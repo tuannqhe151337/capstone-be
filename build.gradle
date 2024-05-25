@@ -42,8 +42,8 @@ dependencies {
     implementation 'org.mapstruct:mapstruct-processor:1.6.0.Beta1'
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-maven-plugin
     implementation 'org.springdoc:springdoc-openapi-maven-plugin:1.4'
-
-
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
+    implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
 
     testImplementation 'org.springframework.security:spring-security-test'
     compileOnly 'org.projectlombok:lombok'
@@ -51,6 +51,7 @@ dependencies {
     compileOnly 'org.hibernate:hibernate-jpamodelgen:6.5.0.Final'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor "org.mapstruct:mapstruct-processor:1.6.0.Beta1"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
     annotationProcessor("org.hibernate.orm:hibernate-jpamodelgen:6.3.1.Final")
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

@@ -2,7 +2,11 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.UserDetailResponse;
 import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.Position;
+import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -13,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @CrossOrigin("*")
@@ -72,6 +77,7 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
     // build create user REST API
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserResponse user) {
@@ -80,20 +86,38 @@ public class UserController {
 
     // build get user by id REST API
     @GetMapping("{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long userId){
-        return null;
+    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable("id") Long userId) {
+//        User user =  userService.getUserById(userId);
+//        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
+        User user = User.builder()
+                .id(1L)
+                .username("USERNAME")
+                .email("EMAIL")
+                .dob(LocalDate.now())
+                .note("NOTE")
+                .fullName("FULLNAME")
+                .phoneNumber("00000000")
+                .address("ADDRESS").status(true)
+                .createdAt(LocalDate.now())
+                .updatedAt(LocalDate.now())
+                .position(Position.builder().id(1L).name("POSTITION A").createdAt(LocalDate.now()).updatedAt(LocalDate.now()).build())
+                .department(Department.builder().id(2L).name("DEPARTMENT").build())
+                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build()).build();
+        UserDetailResponse userResponse = new UserMapperImpl().mapToUserDetail(user);
+
+        return ResponseEntity.ok(userResponse);
     }
 
     // build update user REST API
     @PutMapping("{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long userId,
-                                                @RequestBody UserResponse userDetails) {
+                                                   @RequestBody UserResponse userDetails) {
         return null;
     }
 
     // build delete user REST API
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId){
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
         return null;
     }
 }
