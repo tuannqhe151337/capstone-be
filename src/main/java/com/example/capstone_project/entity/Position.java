@@ -21,17 +21,21 @@ public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "name")
     private String name;
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
 
     @OneToMany(mappedBy = "position")
     private List<User> user;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDate createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDate updatedAt;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }

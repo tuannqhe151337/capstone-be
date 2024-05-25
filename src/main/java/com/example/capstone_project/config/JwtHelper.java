@@ -1,6 +1,8 @@
 package com.example.capstone_project.config;
 
 
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -43,8 +45,12 @@ public class JwtHelper {
                 .compact();
     }
 
-    public String generateToken(Integer userId) {
-        return generateToken(new HashMap<>(), userId);
+    public String generateToken(Integer userId, String roleCole, long departmentId) {
+        HashMap<String, Object> claims =  new HashMap<>();
+        claims.put("role", roleCole);
+        claims.put("departmentId", departmentId);
+
+        return this.generateToken(claims, userId);
     }
 
     public String generateToken(Map<String, Object> claims, Integer userId) {

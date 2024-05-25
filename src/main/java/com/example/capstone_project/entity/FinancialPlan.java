@@ -44,6 +44,6 @@ public class FinancialPlan {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

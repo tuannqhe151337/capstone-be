@@ -43,6 +43,14 @@ public class FinancialReportExpense {
     @Column(name = "note")
     private String note;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "financial_report_id")
+    private FinancialReport financialReport;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cost_type_id")
+    private CostType costType;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDate createdAt;
@@ -51,14 +59,6 @@ public class FinancialReportExpense {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_report_id")
-    private FinancialReport financialReport;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cost_type_id")
-    private CostType costType;
 }

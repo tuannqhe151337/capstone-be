@@ -28,13 +28,6 @@ public class FinancialPlanFile {
     @Column(name = "version")
     private String version;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private FinancialStatus status;
@@ -49,4 +42,11 @@ public class FinancialPlanFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by")
     private User user;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDate createdAt;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }
