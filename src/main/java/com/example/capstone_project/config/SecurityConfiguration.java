@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 class SecurityConfiguration {
-    private static final String[] WHITE_LIST_URL = {"/api/user/1", "/api/login", "/api/refresh-token", "/api-docs", "/swagger-ui-custom.html", "/swagger-ui/*"};
+    private static final String[] WHITE_LIST_URL = { "/api/login", "/api/refresh-token", "/api-docs", "/swagger-ui-custom.html", "/swagger-ui/*"};
 
     private final JwtTokenFilter jwtTokenFilter;
 

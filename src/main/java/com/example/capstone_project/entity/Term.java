@@ -1,6 +1,6 @@
 package com.example.capstone_project.entity;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -17,7 +17,7 @@ public class UserResponse {
     private String username;
     private String email;
     private LocalDate dob;
-    private Department department;   //
+    private Department department;
     private Role role;
     private String note;
     private String fullName;
