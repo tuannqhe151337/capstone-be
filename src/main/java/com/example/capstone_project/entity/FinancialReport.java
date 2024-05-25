@@ -28,6 +28,13 @@ public class FinancialReport {
     @Column(name = "month")
     private LocalDate month;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "term_id")
+    private Term term;
+
+    @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
+    private List<FinancialReportExpense> financialReportExpenses;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDate createdAt;
@@ -38,11 +45,4 @@ public class FinancialReport {
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "term_id")
-    private Term term;
-
-    @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
-    private List<FinancialReportExpense> financialReportExpenses;
 }

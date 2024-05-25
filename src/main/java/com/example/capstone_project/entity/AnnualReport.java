@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -33,13 +33,13 @@ public class AnnualReport {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 
     @OneToMany(mappedBy = Report_.ANNUAL_REPORT)

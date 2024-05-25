@@ -50,17 +50,6 @@ public class User {
     @Column(name = "status")
     private Boolean status;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     private Position position;
@@ -73,9 +62,26 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @Transient
+    private List<Authority> authorities;
+
+    @OneToOne(mappedBy = UserSetting_.USER)
+    private UserSetting userSetting;
+
+    @OneToMany(mappedBy = Term_.USER)
     private List<Term> terms;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = FinancialPlanFile_.USER)
     private List<FinancialPlanFile> financialPlanFiles;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDate createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private LocalDate updatedAt;
+
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }
