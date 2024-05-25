@@ -98,11 +98,10 @@ public class UserController {
                 .fullName("FULLNAME")
                 .phoneNumber("00000000")
                 .address("ADDRESS").status(true)
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
-                .position(Position.builder().id(1L).name("POSTITION A").createdAt(LocalDate.now()).updatedAt(LocalDate.now()).build())
+                .position(Position.builder().id(1L).name("POSITION A").build())
                 .department(Department.builder().id(2L).name("DEPARTMENT").build())
-                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build()).build();
+                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
+                .build();
         UserDetailResponse userResponse = new UserMapperImpl().mapToUserDetail(user);
 
         return ResponseEntity.ok(userResponse);

@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,18 +18,13 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Position {
+public class Position extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
+
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;
 

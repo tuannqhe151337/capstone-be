@@ -1,8 +1,9 @@
 package com.example.capstone_project.controller.responses;
 
-import com.example.capstone_project.entity.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import lombok.*;
+import org.json.JSONPropertyName;
 
 import java.time.LocalDate;
 
@@ -26,15 +27,20 @@ public class UserDetailResponse {
     private String fullName;
     private String phoneNumber;
     private String address;
+
     //department
-    private Long departmentId;
-    private String departmentName;
+    @JsonProperty("department")
+    private DepartmentResponse departmentResponse;
+
     //position
-    private Long positionId;
-    private String positionName;
+    @JsonProperty("position")
+    private PositionResponse positionResponse;
+
     //role
-    private Long roleId;
-    private String roleCode;
-    private String roleName;
+    @JsonProperty("role")
+    private RoleResponse roleResponse;
+
 
 }
+
+

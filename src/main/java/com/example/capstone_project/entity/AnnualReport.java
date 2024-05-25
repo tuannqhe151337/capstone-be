@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class AnnualReport {
+public class AnnualReport extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,14 +31,6 @@ public class AnnualReport {
 
     @Column(name = "total_department")
     private Integer totalDepartment;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

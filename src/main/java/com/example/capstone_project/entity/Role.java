@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Role {
+public class Role extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,13 +33,6 @@ public class Role {
     @OneToMany(mappedBy = "role")
     private List<RoleAuthority> roleAuthorities;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

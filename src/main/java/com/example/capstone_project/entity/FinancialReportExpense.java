@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Data
 @Builder
-public class FinancialReportExpense {
+public class FinancialReportExpense extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,13 +43,7 @@ public class FinancialReportExpense {
     @Column(name = "note")
     private String note;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
 
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class FinancialPlan {
+public class FinancialPlan extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,13 +36,6 @@ public class FinancialPlan {
     @JoinColumn(name = "status_id")
     private FinancialStatus status;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Authority {
+public class Authority extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,14 +27,6 @@ public class Authority {
 
     @Column(name = "code")
     private String code;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

@@ -12,12 +12,12 @@ public interface UserMapper {
 
     User mapToUser(UserResponse userResponse);
 
-    @Mapping(source = "user.department.id", target = "departmentId")
-    @Mapping(source = "user.department.name", target = "departmentName")
-    @Mapping(source = "user.position.id", target = "positionId")
-    @Mapping(source = "user.position.name", target = "positionName  ")
-    @Mapping(source = "user.role.id", target = "roleId")
-    @Mapping(source = "user.role.code", target = "roleCode")
-    @Mapping(source = "user.role.name", target = "roleName")
+    @Mapping(source = "user.department.id", target = "departmentResponse.id")
+    @Mapping(source = "user.department.name", target = "departmentResponse.name")
+    @Mapping(source = "user.position.id", target = "positionResponse.id")
+    @Mapping(source = "user.position.name", target = "positionResponse.name")
+    @Mapping(source = "user.role.id", target = "roleResponse.id")
+    @Mapping(source = "user.role.code", target = "roleResponse.code")
+    @Mapping(source = "user.role.name", target = "roleResponse.name")
     UserDetailResponse mapToUserDetail(User user);
 }
