@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(schema = "capstone_v2",name = "positions")
+@Table(schema = "capstone_v2", name = "positions")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

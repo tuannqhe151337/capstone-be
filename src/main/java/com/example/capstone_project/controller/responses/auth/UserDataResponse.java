@@ -10,8 +10,11 @@ import java.util.List;
 @Builder
 public class UserDataResponse {
     private long userId;
+    private String username;
+    private String fullName;
     private RoleResponse role;
     private DepartmentResponse department;
+    private PositionResponse position;
     private List<AuthorityResponse> authorities;
     private UserSettingResponse settings;
 }
