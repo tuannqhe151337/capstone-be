@@ -8,21 +8,32 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
 
-    @Query(value = "select user from User user " +
-            "join user.role " +
-            "join user.department " +
-            "join user.position " +
-            "join user.userSetting " +
-            "where user.username = :username and (user.isDelete != false or user.isDelete is null)")
     Optional<User> findUserByUsername(String username);
 
     @Query(value = "select user from User user " +
-            "join user.role " +
-            "join user.department " +
-            "join user.position " +
-            "join user.userSetting " +
-            "where user.id = :userId and (user.isDelete != false or user.isDelete is null)")
+            "join fetch user.role " +
+            "join fetch user.department " +
+            "join fetch user.position " +
+            "join fetch user.userSetting " +
+            "where user.username = :username and (user.isDelete != false or user.isDelete is null)")
+    Optional<User> findUserDetailedByUsername(String username);
+
     Optional<User> findUserById(Long userId);
+
+    @Query(value = "select user from User user " +
+            "join fetch user.role " +
+            "join fetch user.department " +
+            "join fetch user.position " +
+            "join fetch user.userSetting " +
+            "where user.id = :userId and (user.isDelete != false or user.isDelete is null)")
+    Optional<User> findUserDetailedById(Long userId);
+
+    @Query(value = "select user from User user " +
+            "join fetch user.role " +
+            "join fetch user.department " +
+            "where user.id = :userId and (user.isDelete != false or user.isDelete is null)"
+    )
+    Optional<User> findUserWithRoleAndDepartmentById(Long userId);
 
     @Query(value = "select distinct count(user.id) from User user " +
             "where user.username like %:query% and (user.isDelete != false or user.isDelete is null)")

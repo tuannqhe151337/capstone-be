@@ -15,6 +15,6 @@ public interface AuthorityRepository extends JpaRepository<Authority, Long> {
 
     @Query("select authority from Authority authority " +
             "join authority.roleAuthorities roleAuthority " +
-            "where roleAuthority.id = :roleId")
+            "where roleAuthority.role.id = :roleId")
     List<Authority> findAuthoritiesOfRole(long roleId);
 }

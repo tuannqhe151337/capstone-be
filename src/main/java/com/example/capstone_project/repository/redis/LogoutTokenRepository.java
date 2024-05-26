@@ -1,4 +1,4 @@
-package com.example.capstone_project.repository;
+package com.example.capstone_project.repository.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

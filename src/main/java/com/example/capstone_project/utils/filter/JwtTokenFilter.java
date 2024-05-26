@@ -1,7 +1,7 @@
 package com.example.capstone_project.utils.filter;
 
-import com.example.capstone_project.config.JwtHelper;
-import com.example.capstone_project.repository.LogoutTokenRepository;
+import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.repository.redis.LogoutTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +47,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         // Set to security context holder
-        final Integer userId = jwtHelper.extractUserId(accessToken);
+        final Integer userId = jwtHelper.extractUserIdFromAccessToken(accessToken);
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userId,
