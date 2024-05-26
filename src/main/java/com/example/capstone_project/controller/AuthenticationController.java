@@ -17,13 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthService authService;
-    private final JwtHelper jwtHelper;
 
     @PostMapping("login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequestBody body) {
