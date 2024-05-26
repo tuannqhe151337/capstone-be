@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses;
+package com.example.capstone_project.controller.responses.auth;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,14 +1,12 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
+@ToString
 public class Authority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,15 +29,16 @@ public class Authority {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "authority")
-    private List<RoleAuthority> authorities;
+    private List<RoleAuthority> roleAuthorities;
 }

@@ -1,6 +1,7 @@
-package com.example.capstone_project.config;
+package com.example.capstone_project.utils.helper;
 
 
+import com.example.capstone_project.entity.AccessTokenClaim;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -23,10 +24,10 @@ public class JwtHelper {
 //    private final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 2; // milliseconds for 2 days
 
     @Value("${application.security.access-token.secret-key}")
-    private String SECRET_KEY;
+    private String ACCESS_TOKEN_SECRET_KEY;
 
     @Value("${application.security.access-token.expiration}")
-    private long EXPIRATION;
+    private long ACCESS_TOKEN_EXPIRATION;
 
     @Value("${application.security.refresh-token.secret-key}")
     private String SECRET_REFRESH_TOKEN_KEY;
@@ -43,27 +44,31 @@ public class JwtHelper {
                 .compact();
     }
 
-    public String generateToken(Integer userId) {
-        return generateToken(new HashMap<>(), userId);
+    public String generateAccessToken(Integer userId, String roleCole, long departmentId) {
+        HashMap<String, Object> claims =  new HashMap<>();
+        claims.put("role", roleCole);
+        claims.put("departmentId", departmentId);
+
+        return this.generateAccessToken(claims, userId);
     }
 
-    public String generateToken(Map<String, Object> claims, Integer userId) {
+    private String generateAccessToken(Map<String, Object> claims, Integer userId) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(this.getSecretKey())
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(this.getAccessTokenSecretKey())
                 .compact();
     }
 
-    public Integer extractUserIdFromExpiredToken(String token) {
+    public Integer extractUserIdFromExpiredAccessToken(String token) {
         try {
             return Integer.parseInt(
                     Jwts.parser()
-                        .verifyWith(this.getSecretKey())
+                        .verifyWith(this.getAccessTokenSecretKey())
                         .build()
-                        .parseUnsecuredClaims(token)
+                        .parseSignedClaims(token)
                         .getPayload()
                         .getSubject()
             );
@@ -83,25 +88,39 @@ public class JwtHelper {
         );
     }
 
-    public Integer extractUserId(String jwt) {
+    public Integer extractUserIdFromAccessToken(String jwt) {
         return Integer.parseInt(extractClaim(jwt, Claims::getSubject));
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public AccessTokenClaim parseToken(String accessToken) {
+        final Claims claims = this.extractAllClaims(accessToken);
+
+        long userId = Long.parseLong(claims.getSubject());
+        long departmentId = Long.parseLong(claims.get("departmentId").toString());
+        String role = claims.get("role").toString();
+
+        return AccessTokenClaim.builder()
+                .roleCode(role)
+                .userId(userId)
+                .departmentId(departmentId)
+                .build();
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = this.extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(this.getSecretKey())
+                .verifyWith(this.getAccessTokenSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+    private SecretKey getAccessTokenSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(ACCESS_TOKEN_SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

@@ -16,11 +16,16 @@ import java.util.List;
 public class UserRepositoryImpl implements CustomUserRepository {
     @PersistenceContext
     private EntityManager entityManager;
+
     @Override
     public List<User> getUserWithPagination(String query, Pageable pageable) {
         // HQL query
         String hql = "select user from User user " +
-                "where user.username like :query and user.isDelete = false " +
+                "left join user.role " +
+                "left join user.department " +
+                "left join user.position " +
+                "where user.username like :query " +
+//                "and user.isDelete = false " + // We actually want to get all deactivated users as well
                 "order by ";
 
         // Handling sort by and sort type
@@ -49,9 +54,9 @@ public class UserRepositoryImpl implements CustomUserRepository {
 
         // Handling join
         EntityGraph<User> entityGraph = entityManager.createEntityGraph(User.class);
-//        entityGraph.addAttributeNodes(User_.ROLE);
-//        entityGraph.addAttributeNodes(User_.DEPARTMENT);
-//        entityGraph.addAttributeNodes(User_.POSITION);
+        entityGraph.addAttributeNodes(User_.ROLE);
+        entityGraph.addAttributeNodes(User_.DEPARTMENT);
+        entityGraph.addAttributeNodes(User_.POSITION);
 
         // Run query
         return entityManager.createQuery(hql, User.class)

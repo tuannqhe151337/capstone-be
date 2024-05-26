@@ -4,14 +4,14 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class UserHelper {
-    public static int getUserId(){
+    public static int getUserId() {
         if (SecurityContextHolder.getContext() != null
-                        && SecurityContextHolder.getContext().getAuthentication() != null
-                        && SecurityContextHolder.getContext().getAuthentication().getPrincipal() != null
-                        && !SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().isBlank()
-        ){
+                && SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().getPrincipal() != null
+                && !SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().isBlank()
+        ) {
             return Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        }else {
+        } else {
             throw new UnauthorizedException("User unauthorized!");
         }
     }
