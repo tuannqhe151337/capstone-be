@@ -2,24 +2,25 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.responses.user.UserResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.UserMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
@@ -28,9 +29,6 @@ public class UserController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType) {
-
-        // Get userId
-        int userId = UserHelper.getUserId();
 
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
@@ -47,14 +45,18 @@ public class UserController {
         // Get data
         List<User> users = userService.getAllUsers(query, pageable);
 
+        if (users == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        // Count distinct
         long count = this.userService.countDistinct(query);
 
         // Response
         ListResponse<UserResponse> response = new ListResponse<>();
 
-        if (users != null && !users.isEmpty()) {
+        if (!users.isEmpty()) {
             for (User user : users) {
-                String iconCode = "";
                 //mapperToUserResponse
                 response.getData().add(new UserMapperImpl().mapToUserResponse(user));
             }

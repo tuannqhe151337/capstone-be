@@ -2,23 +2,35 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.repository.UserRepository;
+import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserAuthorityRepository userAuthorityRepository;
     @Override
     public List<User> getAllUsers(
             String query,
             Pageable pageable) {
-        return userRepository.getUserWithPagination(query, pageable);
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
+            return userRepository.getUserWithPagination(query, pageable);
+        }
+
+        return null;
     }
 
     @Override
