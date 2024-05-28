@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(schema = "capstone_v2", name = "users")
@@ -46,6 +47,9 @@ public class User {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "status")
+    private Boolean status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     private Position position;
@@ -61,7 +65,7 @@ public class User {
     @Transient
     private List<Authority> authorities;
 
-    @OneToOne(mappedBy = UserSetting_.USER, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = UserSetting_.USER)
     private UserSetting userSetting;
 
     @OneToMany(mappedBy = Term_.USER)
@@ -79,5 +83,5 @@ public class User {
     private LocalDate updatedAt;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private boolean isDelete;
+    private Boolean isDelete;
 }

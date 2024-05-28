@@ -57,7 +57,6 @@ public class UserRepositoryImpl implements CustomUserRepository {
         entityGraph.addAttributeNodes(User_.ROLE);
         entityGraph.addAttributeNodes(User_.DEPARTMENT);
         entityGraph.addAttributeNodes(User_.POSITION);
-        entityGraph.addAttributeNodes(User_.USER_SETTING);
 
         // Run query
         return entityManager.createQuery(hql, User.class)

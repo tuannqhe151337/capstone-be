@@ -6,9 +6,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
-public class RoleResponse {
+public class PositionResponse {
     private Long id;
     private String name;
     private LocalDate createdAt;
     private LocalDate updatedAt;
+
 }
