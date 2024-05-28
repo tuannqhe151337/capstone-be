@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ExpenseController {
     @PutMapping("/upload")
-    public void selectTerm(
-            @RequestBody(required = true) ConfirmNewExpenseBody body
-    ) {
+    public void selectTerm(@RequestBody(required = true) ConfirmNewExpenseBody body) {
     }
 }
