@@ -6,7 +6,6 @@ import com.example.capstone_project.controller.responses.UserResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.UserMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -28,9 +27,6 @@ public class UserController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType) {
-
-        // Get userId
-        int userId = UserHelper.getUserId();
 
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);

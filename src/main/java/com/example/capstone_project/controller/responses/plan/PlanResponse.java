@@ -8,6 +8,7 @@ import lombok.Data;
 public class PlanResponse {
     private Long id;
     private String name;
+    private TermResponse term;
     private StatusResponse status;
     private DepartmentResponse department;
     private String version;

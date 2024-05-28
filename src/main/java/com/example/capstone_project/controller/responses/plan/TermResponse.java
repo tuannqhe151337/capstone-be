@@ -9,5 +9,4 @@ import java.util.List;
 public class TermResponse {
     private long termId;
     private String name;
-    private List<PlanResponse> plans;
 }
