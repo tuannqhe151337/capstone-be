@@ -12,10 +12,10 @@ import java.util.List;
 public class ConfirmNewExpenseBody {
     @NotEmpty(message = "Term Id, can't not be empty")
     private long termId;
-    @NotEmpty(message = "Term Id, can't not be empty")
+    @NotEmpty(message = "Plan name, can't not be empty")
     private String planName;
-    @NotEmpty(message = "Term Id, can't not be empty")
+    @NotEmpty(message = "File name, can't not be empty")
     private String fileName;
-    @NotNull(message = "Term Id, can't not be null")
+    @NotNull(message = "Expenses, can't not be null")
     private List<ExpenseBody> expenses;
 }
