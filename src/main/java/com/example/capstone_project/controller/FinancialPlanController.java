@@ -2,10 +2,10 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
-import com.example.capstone_project.controller.responses.plan.PlanResponse;
-import com.example.capstone_project.controller.responses.plan.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.TermResponse;
+import com.example.capstone_project.controller.responses.plan_management.DepartmentResponse;
+import com.example.capstone_project.controller.responses.plan_management.PlanResponse;
+import com.example.capstone_project.controller.responses.plan_management.StatusResponse;
+import com.example.capstone_project.controller.responses.plan_management.TermResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FinancialPlanController {
     @GetMapping
-    public ResponseEntity<ListResponse<PlanResponse>> getListPlan(){
+    public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
+            @RequestParam(required = false) Integer termId,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ){
         ListResponse<PlanResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
                 PlanResponse.builder()

@@ -1,9 +1,8 @@
-package com.example.capstone_project.controller.responses.plan;
+package com.example.capstone_project.controller.responses.plan_management;
 
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
 @Data
 @Builder
 public class TermResponse {
