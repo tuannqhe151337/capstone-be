@@ -1,14 +1,12 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.confirm_expenses.ConfirmNewExpenseBody;
+import com.example.capstone_project.controller.body.confirmExpenses.ConfirmNewExpenseBody;
 import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/plan")

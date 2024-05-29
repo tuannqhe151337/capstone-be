@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.confirm_expenses;
+package com.example.capstone_project.controller.body.confirmExpenses;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
