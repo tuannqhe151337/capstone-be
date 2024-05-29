@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.confirm_expenses;
+package com.example.capstone_project.controller.responses.confirmExpenses;
 
 import lombok.Builder;
 import lombok.Data;

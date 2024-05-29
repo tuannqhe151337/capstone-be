@@ -1,6 +1,6 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.responses.confirm_expenses.CostTypeResponse;
+import com.example.capstone_project.controller.responses.confirmExpenses.CostTypeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
