@@ -1,4 +1,4 @@
-package com.example.capstone_project.utils.mapper;
+package com.example.capstone_project.utils.mapper.auth;
 
 import com.example.capstone_project.controller.responses.AuthorityResponse;
 import com.example.capstone_project.controller.responses.auth.UserDataResponse;

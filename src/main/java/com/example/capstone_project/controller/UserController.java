@@ -2,13 +2,14 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.UserMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.UserMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
@@ -43,15 +44,18 @@ public class UserController {
         // Get data
         List<User> users = userService.getAllUsers(query, pageable);
 
+        if (users == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        // Count distinct
         long count = this.userService.countDistinct(query);
 
         // Response
         ListResponse<UserResponse> response = new ListResponse<>();
 
-        if (users != null && !users.isEmpty()) {
+        if (!users.isEmpty()) {
             for (User user : users) {
-                String iconCode = "";
-                //mapperToUserResponse
                 response.getData().add(new UserMapperImpl().mapToUserResponse(user));
             }
         }
