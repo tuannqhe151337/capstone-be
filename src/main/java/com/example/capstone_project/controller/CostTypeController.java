@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/costType")
+@RequestMapping("/api/cost-type")
 @RequiredArgsConstructor
 public class CostTypeController {
 
