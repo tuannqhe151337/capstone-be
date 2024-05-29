@@ -1,6 +1,6 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.confirmExpenses.ConfirmNewExpenseBody;
+import com.example.capstone_project.controller.body.confirmExpenses.NewPlanBody;
 import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +15,9 @@ public class ExpenseController {
     private final JwtHelper jwtHelper;
 
     @PostMapping("/upload")
-    public ResponseEntity<ConfirmNewExpenseBody> confirmExpenses(
+    public ResponseEntity<NewPlanBody> confirmExpenses(
             @RequestHeader("Authorization") String token,
-            @RequestBody ConfirmNewExpenseBody body) {
+            @RequestBody NewPlanBody body) {
         //Get access token
         final String accessToken = token.substring(7);
 

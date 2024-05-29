@@ -10,21 +10,21 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class ExpenseBody {
-    @NotEmpty(message = "Name, can't not be empty")
+    @NotEmpty(message = "Name, can not be empty")
     private String name;
-    @NotEmpty(message = "Cost type name, can't not be empty")
+    @NotEmpty(message = "Cost type name, can not be empty")
     private String costTypeName;
     @NotEmpty()
-    @Range(min = 0, message = "Unit price can't not be negative")
+    @Range(min = 0, message = "Unit price can not be negative")
     private BigDecimal unitPrice;
-    @NotEmpty(message = "Amount, can't not be empty")
-    @Min(value = 0, message = "Amount can't not be negative")
+    @NotEmpty(message = "Amount, can not be empty")
+    @Min(value = 0, message = "Amount can not be negative")
     private int amount;
-    @NotEmpty(message = "Project name, can't not be empty")
+    @NotEmpty(message = "Project name, can not be empty")
     private String projectName;
-    @NotEmpty(message = "Supplier name, can't not be empty")
+    @NotEmpty(message = "Supplier name, can not be empty")
     private String supplierName;
-    @NotEmpty(message = "PiC, can't not be empty")
+    @NotEmpty(message = "PiC, can not be empty")
     private String pic;
     private String notes;
 }
