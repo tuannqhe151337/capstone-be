@@ -2,10 +2,10 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.plan_management.DepartmentResponse;
-import com.example.capstone_project.controller.responses.plan_management.PlanResponse;
-import com.example.capstone_project.controller.responses.plan_management.StatusResponse;
-import com.example.capstone_project.controller.responses.plan_management.TermResponse;
+import com.example.capstone_project.controller.responses.planManagement.DepartmentResponse;
+import com.example.capstone_project.controller.responses.planManagement.PlanResponse;
+import com.example.capstone_project.controller.responses.planManagement.StatusResponse;
+import com.example.capstone_project.controller.responses.planManagement.TermResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
