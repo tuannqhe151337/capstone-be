@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.plan_management;
+package com.example.capstone_project.controller.responses.planManagement;
 
 import lombok.Builder;
 import lombok.Data;
