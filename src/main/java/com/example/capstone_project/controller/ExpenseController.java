@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.listExpenses.CostTypeResponse;
 import com.example.capstone_project.controller.responses.listExpenses.ExpenseResponse;
+import com.example.capstone_project.controller.responses.listExpenses.StatusResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,9 @@ public class ExpenseController {
                         .supplierName("Hong Ha")
                         .pic("HongHD9")
                         .notes("Approximate")
+                        .status(StatusResponse.builder()
+                                .statusId(1L)
+                                .name("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(2L)
@@ -55,6 +59,9 @@ public class ExpenseController {
                         .projectName("IN22")
                         .supplierName("Hong Ha")
                         .pic("HongHD9")
+                        .status(StatusResponse.builder()
+                                .statusId(2L)
+                                .name("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(3L)
@@ -67,6 +74,9 @@ public class ExpenseController {
                         .projectName("CAM1")
                         .supplierName("TuNM")
                         .pic("TuanVV")
+                        .status(StatusResponse.builder()
+                                .statusId(1L)
+                                .name("Waiting for approval").build())
                         .build()
         ));
 
