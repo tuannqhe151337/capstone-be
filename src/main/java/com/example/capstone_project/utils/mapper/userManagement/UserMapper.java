@@ -1,6 +1,6 @@
-package com.example.capstone_project.utils.mapper.user_management;
+package com.example.capstone_project.utils.mapper.userManagement;
 
-import com.example.capstone_project.controller.responses.user_management.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserResponse;
 import com.example.capstone_project.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

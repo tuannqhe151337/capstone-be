@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.user_management;
+package com.example.capstone_project.controller.responses.userManagement;
 
 import lombok.Data;
 
