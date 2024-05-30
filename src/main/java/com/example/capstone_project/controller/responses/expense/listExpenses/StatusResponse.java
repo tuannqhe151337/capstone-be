@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.listExpenses;
+package com.example.capstone_project.controller.responses.expense.listExpenses;
 
 import lombok.Builder;
 import lombok.Data;

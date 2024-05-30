@@ -1,16 +1,18 @@
 package com.example.capstone_project.controller;
 
+
+import com.example.capstone_project.controller.body.confirmExpenses.NewPlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.listExpenses.CostTypeResponse;
-import com.example.capstone_project.controller.responses.listExpenses.ExpenseResponse;
-import com.example.capstone_project.controller.responses.listExpenses.StatusResponse;
+import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
+import com.example.capstone_project.controller.responses.expense.listExpenses.ExpenseResponse;
+import com.example.capstone_project.controller.responses.expense.listExpenses.StatusResponse;
+import com.example.capstone_project.entity.AccessTokenClaim;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +21,21 @@ import java.util.List;
 @RequestMapping("/api/list-expense")
 @RequiredArgsConstructor
 public class ExpenseController {
+    private final JwtHelper jwtHelper;
+
+    @PostMapping("/upload")
+    public ResponseEntity<NewPlanBody> confirmExpenses(
+            @RequestHeader("Authorization") String token,
+            @RequestBody NewPlanBody body) {
+        //Get access token
+        final String accessToken = token.substring(7);
+
+        //Get department ID
+        AccessTokenClaim accessTokenClaim = jwtHelper.parseToken(accessToken);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
     @GetMapping
     public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = false) Integer termId,
