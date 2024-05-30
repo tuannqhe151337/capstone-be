@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/list-plan")
+@RequestMapping("/api/plan")
 @RequiredArgsConstructor
 public class FinancialPlanController {
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer departmentId,
