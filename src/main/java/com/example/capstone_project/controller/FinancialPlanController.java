@@ -6,8 +6,8 @@ import com.example.capstone_project.controller.responses.planManagement.Departme
 import com.example.capstone_project.controller.responses.planManagement.PlanResponse;
 import com.example.capstone_project.controller.responses.planManagement.StatusResponse;
 import com.example.capstone_project.controller.responses.planManagement.TermResponse;
-import com.example.capstone_project.controller.responses.planVersion.UserResponse;
-import com.example.capstone_project.controller.responses.planVersion.VersionResponse;
+import com.example.capstone_project.controller.responses.plan.version.UserResponse;
+import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
