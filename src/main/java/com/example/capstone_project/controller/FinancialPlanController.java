@@ -6,17 +6,20 @@ import com.example.capstone_project.controller.responses.planManagement.Departme
 import com.example.capstone_project.controller.responses.planManagement.PlanResponse;
 import com.example.capstone_project.controller.responses.planManagement.StatusResponse;
 import com.example.capstone_project.controller.responses.planManagement.TermResponse;
+import com.example.capstone_project.controller.responses.planVersion.UserResponse;
+import com.example.capstone_project.controller.responses.planVersion.VersionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/list-plan")
+@RequestMapping("/api/plan")
 @RequiredArgsConstructor
 public class FinancialPlanController {
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer departmentId,
@@ -56,6 +59,46 @@ public class FinancialPlanController {
                                 .name("BU 2").build())
                         .version("V2").build()
                 ));
+
+        listResponse.setPagination(Pagination.builder()
+                .count(100)
+                .page(10)
+                .displayRecord(0)
+                .numPages(1)
+                .build());
+
+        return ResponseEntity.ok(listResponse);
+    }
+
+    @GetMapping("versions")
+    public ResponseEntity<ListResponse<VersionResponse>> getListVersion(
+            @RequestParam Integer planId,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ){
+        ListResponse<VersionResponse> listResponse = new ListResponse<>();
+        listResponse.setData(List.of(
+                VersionResponse.builder()
+                        .version("v1")
+                        .publishedDate(LocalDate.of(2024,4,10))
+                        .uploadedBy(UserResponse.builder()
+                                .userId(1L)
+                                .username("Anhln").build()).build(),
+                VersionResponse.builder()
+                        .version("v2")
+                        .publishedDate(LocalDate.now())
+                        .uploadedBy(UserResponse.builder()
+                                .userId(1L)
+                                .username("Anhln").build()).build(),
+                VersionResponse.builder()
+                        .version("v3")
+                        .publishedDate(LocalDate.now())
+                        .uploadedBy(UserResponse.builder()
+                                .userId(1L)
+                                .username("Anhln").build()).build()
+        ));
 
         listResponse.setPagination(Pagination.builder()
                 .count(100)
