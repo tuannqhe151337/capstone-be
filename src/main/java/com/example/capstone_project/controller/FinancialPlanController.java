@@ -2,6 +2,8 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.planDetail.PlanDetailResponse;
+import com.example.capstone_project.controller.responses.planDetail.StatusPlanDetailResponse;
 import com.example.capstone_project.controller.responses.planManagement.DepartmentResponse;
 import com.example.capstone_project.controller.responses.planManagement.PlanResponse;
 import com.example.capstone_project.controller.responses.planManagement.StatusResponse;
@@ -10,13 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/list-plan")
+@RequestMapping("/api/plan")
 @RequiredArgsConstructor
 public class FinancialPlanController {
-    @GetMapping
+    @GetMapping("list-plan")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer departmentId,
@@ -65,5 +69,26 @@ public class FinancialPlanController {
                 .build());
 
         return ResponseEntity.ok(listResponse);
+    }
+
+    @GetMapping("plan-detail")
+    public ResponseEntity<PlanDetailResponse> getDetailPlan(
+            @RequestParam Integer planId
+    ){
+        return ResponseEntity.ok(PlanDetailResponse.builder()
+                        .planId(1L)
+                        .termName("Financial plan december Q3 2021")
+                        .biggestExpenditure(BigDecimal.valueOf(180000000))
+                        .totalPlan(BigDecimal.valueOf(213425384))
+                        .planDueDate(LocalDate.now())
+                        .departmentName("BU 01")
+                        .status(StatusPlanDetailResponse.builder()
+                                .statusId(1L)
+                                .name("Waiting for approval")
+                                .build())
+                        .version("2")
+                        .createAt(LocalDate.of(2024,3,2))
+                        .createBy("AnhLN2")
+                .build());
     }
 }
