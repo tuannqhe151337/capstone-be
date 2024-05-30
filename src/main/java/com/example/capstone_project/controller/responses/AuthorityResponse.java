@@ -10,6 +10,8 @@ import java.time.LocalDate;
 @Data
 public class AuthorityResponse {
     private Long id;
+
     private String code;
+
     private String name;
 }

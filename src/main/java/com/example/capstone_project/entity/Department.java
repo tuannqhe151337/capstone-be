@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Department {
+public class Department extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,14 +31,6 @@ public class Department {
 
     @OneToMany(mappedBy = Report_.DEPARTMENT)
     private List<Report> reports;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;

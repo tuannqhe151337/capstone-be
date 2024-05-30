@@ -1,25 +1,35 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+
 import com.example.capstone_project.controller.responses.userManagement.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.Position;
+import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.userManagement.UserMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.CreateUserBodyEntityMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.UserDetailResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.UserResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    private final UserService userService;
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
@@ -27,8 +37,8 @@ public class UserController {
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortType) {
-
+            @RequestParam(required = false) String sortType
+    ) {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -44,19 +54,16 @@ public class UserController {
         // Get data
         List<User> users = userService.getAllUsers(query, pageable);
 
-        if (users == null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
-        // Count distinct
         long count = this.userService.countDistinct(query);
 
         // Response
         ListResponse<UserResponse> response = new ListResponse<>();
 
-        if (!users.isEmpty()) {
+        if (users != null && !users.isEmpty()) {
             for (User user : users) {
-                response.getData().add(new UserMapperImpl().mapToUserResponse(user));
+                String iconCode = "";
+                //mapperToUserResponse
+                response.getData().add(new UserResponseMapperImpl().mapToUserResponse(user));
             }
         }
 
@@ -71,28 +78,51 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
     // build create user REST API
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserResponse user) {
-        return null;
+    public ResponseEntity<String> createUser(@RequestBody CreateUserBody userBody) {
+        User user = new User();
+        user = new CreateUserBodyEntityMapperImpl().mapBodytoUser(userBody);
+        System.out.println(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // build get user by id REST API
     @GetMapping("{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long userId){
-        return null;
+    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable("id") Long userId) {
+//        User user =  userService.getUserById(userId);
+//        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
+        User user = User.builder()
+                .id(1L)
+                .username("USERNAME")
+                .email("EMAIL")
+                .dob(LocalDate.now())
+                .note("NOTE")
+                .fullName("FULLNAME")
+                .phoneNumber("00000000")
+                .address("ADDRESS").isDelete(false)
+                .position(Position.builder().id(1L).name("POSITION A").build())
+                .department(Department.builder().id(2L).name("DEPARTMENT").build())
+                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
+                .build();
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        UserDetailResponse userResponse = new UserDetailResponseMapperImpl().mapToUserDetail(user);
+
+        return ResponseEntity.ok(userResponse);
     }
 
     // build update user REST API
     @PutMapping("{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long userId,
-                                                @RequestBody UserResponse userDetails) {
+                                                   @RequestBody UserResponse userDetails) {
         return null;
     }
 
     // build delete user REST API
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId){
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
         return null;
     }
 }

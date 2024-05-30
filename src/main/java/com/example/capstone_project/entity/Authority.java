@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -15,8 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-@ToString
-public class Authority {
+public class Authority extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,15 +25,7 @@ public class Authority {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;
 
     @ToString.Exclude

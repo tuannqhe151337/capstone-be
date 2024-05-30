@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public interface UserResponseMapper {
     @Mapping(source = "id", target = "userId")
     @Mapping(source = "username", target = "username")
     @Mapping(source = "email", target = "email")
@@ -19,5 +19,4 @@ public interface UserMapper {
     @Mapping(source = "position.name", target = "position.name")
     @Mapping(source = "delete", target = "deactivate") // Don't know why must change isDelete to delete in entity but it works
     UserResponse mapToUserResponse(User user);
-    User mapToUser(UserResponse userResponse);
 }

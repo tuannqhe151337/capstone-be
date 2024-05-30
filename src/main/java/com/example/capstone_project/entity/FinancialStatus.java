@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class FinancialStatus {
+public class FinancialStatus extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,14 +32,6 @@ public class FinancialStatus {
     @OneToMany(mappedBy = FinancialPlanExpense_.STATUS)
     private List<FinancialPlanExpense> financialPlanExpenses;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
-    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

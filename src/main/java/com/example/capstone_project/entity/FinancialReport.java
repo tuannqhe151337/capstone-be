@@ -35,14 +35,6 @@ public class FinancialReport {
     @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
     private List<FinancialReportExpense> financialReportExpenses;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

@@ -1,5 +1,6 @@
 package com.example.capstone_project.repository;
 
+import com.example.capstone_project.controller.responses.UserResponse;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,6 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     @Query(value = "select distinct count(user.id) from User user " +
             "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
     long countDistinct(String query);
+
+    User save(User user);
 }

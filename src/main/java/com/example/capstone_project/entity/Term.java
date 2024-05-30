@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class Term {
+public class Term extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,14 +53,6 @@ public class Term {
 
     @OneToMany(mappedBy = "term")
     private List<FinancialReport> financialReports;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
