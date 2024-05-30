@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -19,6 +20,7 @@ public class BaseEntity {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt ;

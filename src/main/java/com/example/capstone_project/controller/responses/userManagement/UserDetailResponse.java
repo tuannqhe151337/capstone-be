@@ -6,7 +6,7 @@ import com.example.capstone_project.controller.responses.RoleResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Getter
@@ -18,11 +18,10 @@ public class UserDetailResponse {
     private Long id;
     private String username;
     private String email;
-    private LocalDate dob;
+    private LocalDateTime dob;
 
-    private Boolean status;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     private String note;
     private String fullName;

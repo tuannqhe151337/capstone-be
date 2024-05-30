@@ -1,9 +1,10 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
-import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserResponse;
 import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
@@ -11,17 +12,19 @@ import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.UserMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.CreateUserBodyEntityMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.UserDetailResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.userManagement.UserResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
@@ -60,7 +63,7 @@ public class UserController {
             for (User user : users) {
                 String iconCode = "";
                 //mapperToUserResponse
-                response.getData().add(new UserMapperImpl().mapToUserResponse(user));
+                response.getData().add(new UserResponseMapperImpl().mapToUserResponse(user));
             }
         }
 
@@ -78,8 +81,11 @@ public class UserController {
 
     // build create user REST API
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserResponse user) {
-        return null;
+    public ResponseEntity<String> createUser(@RequestBody CreateUserBody userBody) {
+        User user = new User();
+        user = new CreateUserBodyEntityMapperImpl().mapBodytoUser(userBody);
+        System.out.println(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // build get user by id REST API
@@ -100,7 +106,9 @@ public class UserController {
                 .department(Department.builder().id(2L).name("DEPARTMENT").build())
                 .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
                 .build();
-        UserDetailResponse userResponse = new UserMapperImpl().mapToUserDetail(user);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        UserDetailResponse userResponse = new UserDetailResponseMapperImpl().mapToUserDetail(user);
 
         return ResponseEntity.ok(userResponse);
     }

@@ -1,18 +1,14 @@
-package com.example.capstone_project.utils.mapper;
+package com.example.capstone_project.utils.mapper.userManagement;
 
 
-import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
 import com.example.capstone_project.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
-    UserResponse mapToUserResponse(User user);
-
-    User mapToUser(UserResponse userResponse);
-
+public interface UserDetailResponseMapper {
     @Mapping(source = "user.department.id", target = "departmentResponse.id")
     @Mapping(source = "user.department.name", target = "departmentResponse.name")
     @Mapping(source = "user.position.id", target = "positionResponse.id")
