@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(schema = "capstone_v2", name = "users")
@@ -18,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 @Builder
-public class User extends BaseEntity{
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,14 +46,6 @@ public class User extends BaseEntity{
     @Column(name = "address")
     private String address;
 
-    @Column(name = "status")
-    private Boolean status;
-
-
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     private Position position;
@@ -67,9 +58,18 @@ public class User extends BaseEntity{
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @Transient
+    private List<Authority> authorities;
+
+    @OneToOne(mappedBy = UserSetting_.USER, fetch = FetchType.LAZY)
+    private UserSetting userSetting;
+
+    @OneToMany(mappedBy = Term_.USER)
     private List<Term> terms;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = FinancialPlanFile_.USER)
     private List<FinancialPlanFile> financialPlanFiles;
+
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    private boolean isDelete;
 }

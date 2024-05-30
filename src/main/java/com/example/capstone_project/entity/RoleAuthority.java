@@ -29,7 +29,6 @@ public class RoleAuthority extends BaseEntity{
     @JoinColumn(name = "authority_id")
     private Authority authority;
 
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

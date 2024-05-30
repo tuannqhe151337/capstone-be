@@ -2,8 +2,9 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.UserDetailResponse;
+
 import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
@@ -33,11 +34,8 @@ public class UserController {
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortType) {
-
-        // Get userId
-        int userId = UserHelper.getUserId();
-
+            @RequestParam(required = false) String sortType
+    ) {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -97,7 +95,7 @@ public class UserController {
                 .note("NOTE")
                 .fullName("FULLNAME")
                 .phoneNumber("00000000")
-                .address("ADDRESS").status(true)
+                .address("ADDRESS").isDelete(false)
                 .position(Position.builder().id(1L).name("POSITION A").build())
                 .department(Department.builder().id(2L).name("DEPARTMENT").build())
                 .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())

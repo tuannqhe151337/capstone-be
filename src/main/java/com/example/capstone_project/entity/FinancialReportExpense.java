@@ -43,11 +43,6 @@ public class FinancialReportExpense extends BaseEntity{
     @Column(name = "note")
     private String note;
 
-
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "financial_report_id")
     private FinancialReport financialReport;
@@ -55,4 +50,7 @@ public class FinancialReportExpense extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cost_type_id")
     private CostType costType;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }

@@ -59,7 +59,6 @@ public class FinancialPlanExpense extends BaseEntity{
     @JoinColumn(name = "cost_type_id")
     private CostType costType;
 
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

@@ -36,7 +36,6 @@ public class FinancialPlan extends BaseEntity{
     @JoinColumn(name = "status_id")
     private FinancialStatus status;
 
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

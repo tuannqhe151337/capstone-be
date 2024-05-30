@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class FinancialReport extends BaseEntity{
+public class FinancialReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,15 +28,13 @@ public class FinancialReport extends BaseEntity{
     @Column(name = "month")
     private LocalDate month;
 
-
-
-    @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")
     private Term term;
 
     @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
     private List<FinancialReportExpense> financialReportExpenses;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }

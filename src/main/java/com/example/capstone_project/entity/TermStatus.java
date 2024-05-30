@@ -21,14 +21,16 @@ public class TermStatus extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "name")
     private String name;
+
     @Column(name = "icon_code")
     private String iconCode;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
-
     @OneToMany(mappedBy = "status")
     private List<Term> terms;
+
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }

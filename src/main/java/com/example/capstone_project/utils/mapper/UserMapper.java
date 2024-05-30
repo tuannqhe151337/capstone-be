@@ -1,7 +1,8 @@
 package com.example.capstone_project.utils.mapper;
 
-import com.example.capstone_project.controller.responses.UserDetailResponse;
+
 import com.example.capstone_project.controller.responses.UserResponse;
+import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
 import com.example.capstone_project.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

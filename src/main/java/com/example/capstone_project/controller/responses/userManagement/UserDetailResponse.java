@@ -1,9 +1,10 @@
-package com.example.capstone_project.controller.responses;
+package com.example.capstone_project.controller.responses.userManagement;
 
+import com.example.capstone_project.controller.responses.DepartmentResponse;
+import com.example.capstone_project.controller.responses.PositionResponse;
+import com.example.capstone_project.controller.responses.RoleResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
 import lombok.*;
-import org.json.JSONPropertyName;
 
 import java.time.LocalDate;
 

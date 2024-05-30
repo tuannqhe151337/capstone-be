@@ -41,6 +41,6 @@ public class Report extends BaseEntity{
 
 
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }
