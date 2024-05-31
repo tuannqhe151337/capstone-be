@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 public class ExpenseBody {
     @NotEmpty(message = "Name, can not be empty")
     private String name;
-    @NotEmpty(message = "Cost type name, can not be empty")
-    private CostTypeBody costType;
+    @NotEmpty(message = "Cost type id, can not be empty")
+    private String costTypeName;
     @NotEmpty()
     @Range(min = 0, message = "Unit price can not be negative")
     private BigDecimal unitPrice;
