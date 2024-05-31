@@ -38,4 +38,6 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     @Query(value = "select distinct count(user.id) from User user " +
             "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
     long countDistinct(String query);
+
+    User save(User user);
 }
