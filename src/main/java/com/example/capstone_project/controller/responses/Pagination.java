@@ -3,9 +3,9 @@ package com.example.capstone_project.controller.responses;
 import lombok.*;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class Pagination {
     private long page;
