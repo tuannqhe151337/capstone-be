@@ -2,7 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.userManagement.UserResponse;
+import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -21,7 +21,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,

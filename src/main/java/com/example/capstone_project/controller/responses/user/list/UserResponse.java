@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.userManagement;
+package com.example.capstone_project.controller.responses.user.list;
 
 import com.example.capstone_project.controller.responses.auth.PositionResponse;
 import com.example.capstone_project.controller.responses.auth.RoleResponse;
