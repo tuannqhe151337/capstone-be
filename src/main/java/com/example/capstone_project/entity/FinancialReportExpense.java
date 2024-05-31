@@ -41,7 +41,7 @@ public class FinancialReportExpense {
     private String pic;
 
     @Column(name = "note")
-    private String note;
+    private String notes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "financial_report_id")

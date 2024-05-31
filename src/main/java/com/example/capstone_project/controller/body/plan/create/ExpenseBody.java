@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.confirmExpenses;
+package com.example.capstone_project.controller.body.plan.create;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -13,7 +13,7 @@ public class ExpenseBody {
     @NotEmpty(message = "Name, can not be empty")
     private String name;
     @NotEmpty(message = "Cost type name, can not be empty")
-    private String costTypeName;
+    private CostTypeBody costType;
     @NotEmpty()
     @Range(min = 0, message = "Unit price can not be negative")
     private BigDecimal unitPrice;
