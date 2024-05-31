@@ -1,19 +1,15 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
-import com.example.capstone_project.controller.responses.expense.listExpenses.ExpenseResponse;
-import com.example.capstone_project.controller.responses.planManagement.DepartmentResponse;
-import com.example.capstone_project.controller.responses.planManagement.PlanResponse;
-import com.example.capstone_project.controller.responses.planManagement.StatusResponse;
-import com.example.capstone_project.controller.responses.planManagement.TermResponse;
-import com.example.capstone_project.entity.AccessTokenClaim;
+import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
+import com.example.capstone_project.controller.responses.plan.list.DepartmentResponse;
+import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
+import com.example.capstone_project.controller.responses.plan.list.StatusResponse;
+import com.example.capstone_project.controller.responses.plan.list.TermResponse;
 import com.example.capstone_project.utils.helper.JwtHelper;
-import com.example.capstone_project.utils.mapper.body.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,7 +98,7 @@ public class FinancialPlanController {
                         .supplierName("Hong Ha")
                         .pic("HongHD9")
                         .notes("Approximate")
-                        .status(com.example.capstone_project.controller.responses.expense.listExpenses.StatusResponse.builder()
+                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
                                 .name("Waiting for approval").build())
                         .build(),
@@ -117,7 +113,7 @@ public class FinancialPlanController {
                         .projectName("IN22")
                         .supplierName("Hong Ha")
                         .pic("HongHD9")
-                        .status(com.example.capstone_project.controller.responses.expense.listExpenses.StatusResponse.builder()
+                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(2L)
                                 .name("Waiting for approval").build())
                         .build(),
@@ -132,7 +128,7 @@ public class FinancialPlanController {
                         .projectName("CAM1")
                         .supplierName("TuNM")
                         .pic("TuanVV")
-                        .status(com.example.capstone_project.controller.responses.expense.listExpenses.StatusResponse.builder()
+                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
                                 .name("Waiting for approval").build())
                         .build()

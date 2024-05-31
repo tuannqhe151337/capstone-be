@@ -4,17 +4,17 @@ import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
-import com.example.capstone_project.controller.responses.userManagement.UserResponse;
-import com.example.capstone_project.controller.responses.userManagement.UserDetailResponse;
+import com.example.capstone_project.controller.responses.user.list.UserResponse;
+import com.example.capstone_project.controller.responses.user.create.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.userManagement.CreateUserBodyEntityMapperImpl;
-import com.example.capstone_project.utils.mapper.userManagement.UserDetailResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.userManagement.UserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
+import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
@@ -63,7 +63,7 @@ public class UserController {
             for (User user : users) {
                 String iconCode = "";
                 //mapperToUserResponse
-                response.getData().add(new UserResponseMapperImpl().mapToUserResponse(user));
+                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
             }
         }
 
@@ -83,7 +83,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<String> createUser(@RequestBody CreateUserBody userBody) {
         User user = new User();
-        user = new CreateUserBodyEntityMapperImpl().mapBodytoUser(userBody);
+        user = new CreateUserBodyMapperImpl().mapBodytoUser(userBody);
         System.out.println(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
@@ -108,7 +108,7 @@ public class UserController {
                 .build();
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        UserDetailResponse userResponse = new UserDetailResponseMapperImpl().mapToUserDetail(user);
+        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
 
         return ResponseEntity.ok(userResponse);
     }

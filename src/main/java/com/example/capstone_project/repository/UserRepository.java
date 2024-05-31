@@ -1,6 +1,5 @@
 package com.example.capstone_project.repository;
 
-import com.example.capstone_project.controller.responses.UserResponse;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
