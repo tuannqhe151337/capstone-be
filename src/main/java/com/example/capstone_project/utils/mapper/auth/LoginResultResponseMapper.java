@@ -1,6 +1,6 @@
 package com.example.capstone_project.utils.mapper.auth;
 
-import com.example.capstone_project.controller.responses.AuthorityResponse;
+import com.example.capstone_project.controller.responses.auth.AuthorityResponse;
 import com.example.capstone_project.controller.responses.auth.LoginResponse;
 import com.example.capstone_project.entity.Authority;
 import com.example.capstone_project.service.result.LoginResult;
