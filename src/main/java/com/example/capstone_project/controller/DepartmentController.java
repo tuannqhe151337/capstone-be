@@ -2,7 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginate;
+import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,31 +17,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentController {
     @GetMapping("/plan-paging-department")
-    public ResponseEntity<ListResponse<DepartmentPaginate>> getListDepartmentPaging(
+    public ResponseEntity<ListResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ){
-        ListResponse<DepartmentPaginate> listResponse = new ListResponse<>();
+        ListResponse<DepartmentPaginateResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
-                DepartmentPaginate.builder()
+                DepartmentPaginateResponse.builder()
                         .departmentId(1L)
                         .name("Department 1")
                         .build(),
-                DepartmentPaginate.builder()
+                DepartmentPaginateResponse.builder()
                         .departmentId(2L)
                         .name("Department 2")
                         .build(),
-                DepartmentPaginate.builder()
+                DepartmentPaginateResponse.builder()
                         .departmentId(3L)
                         .name("Department 3")
                         .build(),
-                DepartmentPaginate.builder()
+                DepartmentPaginateResponse.builder()
                         .departmentId(3L)
                         .name("Department 3")
                         .build(),
-                DepartmentPaginate.builder()
+                DepartmentPaginateResponse.builder()
                         .departmentId(4L)
                         .name("Department 4")
                         .build()

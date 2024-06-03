@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class DepartmentPaginate {
+public class DepartmentPaginateResponse {
     private long departmentId;
     private String name;
 }
