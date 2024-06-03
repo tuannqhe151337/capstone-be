@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.user.edit.EditUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
@@ -14,10 +15,12 @@ import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.edit.EditUserResponseEntityMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,10 +117,13 @@ public class UserController {
     }
 
     // build update user REST API
-    @PutMapping("{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long userId,
-                                                   @RequestBody UserResponse userDetails) {
-        return null;
+    @PutMapping()
+    public ResponseEntity<User> updateUser( @RequestBody
+                                                EditUserBody userEditBody) {
+       User user = new EditUserResponseEntityMapperImpl().mapEditResponsetoUser(userEditBody);
+        System.out.println(user);
+       return ResponseEntity.status(HttpStatus.OK).body(null);
+
     }
 
     // build delete user REST API
