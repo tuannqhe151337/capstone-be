@@ -1,5 +1,7 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -202,5 +204,12 @@ public class FinancialPlanController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(report);
+    }
+
+    @DeleteMapping()
+    private ResponseEntity<String> deletePlan(
+            @RequestBody DeletePlanBody planBody)
+    {
+        return null;
     }
 }
