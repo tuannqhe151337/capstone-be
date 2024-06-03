@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TermPaginate {
+public class TermPaginateResponse {
     private long termId;
     private String name;
 }
