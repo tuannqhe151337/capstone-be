@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -15,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/plan")
@@ -202,5 +205,13 @@ public class FinancialPlanController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(report);
+    }
+
+    @PutMapping("/re-upload")
+    private ResponseEntity<String> reUploadPlan(
+            @RequestBody List<ReUploadExpenseBody> bodyList
+            ){
+        System.out.println(bodyList.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }
