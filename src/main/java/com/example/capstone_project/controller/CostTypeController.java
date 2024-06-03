@@ -27,7 +27,7 @@ public class CostTypeController {
                         .build(),
                 CostTypeResponse.builder()
                         .costTypeId(3L)
-                        .name("Coty type 3")
+                        .name("Direct cost")
                         .build(),
                 CostTypeResponse.builder()
                         .costTypeId(4L)
