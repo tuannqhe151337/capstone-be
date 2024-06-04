@@ -1,11 +1,15 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -16,32 +20,42 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class Term extends BaseEntity{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Name cannot be empty")
     @Column(name = "name")
     private String name;
 
+    @NotEmpty(message = "Duration cannot be empty")
     @Column(name = "duration")
     private String duration;
 
+    @NotNull(message = "Start date cannot be null")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
+    @NotNull(message = "End date cannot be null")
+    @Future(message = "End date must be in the future")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
+    @NotNull(message = "Plan due date cannot be null")
+    @Future(message = "Plan due date must be in the future")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "plan_due_date")
-    private LocalDate planDueDate;
+    private LocalDateTime planDueDate;
 
-    @Column(name = "report_due_date")
-    private LocalDate reportDueDate;
-
+    @NotNull(message = "User cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User user;
 
+    @NotNull(message = "Status cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private TermStatus status;
@@ -54,4 +68,5 @@ public class Term extends BaseEntity{
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
+
 }
