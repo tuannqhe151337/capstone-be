@@ -2,6 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.report.list.DepartmentResponse;
 import com.example.capstone_project.controller.responses.report.list.ReportResponse;
 import com.example.capstone_project.controller.responses.report.list.StatusResponse;
 import com.example.capstone_project.controller.responses.report.list.TermResponse;
@@ -42,6 +43,10 @@ public class ReportController {
                                 .termId(1L)
                                 .name("Term name 1")
                                 .build())
+                        .department(DepartmentResponse.builder()
+                                .departmentId(1L)
+                                .name("Department 1")
+                                .build())
                         .build(),
                 ReportResponse.builder()
                         .reportId(2L)
@@ -53,6 +58,10 @@ public class ReportController {
                         .term(TermResponse.builder()
                                 .termId(2L)
                                 .name("Term name 2")
+                                .build())
+                        .department(DepartmentResponse.builder()
+                                .departmentId(1L)
+                                .name("Department 1")
                                 .build())
                         .build(),
                 ReportResponse.builder()
@@ -66,6 +75,10 @@ public class ReportController {
                                 .termId(1L)
                                 .name("Term name 1")
                                 .build())
+                        .department(DepartmentResponse.builder()
+                                .departmentId(3L)
+                                .name("Department 3")
+                                .build())
                         .build(),
                 ReportResponse.builder()
                         .reportId(4L)
@@ -77,6 +90,10 @@ public class ReportController {
                         .term(TermResponse.builder()
                                 .termId(1L)
                                 .name("Term name 1")
+                                .build())
+                        .department(DepartmentResponse.builder()
+                                .departmentId(2L)
+                                .name("Department 2")
                                 .build())
                         .build()
                 )
