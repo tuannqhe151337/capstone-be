@@ -2,6 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.list.DepartmentResponse;
@@ -203,9 +204,10 @@ public class FinancialPlanController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(report);
     }
-    @GetMapping("/plan-paging-status")
-    public ResponseEntity<List<StatusResponse>> getListStatusPaging() {
-        return ResponseEntity.ok(List.of(
+    @GetMapping("/plan-status")
+    public ResponseEntity<Responses<StatusResponse>> getListStatusPaging() {
+        Responses<StatusResponse> responses = new Responses<>();
+        responses.setData(List.of(
                 StatusResponse.builder()
                         .statusId(1L)
                         .name("New")
@@ -223,5 +225,7 @@ public class FinancialPlanController {
                         .name("Reviewed")
                         .build()
         ));
+
+        return ResponseEntity.ok(responses);
     }
 }
