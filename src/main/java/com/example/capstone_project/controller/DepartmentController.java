@@ -18,6 +18,7 @@ import java.util.List;
 public class DepartmentController {
     @GetMapping("/plan-paging-department")
     public ResponseEntity<ListResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
