@@ -96,12 +96,13 @@ public class UserController {
         User user = User.builder()
                 .id(1L)
                 .username("USERNAME")
-                .email("EMAIL")
-                .dob(LocalDate.now())
+                .email("email@gmail.com")
+                .dob(LocalDateTime.now())
                 .note("NOTE")
                 .fullName("FULLNAME")
-                .phoneNumber("00000000")
-                .address("ADDRESS").isDelete(false)
+                .phoneNumber("0999888777")
+                .address("ADDRESS")
+                .isDelete(false)
                 .position(Position.builder().id(1L).name("POSITION A").build())
                 .department(Department.builder().id(2L).name("DEPARTMENT").build())
                 .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
@@ -109,7 +110,6 @@ public class UserController {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         UserDetailResponse userResponse = new UserDetailResponseMapperImpl().mapToUserDetail(user);
-
         return ResponseEntity.ok(userResponse);
     }
 

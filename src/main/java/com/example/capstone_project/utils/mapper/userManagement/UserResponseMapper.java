@@ -17,6 +17,6 @@ public interface UserResponseMapper {
     @Mapping(source = "department.name", target = "department.name")
     @Mapping(source = "position.id", target = "position.id")
     @Mapping(source = "position.name", target = "position.name")
-    @Mapping(source = "delete", target = "deactivate") // Don't know why must change isDelete to delete in entity but it works
+    @Mapping(source = "isDelete", target = "deactivate") // Don't know why must change isDelete to delete in entity but it works
     UserResponse mapToUserResponse(User user);
 }
