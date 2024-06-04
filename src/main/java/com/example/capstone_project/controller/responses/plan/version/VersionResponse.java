@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.responses.plan.version;
 
+import com.example.capstone_project.controller.responses.plan.UserResponse;
 import lombok.Builder;
 import lombok.Data;
 

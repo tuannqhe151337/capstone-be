@@ -4,17 +4,26 @@ import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.list.DepartmentResponse;
+import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
+import com.example.capstone_project.controller.responses.plan.StatusResponse;
+import com.example.capstone_project.controller.responses.plan.TermResponse;
+import com.example.capstone_project.controller.responses.plan.UserResponse;
+import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
-import com.example.capstone_project.controller.responses.plan.list.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.list.TermResponse;
-import com.example.capstone_project.controller.responses.plan.version.UserResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -185,5 +194,88 @@ public class FinancialPlanController {
                 .build());
 
         return ResponseEntity.ok(listResponse);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<PlanDetailResponse> getPlanDetail(
+            @RequestParam Integer planId
+    ){
+        return ResponseEntity.ok(PlanDetailResponse.builder()
+                .id(1L)
+                .name("Plan name")
+                .term(TermResponse.builder()
+                        .termId(1L)
+                        .name("Financial plan December Q3 2021")
+                        .build())
+                .biggestExpenditure(BigDecimal.valueOf(180000000))
+                .totalPlan(BigDecimal.valueOf(213425384))
+                .planDueDate(LocalDate.now())
+                .department(DepartmentResponse.builder()
+                        .departmentId(1L)
+                        .name("BU 01")
+                        .build())
+                .status(StatusResponse.builder()
+                        .statusId(1L)
+                        .name("Waiting for approval")
+                        .build())
+                .version("version 2")
+                .createdAt(LocalDate.now())
+                .user(UserResponse.builder()
+                        .userId(1L)
+                        .username("Anhln")
+                        .build())
+                .build());
+    }
+
+    @PostMapping("/download")
+    public ResponseEntity<byte[]> generateXlsxReport(
+            @RequestParam Integer planId
+    ) throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+        FileInputStream file = new FileInputStream(fileLocation);
+        XSSFWorkbook wb = new XSSFWorkbook(file);
+
+        Sheet sheet = wb.getSheet("Expense");
+
+        String[][] tableData = {
+                {"Code Expense 1","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
+                {"Code Expense 2","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
+                {"Code Expense 3","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
+                {"Code Expense 4","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
+        };
+
+        Row row = null;
+        Cell cell = null;
+
+        int rowPosition = 2;
+        int colPosition = 0;
+
+        for (int i = 0; i<tableData.length; i++){
+            row = sheet.getRow(i+rowPosition);
+
+            for (int j = 0; j<tableData[0].length;j++){
+                cell = row.getCell(j+colPosition);
+
+                cell.setCellValue(tableData[i][j]);
+            }
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+        byte[] report = out.toByteArray();
+
+        String outFileName = "report.xlsx";
+
+        return createResponseEntity(report, outFileName);
+    }
+
+    private ResponseEntity<byte[]> createResponseEntity(
+            byte[] report, String fileName) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .body(report);
     }
 }
