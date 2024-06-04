@@ -34,19 +34,16 @@ public class Term extends BaseEntity{
     private String duration;
 
     @NotNull(message = "Start date cannot be null")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "start_date")
     private LocalDateTime startDate;
 
     @NotNull(message = "End date cannot be null")
     @Future(message = "End date must be in the future")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
     @NotNull(message = "Plan due date cannot be null")
     @Future(message = "Plan due date must be in the future")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @Column(name = "plan_due_date")
     private LocalDateTime planDueDate;
 

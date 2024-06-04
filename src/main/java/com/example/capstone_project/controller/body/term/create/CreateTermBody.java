@@ -14,8 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
-@Entity
-@Table(schema = "capstone_v2", name = "terms")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
