@@ -20,6 +20,7 @@ import java.util.List;
 public class TermController {
     @GetMapping("/plan-paging-term")
     public ResponseEntity<ListResponse<TermPaginateResponse>> getListTermPaging(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
