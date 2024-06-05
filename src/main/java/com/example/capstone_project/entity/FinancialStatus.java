@@ -28,5 +28,5 @@ public class FinancialStatus extends BaseEntity {
     private List<FinancialPlan> financialPlans;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

@@ -23,5 +23,5 @@ public class FinancialReportStatus extends BaseEntity {
     private List<FinancialReportExpense> reportExpenses;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

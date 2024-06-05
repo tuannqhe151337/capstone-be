@@ -37,8 +37,6 @@ public class Report extends BaseEntity{
     @JoinColumn(name = "cost_type_id")
     private CostType costType;
 
-
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

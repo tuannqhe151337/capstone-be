@@ -53,5 +53,5 @@ public class Term extends BaseEntity{
     private List<FinancialReport> financialReports;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

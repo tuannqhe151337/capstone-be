@@ -32,5 +32,5 @@ public class Role extends BaseEntity {
     private List<RoleAuthority> roleAuthorities;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }
