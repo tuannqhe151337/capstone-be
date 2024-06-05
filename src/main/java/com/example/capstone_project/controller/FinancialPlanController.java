@@ -5,10 +5,10 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.list.DepartmentResponse;
-import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
+import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.list.TermResponse;
+import com.example.capstone_project.controller.responses.plan.TermResponse;
+import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -204,6 +204,7 @@ public class FinancialPlanController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(report);
     }
+
     @GetMapping("/plan-status")
     public ResponseEntity<Responses<StatusResponse>> getListStatusPaging() {
         Responses<StatusResponse> responses = new Responses<>();
