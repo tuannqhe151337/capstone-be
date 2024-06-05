@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
+import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.Term;
@@ -8,6 +9,7 @@ import com.example.capstone_project.entity.TermDuration;
 import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermStatusName;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,10 @@ public class TermController {
     public ResponseEntity<String> updateTerm(Term term) {
         // return .save(term);
         return null;
+    }
+    @DeleteMapping
+    public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody) {
+        return ResponseEntity.status(HttpStatus.OK).body("Delete successfully term id +" + deleteTermBody.getId());
     }
 
 }
