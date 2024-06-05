@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Configuration
@@ -447,15 +448,63 @@ public class SeedConfiguration {
             ));
 
             Term term1 = Term.builder()
-                    .id()
-                    .name()
+                    .id(1L)
+                    .name("Spring 2024")
                     .duration("Month")
-                    .startDate()
-                    .endDate()
-                    .planDueDate()
-                    .reportDueDate()
-                    .user()
-                    .status()
+                    .startDate(LocalDateTime.of(2024, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 1, 10, 17, 0))
+                    .reportDueDate(LocalDateTime.of(2024, 1, 20, 17, 0))
+                    .user("user1")
+                    .status("Active")
+                    .build();
+
+            Term term2 = Term.builder()
+                    .id(2L)
+                    .name("Summer 2024")
+                    .duration("Month")
+                    .startDate(LocalDateTime.of(2024, 6, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 6, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 6, 10, 17, 0))
+                    .reportDueDate(LocalDateTime.of(2024, 6, 20, 17, 0))
+                    .user("user2")
+                    .status("Completed")
+                    .build();
+
+            Term term3 = Term.builder()
+                    .id(3L)
+                    .name("Fall 2024")
+                    .duration("Month")
+                    .startDate(LocalDateTime.of(2024, 9, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 9, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 9, 10, 17, 0))
+                    .reportDueDate(LocalDateTime.of(2024, 9, 20, 17, 0))
+                    .user("user3")
+                    .status("Pending")
+                    .build();
+
+            Term term4 = Term.builder()
+                    .id(4L)
+                    .name("Winter 2024")
+                    .duration("Month")
+                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
+                    .reportDueDate(LocalDateTime.of(2024, 12, 20, 17, 0))
+                    .user("user4")
+                    .status("Active")
+                    .build();
+
+            Term term5 = Term.builder()
+                    .id(5L)
+                    .name("Spring 2025")
+                    .duration("Month")
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .reportDueDate(LocalDateTime.of(2025, 1, 20, 17, 0))
+                    .user("user5")
+                    .status("Planned")
                     .build();
 
             termRepository.saveAll(List.of());
