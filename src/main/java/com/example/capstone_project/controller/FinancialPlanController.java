@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -206,10 +207,11 @@ public class FinancialPlanController {
                 .body(report);
     }
 
-    @DeleteMapping()
+    @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
-            @RequestBody DeletePlanBody planBody)
+            @Validated @RequestBody DeletePlanBody planBody)
     {
-        return null;
+        System.out.println(planBody.toString());
+        return ResponseEntity.ok("id " + planBody.getPlanId());
     }
 }
