@@ -23,7 +23,9 @@ public class SeedConfiguration {
             RoleAuthorityRepository roleAuthorityRepository,
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
-            UserSettingRepository userSettingRepository
+            UserSettingRepository userSettingRepository,
+            FinancialPlanRepository planRepository,
+            TermRepository termRepository
     ) {
         return args -> {
             // Department
@@ -443,6 +445,26 @@ public class SeedConfiguration {
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
+
+            Term term1 = Term.builder()
+                    .id()
+                    .name()
+                    .duration("Month")
+                    .startDate()
+                    .endDate()
+                    .planDueDate()
+                    .reportDueDate()
+                    .user()
+                    .status()
+                    .build();
+
+            termRepository.saveAll(List.of());
+
+            FinancialPlan financialPlan1 = FinancialPlan.builder()
+                    .id()
+                    ..build();
+
+            planRepository.saveAll(List.of());
         };
     }
 }

@@ -11,11 +11,13 @@ import com.example.capstone_project.controller.responses.plan.detail.PlanDetailR
 import com.example.capstone_project.controller.responses.plan.detail.UserResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,22 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ){
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+
+
+
         ListResponse<PlanResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
                 PlanResponse.builder()
