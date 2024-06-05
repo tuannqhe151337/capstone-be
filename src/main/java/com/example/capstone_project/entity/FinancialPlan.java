@@ -2,10 +2,7 @@ package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -32,7 +29,7 @@ public class FinancialPlan extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
-    private FinancialStatus status;
+    private PlanStatus status;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
