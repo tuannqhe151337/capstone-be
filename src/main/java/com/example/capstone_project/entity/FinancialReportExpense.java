@@ -49,6 +49,10 @@ public class FinancialReportExpense extends BaseEntity{
     @JoinColumn(name = "cost_type_id")
     private CostType costType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id")
+    private FinancialReportStatus status;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete;
 }

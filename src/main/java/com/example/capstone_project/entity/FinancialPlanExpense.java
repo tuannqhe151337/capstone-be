@@ -22,7 +22,7 @@ public class FinancialPlanExpense extends BaseEntity{
     private Long id;
 
     @Column(name = "financial_plan_expense_key")
-    private String financialPlanExpenseKey;
+    private String planExpenseKey;
 
     @Column(name = "name")
     private String name;
@@ -47,11 +47,10 @@ public class FinancialPlanExpense extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
-    private FinancialStatus status;
+    private ExpenseStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_plan_file_id")
-    private FinancialPlanFile financialPlanFile;
+    @OneToMany(mappedBy = FinancialPlanFileExpense_.PLAN_EXPENSE)
+    private List<FinancialPlanFileExpense> files;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cost_type_id")

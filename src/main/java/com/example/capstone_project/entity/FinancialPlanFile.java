@@ -28,16 +28,12 @@ public class FinancialPlanFile {
     @Column(name = "version")
     private String version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id")
-    private FinancialStatus status;
-
-    @OneToMany(mappedBy = "financialPlanFile")
-    private List<FinancialPlanExpense> financialPlanExpenses;
+    @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE)
+    private List<FinancialPlanFileExpense> planExpenses;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "financial_plan_id")
-    private FinancialPlan financialPlan;
+    private FinancialPlan plan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by")

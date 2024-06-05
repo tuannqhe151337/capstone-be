@@ -23,8 +23,8 @@ public class FinancialPlan extends BaseEntity{
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.FINANCIAL_PLAN)
-    private List<FinancialPlanFile> financialPlanFiles;
+    @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
+    private List<FinancialPlanFile> planFiles;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")
