@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -27,16 +28,16 @@ public class Term extends BaseEntity{
     private String duration;
 
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "plan_due_date")
-    private LocalDate planDueDate;
+    private LocalDateTime planDueDate;
 
     @Column(name = "report_due_date")
-    private LocalDate reportDueDate;
+    private LocalDateTime reportDueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
