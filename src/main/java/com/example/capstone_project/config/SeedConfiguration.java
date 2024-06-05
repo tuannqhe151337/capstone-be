@@ -26,7 +26,9 @@ public class SeedConfiguration {
             PositionRepository positionRepository,
             UserSettingRepository userSettingRepository,
             FinancialPlanRepository planRepository,
-            TermRepository termRepository
+            TermRepository termRepository,
+            TermStatusRepository termStatusRepository,
+            Status
     ) {
         return args -> {
             // Department
@@ -447,6 +449,26 @@ public class SeedConfiguration {
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
 
+            TermStatus status1 = TermStatus.builder()
+                    .id(1L)
+                    .name("New")
+                    .iconCode("icon_new")
+                    .build();
+
+            TermStatus status2 = TermStatus.builder()
+                    .id(2L)
+                    .name("In-Progress")
+                    .iconCode("icon_in_progress")
+                    .build();
+
+            TermStatus status3 = TermStatus.builder()
+                    .id(3L)
+                    .name("Close")
+                    .iconCode("icon_close")
+                    .build();
+
+            termStatusRepository.saveAll(List.of(status1,status2,status3));
+
             Term term1 = Term.builder()
                     .id(1L)
                     .name("Spring 2024")
@@ -455,8 +477,8 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2024, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 1, 10, 17, 0))
                     .reportDueDate(LocalDateTime.of(2024, 1, 20, 17, 0))
-                    .user("user1")
-                    .status("Active")
+                    .user(user1)
+                    .status(status1)
                     .build();
 
             Term term2 = Term.builder()
@@ -467,8 +489,8 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2024, 6, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 6, 10, 17, 0))
                     .reportDueDate(LocalDateTime.of(2024, 6, 20, 17, 0))
-                    .user("user2")
-                    .status("Completed")
+                    .user(user1)
+                    .status(status2)
                     .build();
 
             Term term3 = Term.builder()
@@ -479,8 +501,8 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2024, 9, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 9, 10, 17, 0))
                     .reportDueDate(LocalDateTime.of(2024, 9, 20, 17, 0))
-                    .user("user3")
-                    .status("Pending")
+                    .user(user2)
+                    .status(status3)
                     .build();
 
             Term term4 = Term.builder()
@@ -491,8 +513,8 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .reportDueDate(LocalDateTime.of(2024, 12, 20, 17, 0))
-                    .user("user4")
-                    .status("Active")
+                    .user(user3)
+                    .status(status1)
                     .build();
 
             Term term5 = Term.builder()
@@ -503,14 +525,16 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .reportDueDate(LocalDateTime.of(2025, 1, 20, 17, 0))
-                    .user("user5")
-                    .status("Planned")
+                    .user(user4)
+                    .status(status2)
                     .build();
 
-            termRepository.saveAll(List.of());
+            termRepository.saveAll(List.of(term1,term2,term3,term4,term5));
 
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .id()
+                    .name()
+                    .term()
                     ..build();
 
             planRepository.saveAll(List.of());
