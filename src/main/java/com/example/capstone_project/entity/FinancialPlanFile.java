@@ -44,5 +44,5 @@ public class FinancialPlanFile {
     private LocalDate createdAt;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

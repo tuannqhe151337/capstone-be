@@ -31,5 +31,5 @@ public class Department extends BaseEntity {
     private List<Report> reports;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }
