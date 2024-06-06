@@ -28,6 +28,10 @@ public class FinancialPlan extends BaseEntity{
     private Term term;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private PlanStatus status;
 
