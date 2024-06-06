@@ -19,31 +19,20 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class CreateTermBody {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @NotEmpty(message = "Name can not be empty")
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "duration")
+    @NotEmpty(message = "Duration cannot be null")
     private String duration;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
-    @Column(name = "start_date")
+    @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
     @NotNull(message = "End date cannot be null")
     @Future(message = "End date must be in the future")
-    @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
-    @Column(name = "plan_due_date")
     @NotNull(message = "Plan due date cannot be null")
     @Future(message = "Plan due date must be in the future")
     private LocalDateTime planDueDate;
-
 }

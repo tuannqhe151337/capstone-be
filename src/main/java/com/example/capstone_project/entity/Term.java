@@ -2,11 +2,9 @@ package com.example.capstone_project.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.*;
 import lombok.*;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +29,7 @@ public class Term extends BaseEntity{
 
     @NotEmpty(message = "Duration cannot be empty")
     @Column(name = "duration")
-    private String duration;
+    private TermDuration duration ;
 
     @NotNull(message = "Start date cannot be null")
     @Column(name = "start_date")
@@ -55,7 +53,7 @@ public class Term extends BaseEntity{
     @NotNull(message = "Status cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
-    private TermStatus status;
+    private TermStatus status; //trong day da co isDelete roi
 
     @OneToMany(mappedBy = "term")
     private List<FinancialPlan> financialPlans;
@@ -63,7 +61,13 @@ public class Term extends BaseEntity{
     @OneToMany(mappedBy = "term")
     private List<FinancialReport> financialReports;
 
-    @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    @AssertTrue(message = "Plan due date must be before end date")
+    private boolean isPlanDueDateBeforeEndDate() {
+        if (planDueDate == null || endDate == null) {
+            return true; // Để @NotNull xử lý null check
+        }
+        return planDueDate.isBefore(endDate);
+    }
+
 
 }
