@@ -28,7 +28,7 @@ public class SeedConfiguration {
             FinancialPlanRepository planRepository,
             TermRepository termRepository,
             TermStatusRepository termStatusRepository,
-            Status
+            PlanStatusRepository planStatusRepository
     ) {
         return args -> {
             // Department
@@ -469,6 +469,28 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(status1,status2,status3));
 
+            PlanStatus planStatus1 = PlanStatus.builder()
+                    .id(1L)
+                    .name("New")
+                    .build();
+
+            PlanStatus planStatus2 = PlanStatus.builder()
+                    .id(2L)
+                    .name("Waiting for reviewed")
+                    .build();
+
+            PlanStatus planStatus3 = PlanStatus.builder()
+                    .id(3L)
+                    .name("Reviewed")
+                    .build();
+
+            PlanStatus planStatus4 = PlanStatus.builder()
+                    .id(4L)
+                    .name("Denied")
+                    .build();
+
+            planStatusRepository.saveAll(List.of(planStatus1,planStatus2,planStatus3,planStatus4));
+
             Term term1 = Term.builder()
                     .id(1L)
                     .name("Spring 2024")
@@ -532,12 +554,41 @@ public class SeedConfiguration {
             termRepository.saveAll(List.of(term1,term2,term3,term4,term5));
 
             FinancialPlan financialPlan1 = FinancialPlan.builder()
-                    .id()
-                    .name()
-                    .term()
-                    ..build();
+                    .id(1L)
+                    .name("Financial Plan 1")
+                    .term(term1)
+                    .status(planStatus1)
+                    .build();
 
-            planRepository.saveAll(List.of());
+            FinancialPlan financialPlan2 = FinancialPlan.builder()
+                    .id(2L)
+                    .name("Financial Plan 2")
+                    .term(term1)
+                    .status(planStatus2)
+                    .build();
+
+            FinancialPlan financialPlan3 = FinancialPlan.builder()
+                    .id(3L)
+                    .name("Financial Plan 3")
+                    .term(term1)
+                    .status(planStatus3)
+                    .build();
+
+            FinancialPlan financialPlan4 = FinancialPlan.builder()
+                    .id(4L)
+                    .name("Financial Plan 4")
+                    .term(term1)
+                    .status(planStatus4)
+                    .build();
+
+            FinancialPlan financialPlan5 = FinancialPlan.builder()
+                    .id(5L)
+                    .name("Financial Plan 5")
+                    .term(term2)
+                    .status(planStatus1)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1,financialPlan2,financialPlan3,financialPlan4,financialPlan5));
         };
     }
 }
