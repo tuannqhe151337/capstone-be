@@ -18,7 +18,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class Term extends BaseEntity{
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -61,6 +60,9 @@ public class Term extends BaseEntity{
     @OneToMany(mappedBy = "term")
     private List<FinancialReport> financialReports;
 
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private boolean isDelete;
+
     @AssertTrue(message = "Plan due date must be before end date")
     private boolean isPlanDueDateBeforeEndDate() {
         if (planDueDate == null || endDate == null) {
@@ -68,6 +70,4 @@ public class Term extends BaseEntity{
         }
         return planDueDate.isBefore(endDate);
     }
-
-
 }

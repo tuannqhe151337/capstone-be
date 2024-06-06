@@ -55,7 +55,7 @@ public class UserController {
         }
 
         // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(query, pageInt, sizeInt, sortBy, sortType);
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
         List<User> users = userService.getAllUsers(query, pageable);
@@ -67,7 +67,6 @@ public class UserController {
 
         if (users != null && !users.isEmpty()) {
             for (User user : users) {
-                String iconCode = "";
                 //mapperToUserResponse
                 response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
             }

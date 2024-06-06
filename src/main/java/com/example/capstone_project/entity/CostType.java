@@ -28,12 +28,12 @@ public class CostType extends BaseEntity {
     private List<Report> reports;
 
     @OneToMany(mappedBy = FinancialReportExpense_.COST_TYPE)
-    private List<FinancialReportExpense> financialReportExpenses;
+    private List<FinancialReportExpense> reportExpenses;
 
     @OneToMany(mappedBy = FinancialPlanExpense_.COST_TYPE)
-    private List<FinancialPlanExpense> financialPlanExpenses;
+    private List<FinancialPlanExpense> planExpenses;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 
 }
