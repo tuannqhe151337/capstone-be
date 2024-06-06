@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Configuration
@@ -189,6 +190,9 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user2 = User.builder()
@@ -197,6 +201,9 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
@@ -205,6 +212,9 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user4 = User.builder()
@@ -213,6 +223,9 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user5 = User.builder()
@@ -221,6 +234,9 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
