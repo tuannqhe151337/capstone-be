@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
+import com.example.capstone_project.controller.body.term.create.UpdateTermBody;
 import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.Term;
@@ -55,9 +56,9 @@ public class TermController {
     }
 
     @PutMapping
-    public ResponseEntity<String> updateTerm(Term term) {
+    public ResponseEntity<String> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody) {
         // return .save(term);
-        return null;
+    return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
     }
 
 }
