@@ -10,6 +10,8 @@ import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.detail.UserResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
+import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +37,12 @@ import java.util.List;
 public class FinancialPlanController {
 
     private final JwtHelper jwtHelper;
+    private final FinancialPlanService planService;
     @GetMapping("/list")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
-            @RequestParam(required = false) Integer termId,
-            @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Long termId,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -59,6 +62,28 @@ public class FinancialPlanController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query,pageable);
+
+        long count = planService.countDistinct(query,termId,departmentId,statusId);
+
+        // Response
+        ListResponse<PlanResponse> response = new ListResponse<>();
+
+        if (plans != null && !plans.isEmpty()) {
+            for (FinancialPlan plan : plans) {
+                //mapperToPlanResponse
+                response.getData().add(new );
+            }
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .count(count)
+                .page(pageInt)
+                .displayRecord(sizeInt)
+                .numPages(numPages)
+                .build());
 
 
 
@@ -99,7 +124,7 @@ public class FinancialPlanController {
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("expenses")

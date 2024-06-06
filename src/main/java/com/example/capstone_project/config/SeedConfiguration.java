@@ -557,6 +557,7 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Financial Plan 1")
                     .term(term1)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus1)
                     .build();
 
@@ -564,6 +565,7 @@ public class SeedConfiguration {
                     .id(2L)
                     .name("Financial Plan 2")
                     .term(term1)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus2)
                     .build();
 
@@ -571,12 +573,14 @@ public class SeedConfiguration {
                     .id(3L)
                     .name("Financial Plan 3")
                     .term(term1)
+                    .department(accountingDepartment)
                     .status(planStatus3)
                     .build();
 
             FinancialPlan financialPlan4 = FinancialPlan.builder()
                     .id(4L)
                     .name("Financial Plan 4")
+                    .department(financeDepartment)
                     .term(term1)
                     .status(planStatus4)
                     .build();
@@ -585,6 +589,7 @@ public class SeedConfiguration {
                     .id(5L)
                     .name("Financial Plan 5")
                     .term(term2)
+                    .department(accountingDepartment)
                     .status(planStatus1)
                     .build();
 
