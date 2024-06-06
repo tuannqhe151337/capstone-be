@@ -42,7 +42,7 @@ public class PaginationHelper {
         }
     }
 
-    public static Pageable handlingPagination(String query, Integer page, Integer size, String sortBy, String sortType){
+    public static Pageable handlingPagination(Integer page, Integer size, String sortBy, String sortType){
 
         // Handling page and pageSize
         if (page == null || page <= 0) {

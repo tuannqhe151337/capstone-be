@@ -33,8 +33,8 @@ public class FinancialReport {
     private Term term;
 
     @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
-    private List<FinancialReportExpense> financialReportExpenses;
+    private List<FinancialReportExpense> reportExpenses;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }
