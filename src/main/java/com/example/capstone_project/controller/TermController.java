@@ -46,7 +46,6 @@ public class TermController {
                         .code(TermCode.IN_PROGRESS).build())
                 .build();
 
-
         return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
     }
 

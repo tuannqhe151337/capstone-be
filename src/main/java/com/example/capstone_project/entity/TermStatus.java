@@ -22,10 +22,10 @@ public class TermStatus extends BaseEntity{
     private Long id;
 
     @Column(name = "name")
-    @Enumerated(EnumType.STRING)
     private String name;
 
     @Column(name = "icon_code")
+    @Enumerated(EnumType.STRING)
     private TermCode code;
 
     @OneToMany(mappedBy = "status")
