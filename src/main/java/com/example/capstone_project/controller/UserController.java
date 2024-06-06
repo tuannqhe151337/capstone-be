@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
@@ -14,6 +15,7 @@ import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.edit.UpdateUserToUserDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -119,10 +121,13 @@ public class UserController {
     }
 
     // build update user REST API
-    @PutMapping("{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long userId,
-                                                   @RequestBody UserResponse userDetails) {
-        return null;
+    @PutMapping()
+    public ResponseEntity<UserDetailResponse> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
+        User user = new User();
+        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
+        userDetailResponse.setCreatedAt(LocalDateTime.now());
+        userDetailResponse.setUpdatedAt(LocalDateTime.now());
+        return ResponseEntity.ok(userDetailResponse);
     }
 
     // build delete user REST API
