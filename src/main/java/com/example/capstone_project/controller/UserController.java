@@ -15,19 +15,25 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -81,23 +87,23 @@ public class UserController {
 
     // build create user REST API
     @PostMapping
-    public ResponseEntity<String> createUser(@RequestBody CreateUserBody userBody) {
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
+
         User user = new User();
         user = new CreateUserBodyMapperImpl().mapBodytoUser(userBody);
-        System.out.println(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Created success");
     }
 
     // build get user by id REST API
     @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable("id") Long userId) {
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
 //        User user =  userService.getUserById(userId);
 //        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
         User user = User.builder()
                 .id(1L)
                 .username("USERNAME")
                 .email("EMAIL")
-                .dob(LocalDate.now())
+                .dob(LocalDateTime.now())
                 .note("NOTE")
                 .fullName("FULLNAME")
                 .phoneNumber("00000000")
