@@ -1,5 +1,7 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
@@ -21,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -306,4 +309,12 @@ public class FinancialPlanController {
     }
 
 
+
+    @DeleteMapping("/delete")
+    private ResponseEntity<String> deletePlan(
+            @Validated @RequestBody DeletePlanBody planBody)
+    {
+        System.out.println(planBody.toString());
+        return ResponseEntity.ok("id " + planBody.getPlanId());
+    }
 }
