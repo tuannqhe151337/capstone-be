@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
+import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.Term;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -27,13 +30,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/term")
+@Validated
 public class TermController {
     private final TermService termService;
 
-    @GetMapping
-    public ResponseEntity<List<Term>> getAllTerms() {
-        return null;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
@@ -63,6 +63,11 @@ public class TermController {
     public ResponseEntity<String> updateTerm(Term term) {
         // return .save(term);
         return null;
+    }
+    @DeleteMapping
+    public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Deleted successfully");
     }
 
     @GetMapping("/plan-paging-term")
