@@ -1,13 +1,11 @@
 package com.example.capstone_project.utils.mapper.term_plan;
 
 
-import com.example.capstone_project.controller.responses.term.get_plans.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get_plans.TermPlanDetailResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
