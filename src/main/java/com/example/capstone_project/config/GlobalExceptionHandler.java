@@ -1,11 +1,11 @@
 package com.example.capstone_project.config;
 
-
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,14 +17,26 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @RestControllerAdvice
-    public class ApiExceptionHandler {
-
         @ExceptionHandler(ConstraintViolationException.class)
         @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-        public ResponseEntity<List<ExceptionResponse>>  TodoException(Exception ex, WebRequest request) {
-            String error = ex.getMessage();
-            String[] errors = error.split(",");
+        public ResponseEntity<List<ExceptionResponse>> handleConstraintViolationException(Exception ex, WebRequest request) {
+            String exceptionMessage = ex.getMessage();
+            List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse(exceptionMessage);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+        }
+
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+        public ResponseEntity<List<ExceptionResponse>> handleHttpMessageNotReadableException(Exception ex, WebRequest request) {
+            String exceptionMessage = ex.getMessage();
+            List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse(exceptionMessage);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+        }
+
+        private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
+            String[] errors = errorMessage.split(",");
             List<ExceptionResponse> exceptionResponseList = new ArrayList<>();
             for (String s : errors) {
                 String[] parts = s.trim().split(": ");
@@ -36,7 +48,7 @@ public class GlobalExceptionHandler {
                 exceptionResponseList.add(exception);
             }
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+            return exceptionResponseList;
         }
     }
-}
+

@@ -26,8 +26,9 @@ public class Term extends BaseEntity{
     @Column(name = "name")
     private String name;
 
-    @NotEmpty(message = "Duration cannot be empty")
+    @NotNull(message = "Duration cannot be empty")
     @Column(name = "duration")
+    @Enumerated(EnumType.STRING)
     private TermDuration duration ;
 
     @NotNull(message = "Start date cannot be null")
