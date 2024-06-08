@@ -1,8 +1,8 @@
 package com.example.capstone_project.utils.helper;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+
+import java.util.List;
 
 
 public class PaginationHelper {
@@ -42,6 +42,7 @@ public class PaginationHelper {
         }
     }
 
+
     public static Pageable handlingPagination(Integer page, Integer size, String sortBy, String sortType){
 
         // Handling page and pageSize
@@ -73,4 +74,11 @@ public class PaginationHelper {
             };
         }
     }
+
+    //Convert a LIST to a PAGE
+    public static <T> Page<T> createPage(List<T> list, PageRequest pageRequest) {
+        return new PageImpl<>(list, pageRequest, list.size());
+    }
+
+
 }

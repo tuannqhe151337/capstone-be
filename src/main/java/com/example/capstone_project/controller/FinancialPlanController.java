@@ -80,9 +80,9 @@ public class FinancialPlanController {
                 ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -151,9 +151,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -299,9 +299,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 

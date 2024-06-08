@@ -1,7 +1,6 @@
-package com.example.capstone_project.controller.responses.term.get;
+package com.example.capstone_project.controller.responses.term.get_plans;
 
 import com.example.capstone_project.entity.TermDuration;
-import com.example.capstone_project.entity.TermStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

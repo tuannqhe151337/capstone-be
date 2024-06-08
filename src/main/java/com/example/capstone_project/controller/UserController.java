@@ -78,9 +78,9 @@ public class UserController {
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
-                .count(count)
+                .totalRecords(100)
                 .page(pageInt)
-                .displayRecord(sizeInt)
+                .limitRecordsPerPage(4)
                 .numPages(numPages)
                 .build());
 
