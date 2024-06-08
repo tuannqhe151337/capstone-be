@@ -7,6 +7,7 @@ import com.example.capstone_project.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -22,7 +23,7 @@ public class CreateTermBody {
     @NotEmpty(message = "Name can not be empty")
     private String name;
 
-    @NotEmpty(message = "Duration cannot be null")
+    @NotEmpty(message = "Duration cannot be empty")
     private String duration;
 
     @NotNull(message = "Start date cannot be null")

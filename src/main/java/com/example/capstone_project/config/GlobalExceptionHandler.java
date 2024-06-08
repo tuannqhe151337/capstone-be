@@ -17,9 +17,6 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @RestControllerAdvice
-    public class ApiExceptionHandler {
-
         @ExceptionHandler(ConstraintViolationException.class)
         @ResponseStatus(value = HttpStatus.BAD_REQUEST)
         public ResponseEntity<List<ExceptionResponse>>  TodoException(Exception ex, WebRequest request) {
@@ -38,5 +35,5 @@ public class GlobalExceptionHandler {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
         }
-    }
+
 }

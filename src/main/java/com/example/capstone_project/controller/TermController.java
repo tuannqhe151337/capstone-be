@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/term")
+@Validated
 public class TermController {
     private final TermService termService;
 
