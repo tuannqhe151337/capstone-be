@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 public class UpdateUserBody {
-
         @NotBlank(message = "Id cannot be blank")
         private String id;
 

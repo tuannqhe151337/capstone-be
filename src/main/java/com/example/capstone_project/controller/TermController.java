@@ -2,12 +2,16 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
+import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
+import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.entity.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapper;
+import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,7 +43,7 @@ public class TermController {
     public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
         TermDetailResponse termDetailResponse
                 = TermDetailResponse.builder()
-                .id(1)
+                .id(1L)
                 .name("TERM APRIL 2024")
                 .duration(TermDuration.MONTHLY)
                 .startDate(LocalDateTime.now())
@@ -60,13 +64,12 @@ public class TermController {
     }
 
     @PutMapping
-    public ResponseEntity<String> updateTerm(Term term) {
-        // return .save(term);
-        return null;
+    public ResponseEntity<String> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
+        TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
+        return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
     }
     @DeleteMapping
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
-
         return ResponseEntity.status(HttpStatus.CREATED).body("Deleted successfully");
     }
 

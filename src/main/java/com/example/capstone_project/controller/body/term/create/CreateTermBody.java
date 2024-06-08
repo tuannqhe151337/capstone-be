@@ -1,9 +1,6 @@
 package com.example.capstone_project.controller.body.term.create;
 
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.entity.TermStatus;
-import com.example.capstone_project.entity.User;
+import com.example.capstone_project.entity.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
@@ -22,8 +19,9 @@ public class CreateTermBody {
     @NotEmpty(message = "Name can not be empty")
     private String name;
 
-    @NotEmpty(message = "Duration cannot be null")
-    private String duration;
+    @NotNull(message = "Duration cannot be null")
+    @Enumerated(EnumType.STRING)
+    private TermDuration duration;
 
     @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
