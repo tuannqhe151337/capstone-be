@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,8 +95,7 @@ public class TermController {
             }
         });
 
-        // Tạo Pageable từ thông tin trang và giới hạn
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).descending());
+        PageRequest pageRequest = ( PageRequest) PaginationHelper.handlingPagination(page, size, sortBy, sortType);
 
         //Tao Page tu list
         Page<TermPlanDetailResponse> listTermPlan = PaginationHelper.createPage(list, pageRequest);
