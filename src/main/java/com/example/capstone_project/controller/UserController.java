@@ -1,6 +1,8 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
+import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
@@ -14,20 +16,27 @@ import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.edit.UpdateUserToUserDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -80,23 +89,23 @@ public class UserController {
 
     // build create user REST API
     @PostMapping
-    public ResponseEntity<String> createUser(@RequestBody CreateUserBody userBody) {
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
+
         User user = new User();
         user = new CreateUserBodyMapperImpl().mapBodytoUser(userBody);
-        System.out.println(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Created success");
     }
 
     // build get user by id REST API
     @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable("id") Long userId) {
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
 //        User user =  userService.getUserById(userId);
 //        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
         User user = User.builder()
                 .id(1L)
                 .username("USERNAME")
                 .email("EMAIL")
-                .dob(LocalDate.now())
+                .dob(LocalDateTime.now())
                 .note("NOTE")
                 .fullName("FULLNAME")
                 .phoneNumber("00000000")
@@ -113,15 +122,19 @@ public class UserController {
     }
 
     // build update user REST API
-    @PutMapping("{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long userId,
-                                                   @RequestBody UserResponse userDetails) {
-        return null;
+    @PutMapping()
+    public ResponseEntity<UserDetailResponse> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
+        User user = new User();
+        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
+        userDetailResponse.setCreatedAt(LocalDateTime.now());
+        userDetailResponse.setUpdatedAt(LocalDateTime.now());
+        return ResponseEntity.ok(userDetailResponse);
     }
 
     // build delete user REST API
-    @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
-        return null;
+    @DeleteMapping()
+    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
+        return ResponseEntity.status(HttpStatus.OK).body("Delete success");
     }
+
 }

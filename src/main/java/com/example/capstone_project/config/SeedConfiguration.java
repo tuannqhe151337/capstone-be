@@ -3,6 +3,7 @@ package com.example.capstone_project.config;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -200,6 +201,9 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user2 = User.builder()
@@ -208,6 +212,9 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
@@ -216,6 +223,9 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user4 = User.builder()
@@ -224,6 +234,9 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user5 = User.builder()
@@ -232,6 +245,9 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
@@ -468,19 +484,19 @@ public class SeedConfiguration {
             TermStatus status1 = TermStatus.builder()
                     .id(1L)
                     .name("New")
-                    .iconCode("icon_new")
+                    .code(TermCode.NOT_STARTED)
                     .build();
 
             TermStatus status2 = TermStatus.builder()
                     .id(2L)
                     .name("In-Progress")
-                    .iconCode("icon_in_progress")
+                    .code(TermCode.IN_PROGRESS)
                     .build();
 
             TermStatus status3 = TermStatus.builder()
                     .id(3L)
                     .name("Close")
-                    .iconCode("icon_close")
+                    .code(TermCode.CLOSED)
                     .build();
 
             termStatusRepository.saveAll(List.of(status1,status2,status3));
@@ -510,11 +526,10 @@ public class SeedConfiguration {
             Term term1 = Term.builder()
                     .id(1L)
                     .name("Spring 2024")
-                    .duration("Month")
-                    .startDate(LocalDateTime.of(2024, 1, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 1, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2024, 1, 10, 17, 0))
-                    .reportDueDate(LocalDateTime.of(2024, 1, 20, 17, 0))
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .user(user1)
                     .status(status1)
                     .build();
@@ -522,11 +537,10 @@ public class SeedConfiguration {
             Term term2 = Term.builder()
                     .id(2L)
                     .name("Summer 2024")
-                    .duration("Month")
-                    .startDate(LocalDateTime.of(2024, 6, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 6, 30, 23, 59))
-                    .planDueDate(LocalDateTime.of(2024, 6, 10, 17, 0))
-                    .reportDueDate(LocalDateTime.of(2024, 6, 20, 17, 0))
+                    .duration(TermDuration.QUARTERLY)
+                    .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
                     .user(user1)
                     .status(status2)
                     .build();
@@ -534,11 +548,10 @@ public class SeedConfiguration {
             Term term3 = Term.builder()
                     .id(3L)
                     .name("Fall 2024")
-                    .duration("Month")
-                    .startDate(LocalDateTime.of(2024, 9, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 9, 30, 23, 59))
-                    .planDueDate(LocalDateTime.of(2024, 9, 10, 17, 0))
-                    .reportDueDate(LocalDateTime.of(2024, 9, 20, 17, 0))
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
                     .user(user2)
                     .status(status3)
                     .build();
@@ -546,11 +559,10 @@ public class SeedConfiguration {
             Term term4 = Term.builder()
                     .id(4L)
                     .name("Winter 2024")
-                    .duration("Month")
-                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
-                    .reportDueDate(LocalDateTime.of(2024, 12, 20, 17, 0))
+                    .duration(TermDuration.YEARLY)
+                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
                     .user(user3)
                     .status(status1)
                     .build();
@@ -558,11 +570,10 @@ public class SeedConfiguration {
             Term term5 = Term.builder()
                     .id(5L)
                     .name("Spring 2025")
-                    .duration("Month")
+                    .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
                     .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
-                    .reportDueDate(LocalDateTime.of(2025, 1, 20, 17, 0))
                     .user(user4)
                     .status(status2)
                     .build();
