@@ -2,10 +2,10 @@ package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import io.lettuce.core.dynamic.annotation.Param;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
-public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
+public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
 
     @Query(value = "SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +

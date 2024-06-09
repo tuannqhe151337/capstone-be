@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -10,10 +11,14 @@ import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.detail.UserResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
+import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapper;
+import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,6 +26,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +44,10 @@ public class FinancialPlanController {
 
     private final JwtHelper jwtHelper;
     private final FinancialPlanService planService;
+
     @GetMapping("/list")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
+            @RequestHeader("Authorization") String accessToken,
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) Long statusId,
@@ -48,7 +56,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -58,22 +66,47 @@ public class FinancialPlanController {
             query = "";
         }
 
+        // Get token claim
+        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken);
+
         // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+        Pageable pageable;
+
+        if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                    CustomSort.builder().sortBy("accountant").sortType("").build(),
+                    CustomSort.builder().sortBy("start_date").sortType("asc").build(),
+                    CustomSort.builder().sortBy("plan_id").sortType("desc").build()
+            ));
+        } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                    CustomSort.builder().sortBy("financial-staff").sortType("").build(),
+                    CustomSort.builder().sortBy("start_date").sortType("asc").build(),
+                    CustomSort.builder().sortBy("plan_id").sortType("desc").build()
+            ));
+        } else {
+            pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+        }
 
         // Get data
-        List<FinancialPlan> plans = planService.getPlanWithPagination(query,pageable);
-
-        long count = planService.countDistinct(query,termId,departmentId,statusId);
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageable, tokenClaim);
 
         // Response
         ListResponse<PlanResponse> response = new ListResponse<>();
 
-        if (plans != null && !plans.isEmpty()) {
+        long count = 0;
+
+        if (plans != null) {
+
+            // Count total record
+            count = planService.countDistinct(query, termId, departmentId, statusId);
+
             for (FinancialPlan plan : plans) {
                 //mapperToPlanResponse
-                response.getData().add(new );
+                response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
@@ -83,45 +116,6 @@ public class FinancialPlanController {
                 .page(pageInt)
                 .displayRecord(sizeInt)
                 .numPages(numPages)
-                .build());
-
-
-
-        ListResponse<PlanResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
-                PlanResponse.builder()
-                        .id(1L)
-                        .name("BU name_term_plan")
-                        .status(StatusResponse.builder()
-                                .statusId(1L)
-                                .name("New").build())
-                        .term(TermResponse.builder()
-                                .termId(1L)
-                                .name("Term name 1").build())
-                        .department(DepartmentResponse.builder()
-                                .departmentId(1L)
-                                .name("BU 1").build())
-                        .version("V1").build(),
-                PlanResponse.builder()
-                        .id(2L)
-                        .name("BU name_term_plan")
-                        .status(StatusResponse.builder()
-                                .statusId(2L)
-                                .name("Approved").build())
-                        .term(TermResponse.builder()
-                                .termId(1L)
-                                .name("Term name 1").build())
-                        .department(DepartmentResponse.builder()
-                                .departmentId(2L)
-                                .name("BU 2").build())
-                        .version("V2").build()
-                ));
-
-        listResponse.setPagination(Pagination.builder()
-                .count(100)
-                .page(10)
-                .displayRecord(0)
-                .numPages(1)
                 .build());
 
         return ResponseEntity.ok(response);
@@ -201,7 +195,7 @@ public class FinancialPlanController {
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
             @RequestParam Integer planId
-    ){
+    ) {
         return ResponseEntity.ok(PlanDetailResponse.builder()
                 .id(1L)
                 .name("Plan name")
@@ -240,10 +234,10 @@ public class FinancialPlanController {
         Sheet sheet = wb.getSheet("Expense");
 
         String[][] tableData = {
-                {"Code Expense 1","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
-                {"Code Expense 2","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
-                {"Code Expense 3","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
-                {"Code Expense 4","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
+                {"Code Expense 1", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
+                {"Code Expense 2", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
+                {"Code Expense 3", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
+                {"Code Expense 4", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
         };
 
         Row row = null;
@@ -252,11 +246,11 @@ public class FinancialPlanController {
         int rowPosition = 2;
         int colPosition = 0;
 
-        for (int i = 0; i<tableData.length; i++){
-            row = sheet.getRow(i+rowPosition);
+        for (int i = 0; i < tableData.length; i++) {
+            row = sheet.getRow(i + rowPosition);
 
-            for (int j = 0; j<tableData[0].length;j++){
-                cell = row.getCell(j+colPosition);
+            for (int j = 0; j < tableData[0].length; j++) {
+                cell = row.getCell(j + colPosition);
 
                 cell.setCellValue(tableData[i][j]);
             }

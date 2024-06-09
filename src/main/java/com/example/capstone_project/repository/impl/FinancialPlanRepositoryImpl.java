@@ -13,17 +13,20 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class PlanRepositoryImpl implements CustomFinancialPlanRepository {
+public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepository {
     @PersistenceContext
     private EntityManager entityManager;
+
     @Override
-    public List<FinancialPlan> getPlanWithPagination(String query, Pageable pageable) {
+    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId,Long statusId, Pageable pageable) {
+
         // HQL query
         String hql = "SELECT plan FROM FinancialPlan plan " +
                 " LEFT JOIN plan.term " +
                 " LEFT JOIN plan.department " +
-                " LEFT JOIN plan.status " +
-                " WHERE plan.name like %:query% AND " +
+                " LEFT JOIN plan.planFiles " +
+                " LEFT JOIN plan.status status" +
+                " WHERE plan.name like :query AND " +
                 " (:termId IS NULL OR plan.status.id = :termId) AND " +
                 " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
                 " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
@@ -45,8 +48,31 @@ public class PlanRepositoryImpl implements CustomFinancialPlanRepository {
                     break;
                 case "department.id", "department_id", "department" :
                     hql += "department.id " + sortType;
+                    break;
                 case "term.id", "term_id", "term":
-                    hql += "term.id" + sortType;
+                    hql += "term.id " + sortType;
+                    break;
+                case "start-date", "start_date", "start_at":
+                    hql += "plan.createdAt " + sortType;
+                    break;
+                case "accountant":
+                    hql += "CASE status.name\n" +
+                            "        WHEN 'Waiting for reviewed' THEN 1\n" +
+                            "        WHEN 'Reviewed' THEN 2\n" +
+                            "        WHEN 'New' THEN 3\n" +
+                            "        WHEN 'Approved' THEN 4\n" +
+                            "        ELSE 5 \n" +
+                            "    END";
+                    break;
+                case "financial-staff", "financial_staff", "staff" :
+                    hql += "CASE status.name\n" +
+                            "        WHEN 'Reviewed' THEN 1\n" +
+                            "        WHEN 'New' THEN 2\n" +
+                            "        WHEN 'Waiting for reviewed' THEN 3\n" +
+                            "        WHEN 'Approved' THEN 4\n" +
+                            "        ELSE 5 \n" +
+                            "    END";
+                    break;
                 default:
                     hql += "plan.id " + sortType;
             }
@@ -63,10 +89,14 @@ public class PlanRepositoryImpl implements CustomFinancialPlanRepository {
         entityGraph.addAttributeNodes(FinancialPlan_.TERM);
         entityGraph.addAttributeNodes(FinancialPlan_.DEPARTMENT);
         entityGraph.addAttributeNodes(FinancialPlan_.STATUS);
+        entityGraph.addAttributeNodes(FinancialPlan_.PLAN_FILES);
 
         // Run query
         return entityManager.createQuery(hql, FinancialPlan.class)
                 .setParameter("query", "%" + query + "%")
+                .setParameter("termId", termId)
+                .setParameter("departmentId", departmentId)
+                .setParameter("statusId", statusId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)

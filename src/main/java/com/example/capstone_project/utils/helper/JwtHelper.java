@@ -93,7 +93,7 @@ public class JwtHelper {
     }
 
     public AccessTokenClaim parseToken(String accessToken) {
-        final Claims claims = this.extractAllClaims(accessToken);
+        final Claims claims = this.extractAllClaims(accessToken.substring(7));
 
         long userId = Long.parseLong(claims.getSubject());
         long departmentId = Long.parseLong(claims.get("departmentId").toString());
