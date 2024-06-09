@@ -49,7 +49,7 @@ public class TermController {
 
     @GetMapping("/plan")
     public ResponseEntity<ListResponse<TermPlanDetailResponse>> getPlanListByTerm
-            (@RequestParam(name = "id") Long termId,
+            (@RequestParam(name = "termId") Long termId,
              @RequestParam(defaultValue = "1") int page,
              @RequestParam(defaultValue = "10") int size,
              @RequestParam(required = false) String sortBy,
