@@ -1,7 +1,6 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
@@ -52,7 +51,7 @@ public class FinancialPlanController {
         ListResponse<PlanResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
                 PlanResponse.builder()
-                        .id(1L)
+                        .planId(1L)
                         .name("BU name_term_plan")
                         .status(StatusResponse.builder()
                                 .statusId(1L)
@@ -65,7 +64,7 @@ public class FinancialPlanController {
                                 .name("BU 1").build())
                         .version("V1").build(),
                 PlanResponse.builder()
-                        .id(2L)
+                        .planId(2L)
                         .name("BU name_term_plan")
                         .status(StatusResponse.builder()
                                 .statusId(2L)
@@ -107,7 +106,7 @@ public class FinancialPlanController {
                         .name("Promotion event")
                         .costType(CostTypeResponse.builder()
                                 .costTypeId(1L)
-                                .name("Direct cost").build())
+                                .code("Direct cost").build())
                         .unitPrice(BigDecimal.valueOf(15000000))
                         .amount(3)
                         .projectName("RECT")
@@ -123,7 +122,7 @@ public class FinancialPlanController {
                         .name("Social media")
                         .costType(CostTypeResponse.builder()
                                 .costTypeId(1L)
-                                .name("Direct cost").build())
+                                .code("Direct cost").build())
                         .unitPrice(BigDecimal.valueOf(15000000))
                         .amount(1)
                         .projectName("IN22")
@@ -138,7 +137,7 @@ public class FinancialPlanController {
                         .name("Office supplier")
                         .costType(CostTypeResponse.builder()
                                 .costTypeId(2L)
-                                .name("Adminstration").build())
+                                .code("Adminstration").build())
                         .unitPrice(BigDecimal.valueOf(5000000))
                         .amount(2)
                         .projectName("CAM1")

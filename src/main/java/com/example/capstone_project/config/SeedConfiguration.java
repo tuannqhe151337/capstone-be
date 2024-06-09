@@ -2,6 +2,7 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.utils.enums.CostTypeCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,8 @@ public class SeedConfiguration {
             RoleAuthorityRepository roleAuthorityRepository,
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
-            UserSettingRepository userSettingRepository
+            UserSettingRepository userSettingRepository,
+            CostTypeRepository costTypeRepository
     ) {
         return args -> {
             // Department
@@ -192,7 +194,7 @@ public class SeedConfiguration {
                     .position(techlead)
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user2 = User.builder()
@@ -203,7 +205,7 @@ public class SeedConfiguration {
                     .position(techlead)
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user3 = User.builder()
@@ -214,7 +216,7 @@ public class SeedConfiguration {
                     .position(juniorDev)
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user4 = User.builder()
@@ -225,7 +227,7 @@ public class SeedConfiguration {
                     .position(juniorDev)
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user5 = User.builder()
@@ -236,7 +238,7 @@ public class SeedConfiguration {
                     .position(staff)
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
@@ -459,6 +461,38 @@ public class SeedConfiguration {
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
+
+            CostType costType1 = CostType.builder()
+                    .id(1L)
+                    .code(CostTypeCode.ADMINISTRATION_COSTS)
+                    .build();
+
+            CostType costType2 = CostType.builder()
+                    .id(2L)
+                    .code(CostTypeCode.DIRECT_COSTS)
+                    .build();
+
+            CostType costType3 = CostType.builder()
+                    .id(3L)
+                    .code(CostTypeCode.INDIRECT_COSTS)
+                    .build();
+
+            CostType costType4 = CostType.builder()
+                    .id(4L)
+                    .code(CostTypeCode.OPERATING_COSTS)
+                    .build();
+
+            CostType costType5 = CostType.builder()
+                    .id(5L)
+                    .code(CostTypeCode.MAINTENANCE_COSTS)
+                    .build();
+
+            CostType costType6 = CostType.builder()
+                    .id(6L)
+                    .code(CostTypeCode.MANUFACTURING_COSTS)
+                    .build();
+
+            costTypeRepository.saveAll(List.of(costType1, costType2, costType3, costType4, costType5, costType6));
         };
     }
 }
