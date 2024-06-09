@@ -46,17 +46,19 @@ public class TermController {
     private final TermService termService;
 
 
-    @GetMapping
+    @GetMapping("/plan")
     public ResponseEntity<ListResponse<TermPlanDetailResponse>> getPlanListByTerm
             (@RequestParam(name = "id") Long termId,
-             @RequestParam(defaultValue = "0") int page,
-             @RequestParam(defaultValue = "10") int limit) {
+             @RequestParam(defaultValue = "1") int page,
+             @RequestParam(defaultValue = "10") int size,
+             @RequestParam(required = false) String sortBy,
+             @RequestParam(required = false) String sortType) {
 
         TermPlanDetailResponse termplan =
                 TermPlanDetailResponse.builder()
                         .id(1L)
                         .name("PLAN 1")
-                        .planStatus(PlanStatusResponse.builder().id(1L).name("REVIEWED").build())
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
                         .build();
         termplan.setCreatedAt(LocalDateTime.now());
         termplan.setUpdatedAt(LocalDateTime.now());
@@ -65,7 +67,7 @@ public class TermController {
                 TermPlanDetailResponse.builder()
                         .id(1L)
                         .name("PLAN 2")
-                        .planStatus(PlanStatusResponse.builder().id(1L).name("REVIEWED").build())
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
                         .build();
         termplan2.setCreatedAt(LocalDateTime.now());
         termplan2.setUpdatedAt(LocalDateTime.of(2025, 11, 6, 0, 0, 0));
@@ -74,7 +76,7 @@ public class TermController {
                 TermPlanDetailResponse.builder()
                         .id(1L)
                         .name("PLAN 3")
-                        .planStatus(PlanStatusResponse.builder().id(1L).name("REVIEWED").build())
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
                         .build();
         termplan3.setCreatedAt(LocalDateTime.now());
         termplan3.setUpdatedAt(LocalDateTime.of(2026, 11, 6, 0, 0, 0));
@@ -93,7 +95,7 @@ public class TermController {
         });
 
         // Tạo Pageable từ thông tin trang và giới hạn
-        PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("updatedAt").descending());
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).descending());
 
         //Tao Page tu list
         Page<TermPlanDetailResponse> listTermPlan = PaginationHelper.createPage(list, pageRequest);
