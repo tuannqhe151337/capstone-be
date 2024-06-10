@@ -17,17 +17,10 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class TermPlanDetailResponse{
-    @NotNull(message = "Id cannot be null")
+
     private Long id;
-
-    @NotEmpty(message = "Name cannot be empty ")
     private String name;
-
-    @NotNull(message = "Status cannot be empty ")
     private PlanStatusResponse planStatus;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt ;
 }

@@ -15,10 +15,10 @@ import java.util.List;
 @Data
 @Builder
 public class PlanStatusResponse {
-    @NotNull(message = "Id cannot be null")
+
     private Long id;
-    @NotEmpty(message = "Name cannot be empty")
+
     private String name;
-    @NotEmpty(message = "Code cannot be empty")
+
     private String code;
 }
