@@ -1,14 +1,10 @@
-package com.example.capstone_project.controller.responses.term.get_plans;
+package com.example.capstone_project.controller.responses.term.getPlans;
 
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor

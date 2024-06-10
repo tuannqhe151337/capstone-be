@@ -1,7 +1,7 @@
 package com.example.capstone_project.utils.mapper.term_plan;
 
 
-import com.example.capstone_project.controller.responses.term.get_plans.TermPlanDetailResponse;
+import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 
 import org.mapstruct.Mapper;

@@ -1,7 +1,7 @@
 package com.example.capstone_project.utils.mapper.term.update;
 
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
-import com.example.capstone_project.controller.responses.term.get_termDetail.TermDetailResponse;
+import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

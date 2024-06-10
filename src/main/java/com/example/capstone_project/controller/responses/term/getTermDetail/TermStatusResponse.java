@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.term.get_termDetail;
+package com.example.capstone_project.controller.responses.term.getTermDetail;
 
 import com.example.capstone_project.utils.enums.TermCode;
 import jakarta.persistence.EnumType;
