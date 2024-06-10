@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -304,7 +305,7 @@ public class FinancialPlanController {
         listResponse.setPagination(Pagination.builder()
                 .count(100)
                 .page(10)
-git                 .displayRecord(0)
+                .displayRecord(0)
                 .numPages(1)
                 .build());
 
@@ -322,10 +323,10 @@ git                 .displayRecord(0)
     }
 
     @PutMapping("/re-upload")
-    private ResponseEntity<String> reUploadPlan(
-            @RequestBody List<ReUploadExpenseBody> bodyList
+    private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
+            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
             ){
-        System.out.println(bodyList.toString());
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+
+        return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }
 }
