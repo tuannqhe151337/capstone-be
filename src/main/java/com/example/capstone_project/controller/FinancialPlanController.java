@@ -301,7 +301,7 @@ public class FinancialPlanController {
         listResponse.setPagination(Pagination.builder()
                 .count(100)
                 .page(10)
-                .displayRecord(0)
+git                 .displayRecord(0)
                 .numPages(1)
                 .build());
 
