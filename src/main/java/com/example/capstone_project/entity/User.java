@@ -19,13 +19,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "username cannot br ")
+    @NotEmpty(message = "Username cannot be empty")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-
-    @Size(max = 100, message = "Full name must be less than 100 characters")
-    @Column(name = "full_name")
-    private String fullName;
 
     @NotEmpty(message = "Password cannot be empty")
     @Size(min = 8, message = "Password must be at least 8 characters long")
@@ -38,19 +35,22 @@ public class User extends BaseEntity {
     private String email;
 
     @NotNull(message = "Date of birth cannot be null")
-    @Past(message = "DOB must be in the past")
+    @Past(message = "Date of birth must be in the past")
     @Column(name = "dob")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING )
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime dob;
 
     @Column(name = "note")
     private String note;
 
+    @Size(max = 100, message = "Full name must be less than 100 characters")
+    @Column(name = "full_name")
+    private String fullName;
+
     @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @NotEmpty(message = "Address cannot be empty")
     @Size(max = 200, message = "Address must be less than 200 characters")
     @Column(name = "address")
     private String address;
@@ -82,6 +82,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = FinancialPlanFile_.USER)
     private List<FinancialPlanFile> financialPlanFiles;
 
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private boolean isDelete;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete;
 }

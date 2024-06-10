@@ -7,7 +7,7 @@ import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
-import com.example.capstone_project.controller.responses.user.create.UserDetailResponse;
+import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
@@ -24,14 +24,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -78,9 +75,9 @@ public class UserController {
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
-                .count(count)
+                .totalRecords(100)
                 .page(pageInt)
-                .displayRecord(sizeInt)
+                .limitRecordsPerPage(4)
                 .numPages(numPages)
                 .build());
 
@@ -104,31 +101,32 @@ public class UserController {
         User user = User.builder()
                 .id(1L)
                 .username("USERNAME")
-                .email("EMAIL")
+                .email("email@gmail.com")
                 .dob(LocalDateTime.now())
                 .note("NOTE")
                 .fullName("FULLNAME")
-                .phoneNumber("00000000")
-                .address("ADDRESS").isDelete(false)
+                .phoneNumber("0999888777")
+                .address("ADDRESS")
+                .isDelete(false)
                 .position(Position.builder().id(1L).name("POSITION A").build())
                 .department(Department.builder().id(2L).name("DEPARTMENT").build())
                 .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
                 .build();
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-      //  UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
 
-        return ResponseEntity.ok(null);
+        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
+        return ResponseEntity.ok(userResponse);
     }
 
     // build update user REST API
     @PutMapping()
     public ResponseEntity<UserDetailResponse> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         User user = new User();
-//        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
-//        userDetailResponse.setCreatedAt(LocalDateTime.now());
-//        userDetailResponse.setUpdatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(null);
+        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
+        userDetailResponse.setCreatedAt(LocalDateTime.now());
+        userDetailResponse.setUpdatedAt(LocalDateTime.now());
+        return ResponseEntity.ok(userDetailResponse);
     }
 
     // build delete user REST API

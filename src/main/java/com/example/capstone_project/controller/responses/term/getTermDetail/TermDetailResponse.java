@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.term.getDetail;
+package com.example.capstone_project.controller.responses.term.getTermDetail;
 
 import com.example.capstone_project.entity.TermDuration;
 import com.fasterxml.jackson.annotation.JsonFormat;
