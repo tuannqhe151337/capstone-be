@@ -117,7 +117,7 @@ public class TermController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
+    public ResponseEntity<TermDetailResponse> getTermDetailmById(@Valid @PathVariable("id") Long id, BindingResult result) {
         TermDetailResponse termDetailResponse
                 = TermDetailResponse.builder()
                 .id(1L)
@@ -136,7 +136,7 @@ public class TermController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createTerm(@Valid @RequestBody CreateTermBody createTermBody) {
+    public ResponseEntity<String> createTerm(@Valid @RequestBody CreateTermBody createTermBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.CREATED).body("Created successfully");
     }
 
@@ -157,7 +157,7 @@ public class TermController {
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortType
+            @RequestParam(required = false) String sortType, BindingResult bindingResult
     ) {
         ListResponse<TermPaginateResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
