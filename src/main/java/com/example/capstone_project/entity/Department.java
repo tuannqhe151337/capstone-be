@@ -30,6 +30,9 @@ public class Department extends BaseEntity {
     @OneToMany(mappedBy = Report_.DEPARTMENT)
     private List<Report> reports;
 
+    @OneToMany(mappedBy = FinancialPlan_.DEPARTMENT)
+    private List<FinancialPlan> plans;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

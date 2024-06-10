@@ -1,11 +1,10 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -20,38 +19,53 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @NotEmpty(message = "username cannot br ")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
+    @Size(max = 100, message = "Full name must be less than 100 characters")
+    @Column(name = "full_name")
+    private String fullName;
+
+    @NotEmpty(message = "Password cannot be empty")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     @Column(name = "password", nullable = false)
     private String password;
 
+    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "Email should be valid")
     @Column(name = "email")
     private String email;
 
+    @NotNull(message = "Date of birth cannot be null")
+    @Past(message = "DOB must be in the past")
     @Column(name = "dob")
-    private LocalDate dob;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING )
+    private LocalDateTime dob;
 
     @Column(name = "note")
     private String note;
 
-    @Column(name = "full_name")
-    private String fullName;
-
+    @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @NotEmpty(message = "Address cannot be empty")
+    @Size(max = 200, message = "Address must be less than 200 characters")
     @Column(name = "address")
     private String address;
 
+    @NotNull(message = "Position cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     private Position position;
 
+    @NotNull(message = "Department cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
 
+    @NotNull(message = "Role cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;

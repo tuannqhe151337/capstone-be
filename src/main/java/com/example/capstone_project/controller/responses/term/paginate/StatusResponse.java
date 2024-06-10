@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.plan.list;
+package com.example.capstone_project.controller.responses.term.paginate;
 
 import lombok.Builder;
 import lombok.Data;
