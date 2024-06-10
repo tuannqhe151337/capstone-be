@@ -47,7 +47,7 @@ public interface CreatePlanMapper {
                         .name(newPlanBody.getFileName())
                         .version("v1")
                         .user(User.builder().id(tokenClaim.getUserId()).build())
-                        .planFileExpenses(expenseFile)
+//                        .planFileExpenses(expenseFile)
                         .build());
 
         plan.setPlanFiles(files);

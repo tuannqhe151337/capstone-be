@@ -20,8 +20,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Transactional
     public void creatPlan(FinancialPlan plan, List<FinancialPlanExpense> expenseList, AccessTokenClaim tokenClaim) {
 
-        planRepository.save(plan);
-
-
+        expenseRepository.saveAll(expenseList);
+        planRepository.saveAndFlush(plan);
     }
 }
