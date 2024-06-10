@@ -116,19 +116,19 @@ public class UserController {
                 .build();
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
+      //  UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
 
-        return ResponseEntity.ok(userResponse);
+        return ResponseEntity.ok(null);
     }
 
     // build update user REST API
     @PutMapping()
     public ResponseEntity<UserDetailResponse> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         User user = new User();
-        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
-        userDetailResponse.setCreatedAt(LocalDateTime.now());
-        userDetailResponse.setUpdatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(userDetailResponse);
+//        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
+//        userDetailResponse.setCreatedAt(LocalDateTime.now());
+//        userDetailResponse.setUpdatedAt(LocalDateTime.now());
+        return ResponseEntity.ok(null);
     }
 
     // build delete user REST API

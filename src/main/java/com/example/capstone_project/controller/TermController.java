@@ -3,17 +3,18 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
-import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
-import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
-import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
-import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.controller.responses.term.getDetail.TermDetailResponse;
+import com.example.capstone_project.controller.responses.term.getDetail.TermStatusResponse;
+import com.example.capstone_project.controller.responses.term.getReport.TermReportResponse;
 import com.example.capstone_project.entity.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
-import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -29,6 +30,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,9 +42,56 @@ import java.util.List;
 public class TermController {
     private final TermService termService;
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
+    public ResponseEntity<TermDetailResponse> getReportByTerm(
+            @RequestParam(name = "termId") Long termId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ) {
+        TermReportResponse reportResponse = TermReportResponse.builder().build();
+
+        //add list
+        List<TermReportResponse> list = new ArrayList<>();
+
+
+        // Sort the list by updatedAt, from newest to oldest
+        Collections.sort(list, new Comparator<TermReportResponse>() {
+            @Override
+            public int compare(TermReportResponse o1, TermPlanDetailResponse o2) {
+                return o2.getUpdatedAt().compareTo(o1.getUpdatedAt());
+            }
+        });
+
+        PageRequest pageRequest = ( PageRequest) PaginationHelper.handlingPagination(page, size, sortBy, sortType);
+
+        //Tao Page tu list
+        Page<TermReportResponse> listTermPlan = PaginationHelper.createPage(list, pageRequest);
+
+
+        //Build response
+        Pagination pagination = Pagination
+                .builder()
+                .page(pageRequest.getPageNumber())
+                .limitRecordsPerPage(pageRequest.getPageSize())
+                .totalRecords((long) listTermPlan.getNumberOfElements())
+                .numPages(PaginationHelper.
+                        calculateNumPages((long) listTermPlan.getNumberOfElements(),
+                                pageRequest.getPageSize())).build();
+
+        ListResponse<TermPlanDetailResponse> response = new ListResponse<>();
+        response.setData(list);
+        response.setPagination(pagination);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
+
+
+        return null;
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<TermDetailResponse> getTermDetailById(@PathVariable("id") Long id) {
         TermDetailResponse termDetailResponse
                 = TermDetailResponse.builder()
                 .id(1L)
