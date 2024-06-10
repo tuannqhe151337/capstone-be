@@ -2,6 +2,7 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,9 @@ public class SeedConfiguration {
             RoleAuthorityRepository roleAuthorityRepository,
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
-            UserSettingRepository userSettingRepository
+            UserSettingRepository userSettingRepository,
+            TermRepository termRepository,
+            CostTypeRepository costTypeRepository
     ) {
         return args -> {
             // Department
@@ -459,6 +462,25 @@ public class SeedConfiguration {
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
+
+            termRepository.save(Term.builder()
+                    .id(1L)
+                    .name("TERM APRIL 2024")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .planDueDate(LocalDateTime.of(2025,11,11, 0,0,0))
+                    .endDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025,11,11, 0,0,0)))
+                    .status(TermStatus.builder()
+//                            .id(1L)
+                            .name("IN_PROGRESS")
+                            .code(TermCode.IN_PROGRESS).build())
+                    .user(user1)
+                    .build());
+
+
+            costTypeRepository.save(CostType.builder()
+                    .id(1L)
+                    .name("Something").build());
         };
     }
 }

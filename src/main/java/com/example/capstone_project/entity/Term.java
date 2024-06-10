@@ -51,7 +51,7 @@ public class Term extends BaseEntity{
     private User user;
 
     @NotNull(message = "Status cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private TermStatus status; //trong day da co isDelete roi
 

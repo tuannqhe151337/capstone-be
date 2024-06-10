@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
@@ -14,13 +15,21 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.entity.AccessTokenClaim;
+import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanExpenseMapper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanExpenseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -38,6 +47,7 @@ import java.util.List;
 public class FinancialPlanController {
 
     private final JwtHelper jwtHelper;
+    private final FinancialPlanService planService;
     @GetMapping("/list")
     public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Integer termId,
@@ -308,13 +318,30 @@ public class FinancialPlanController {
         return ResponseEntity.ok(listResponse);
     }
 
-
-
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
             @Validated @RequestBody DeletePlanBody planBody)
     {
         System.out.println(planBody.toString());
         return ResponseEntity.ok("id " + planBody.getPlanId());
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<NewPlanBody> confirmExpenses(
+            @RequestHeader("Authorization") String token,
+            @RequestBody NewPlanBody planBody) {
+
+        //Get claim token
+        AccessTokenClaim tokenClaim = jwtHelper.parseToken(token);
+
+        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody,tokenClaim);
+
+        System.out.println(plan);
+
+        List<FinancialPlanExpense> expenseList = new CreatePlanExpenseMapperImpl().mapExpenseBodyToExpense(planBody.getExpenses(),planBody);
+
+        planService.creatPlan(plan,expenseList,tokenClaim);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 }

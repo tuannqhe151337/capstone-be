@@ -45,6 +45,10 @@ dependencies {
     // https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
     implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
     // https://mvnrepository.com/artifact/org.apache.poi/poi
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-core
+    implementation 'org.hibernate:hibernate-core:6.5.0.Final'
+
+
     implementation 'org.apache.poi:poi:5.2.5'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
     implementation 'org.apache.poi:poi-ooxml:5.2.5'

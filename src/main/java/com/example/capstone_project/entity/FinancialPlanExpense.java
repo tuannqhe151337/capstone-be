@@ -21,7 +21,7 @@ public class FinancialPlanExpense extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "financial_plan_expense_key")
+    @Column(name = "financial_plan_expense_key", unique = true)
     private String planExpenseKey;
 
     @Column(name = "name")
@@ -45,7 +45,7 @@ public class FinancialPlanExpense extends BaseEntity{
     @Column(name = "note")
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "status_id")
     private ExpenseStatus status;
 
@@ -58,4 +58,5 @@ public class FinancialPlanExpense extends BaseEntity{
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
+
 }
