@@ -22,6 +22,7 @@ public enum TermDuration {
             return startDate.plus(1, ChronoUnit.YEARS);
         }
     };
+    private String value;
 
 
     public abstract LocalDateTime calculateEndDate(LocalDateTime startDate);

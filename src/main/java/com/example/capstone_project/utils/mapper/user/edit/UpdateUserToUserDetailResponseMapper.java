@@ -2,7 +2,7 @@ package com.example.capstone_project.utils.mapper.user.edit;
 
 
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
-import com.example.capstone_project.controller.responses.user.create.UserDetailResponse;
+import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
