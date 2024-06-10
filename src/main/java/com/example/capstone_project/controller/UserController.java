@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
@@ -88,7 +89,7 @@ public class UserController {
     }
 
     // build create user REST API
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
 
         User user = new User();
@@ -118,7 +119,7 @@ public class UserController {
         user.setUpdatedAt(LocalDateTime.now());
         UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
 
-        return ResponseEntity.ok(userResponse);
+        return ResponseEntity.ok(null);
     }
 
     // build update user REST API
@@ -128,13 +129,19 @@ public class UserController {
         UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
         userDetailResponse.setCreatedAt(LocalDateTime.now());
         userDetailResponse.setUpdatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(userDetailResponse);
+        return ResponseEntity.ok(null);
     }
 
     // build delete user REST API
     @DeleteMapping()
     public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Delete success");
+        return ResponseEntity.status(HttpStatus.OK).body("Delete user success");
     }
+    // build delete user REST API
+    @PostMapping("/activate")
+    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user success");
+    }
+
 
 }
