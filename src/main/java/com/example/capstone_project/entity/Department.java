@@ -2,10 +2,7 @@ package com.example.capstone_project.entity;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 public class Department extends BaseEntity {
     @Id
@@ -32,6 +30,9 @@ public class Department extends BaseEntity {
     @OneToMany(mappedBy = Report_.DEPARTMENT)
     private List<Report> reports;
 
+    @OneToMany(mappedBy = FinancialPlan_.DEPARTMENT)
+    private List<FinancialPlan> plans;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

@@ -1,14 +1,8 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -16,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 public class FinancialPlan extends BaseEntity{
     @Id
@@ -25,17 +20,21 @@ public class FinancialPlan extends BaseEntity{
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.FINANCIAL_PLAN)
-    private List<FinancialPlanFile> financialPlanFiles;
+    @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
+    private List<FinancialPlanFile> planFiles;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")
     private Term term;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
-    private FinancialStatus status;
+    private PlanStatus status;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

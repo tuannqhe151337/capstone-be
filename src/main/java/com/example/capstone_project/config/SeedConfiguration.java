@@ -193,6 +193,9 @@ public class SeedConfiguration {
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("mail21@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+
                     .build();
 
             User user2 = User.builder()
@@ -201,8 +204,11 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
+
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+                      .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
@@ -212,7 +218,9 @@ public class SeedConfiguration {
                     .department(financeDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user4 = User.builder()
@@ -222,7 +230,10 @@ public class SeedConfiguration {
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user5 = User.builder()
@@ -232,7 +243,9 @@ public class SeedConfiguration {
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+                    .email("Email23@gmail.com")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));

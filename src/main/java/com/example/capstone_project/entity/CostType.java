@@ -2,10 +2,7 @@ package com.example.capstone_project.entity;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,25 +14,26 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 public class CostType extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
 
     @OneToMany(mappedBy = Report_.COST_TYPE)
     private List<Report> reports;
 
     @OneToMany(mappedBy = FinancialReportExpense_.COST_TYPE)
-    private List<FinancialReportExpense> financialReportExpenses;
+    private List<FinancialReportExpense> reportExpenses;
 
     @OneToMany(mappedBy = FinancialPlanExpense_.COST_TYPE)
-    private List<FinancialPlanExpense> financialPlanExpenses;
+    private List<FinancialPlanExpense> planExpenses;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 
 }
