@@ -6,6 +6,7 @@ import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -201,9 +202,11 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
-                    .email("Email23@gmail.com")
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .email("mail21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+
                     .build();
 
             User user2 = User.builder()
@@ -212,7 +215,9 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
-                    .email("Email23@gmail.com")
+
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                      .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
@@ -223,6 +228,7 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
@@ -234,6 +240,8 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
@@ -245,6 +253,7 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))

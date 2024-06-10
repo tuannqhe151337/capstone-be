@@ -1,5 +1,7 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ListResponse;
@@ -39,6 +41,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/plan")
@@ -349,5 +352,13 @@ public class FinancialPlanController {
             @Validated @RequestBody DeletePlanBody planBody) {
         System.out.println(planBody.toString());
         return ResponseEntity.ok("id " + planBody.getPlanId());
+    }
+
+    @PutMapping("/re-upload")
+    private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
+            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
+            ){
+
+        return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }
 }
