@@ -40,7 +40,7 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
+    public ResponseEntity<TermDetailResponse> getTermDetailById(@PathVariable("id") Long id) {
         TermDetailResponse termDetailResponse
                 = TermDetailResponse.builder()
                 .id(1L)
@@ -59,7 +59,7 @@ public class TermController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createTerm(@Valid @RequestBody CreateTermBody createTermBody) {
+    public ResponseEntity<String> createTerm(@Valid @RequestBody CreateTermBody createTermBody, BindingResult result) {
         return ResponseEntity.status(HttpStatus.CREATED).body("Created successfully");
     }
 
