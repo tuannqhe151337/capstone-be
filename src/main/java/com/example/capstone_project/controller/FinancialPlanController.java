@@ -95,7 +95,7 @@ public class FinancialPlanController {
 
     @GetMapping("expenses")
     public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer termId,
+            @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,

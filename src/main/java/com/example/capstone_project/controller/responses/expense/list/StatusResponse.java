@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class StatusResponse {
-    private long statusId;
+    private Long statusId;
     private String name;
 }
