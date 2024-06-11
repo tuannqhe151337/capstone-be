@@ -338,7 +338,7 @@ public class FinancialPlanController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<NewPlanBody> confirmExpenses(
+    public ResponseEntity<FinancialPlan> confirmExpenses(
             @RequestHeader("Authorization") String token,
             @RequestBody NewPlanBody planBody) {
 
@@ -349,12 +349,10 @@ public class FinancialPlanController {
 
         FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, tokenClaim);
 
-        System.out.println(plan);
-
         List<FinancialPlanExpense> expenseList = new CreatePlanExpenseMapperImpl().mapExpenseBodyToExpense(planBody.getExpenses(), planBody);
 
         planService.creatPlan(plan, expenseList, tokenClaim);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(plan);
     }
 }

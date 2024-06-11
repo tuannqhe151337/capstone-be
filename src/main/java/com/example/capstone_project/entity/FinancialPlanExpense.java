@@ -45,7 +45,7 @@ public class FinancialPlanExpense extends BaseEntity{
     @Column(name = "note")
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private ExpenseStatus status;
 

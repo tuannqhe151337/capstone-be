@@ -28,10 +28,9 @@ public interface CreatePlanMapper {
 
         plan.setDepartment(Department.builder().id(tokenClaim.getDepartmentId()).build());
 
-        //
         plan.setStatus(PlanStatus.builder()
-//                .id(1L)
-                .code(PlanStatusCode.NEW).build());
+                .id(1L)
+                .build());
 
         List<FinancialPlanExpense> expenses =mapExpenseBodyToExpense(newPlanBody.getExpenses(),newPlanBody);
 
@@ -47,7 +46,7 @@ public interface CreatePlanMapper {
                         .name(newPlanBody.getFileName())
                         .version("v1")
                         .user(User.builder().id(tokenClaim.getUserId()).build())
-//                        .planFileExpenses(expenseFile)
+                        .planFileExpenses(expenseFile)
                         .build());
 
         plan.setPlanFiles(files);
@@ -69,8 +68,7 @@ public interface CreatePlanMapper {
                     .pic(expenseBody.getPic())
                     .note(expenseBody.getNotes())
                     .status(ExpenseStatus.builder()
-//                            .id(1L)
-                            .code(ExpenseStatusCode.NEW)
+                            .id(1L)
                             .build())
                     .costType(CostType.builder()
                             .id(expenseBody.getCostTypeId())

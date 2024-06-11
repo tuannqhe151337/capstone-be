@@ -1,15 +1,15 @@
 package com.example.capstone_project.config;
 
+import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,8 +28,12 @@ public class SeedConfiguration {
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
             UserSettingRepository userSettingRepository,
+            FinancialPlanRepository planRepository,
             TermRepository termRepository,
-            CostTypeRepository costTypeRepository
+            TermStatusRepository termStatusRepository,
+            PlanStatusRepository planStatusRepository,
+            CostTypeRepository costTypeRepository,
+            ExpenseStatusRepository expenseStatusRepository
     ) {
         return args -> {
             // Department
@@ -64,111 +68,116 @@ public class SeedConfiguration {
 
             // Authority
             Authority createUser = Authority.builder()
-                    .code("A-001")
+                    .code(AuthorityCode.CREATE_NEW_USER)
                     .name("Create new user")
                     .build();
 
             Authority viewListUsers = Authority.builder()
-                    .code("A-002")
+                    .code(AuthorityCode.VIEW_LIST_USERS)
                     .name("View list users")
                     .build();
 
             Authority deleteUser = Authority.builder()
-                    .code("A-003")
+                    .code(AuthorityCode.DELETE_USER)
                     .name("Delete user")
                     .build();
 
             Authority editUser = Authority.builder()
-                    .code("A-004")
+                    .code(AuthorityCode.EDIT_USER)
                     .name("Edit user")
                     .build();
 
             Authority activateUser = Authority.builder()
-                    .code("A-005")
+                    .code(AuthorityCode.ACTIVATE_USER)
                     .name("Activate user")
                     .build();
 
             Authority deactivateUser = Authority.builder()
-                    .code("A-006")
+                    .code(AuthorityCode.DEACTIVATE_USER)
                     .name("Deactivate user")
                     .build();
 
             Authority createTerm = Authority.builder()
-                    .code("B-001")
+                    .code(AuthorityCode.CREATE_TERM)
                     .name("Create term")
                     .build();
 
             Authority editTerm = Authority.builder()
-                    .code("B-002")
+                    .code(AuthorityCode.EDIT_TERM)
                     .name("Edit term")
                     .build();
 
             Authority viewTerm = Authority.builder()
-                    .code("B-003")
+                    .code(AuthorityCode.VIEW_TERM)
                     .name("View term")
                     .build();
 
             Authority startTerm = Authority.builder()
-                    .code("B-004")
+                    .code(AuthorityCode.START_TERM)
                     .name("Start term")
                     .build();
 
             Authority deleteTerm = Authority.builder()
-                    .code("B-005")
+                    .code(AuthorityCode.DELETE_TERM)
                     .name("Delete term")
                     .build();
 
             Authority importPlan = Authority.builder()
-                    .code("C-001")
+                    .code(AuthorityCode.IMPORT_PLAN)
                     .name("Import plan")
                     .build();
 
             Authority reUploadPlan = Authority.builder()
-                    .code("C-002")
+                    .code(AuthorityCode.RE_UPLOAD_PLAN)
                     .name("Reupload plan")
                     .build();
 
             Authority submitPlanForReview = Authority.builder()
-                    .code("C-003")
+                    .code(AuthorityCode.SUBMIT_PLAN_FOR_REVIEW)
                     .name("Submit plan for review")
                     .build();
 
             Authority deletePlan = Authority.builder()
-                    .code("C-004")
+                    .code(AuthorityCode.DELETE_PLAN)
                     .name("Delete plan")
                     .build();
 
             Authority downloadPlan = Authority.builder()
-                    .code("C-005")
+                    .code(AuthorityCode.DOWNLOAD_PLAN)
                     .name("Download plan")
                     .build();
 
             Authority approvePlan = Authority.builder()
-                    .code("C-006")
+                    .code(AuthorityCode.APPROVE_PLAN)
                     .name("Approve plan")
                     .build();
 
+            Authority viewPlan = Authority.builder()
+                    .code(AuthorityCode.VIEW_PLAN)
+                    .name("View plan")
+                    .build();
+
             Authority viewReport = Authority.builder() // Monthly, Quarterly, Half-year
-                    .code("D-001")
+                    .code(AuthorityCode.VIEW_REPORT)
                     .name("View report")
                     .build();
 
             Authority downloadReport = Authority.builder() // Monthly, Quarterly, Half-year
-                    .code("D-002")
+                    .code(AuthorityCode.DOWNLOAD_REPORT)
                     .name("Download report")
                     .build();
 
             Authority viewAnnualReport = Authority.builder()
-                    .code("E-001")
+                    .code(AuthorityCode.VIEW_ANNUAL_REPORT)
                     .name("View annual report")
                     .build();
 
             Authority downloadAnnualReport = Authority.builder()
-                    .code("E-002")
+                    .code(AuthorityCode.DOWNLOAD_ANNUAL_REPORT)
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -198,7 +207,7 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("mail21@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
 
                     .build();
 
@@ -210,9 +219,9 @@ public class SeedConfiguration {
                     .position(techlead)
 
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                      .email("Email23@gmail.com")
+                    .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user3 = User.builder()
@@ -224,7 +233,7 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user4 = User.builder()
@@ -237,7 +246,7 @@ public class SeedConfiguration {
 
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user5 = User.builder()
@@ -249,7 +258,7 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
@@ -398,6 +407,11 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
+            RoleAuthority accountantAuthority16 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(viewPlan)
+                    .build();
+
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(createTerm)
@@ -468,29 +482,211 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
+            RoleAuthority financialStaffAuthority15 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(viewPlan)
+                    .build();
+
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
-            termRepository.save(Term.builder()
+            TermStatus status1 = TermStatus.builder()
                     .id(1L)
-                    .name("TERM APRIL 2024")
+                    .name("New")
+                    .code(TermCode.NOT_STARTED)
+                    .build();
+
+            TermStatus status2 = TermStatus.builder()
+                    .id(2L)
+                    .name("In-Progress")
+                    .code(TermCode.IN_PROGRESS)
+                    .build();
+
+            TermStatus status3 = TermStatus.builder()
+                    .id(3L)
+                    .name("Close")
+                    .code(TermCode.CLOSED)
+                    .build();
+
+            termStatusRepository.saveAll(List.of(status1, status2, status3));
+
+            PlanStatus planStatus1 = PlanStatus.builder()
+                    .id(1L)
+                    .code(PlanStatusCode.NEW)
+                    .build();
+
+            PlanStatus planStatus2 = PlanStatus.builder()
+                    .id(2L)
+                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
+                    .build();
+
+            PlanStatus planStatus3 = PlanStatus.builder()
+                    .id(3L)
+                    .code(PlanStatusCode.REVIEWED)
+                    .build();
+
+            PlanStatus planStatus4 = PlanStatus.builder()
+                    .id(4L)
+                    .code(PlanStatusCode.APPROVED)
+                    .build();
+
+            planStatusRepository.saveAll(List.of(planStatus1, planStatus2, planStatus3, planStatus4));
+
+            Term term1 = Term.builder()
+                    .id(1L)
+                    .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .planDueDate(LocalDateTime.of(2025,11,11, 0,0,0))
-                    .endDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025,11,11, 0,0,0)))
-                    .status(TermStatus.builder()
-//                            .id(1L)
-                            .name("IN_PROGRESS")
-                            .code(TermCode.IN_PROGRESS).build())
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .user(user1)
-                    .build());
+                    .status(status1)
+                    .build();
 
+            Term term2 = Term.builder()
+                    .id(2L)
+                    .name("Summer 2024")
+                    .duration(TermDuration.QUARTERLY)
+                    .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
+                    .user(user1)
+                    .status(status2)
+                    .build();
 
-            costTypeRepository.save(CostType.builder()
+            Term term3 = Term.builder()
+                    .id(3L)
+                    .name("Fall 2024")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
+                    .user(user2)
+                    .status(status3)
+                    .build();
+
+            Term term4 = Term.builder()
+                    .id(4L)
+                    .name("Winter 2024")
+                    .duration(TermDuration.YEARLY)
+                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
+                    .user(user3)
+                    .status(status1)
+                    .build();
+
+            Term term5 = Term.builder()
+                    .id(5L)
+                    .name("Spring 2025")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .user(user4)
+                    .status(status2)
+                    .build();
+
+            termRepository.saveAll(List.of(term1, term2, term3, term4, term5));
+
+            FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .id(1L)
-                    .name("Something").build());
+                    .name("Financial Plan 1")
+                    .term(term1)
+                    .department(softwareDevelopmentDepartment)
+                    .status(planStatus1)
+                    .build();
+
+            FinancialPlan financialPlan2 = FinancialPlan.builder()
+                    .id(2L)
+                    .name("Financial Plan 2")
+                    .term(term1)
+                    .department(softwareDevelopmentDepartment)
+                    .status(planStatus2)
+                    .build();
+
+            FinancialPlan financialPlan3 = FinancialPlan.builder()
+                    .id(3L)
+                    .name("Financial Plan 3")
+                    .term(term1)
+                    .department(accountingDepartment)
+                    .status(planStatus3)
+                    .build();
+
+            FinancialPlan financialPlan4 = FinancialPlan.builder()
+                    .id(4L)
+                    .name("Financial Plan 4")
+                    .department(financeDepartment)
+                    .term(term1)
+                    .status(planStatus4)
+                    .build();
+
+            FinancialPlan financialPlan5 = FinancialPlan.builder()
+                    .id(5L)
+                    .name("Financial Plan 5")
+                    .term(term2)
+                    .department(accountingDepartment)
+                    .status(planStatus1)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
+
+            CostType costType1 = CostType.builder()
+                    .id(1L)
+                    .code(CostTypeCode.ADMINISTRATION_COSTS)
+                    .build();
+
+            CostType costType2 = CostType.builder()
+                    .id(2L)
+                    .code(CostTypeCode.DIRECT_COSTS)
+                    .build();
+
+            CostType costType3 = CostType.builder()
+                    .id(3L)
+                    .code(CostTypeCode.INDIRECT_COSTS)
+                    .build();
+
+            CostType costType4 = CostType.builder()
+                    .id(4L)
+                    .code(CostTypeCode.OPERATING_COSTS)
+                    .build();
+
+            CostType costType5 = CostType.builder()
+                    .id(5L)
+                    .code(CostTypeCode.MAINTENANCE_COSTS)
+                    .build();
+
+            CostType costType6 = CostType.builder()
+                    .id(6L)
+                    .code(CostTypeCode.MANUFACTURING_COSTS)
+                    .build();
+
+            costTypeRepository.saveAll(List.of(costType1, costType2, costType3, costType4, costType5, costType6));
+
+            ExpenseStatus expenseStatus1 = ExpenseStatus.builder()
+                    .id(1L)
+                    .code(ExpenseStatusCode.NEW)
+                    .build();
+
+            ExpenseStatus expenseStatus2 = ExpenseStatus.builder()
+                    .id(2L)
+                    .code(ExpenseStatusCode.WAITING_FOR_APPROVAL)
+                    .build();
+
+            ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
+                    .id(3L)
+                    .code(ExpenseStatusCode.APPROVED)
+                    .build();
+
+            ExpenseStatus expenseStatus4 = ExpenseStatus.builder()
+                    .id(4L)
+                    .code(ExpenseStatusCode.DENIED)
+                    .build();
+
+            expenseStatusRepository.saveAll(List.of(expenseStatus1, expenseStatus2, expenseStatus3, expenseStatus4));
         };
     }
 }
+

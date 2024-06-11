@@ -19,9 +19,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     @Transactional
     public void creatPlan(FinancialPlan plan, List<FinancialPlanExpense> expenseList, AccessTokenClaim tokenClaim) {
-
-        expenseRepository.saveListExpenses(expenseList);
-
-
+        planRepository.save(plan);
+//        expenseRepository.saveListExpenses(expenseList);
     }
 }
