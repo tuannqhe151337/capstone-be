@@ -66,7 +66,7 @@ public class FinancialPlanController {
         ListResponse<PlanResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
                 PlanResponse.builder()
-                        .id(1L)
+                        .planId(1L)
                         .name("BU name_term_plan")
                         .status(StatusResponse.builder()
                                 .statusId(1L)
@@ -79,7 +79,7 @@ public class FinancialPlanController {
                                 .name("BU 1").build())
                         .version("V1").build(),
                 PlanResponse.builder()
-                        .id(2L)
+                        .planId(2L)
                         .name("BU name_term_plan")
                         .status(StatusResponse.builder()
                                 .statusId(2L)
