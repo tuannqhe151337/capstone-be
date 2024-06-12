@@ -1,4 +1,4 @@
-package com.example.capstone_project.entity;
+package com.example.capstone_project.utils.enums;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

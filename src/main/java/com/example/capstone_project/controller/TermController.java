@@ -3,17 +3,20 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
-import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
+import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
+import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.entity.TermDuration;
+import com.example.capstone_project.utils.enums.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
-import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.paginate.TermPaginateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +42,7 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@Valid @PathVariable("id") Long id, BindingResult result) {
+    public ResponseEntity<TermDetailResponse> getTermDetailById(@Valid @PathVariable("id") Long id, BindingResult result) {
         TermDetailResponse termDetailResponse
                 = TermDetailResponse.builder()
                 .id(1L)
@@ -68,6 +70,7 @@ public class TermController {
         TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
         return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
     }
+
     @DeleteMapping
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
         return ResponseEntity.status(HttpStatus.CREATED).body("Deleted successfully");
@@ -79,7 +82,7 @@ public class TermController {
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortType, BindingResult bindingResult
+            @RequestParam(required = false) String sortType
     ) {
         ListResponse<TermPaginateResponse> listResponse = new ListResponse<>();
         listResponse.setData(List.of(
@@ -129,5 +132,57 @@ public class TermController {
                 .build());
 
         return ResponseEntity.ok(listResponse);
+    }
+
+    @GetMapping("/plan-create-select-term")
+    public ResponseEntity<ListResponse<TermWhenCreatePlanResponse>> getListTermWhenCreatePlan(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ) {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<Term> terms = termService.getListTermWhenCreatePlan(query, pageable);
+
+        // Response
+        ListResponse<TermWhenCreatePlanResponse> response = new ListResponse<>();
+
+        long count = 0;
+
+        if (terms != null) {
+
+            // Count total record
+            count = termService.countDistinct(query);
+
+            // Mapping to TermPaginateResponse
+            terms.forEach(term -> response.getData().add(new TermWhenCreatePlanMapperImpl().mapToTermWhenCreatePlanResponseMapper(term)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        System.out.println("id = " + terms.get(0).getId());
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .count(count)
+                .page(pageInt)
+                .displayRecord(sizeInt)
+                .numPages(numPages)
+                .build());
+
+        return ResponseEntity.ok(response);
     }
 }
