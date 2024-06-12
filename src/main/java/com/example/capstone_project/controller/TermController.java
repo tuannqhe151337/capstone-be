@@ -192,7 +192,7 @@ public class TermController {
 
     @PutMapping
     public ResponseEntity<String> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
-        TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
+      TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
         return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
     }
 
@@ -258,4 +258,5 @@ public class TermController {
 
         return ResponseEntity.ok(listResponse);
     }
+
 }
