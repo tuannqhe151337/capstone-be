@@ -34,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -340,9 +341,12 @@ public class FinancialPlanController {
     @PostMapping("/create")
     public ResponseEntity<FinancialPlan> confirmExpenses(
             @RequestHeader("Authorization") String token,
-            @RequestBody NewPlanBody planBody) {
+            @RequestBody NewPlanBody planBody, BindingResult bindingResult) {
 
         System.out.println(token);
+
+        System.out.println(bindingResult.getAllErrors().toString());
+        System.out.println(planBody);
 
         //Get claim token
         AccessTokenClaim tokenClaim = jwtHelper.parseToken(token);

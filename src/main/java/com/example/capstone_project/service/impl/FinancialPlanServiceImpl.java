@@ -24,7 +24,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Transactional
     public void creatPlan(FinancialPlan plan, List<FinancialPlanExpense> expenseList, AccessTokenClaim tokenClaim) {
 
-        if (userAuthorityRepository.get(tokenClaim.getUserId()).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
+        if (userAuthorityRepository.get(tokenClaim.getUserId()).contains(AuthorityCode.IMPORT_PLAN.getValue())){
             planRepository.save(plan);
         }
 
