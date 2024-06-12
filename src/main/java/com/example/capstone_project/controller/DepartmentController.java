@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -57,5 +59,33 @@ public class DepartmentController {
 
         return ResponseEntity.ok(listResponse);
     }
+    @GetMapping("/user-paging-department")
+    public ResponseEntity<List<DepartmentResponse>> getListDepartmentPagingUser(){
+       List<DepartmentResponse> departmentResponseList = new ArrayList<>();
+        departmentResponseList = List.of(
+                DepartmentResponse.builder()
+                        .id(1L)
+                        .name("Department 1")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(2L)
+                        .name("Department 2")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(3L)
+                        .name("Department 3")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(3L)
+                        .name("Department 3")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(4L)
+                        .name("Department 4")
+                        .build()
+        );
+        return ResponseEntity.ok(departmentResponseList);
+    }
+
 
 }
