@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -19,8 +20,8 @@ public class PlanDetailResponse {
     private BigDecimal totalPlan;
     private TermResponse term;
     private StatusResponse status;
-    private LocalDate planDueDate;
-    private LocalDate createdAt;
+    private LocalDateTime planDueDate;
+    private LocalDateTime createdAt;
     private DepartmentResponse department;
     private UserResponse user;
     private String version;

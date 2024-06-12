@@ -17,19 +17,26 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanExpenseMapper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -176,33 +183,23 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestParam Integer planId
+            @RequestParam Long planId
     ) {
-        return ResponseEntity.ok(PlanDetailResponse.builder()
-                .id(1L)
-                .name("Plan name")
-                .term(TermResponse.builder()
-                        .termId(1L)
-                        .name("Financial plan December Q3 2021")
-                        .build())
-                .biggestExpenditure(BigDecimal.valueOf(180000000))
-                .totalPlan(BigDecimal.valueOf(213425384))
-                .planDueDate(LocalDate.now())
-                .department(DepartmentResponse.builder()
-                        .departmentId(1L)
-                        .name("BU 01")
-                        .build())
-                .status(StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Waiting for approval")
-                        .build())
-                .version("version 2")
-                .createdAt(LocalDate.now())
-                .user(UserResponse.builder()
-                        .userId(1L)
-                        .username("Anhln")
-                        .build())
-                .build());
+
+        // Get data
+        PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
+
+        // Response
+        PlanDetailResponse response;
+
+        if (plan != null) {
+            // Mapping to TermPaginateResponse
+                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/download")
