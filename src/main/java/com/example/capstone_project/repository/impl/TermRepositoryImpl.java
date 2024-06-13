@@ -1,6 +1,8 @@
 package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.entity.Term_;
+import com.example.capstone_project.entity.User_;
 import com.example.capstone_project.repository.CustomTermRepository;
 import com.example.capstone_project.utils.enums.TermCode;
 import jakarta.persistence.EntityGraph;
@@ -119,6 +121,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
 
         // Handling join
         EntityGraph<Term> entityGraph = entityManager.createEntityGraph(Term.class);
+        entityGraph.addAttributeNodes(Term_.STATUS);
 
         // Run query
         return entityManager.createQuery(hql, Term.class)
