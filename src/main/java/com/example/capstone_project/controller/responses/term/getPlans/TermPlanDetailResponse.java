@@ -1,23 +1,22 @@
-package com.example.capstone_project.controller.responses.term.getReports;
-
-import com.example.capstone_project.entity.*;
+package com.example.capstone_project.controller.responses.term.getPlans;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class TermReportResponse {
+public class TermPlanDetailResponse{
+
     private Long id;
     private String name;
+    private PlanStatusResponse planStatus;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
+    private LocalDateTime updatedAt ;
 }

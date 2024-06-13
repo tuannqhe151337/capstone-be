@@ -1,6 +1,5 @@
 package com.example.capstone_project.controller.body.term.update;
 
-import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.TermDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;

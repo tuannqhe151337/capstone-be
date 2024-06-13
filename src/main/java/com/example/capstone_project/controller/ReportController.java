@@ -117,9 +117,9 @@ public class ReportController {
         );
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(777)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(555)
                 .numPages(1)
                 .build());
 
