@@ -41,7 +41,8 @@ public class TermServiceImpl implements TermService {
     public List<Term> getListTermPaging(String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+            || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
             return termRepository.getListTermPaging(query, pageable);
 
         }
