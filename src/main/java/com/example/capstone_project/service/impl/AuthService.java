@@ -155,7 +155,7 @@ public class AuthService {
     private void saveUserAuthoritiesToRedis(int userId, List<Authority> authorities) {
         List<String> authoritiesCodes = new ArrayList<>();
         for (Authority authority: authorities) {
-            authoritiesCodes.add(authority.getCode());
+            authoritiesCodes.add(authority.getCode().getValue());
         }
 
         this.userAuthorityRepository.save(userId, authoritiesCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));

@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PlanResponse {
-    private Long id;
+    private Long planId;
     private String name;
     private TermResponse term;
     private StatusResponse status;

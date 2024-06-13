@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,8 @@ public class PlanStatus extends BaseEntity {
     private Long id;
 
     @Column(name = "name")
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private PlanStatusCode code;
 
     @OneToMany(mappedBy = FinancialPlan_.STATUS)
     private List<FinancialPlan> financialPlans;
