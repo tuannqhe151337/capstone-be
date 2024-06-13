@@ -41,19 +41,31 @@ public class SeedConfiguration {
     ) {
         return args -> {
             // Department
-            Department softwareDevelopmentDepartment = Department.builder()
-                    .name("Software development")
+            Department itDepartment = Department.builder()
+                    .name("IT")
                     .build();
 
-            Department accountingDepartment = Department.builder()
-                    .name("Accounting department")
+            Department hrDepartment = Department.builder()
+                    .name("HR")
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance department")
+                    .name("Finance")
                     .build();
 
-            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment));
+            Department communicationDepartment = Department.builder()
+                    .name("Communication")
+                    .build();
+
+            Department marketingDepartment = Department.builder()
+                    .name("Marketing")
+                    .build();
+
+            Department accountingDepartment = Department.builder()
+                    .name("Accounting")
+                    .build();
+
+            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -244,7 +256,7 @@ public class SeedConfiguration {
                     .username("username4")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
 
@@ -257,7 +269,7 @@ public class SeedConfiguration {
                     .username("username5")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
@@ -598,14 +610,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus2)
                     .build();
 
