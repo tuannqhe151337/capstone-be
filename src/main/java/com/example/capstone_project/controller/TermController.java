@@ -12,6 +12,8 @@ import com.example.capstone_project.utils.enums.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapper;
+import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
@@ -84,54 +86,97 @@ public class TermController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<TermPaginateResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
-                TermPaginateResponse.builder()
-                        .termId(1L)
-                        .name("Term name 1")
-                        .status(StatusResponse.builder()
-                                .statusId(1L)
-                                .name("New").build()
-                        )
-                        .startDate(LocalDateTime.now())
-                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
-                TermPaginateResponse.builder()
-                        .termId(2L)
-                        .name("Term name 2")
-                        .status(StatusResponse.builder()
-                                .statusId(2L)
-                                .name("Approved").build()
-                        )
-                        .startDate(LocalDateTime.now())
-                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
-                TermPaginateResponse.builder()
-                        .termId(3L)
-                        .name("Term name 3")
-                        .status(StatusResponse.builder()
-                                .statusId(3L)
-                                .name("Waiting for review").build()
-                        )
-                        .startDate(LocalDateTime.now())
-                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
-                TermPaginateResponse.builder()
-                        .termId(4L)
-                        .name("Term name 4")
-                        .status(StatusResponse.builder()
-                                .statusId(1L)
-                                .name("Reviewed").build()
-                        )
-                        .startDate(LocalDateTime.now())
-                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build()
-        ));
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listResponse.setPagination(Pagination.builder()
-                .count(100)
-                .page(10)
-                .displayRecord(0)
-                .numPages(1)
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<Term> terms = termService.getListTermPaging(query, pageable);
+
+        // Response
+        ListResponse<TermPaginateResponse> response = new ListResponse<>();
+
+        long count = 0;
+
+        if (terms != null) {
+
+            // Count total record
+            count = termService.countDistinctListTermPaging(query);
+
+            // Mapping to TermPaginateResponse
+            terms.forEach(term -> response.getData().add( new TermPaginateResponseMapperImpl().mapToTermPaginateResponseMapper(term)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        System.out.println("id = " + terms.get(0).getId());
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .count(count)
+                .page(pageInt)
+                .displayRecord(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(response);
+
+//        ListResponse<TermPaginateResponse> listResponse = new ListResponse<>();
+//        listResponse.setData(List.of(
+//                TermPaginateResponse.builder()
+//                        .termId(1L)
+//                        .name("Term name 1")
+//                        .status(StatusResponse.builder()
+//                                .statusId(1L)
+//                                .name("New").build()
+//                        )
+//                        .startDate(LocalDateTime.now())
+//                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
+//                TermPaginateResponse.builder()
+//                        .termId(2L)
+//                        .name("Term name 2")
+//                        .status(StatusResponse.builder()
+//                                .statusId(2L)
+//                                .name("Approved").build()
+//                        )
+//                        .startDate(LocalDateTime.now())
+//                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
+//                TermPaginateResponse.builder()
+//                        .termId(3L)
+//                        .name("Term name 3")
+//                        .status(StatusResponse.builder()
+//                                .statusId(3L)
+//                                .name("Waiting for review").build()
+//                        )
+//                        .startDate(LocalDateTime.now())
+//                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build(),
+//                TermPaginateResponse.builder()
+//                        .termId(4L)
+//                        .name("Term name 4")
+//                        .status(StatusResponse.builder()
+//                                .statusId(1L)
+//                                .name("Reviewed").build()
+//                        )
+//                        .startDate(LocalDateTime.now())
+//                        .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build()
+//        ));
+//
+//        listResponse.setPagination(Pagination.builder()
+//                .count(100)
+//                .page(10)
+//                .displayRecord(0)
+//                .numPages(1)
+//                .build());
+//
+//        return ResponseEntity.ok(listResponse);
     }
 
     @GetMapping("/plan-create-select-term")
@@ -165,7 +210,7 @@ public class TermController {
         if (terms != null) {
 
             // Count total record
-            count = termService.countDistinct(query);
+            count = termService.countDistinctListTermWhenCreatePlan(query);
 
             // Mapping to TermPaginateResponse
             terms.forEach(term -> response.getData().add(new TermWhenCreatePlanMapperImpl().mapToTermWhenCreatePlanResponseMapper(term)));

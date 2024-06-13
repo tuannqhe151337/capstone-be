@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 
 public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRepository {
-    @Query(value = "SELECT DISTINCT count(term.id) FROM Term term " +
+    @Query(value = " SELECT DISTINCT count(term.id) FROM Term term " +
             " WHERE term.name like %:query% AND " +
             " term.status.name != :close AND " +
             " term.planDueDate >= :now AND " +
@@ -16,6 +16,10 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
     long countDistinctListTermWhenCreatePlan(@Param("query") String query,
                        @Param("close") String close,
                        @Param("now") LocalDateTime now);
+    @Query(value = " SELECT DISTINCT count(term.id) FROM Term term " +
+            " WHERE term.name like %:query% AND " +
+            " term.isDelete = false ")
+    long countDistinctListTermPaging(@Param("query") String query);
 
     //crud term
 

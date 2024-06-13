@@ -6,7 +6,11 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TermService {
-    long countDistinct(String query);
+    long countDistinctListTermWhenCreatePlan(String query);
 
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable);
+
+    List<Term> getListTermPaging(String query, Pageable pageable);
+
+    long countDistinctListTermPaging(String query);
 }

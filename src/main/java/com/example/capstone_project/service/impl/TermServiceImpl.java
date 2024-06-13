@@ -22,7 +22,7 @@ public class TermServiceImpl implements TermService {
     private final UserAuthorityRepository userAuthorityRepository;
 
     @Override
-    public long countDistinct(String query) {
+    public long countDistinctListTermWhenCreatePlan(String query) {
         return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now());
     }
 
@@ -35,5 +35,22 @@ public class TermServiceImpl implements TermService {
         }
 
         return null;
+    }
+
+    @Override
+    public List<Term> getListTermPaging(String query, Pageable pageable) {
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
+            return termRepository.getListTermPaging(query, pageable);
+
+        }
+
+        return null;
+    }
+
+    @Override
+    public long countDistinctListTermPaging(String query) {
+        return termRepository.countDistinctListTermPaging(query);
     }
 }
