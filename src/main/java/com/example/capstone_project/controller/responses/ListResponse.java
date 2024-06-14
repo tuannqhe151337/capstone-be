@@ -12,6 +12,5 @@ import java.util.List;
 @ToString
 public class ListResponse<T> {
     private List<T> data = new ArrayList<>();
-
     private Pagination pagination;
 }
