@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.paginate.TermPaginateResponse;
@@ -46,7 +46,7 @@ public class TermController {
 
 
     @GetMapping("/report")
-    public ResponseEntity<ListResponse<TermReportResponse>> getReportListByTerm
+    public ResponseEntity<ListPaginationResponse<TermReportResponse>> getReportListByTerm
             (@RequestParam(name = "termId") Long termId,
              @RequestParam(defaultValue = "1") int page,
              @RequestParam(defaultValue = "10") int size,
@@ -85,7 +85,7 @@ public class TermController {
                         calculateNumPages((long) listTermReport.getNumberOfElements(),
                                 pageRequest.getPageSize())).build();
 
-        ListResponse<TermReportResponse> response = new ListResponse<>();
+        ListPaginationResponse<TermReportResponse> response = new ListPaginationResponse<>();
         response.setData(rps);
         response.setPagination(pagination);
 
@@ -95,7 +95,7 @@ public class TermController {
 
 
     @GetMapping("/plan")
-    public ResponseEntity<ListResponse<TermPlanDetailResponse>> getPlanListByTerm
+    public ResponseEntity<ListPaginationResponse<TermPlanDetailResponse>> getPlanListByTerm
             (@RequestParam(name = "termId") Long termId,
              @RequestParam(defaultValue = "1") int page,
              @RequestParam(defaultValue = "10") int size,
@@ -158,7 +158,7 @@ public class TermController {
                         calculateNumPages((long) listTermPlan.getNumberOfElements(),
                                 pageRequest.getPageSize())).build();
 
-        ListResponse<TermPlanDetailResponse> response = new ListResponse<>();
+        ListPaginationResponse<TermPlanDetailResponse> response = new ListPaginationResponse<>();
         response.setData(list);
         response.setPagination(pagination);
 
@@ -202,15 +202,15 @@ public class TermController {
     }
 
     @GetMapping("/plan-paging-term")
-    public ResponseEntity<ListResponse<TermPaginateResponse>> getListTermPaging(
+    public ResponseEntity<ListPaginationResponse<TermPaginateResponse>> getListTermPaging(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<TermPaginateResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<TermPaginateResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 TermPaginateResponse.builder()
                         .termId(1L)
                         .name("Term name 1")
@@ -249,14 +249,14 @@ public class TermController {
                         .endDate(LocalDateTime.of(2024, 10, 2, 5, 4, 0)).build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(100)
                 .page(10)
                 .limitRecordsPerPage(0)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
 }

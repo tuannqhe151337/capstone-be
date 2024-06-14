@@ -3,7 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
-import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
@@ -38,7 +38,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ListResponse<UserResponse>> getAllUsers(
+    public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -63,7 +63,7 @@ public class UserController {
         long count = this.userService.countDistinct(query);
 
         // Response
-        ListResponse<UserResponse> response = new ListResponse<>();
+        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
 
         if (users != null && !users.isEmpty()) {
             for (User user : users) {
