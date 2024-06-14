@@ -6,6 +6,7 @@ import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
+import com.example.capstone_project.controller.responses.ResponseObject;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +35,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
-@Validated
+
 public class UserController {
     private final UserService userService;
 
@@ -86,11 +88,37 @@ public class UserController {
 
     // build create user REST API
     @PostMapping
-    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
+    public ResponseEntity<ResponseObject> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .toList();
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(String.join("; ", errorMessages))
+                            .status(HttpStatus.BAD_REQUEST)
+                            .build()
+            );
 
-        User user = new User();
-        user = new CreateUserBodyMapperImpl().mapBodytoUser(userBody);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Created success");
+        }
+        try {
+            User user = userService.createUser(userBody);
+            return ResponseEntity.ok(
+                    ResponseObject.builder()
+                            .message("Create new user successfully")
+                            .status(HttpStatus.CREATED)
+                            .data(user)
+                            .build()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .status(HttpStatus.BAD_REQUEST)
+                            .message(e.getMessage())
+                            .build());
+        }
+
     }
 
     // build get user by id REST API

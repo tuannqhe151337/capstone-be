@@ -31,7 +31,7 @@ public class User extends BaseEntity {
 
     @NotEmpty(message = "Email cannot be empty")
     @Email(message = "Email should be valid")
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @NotNull(message = "Date of birth cannot be null")
@@ -44,7 +44,7 @@ public class User extends BaseEntity {
     private String note;
 
     @Size(max = 100, message = "Full name must be less than 100 characters")
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false, columnDefinition = "NVARCHAR(100)")
     private String fullName;
 
     @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
