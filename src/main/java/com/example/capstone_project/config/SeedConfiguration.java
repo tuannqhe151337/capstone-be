@@ -5,6 +5,7 @@ import com.example.capstone_project.repository.*;
 import com.example.capstone_project.utils.enums.CostTypeCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -192,8 +193,11 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
-                    .email("Email23@gmail.com")
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .email("mail21@gmail.com")
                     .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
@@ -203,6 +207,7 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -214,6 +219,7 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -225,6 +231,7 @@ public class SeedConfiguration {
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -236,6 +243,7 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -463,32 +471,32 @@ public class SeedConfiguration {
             ));
 
             CostType costType1 = CostType.builder()
-                    .id(1L)
+                    .name("Administration cost")
                     .code(CostTypeCode.ADMINISTRATION_COSTS)
                     .build();
 
             CostType costType2 = CostType.builder()
-                    .id(2L)
+                    .name("Direct costs")
                     .code(CostTypeCode.DIRECT_COSTS)
                     .build();
 
             CostType costType3 = CostType.builder()
-                    .id(3L)
+                    .name("Indirect cost")
                     .code(CostTypeCode.INDIRECT_COSTS)
                     .build();
 
             CostType costType4 = CostType.builder()
-                    .id(4L)
+                    .name("Operating costs")
                     .code(CostTypeCode.OPERATING_COSTS)
                     .build();
 
             CostType costType5 = CostType.builder()
-                    .id(5L)
+                    .name("Maintenance costs")
                     .code(CostTypeCode.MAINTENANCE_COSTS)
                     .build();
 
             CostType costType6 = CostType.builder()
-                    .id(6L)
+                    .name("Manufacturing costs")
                     .code(CostTypeCode.MANUFACTURING_COSTS)
                     .build();
 

@@ -1,4 +1,5 @@
-package com.example.capstone_project.controller.responses.expense;
+package com.example.capstone_project.controller.responses.annualReport.expenses;
+
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,5 +9,4 @@ import lombok.Data;
 public class CostTypeResponse {
     private long costTypeId;
     private String name;
-    private String code;
 }

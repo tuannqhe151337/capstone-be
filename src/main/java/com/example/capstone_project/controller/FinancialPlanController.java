@@ -1,5 +1,7 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -20,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +33,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/plan")
@@ -79,9 +83,9 @@ public class FinancialPlanController {
                 ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -90,7 +94,7 @@ public class FinancialPlanController {
 
     @GetMapping("expenses")
     public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer termId,
+            @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -150,9 +154,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -298,9 +302,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -315,5 +319,13 @@ public class FinancialPlanController {
     {
         System.out.println(planBody.toString());
         return ResponseEntity.ok("id " + planBody.getPlanId());
+    }
+
+    @PutMapping("/re-upload")
+    private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
+            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
+            ){
+
+        return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }
 }

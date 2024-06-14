@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum CostTypeCode {
-    DIRECT_COSTS("Direct Costs"),
-    INDIRECT_COSTS("Indirect Costs"),
-    ADMINISTRATION_COSTS("Administration Costs"),
-    OPERATING_COSTS("Operating Costs"),
-    MAINTENANCE_COSTS("Maintenance Costs"),
-    MANUFACTURING_COSTS("Manufacturing costs");
+    DIRECT_COSTS("direct-costs"),
+    INDIRECT_COSTS("indirect-costs"),
+    ADMINISTRATION_COSTS("administration-costs"),
+    OPERATING_COSTS("operating-costs"),
+    MAINTENANCE_COSTS("maintenance-costs"),
+    MANUFACTURING_COSTS("manufacturing-costs");
 
     private final String value;
 

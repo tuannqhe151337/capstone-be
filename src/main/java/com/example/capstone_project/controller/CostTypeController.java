@@ -18,19 +18,13 @@ import java.util.List;
 @RequestMapping("/api/cost-type")
 @RequiredArgsConstructor
 public class CostTypeController {
-    private final JwtHelper jwtHelper;
     private final CostTypeService costTypeService;
 
     @GetMapping("/list")
-    public ResponseEntity<Responses<CostTypeResponse>> confirmExpense(
-            @RequestHeader("Authorization") String accessToken
-    ) {
-
-        // Get token claim
-        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken);
+    public ResponseEntity<Responses<CostTypeResponse>> getListCostType() {
 
         // Get data
-        List<CostType> costTypes = costTypeService.getListCostType(tokenClaim);
+        List<CostType> costTypes = costTypeService.getListCostType();
 
         // Response
         Responses<CostTypeResponse> responses = new Responses<>();
