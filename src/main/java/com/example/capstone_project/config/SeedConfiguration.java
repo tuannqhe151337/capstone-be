@@ -2,7 +2,9 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.CostTypeCode;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cglib.core.Local;
@@ -27,6 +29,10 @@ public class SeedConfiguration {
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
             UserSettingRepository userSettingRepository,
+            FinancialPlanRepository planRepository,
+            TermRepository termRepository,
+            TermStatusRepository termStatusRepository,
+            PlanStatusRepository planStatusRepository,
             CostTypeRepository costTypeRepository
     ) {
         return args -> {
@@ -146,6 +152,11 @@ public class SeedConfiguration {
                     .name("Approve plan")
                     .build();
 
+            Authority viewPlan = Authority.builder()
+                    .code(AuthorityCode.VIEW_PLAN.getValue())
+                    .name("View plan")
+                    .build();
+
             Authority viewReport = Authority.builder() // Monthly, Quarterly, Half-year
                     .code("D-001")
                     .name("View report")
@@ -166,7 +177,7 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -197,8 +208,6 @@ public class SeedConfiguration {
                     .email("mail21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
-
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user2 = User.builder()
@@ -395,6 +404,11 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
+            RoleAuthority accountantAuthority16 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(viewPlan)
+                    .build();
+
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(createTerm)
@@ -465,10 +479,156 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
+            RoleAuthority financialStaffAuthority15 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(viewPlan)
+                    .build();
+
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
+
+            TermStatus status1 = TermStatus.builder()
+                    .id(1L)
+                    .name("New")
+                    .code(TermCode.NOT_STARTED)
+                    .build();
+
+            TermStatus status2 = TermStatus.builder()
+                    .id(2L)
+                    .name("In-Progress")
+                    .code(TermCode.IN_PROGRESS)
+                    .build();
+
+            TermStatus status3 = TermStatus.builder()
+                    .id(3L)
+                    .name("Close")
+                    .code(TermCode.CLOSED)
+                    .build();
+
+            termStatusRepository.saveAll(List.of(status1,status2,status3));
+
+            PlanStatus planStatus1 = PlanStatus.builder()
+                    .id(1L)
+                    .name("New")
+                    .build();
+
+            PlanStatus planStatus2 = PlanStatus.builder()
+                    .id(2L)
+                    .name("Waiting for reviewed")
+                    .build();
+
+            PlanStatus planStatus3 = PlanStatus.builder()
+                    .id(3L)
+                    .name("Reviewed")
+                    .build();
+
+            PlanStatus planStatus4 = PlanStatus.builder()
+                    .id(4L)
+                    .name("Denied")
+                    .build();
+
+            planStatusRepository.saveAll(List.of(planStatus1,planStatus2,planStatus3,planStatus4));
+
+            Term term1 = Term.builder()
+                    .id(1L)
+                    .name("Spring 2024")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .user(user1)
+                    .status(status1)
+                    .build();
+
+            Term term2 = Term.builder()
+                    .id(2L)
+                    .name("Summer 2024")
+                    .duration(TermDuration.QUARTERLY)
+                    .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
+                    .user(user1)
+                    .status(status2)
+                    .build();
+
+            Term term3 = Term.builder()
+                    .id(3L)
+                    .name("Fall 2024")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
+                    .user(user2)
+                    .status(status3)
+                    .build();
+
+            Term term4 = Term.builder()
+                    .id(4L)
+                    .name("Winter 2024")
+                    .duration(TermDuration.YEARLY)
+                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
+                    .user(user3)
+                    .status(status1)
+                    .build();
+
+            Term term5 = Term.builder()
+                    .id(5L)
+                    .name("Spring 2025")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .user(user4)
+                    .status(status2)
+                    .build();
+
+            termRepository.saveAll(List.of(term1,term2,term3,term4,term5));
+
+            FinancialPlan financialPlan1 = FinancialPlan.builder()
+                    .id(1L)
+                    .name("Financial Plan 1")
+                    .term(term1)
+                    .department(softwareDevelopmentDepartment)
+                    .status(planStatus1)
+                    .build();
+
+            FinancialPlan financialPlan2 = FinancialPlan.builder()
+                    .id(2L)
+                    .name("Financial Plan 2")
+                    .term(term1)
+                    .department(softwareDevelopmentDepartment)
+                    .status(planStatus2)
+                    .build();
+
+            FinancialPlan financialPlan3 = FinancialPlan.builder()
+                    .id(3L)
+                    .name("Financial Plan 3")
+                    .term(term1)
+                    .department(accountingDepartment)
+                    .status(planStatus3)
+                    .build();
+
+            FinancialPlan financialPlan4 = FinancialPlan.builder()
+                    .id(4L)
+                    .name("Financial Plan 4")
+                    .department(financeDepartment)
+                    .term(term1)
+                    .status(planStatus4)
+                    .build();
+
+            FinancialPlan financialPlan5 = FinancialPlan.builder()
+                    .id(5L)
+                    .name("Financial Plan 5")
+                    .term(term2)
+                    .department(accountingDepartment)
+                    .status(planStatus1)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1,financialPlan2,financialPlan3,financialPlan4,financialPlan5));
 
             CostType costType1 = CostType.builder()
                     .name("Administration cost")
