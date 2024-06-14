@@ -6,6 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class CostTypeResponse {
-    private long costTypeId;
+    private Long costTypeId;
     private String name;
 }
