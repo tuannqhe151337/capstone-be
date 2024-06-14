@@ -84,9 +84,9 @@ public class FinancialPlanController {
                 ));
 
         listResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
+                .count(100)
                 .page(10)
-                .limitRecordsPerPage(33)
+                .displayRecord(0)
                 .numPages(1)
                 .build());
 
@@ -95,7 +95,7 @@ public class FinancialPlanController {
 
     @GetMapping("expenses")
     public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -155,9 +155,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
+                .count(100)
                 .page(10)
-                .limitRecordsPerPage(33)
+                .displayRecord(0)
                 .numPages(1)
                 .build());
 
@@ -303,9 +303,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
+                .count(100)
                 .page(10)
-                .limitRecordsPerPage(33)
+                .displayRecord(0)
                 .numPages(1)
                 .build());
 

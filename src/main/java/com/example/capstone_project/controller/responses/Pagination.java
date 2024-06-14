@@ -10,9 +10,9 @@ import lombok.*;
 public class Pagination {
     private long page;
 
-    private long totalRecords;
+    private long count;
 
-    private long limitRecordsPerPage;
+    private long displayRecord;
 
     private long numPages;
 }

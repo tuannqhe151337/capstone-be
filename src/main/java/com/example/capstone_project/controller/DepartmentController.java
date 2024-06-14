@@ -49,9 +49,9 @@ public class DepartmentController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .totalRecords(100)
+                .count(100)
                 .page(10)
-                .limitRecordsPerPage(7)
+                .displayRecord(0)
                 .numPages(1)
                 .build());
 

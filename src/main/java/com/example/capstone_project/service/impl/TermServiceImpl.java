@@ -1,17 +1,18 @@
 package com.example.capstone_project.service.impl;
 
 
-import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.service.TermService;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
+@AllArgsConstructor
 public class TermServiceImpl implements TermService {
-    private final FinancialPlanRepository financialPlanRepository;
+    private final TermRepository termRepository;
+
+
 
 
 
 }
-

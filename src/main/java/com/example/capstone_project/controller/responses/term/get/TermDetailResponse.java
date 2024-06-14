@@ -1,24 +1,21 @@
-package com.example.capstone_project.controller.body.term.update;
+package com.example.capstone_project.controller.responses.term.get;
 
-import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.TermDuration;
+import com.example.capstone_project.entity.TermStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
-@NoArgsConstructor
-public class UpdateTermBody {
+@RequiredArgsConstructor
+@Builder
+public class TermDetailResponse {
     @NotNull(message = "ID cannot be empty")
     private Long id;
 
@@ -37,9 +34,14 @@ public class UpdateTermBody {
     private LocalDateTime endDate;
 
     @NotNull(message = "Plan due date cannot be null")
+    @Column(name = "plan_due_date")
     @Future(message = "Plan due date must be in the future")
     private LocalDateTime planDueDate;
 
+    @NotNull(message = "Status cannot be null")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "status_id")
+    private TermStatusResponse status;
 
     @AssertTrue(message = "Plan due date must be before end date")
     private boolean isPlanDueDateBeforeEndDate() {
