@@ -18,6 +18,7 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
@@ -41,7 +42,6 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/plan")
@@ -73,22 +73,22 @@ public class FinancialPlanController {
         }
 
         // Get token claim
-        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken);
+        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken.substring(7));
 
         // Handling pagination
         Pageable pageable;
 
         if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
             pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy("accountant").sortType("").build(),
-                    CustomSort.builder().sortBy("start_date").sortType("asc").build(),
-                    CustomSort.builder().sortBy("plan_id").sortType("desc").build()
+                    CustomSort.builder().sortBy(RoleCode.ACCOUNTANT.toString()).sortType("").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
             ));
         } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy("financial-staff").sortType("").build(),
-                    CustomSort.builder().sortBy("start_date").sortType("asc").build(),
-                    CustomSort.builder().sortBy("plan_id").sortType("desc").build()
+                    CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
             ));
         } else {
             pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
@@ -103,7 +103,6 @@ public class FinancialPlanController {
         long count = 0;
 
         if (plans != null) {
-
             // Count total record
             count = planService.countDistinct(query, termId, departmentId, statusId);
 
@@ -117,10 +116,11 @@ public class FinancialPlanController {
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
+
         response.setPagination(Pagination.builder()
-                .count(count)
+                .totalRecords(count)
                 .page(pageInt)
-                .displayRecord(sizeInt)
+                .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
 
@@ -129,7 +129,7 @@ public class FinancialPlanController {
 
     @GetMapping("expenses")
     public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer termId,
+            @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -189,9 +189,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -337,9 +337,9 @@ public class FinancialPlanController {
         ));
 
         listResponse.setPagination(Pagination.builder()
-                .count(100)
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
@@ -357,7 +357,7 @@ public class FinancialPlanController {
     @PutMapping("/re-upload")
     private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
             @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
-            ){
+    ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }

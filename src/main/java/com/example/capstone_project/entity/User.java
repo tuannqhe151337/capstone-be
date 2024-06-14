@@ -37,7 +37,7 @@ public class User extends BaseEntity {
     @NotNull(message = "Date of birth cannot be null")
     @Past(message = "Date of birth must be in the past")
     @Column(name = "dob")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime dob;
 
     @Column(name = "note")

@@ -5,7 +5,12 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
+
 public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
+
+    List<FinancialPlan> findFinancialPlansByTermId(Long termId);
 
     @Query(value = "SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +

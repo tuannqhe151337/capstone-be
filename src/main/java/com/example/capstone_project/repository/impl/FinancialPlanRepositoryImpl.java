@@ -2,7 +2,9 @@ package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.PlanStatus_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -18,7 +20,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
     private EntityManager entityManager;
 
     @Override
-    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId,Long statusId, Pageable pageable) {
+    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) {
 
         // HQL query
         String hql = "SELECT plan FROM FinancialPlan plan " +
@@ -40,36 +42,36 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
 
             String sortType = order.getDirection().isAscending() ? "asc" : "desc";
             switch (order.getProperty().toLowerCase()) {
-                case "name", "plan_name", "plan.name" :
+                case "name", "plan_name", "plan.name":
                     hql += "plan.name " + sortType;
                     break;
-                case "status", "status_id", "status.id" :
+                case "status", "status_id", "status.id":
                     hql += "status.id " + sortType;
                     break;
-                case "department.id", "department_id", "department" :
+                case "department.id", "department_id", "department":
                     hql += "department.id " + sortType;
                     break;
                 case "term.id", "term_id", "term":
                     hql += "term.id " + sortType;
                     break;
-                case "start-date", "start_date", "start_at":
+                case "start-date", "start_date", "start_at", "createdat":
                     hql += "plan.createdAt " + sortType;
                     break;
                 case "accountant":
-                    hql += "CASE status.name\n" +
-                            "        WHEN 'Waiting for reviewed' THEN 1\n" +
-                            "        WHEN 'Reviewed' THEN 2\n" +
-                            "        WHEN 'New' THEN 3\n" +
-                            "        WHEN 'Approved' THEN 4\n" +
+                    hql += "CASE status.code\n" +
+                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 1\n" +
+                            "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 2\n" +
+                            "        WHEN '" + PlanStatusCode.NEW + "' THEN 3\n" +
+                            "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
                             "        ELSE 5 \n" +
                             "    END";
                     break;
-                case "financial-staff", "financial_staff", "staff" :
-                    hql += "CASE status.name\n" +
-                            "        WHEN 'Reviewed' THEN 1\n" +
-                            "        WHEN 'New' THEN 2\n" +
-                            "        WHEN 'Waiting for reviewed' THEN 3\n" +
-                            "        WHEN 'Approved' THEN 4\n" +
+                case "financial-staff", "financial_staff", "staff":
+                    hql += "CASE status.code\n" +
+                            "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 1\n" +
+                            "        WHEN '" + PlanStatusCode.NEW + "' THEN 2\n" +
+                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 3\n" +
+                            "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
                             "        ELSE 5 \n" +
                             "    END";
                     break;
