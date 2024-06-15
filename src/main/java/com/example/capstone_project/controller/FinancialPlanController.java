@@ -81,13 +81,13 @@ public class FinancialPlanController {
         if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
             pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
                     CustomSort.builder().sortBy(RoleCode.ACCOUNTANT.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("desc").build(),
                     CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
             ));
         } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
                     CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
+                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("desc").build(),
                     CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
             ));
         } else {
