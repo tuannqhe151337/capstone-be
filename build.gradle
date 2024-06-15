@@ -49,6 +49,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
+    implementation 'org.passay:passay:1.6.3'
+
+
     testImplementation 'org.springframework.security:spring-security-test'
     compileOnly 'org.projectlombok:lombok'
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen

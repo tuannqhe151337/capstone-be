@@ -160,4 +160,5 @@ public class AuthService {
 
         this.userAuthorityRepository.save(userId, authoritiesCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
     }
+
 }

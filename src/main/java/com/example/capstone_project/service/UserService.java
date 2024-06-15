@@ -1,6 +1,7 @@
 package com.example.capstone_project.service;
 
 
+import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +19,7 @@ public interface UserService {
 
     User getUserById(Long userId);
 
-    User updateUser(Long userId, User user);
+    User updateUser(UpdateUserBody updateUserBody);
 
     void deleteUser(Long userId);
 }

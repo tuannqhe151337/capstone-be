@@ -40,4 +40,10 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     long countDistinct(String query);
 
     User save(User user);
+
+    @Query(value = "select " +
+            "COUNT(*)  from User  user group by TRANSLATE(user.username, '0123456789', '          ') " +
+            "having TRANSLATE(user.username, '0123456789', '          ') =  ?1")
+    Long getCountByName(String pattern);
+
 }
