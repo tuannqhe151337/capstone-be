@@ -5,6 +5,11 @@ import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import com.example.capstone_project.controller.responses.user.DepartmentResponse;
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.repository.DepartmentRepository;
+import com.example.capstone_project.service.DepartmentService;
+import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapper;
+import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +24,9 @@ import java.util.List;
 @RequestMapping("/api/department")
 @RequiredArgsConstructor
 public class DepartmentController {
+    private final DepartmentService departmentService;
+
+
     @GetMapping("/plan-paging-department")
     public ResponseEntity<ListPaginationResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
             @RequestParam(required = false) String query,
@@ -64,27 +72,10 @@ public class DepartmentController {
     @GetMapping("/user-paging-department")
     public ResponseEntity<ListResponse<DepartmentResponse>> getListDepartmentPagingUser() {
         ListResponse<DepartmentResponse> departmentResponseList = new ListResponse<>();
-        departmentResponseList.setData(List.of(
-                DepartmentResponse.builder()
-                        .id(1L)
-                        .name("Department 1")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(2L)
-                        .name("Department 2")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(3L)
-                        .name("Department 3")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(3L)
-                        .name("Department 3")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(4L)
-                        .name("Department 4")
-                        .build()));
+        List<DepartmentResponse> departmentResponses =
+                new DepartToDepartResponseMapperImpl()
+                        .mapDepartmentsToDepartmentResponses(departmentService.getAllDepartments());
+        departmentResponseList.setData(departmentResponses);
         return ResponseEntity.ok(departmentResponseList);
     }
 
