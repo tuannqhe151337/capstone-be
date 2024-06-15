@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
@@ -21,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnnualReportController {
     @GetMapping("/expenses")
-    public ResponseEntity<ListResponse<AnnualReportExpenseResponse>> confirmExpense() {
-        ListResponse<AnnualReportExpenseResponse> listResponse = new ListResponse<>();
+    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense() {
+        ListPaginationResponse<AnnualReportExpenseResponse> listResponse = new ListPaginationResponse<>();
         listResponse.setData(
                 List.of(
                         AnnualReportExpenseResponse.builder()
@@ -66,14 +67,14 @@ public class AnnualReportController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<ListResponse<AnnualReportResponse>> getListAnnualReport(
+    public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<AnnualReportResponse> listResponse = new ListResponse<>();
+        ListPaginationResponse<AnnualReportResponse> listResponse = new ListPaginationResponse<>();
 
         listResponse.setData(
                 List.of(
