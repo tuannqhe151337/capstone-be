@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         User userAd = userRepository.findById(userAdminId)
                 .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + deactiveUserBody.getId()));
 
-        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue()) && !userAd.getIsDelete()) {
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue()) || !userAd.getIsDelete()) {
             throw new UnauthorizedException("Unauthorized to deactivate user");
         }
         User user = userRepository.findById(deactiveUserBody.getId())
