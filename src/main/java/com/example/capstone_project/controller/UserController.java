@@ -2,7 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -134,7 +134,8 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
+    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+        userService.deactivateUser(deactiveUserBody);
         return ResponseEntity.status(HttpStatus.OK).body("Delete user success");
     }
     // build delete user REST API

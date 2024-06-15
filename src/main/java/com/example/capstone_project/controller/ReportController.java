@@ -29,7 +29,7 @@ import java.util.List;
 public class ReportController {
 
     @GetMapping("/expenses")
-    public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
+    public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
@@ -39,7 +39,7 @@ public class ReportController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ){
-        ListResponse<ExpenseResponse> listResponse = new ListResponse<>();
+        ListPaginationResponse<ExpenseResponse> listResponse = new ListPaginationResponse<>();
         listResponse.setData(List.of(
                 ExpenseResponse.builder()
                         .expenseId(1L)
