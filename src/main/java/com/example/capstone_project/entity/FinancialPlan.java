@@ -20,6 +20,9 @@ public class FinancialPlan extends BaseEntity{
     @Column(name = "name")
     private String name;
 
+    @Transient
+    private Integer version;
+
     @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
     private List<FinancialPlanFile> planFiles;
 

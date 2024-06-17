@@ -17,7 +17,7 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.entity.AccessTokenClaim;
+import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.service.FinancialPlanService;
@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class FinancialPlanController {
     private final FinancialPlanService planService;
 
     @GetMapping("/list")
-    public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
+    public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
@@ -63,7 +64,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
+    ) throws Exception {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -73,33 +74,11 @@ public class FinancialPlanController {
             query = "";
         }
 
-        // Get token claim
-        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken.substring(7));
-
-        // Handling pagination
-        Pageable pageable;
-
-        if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy(RoleCode.ACCOUNTANT.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-            ));
-        } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("asc").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-            ));
-        } else {
-            pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-        }
-
         // Get data
-        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageable, tokenClaim);
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
 
         // Response
-        ListResponse<PlanResponse> response = new ListResponse<>();
+        ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
 
         long count = 0;
 
@@ -112,7 +91,7 @@ public class FinancialPlanController {
                 response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);

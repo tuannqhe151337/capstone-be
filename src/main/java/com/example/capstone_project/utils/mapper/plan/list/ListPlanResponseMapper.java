@@ -23,21 +23,7 @@ public interface ListPlanResponseMapper {
     @Mapping(source = "term", target = "term")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "department", target = "department")
-    @Mapping(source = "planFiles", target = "version", qualifiedByName = "getNewestVersion")
     PlanResponse mapToPlanResponseMapper(FinancialPlan plan);
-
-    @Named("getNewestVersion")
-    default String getNewestVersion(List<FinancialPlanFile> planFiles) {
-        if (planFiles == null || planFiles.isEmpty()) {
-            return null;
-        }
-
-        return planFiles.stream()
-                .min(Comparator.
-                        comparing(planFile -> Math.abs(planFile.getCreatedAt().until(LocalDateTime.now(), ChronoUnit.SECONDS)))
-                )
-                .get().getVersion();
-    }
     @Mapping(source = "id", target = "termId")
     TermResponse termToTermResponse(Term term);
 

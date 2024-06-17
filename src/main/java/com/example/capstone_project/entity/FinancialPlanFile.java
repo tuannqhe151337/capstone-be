@@ -26,9 +26,6 @@ public class FinancialPlanFile {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "version")
-    private String version;
-
     @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE)
     private List<FinancialPlanFileExpense> planExpenses;
 
