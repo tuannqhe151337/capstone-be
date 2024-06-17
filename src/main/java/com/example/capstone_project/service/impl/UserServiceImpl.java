@@ -1,11 +1,13 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.repository.UserRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +20,14 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository userAuthorityRepository;
+
     @Override
     public List<User> getAllUsers(
             String query,
             Pageable pageable) {
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
             return userRepository.getUserWithPagination(query, pageable);
         }
 
@@ -61,5 +64,17 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
 
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void activateUser(ActivateUserBody activateUserBody) {
+        long userAdminId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.ACTIVATE_USER.getValue())) {
+            throw new UnauthorizedException("Unauthorized to activate user");
+        }
+        User user = userRepository.findById(activateUserBody.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + activateUserBody.getId()));
+        user.setIsDelete(false);
+        userRepository.save(user);
     }
 }
