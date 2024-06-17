@@ -91,9 +91,8 @@ public class UserServiceImpl implements UserService {
     public User createUser(CreateUserBody createUserBody) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();
-        User useradmin = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
-        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_NEW_USER.getValue()) && !useradmin.getIsDelete()) {
+
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_NEW_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized to create new user");
         } else {
             //register user
