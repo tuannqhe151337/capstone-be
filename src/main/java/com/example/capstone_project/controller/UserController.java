@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
+import com.example.capstone_project.controller.body.user.getDetail.GetUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -97,10 +98,10 @@ public class UserController {
     }
 
     // build get user by id REST API
-    @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
+    @GetMapping("/detail")
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @RequestBody GetUserBody getUserBody) {
         try {
-            User user = userService.getUserById(userId);
+            User user = userService.getUserById(getUserBody.getId());
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
         }catch (UnauthorizedException e){
