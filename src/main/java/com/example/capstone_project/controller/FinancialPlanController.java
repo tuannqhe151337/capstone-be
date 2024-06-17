@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpens
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -127,8 +128,8 @@ public class FinancialPlanController {
     }
 
     @GetMapping("expenses")
-    public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer departmentId,
+    public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
+            @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -137,8 +138,8 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<ExpenseResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<ExpenseResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 ExpenseResponse.builder()
                         .expenseId(1L)
                         .name("Promotion event")
@@ -187,14 +188,14 @@ public class FinancialPlanController {
                         .build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(2222)
                 .page(10)
                 .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
     @GetMapping("/detail")
@@ -306,15 +307,15 @@ public class FinancialPlanController {
     }
 
     @GetMapping("versions")
-    public ResponseEntity<ListResponse<VersionResponse>> getListVersion(
+    public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
             @RequestParam Integer planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListResponse<VersionResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+    ){
+        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
                         .version("v1")
                         .publishedDate(LocalDate.of(2024, 4, 10))
@@ -335,14 +336,14 @@ public class FinancialPlanController {
                                 .username("Anhln").build()).build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(2222)
                 .page(10)
                 .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
     @DeleteMapping("/delete")
