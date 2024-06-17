@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -75,27 +76,8 @@ public class FinancialPlanController {
         // Get token claim
         AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken.substring(7));
 
-        // Handling pagination
-        Pageable pageable;
-
-        if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy(RoleCode.ACCOUNTANT.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("desc").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-            ));
-        } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-            pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                    CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("desc").build(),
-                    CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-            ));
-        } else {
-            pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-        }
-
         // Get data
-        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageable, tokenClaim);
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType, tokenClaim);
 
         // Response
         ListResponse<PlanResponse> response = new ListResponse<>();
@@ -111,7 +93,7 @@ public class FinancialPlanController {
                 response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);

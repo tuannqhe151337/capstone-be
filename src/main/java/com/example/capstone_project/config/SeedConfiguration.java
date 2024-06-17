@@ -3,6 +3,7 @@ package com.example.capstone_project.config;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -513,21 +514,25 @@ public class SeedConfiguration {
             PlanStatus planStatus1 = PlanStatus.builder()
                     .id(1L)
                     .name("New")
+                    .code(PlanStatusCode.NEW)
                     .build();
 
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
                     .name("Waiting for reviewed")
+                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
                     .id(3L)
                     .name("Reviewed")
+                    .code(PlanStatusCode.REVIEWED)
                     .build();
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
                     .name("Denied")
+                    .code(PlanStatusCode.APPROVED)
                     .build();
 
             planStatusRepository.saveAll(List.of(planStatus1,planStatus2,planStatus3,planStatus4));

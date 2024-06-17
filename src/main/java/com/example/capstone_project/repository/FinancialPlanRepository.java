@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,9 +15,17 @@ public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, L
 
     @Query(value = "SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +
-            " (:termId IS NULL OR plan.status.id = :termId) AND " +
+            " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
             " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
-            " (plan.isDelete = false OR plan.isDelete is null) ")
+            " plan.isDelete = false ")
     long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+
+    @Query(value = "SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version FROM FinancialPlanFile file " +
+            " WHERE file.plan.name LIKE %:query% AND " +
+            " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
+            " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
+            " (:statusId IS NULL OR file.plan.status.id = :statusId) AND" +
+            " file.isDelete = false ")
+    List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
 }
