@@ -218,7 +218,7 @@ public class SeedConfiguration {
                     .department(financeDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Emaiil23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
@@ -231,7 +231,7 @@ public class SeedConfiguration {
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
 
-                    .email("Email23@gmail.com")
+                    .email("Emaiiiil23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
@@ -243,7 +243,7 @@ public class SeedConfiguration {
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Email2iii3@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();

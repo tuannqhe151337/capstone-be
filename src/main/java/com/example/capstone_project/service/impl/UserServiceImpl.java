@@ -1,14 +1,17 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.AuthorityRepository;
-import com.example.capstone_project.repository.UserRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
+import com.example.capstone_project.utils.exception.postion.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.user.edit.UpdateUserBodyToUserEntityMapperImpl;
 import jakarta.persistence.EntityManager;
@@ -19,14 +22,20 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.passay.IllegalCharacterRule.ERROR_CODE;
 
@@ -39,7 +48,9 @@ public class UserServiceImpl implements UserService {
     private final AuthorityRepository authorityRepository;
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
-
+    private final DepartmentRepository departmentRepository;
+    private final RoleRepository roleRepository;
+    private final PositionRepository positionRepository;
 
     @Override
     public List<User> getAllUsers(
@@ -72,13 +83,31 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateUser(UpdateUserBody updateUserBody) {
+    public User updateUser(UpdateUserBody updateUserBody) throws Exception{
+
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized");
         }
         User user = userRepository.findById(updateUserBody.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + updateUserBody));
+
+        //check department
+        //Optional<User> user = userRepository.findUserByEmail(email);
+        if ( userRepository.existsByEmail(updateUserBody.getEmail()) ) {
+            throw new DataIntegrityViolationException("Email already exists");
+        }
+        //check department
+        if(!departmentRepository.existsById(updateUserBody.getDepartment())){
+            throw new InvalidDepartmentIdException("Department does not exist");
+        }
+        if(!positionRepository.existsById(updateUserBody.getPosition())){
+            throw new InvalidPositiontIdException("Position does not exist");
+        }
+        if(!roleRepository.existsById(updateUserBody.getRole())){
+            throw new InvalidRoleIdException("Role does not exist");
+        }
+
         //map update user body to user
         Department newDepartment = entityManager.find(Department.class, updateUserBody.getDepartment());
         user.setDepartment(newDepartment);
@@ -87,10 +116,16 @@ public class UserServiceImpl implements UserService {
         Position newPostion = entityManager.find(Position.class, updateUserBody.getPosition());
         user.setPosition(newPostion);
 
+        //check email can not dublicate
+        if(userRepository.existsByEmail(updateUserBody.getEmail()))
+            throw new DataIntegrityViolationException("Email address already in use");
+
+
         //check full name co thay doi khong de update username
         if (!updateUserBody.getFullName().equals(user.getFullName())) {
             user.setUsername(generateUsernameFromFullName(updateUserBody.getFullName()));
         }
+
         user = new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody, user);
 
         //get authority tu roleid
@@ -118,35 +153,6 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private String generatePassayPassword() {
-        PasswordGenerator gen = new PasswordGenerator();
-        CharacterData lowerCaseChars = EnglishCharacterData.LowerCase;
-        CharacterRule lowerCaseRule = new CharacterRule(lowerCaseChars);
-        lowerCaseRule.setNumberOfCharacters(2);
-
-        CharacterData upperCaseChars = EnglishCharacterData.UpperCase;
-        CharacterRule upperCaseRule = new CharacterRule(upperCaseChars);
-        upperCaseRule.setNumberOfCharacters(2);
-
-        CharacterData digitChars = EnglishCharacterData.Digit;
-        CharacterRule digitRule = new CharacterRule(digitChars);
-        digitRule.setNumberOfCharacters(2);
-
-        CharacterData specialChars = new CharacterData() {
-            public String getErrorCode() {
-                return ERROR_CODE;
-            }
-
-            public String getCharacters() {
-                return "!@#$%^&*()_+";
-            }
-        };
-        CharacterRule splCharRule = new CharacterRule(specialChars);
-        splCharRule.setNumberOfCharacters(2);
-
-        return gen.generatePassword(10, splCharRule, lowerCaseRule,
-                upperCaseRule, digitRule);
-    }
 
     public String generateUsernameFromFullName(String fullname) {
         String[] nameParts = fullname.trim().split("\\s+");
@@ -156,13 +162,31 @@ public class UserServiceImpl implements UserService {
         for (int i = 0; i < nameParts.length - 1; i++) {
             usernameBuilder.append(nameParts[i].toUpperCase().charAt(0)); // Lấy chữ cái đầu tiên của tên đệm
         }
-        Long count = userRepository.getCountByName(usernameBuilder.toString());
-        if (count == null) {
-            return usernameBuilder.toString();
+
+
+        String lastestUsername = userRepository.getCountByName(usernameBuilder.toString());
+        if (lastestUsername != null) {
+            // Sử dụng biểu thức chính quy để tách phần số từ chuỗi
+            Pattern pattern = Pattern.compile("\\d+");
+            Matcher matcher = pattern.matcher(lastestUsername);
+            Long count = 0L;
+            String numericPart = "";
+            if (matcher.find()) {
+                numericPart = matcher.group();  // vi du 14 từ GiangDV14
+                count = Long.parseLong(numericPart); // 14
+            }
+            if (count == 0L) {
+                return usernameBuilder.toString() + 2; //vi du GiangDV -> GiangDV2
+            } else {
+                return usernameBuilder.toString() + (count + 1); //ví dụ GiangDV3 -> GiangDV4
+            }
         } else {
-            return usernameBuilder.toString() + (count + 1);
+            return usernameBuilder.toString();
         }
+
+
     }
+
 
 
 }

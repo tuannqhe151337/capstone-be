@@ -19,7 +19,7 @@ public interface UserService {
 
     User getUserById(Long userId);
 
-    User updateUser(UpdateUserBody updateUserBody);
+    User updateUser(UpdateUserBody updateUserBody) throws Exception;
 
     void deleteUser(Long userId);
 }

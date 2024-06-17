@@ -41,9 +41,11 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
 
     User save(User user);
 
-    @Query(value = "select " +
-            "COUNT(*)  from User  user group by TRANSLATE(user.username, '0123456789', '          ') " +
-            "having TRANSLATE(user.username, '0123456789', '          ') =  ?1")
-    Long getCountByName(String pattern);
+    @Query(value = "SELECT user.username FROM User user" +
+            " WHERE TRIM(TRANSLATE(user.username, '0123456789', '          ')) = ?1" +
+            " ORDER BY LENGTH(user.username) DESC, user.username DESC LIMIT 1")
+    String getCountByName(String pattern);
 
+
+    boolean existsByEmail(String email);
 }
