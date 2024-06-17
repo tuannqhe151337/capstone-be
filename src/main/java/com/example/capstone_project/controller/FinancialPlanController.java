@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpens
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -16,7 +17,7 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.entity.AccessTokenClaim;
+import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.service.FinancialPlanService;
@@ -53,7 +54,7 @@ public class FinancialPlanController {
     private final FinancialPlanService planService;
 
     @GetMapping("/list")
-    public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
+    public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
@@ -63,7 +64,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
+    ) throws Exception {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -73,14 +74,11 @@ public class FinancialPlanController {
             query = "";
         }
 
-        // Get token claim
-        AccessTokenClaim tokenClaim = jwtHelper.parseToken(accessToken.substring(7));
-
         // Get data
-        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType, tokenClaim);
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
 
         // Response
-        ListResponse<PlanResponse> response = new ListResponse<>();
+        ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
 
         long count = 0;
 
@@ -110,8 +108,8 @@ public class FinancialPlanController {
     }
 
     @GetMapping("expenses")
-    public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer departmentId,
+    public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
+            @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -120,8 +118,8 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<ExpenseResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<ExpenseResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 ExpenseResponse.builder()
                         .expenseId(1L)
                         .name("Promotion event")
@@ -170,14 +168,14 @@ public class FinancialPlanController {
                         .build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(2222)
                 .page(10)
                 .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
     @GetMapping("/detail")
@@ -289,15 +287,15 @@ public class FinancialPlanController {
     }
 
     @GetMapping("versions")
-    public ResponseEntity<ListResponse<VersionResponse>> getListVersion(
+    public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
             @RequestParam Integer planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListResponse<VersionResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+    ){
+        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
                         .version("v1")
                         .publishedDate(LocalDate.of(2024, 4, 10))
@@ -318,14 +316,14 @@ public class FinancialPlanController {
                                 .username("Anhln").build()).build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(2222)
                 .page(10)
                 .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
 

@@ -1,11 +1,12 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.responses.CustomSort;
-import com.example.capstone_project.entity.AccessTokenClaim;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.FinancialPlanRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
+import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -27,6 +28,7 @@ import java.util.Objects;
 public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanRepository planRepository;
     private final UserAuthorityRepository userAuthorityRepository;
+    private final UserDetailRepository userDetailRepository;
 
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) {
@@ -35,21 +37,25 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType, AccessTokenClaim tokenClaim) {
-
+    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        System.out.println("DepartmentId :" + userDetail.getDepartmentId());
         // Check authority
-        if (userAuthorityRepository.get(tokenClaim.getUserId()).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
 
             // Handling pagination
             Pageable pageable = null;
             if (sortBy == null || sortBy.isEmpty()) {
-                if (tokenClaim.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
                             CustomSort.builder().sortBy(RoleCode.ACCOUNTANT.toString()).sortType("").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.UPDATED_AT).sortType("desc").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
                     ));
-                } else if (tokenClaim.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                     // Default sort of financial staff role
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
                             CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
@@ -58,7 +64,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     ));
 
                     // Financial staff only see list-plan of their department
-                    departmentId = tokenClaim.getDepartmentId();
+                    departmentId = userDetail.getDepartmentId();
                 }
             } else {
                 // Sort by request

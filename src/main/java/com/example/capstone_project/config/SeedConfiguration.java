@@ -202,6 +202,8 @@ public class SeedConfiguration {
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(accountingDepartment)
+                    .fullName("Nguyen Van A")
+                    .phoneNumber("0922832938")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("mail21@gmail.com")
@@ -216,9 +218,8 @@ public class SeedConfiguration {
                     .role(admin)
                     .department(financeDepartment)
                     .position(techlead)
-
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                      .email("Email23@gmail.com")
+                    .email("Email23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
