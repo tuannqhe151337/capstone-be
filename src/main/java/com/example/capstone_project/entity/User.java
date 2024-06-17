@@ -19,7 +19,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "username cannot br ")
+    @NotEmpty(message = "username cannot be empty")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
@@ -40,7 +40,6 @@ public class User extends BaseEntity {
     @NotNull(message = "Date of birth cannot be null")
     @Past(message = "DOB must be in the past")
     @Column(name = "dob")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", shape = JsonFormat.Shape.STRING )
     private LocalDateTime dob;
 
     @Column(name = "note")
