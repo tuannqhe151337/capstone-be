@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class UserResponse {
-    private Long userId;
+    private Long id;
 
     private String username;
 
@@ -22,7 +22,7 @@ public class UserResponse {
 
     private PositionResponse position;
 
-    private boolean deactivate;
+    private boolean isDelete;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;

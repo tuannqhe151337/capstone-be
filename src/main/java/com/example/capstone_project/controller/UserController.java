@@ -7,6 +7,7 @@ import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
+import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.Department;
@@ -14,14 +15,17 @@ import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.user.edit.UpdateUserToUserDetailResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.user.list.UserEntityToUserResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -29,6 +33,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,51 +44,56 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) String page,
-            @RequestParam(required = false) String size,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Get data
+            List<User> users = userService.getAllUsers();
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
-
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
-        // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
-
-        // Response
-        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
-
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                //mapperToUserResponse
-                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+        // Sort the list by createdAt of user
+        Collections.sort(users, new Comparator<User>() {
+            @Override
+            public int compare(User o1, User o2) {
+                return o1.getCreatedAt().compareTo(o2.getCreatedAt());
             }
-        }
+        });
 
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+        //map to List UserResponse
+        List<UserResponse> userResponseList = new UserEntityToUserResponseMapperImpl().mapToUserResponseList(users);
 
-        response.setPagination(Pagination.builder()
-                .totalRecords(100)
-                .page(pageInt)
-                .limitRecordsPerPage(4)
-                .numPages(numPages)
-                .build());
+        //xu ly phan trang
+        PageRequest pageRequest = (PageRequest) PaginationHelper.handlingPagination(page, size, sortBy, sortType);
+
+        //Tao Page tu list
+        Page<UserResponse> userResponseListPaging = PaginationHelper.createPage(userResponseList, pageRequest);
+
+
+        //Build response
+        Pagination pagination = Pagination
+                .builder()
+                .page(pageRequest.getPageNumber())
+                .limitRecordsPerPage(pageRequest.getPageSize())
+                .totalRecords(userResponseListPaging.getNumberOfElements())
+                .numPages(PaginationHelper.
+                        calculateNumPages((long) userResponseListPaging.getNumberOfElements(),
+                                pageRequest.getPageSize())).build();
+
+        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
+        response.setData(userResponseList);
+        response.setPagination(pagination);
 
         return ResponseEntity.ok(response);
+        }catch (UnauthorizedException e){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     // build create user REST API
@@ -137,10 +148,11 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("Delete user success");
     }
+
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId() + " success");
     }
 
 

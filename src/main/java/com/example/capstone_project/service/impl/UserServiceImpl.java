@@ -6,6 +6,7 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +20,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     @Override
-    public List<User> getAllUsers(
-            String query,
-            Pageable pageable) {
+    public List<User> getAllUsers() {
         long userId = UserHelper.getUserId();
-
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
-            return userRepository.getUserWithPagination(query, pageable);
+          return userRepository.findAll();
         }
-
-        return null;
+        else {
+            throw new UnauthorizedException("Unauthorized");
+        }
     }
 
     @Override
