@@ -14,6 +14,8 @@ import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -134,9 +136,15 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
-        userService.deactivateUser(deactiveUserBody);
-        return ResponseEntity.status(HttpStatus.OK).body("Delete user success");
+    public ResponseEntity<String> deactiveUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+     try {
+         userService.deactivateUser(deactiveUserBody);
+         return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+     }catch (UnauthorizedException e){
+         throw new UnauthorizedException(e.getMessage());
+     }catch (ResourceNotFoundException e){
+         throw new ResourceNotFoundException(e.getMessage());
+     }
     }
     // build delete user REST API
     @PostMapping("/activate")
