@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
@@ -19,15 +20,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentController {
     @GetMapping("/plan-paging-department")
-    public ResponseEntity<ListResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
+    public ResponseEntity<ListPaginationResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
-        ListResponse<DepartmentPaginateResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+    ) {
+        ListPaginationResponse<DepartmentPaginateResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 DepartmentPaginateResponse.builder()
                         .departmentId(1L)
                         .name("Department 1")
@@ -50,19 +51,20 @@ public class DepartmentController {
                         .build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
+        listPaginationResponse.setPagination(Pagination.builder()
                 .totalRecords(100)
                 .page(10)
                 .limitRecordsPerPage(7)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
+
     @GetMapping("/user-paging-department")
-    public ResponseEntity<List<DepartmentResponse>> getListDepartmentPagingUser(){
-       List<DepartmentResponse> departmentResponseList = new ArrayList<>();
-        departmentResponseList = List.of(
+    public ResponseEntity<ListResponse<DepartmentResponse>> getListDepartmentPagingUser() {
+        ListResponse<DepartmentResponse> departmentResponseList = new ListResponse<>();
+        departmentResponseList.setData(List.of(
                 DepartmentResponse.builder()
                         .id(1L)
                         .name("Department 1")
@@ -82,8 +84,7 @@ public class DepartmentController {
                 DepartmentResponse.builder()
                         .id(4L)
                         .name("Department 4")
-                        .build()
-        );
+                        .build()));
         return ResponseEntity.ok(departmentResponseList);
     }
 

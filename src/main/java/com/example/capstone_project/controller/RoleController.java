@@ -18,9 +18,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoleController {
     @GetMapping("/user-paging-role")
-    public ResponseEntity<List<RoleResponse>> getListRolePagingUser(){
-        List<RoleResponse> roleList = new ArrayList<>();
-       roleList =  List.of(
+    public ResponseEntity<ListResponse<RoleResponse>> getListRolePagingUser() {
+        ListResponse<RoleResponse> roleList = new ListResponse<>();
+        roleList.setData(List.of(
                 RoleResponse.builder()
                         .id(1L)
                         .name("Admin")
@@ -35,8 +35,7 @@ public class RoleController {
                         .id(3L)
                         .name("Financial Staff")
                         .code("financial-staff")
-                        .build()
-        );
+                        .build() ));
 
         return ResponseEntity.ok(roleList);
     }
