@@ -53,7 +53,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     // Default sort of financial staff role
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
                             CustomSort.builder().sortBy(RoleCode.FINANCIAL_STAFF.toString()).sortType("").build(),
-                            CustomSort.builder().sortBy(FinancialPlan_.CREATED_AT).sortType("desc").build(),
+                            CustomSort.builder().sortBy(FinancialPlan_.UPDATED_AT).sortType("desc").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
                     ));
 

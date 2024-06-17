@@ -21,7 +21,7 @@ public class PlanStatus extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "code")
+    @Column(name = "code", unique = true)
     @Enumerated(EnumType.STRING)
     private PlanStatusCode code;
 

@@ -57,6 +57,9 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 case "start-date", "start_date", "start_at", "createdat":
                     hql += "plan.createdAt " + sortType;
                     break;
+                case "updated-date", "updated_date", "updated_at","updatedat":
+                    hql += "plan.updatedAt " + sortType;
+                    break;
                 case "accountant":
                     hql += "CASE status.code\n" +
                             "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 1\n" +

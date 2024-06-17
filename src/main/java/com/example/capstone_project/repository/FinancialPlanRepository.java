@@ -26,6 +26,7 @@ public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, L
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
             " (:statusId IS NULL OR file.plan.status.id = :statusId) AND" +
-            " file.isDelete = false ")
+            " file.isDelete = false " +
+            " GROUP BY file.plan.id ")
     List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
 }
