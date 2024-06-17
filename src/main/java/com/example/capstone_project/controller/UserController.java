@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 
@@ -14,6 +15,10 @@ import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -21,12 +26,14 @@ import com.example.capstone_project.utils.mapper.user.edit.UpdateUserToUserDetai
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -88,35 +95,26 @@ public class UserController {
 
     // build create user REST API
     @PostMapping
-    public ResponseEntity<ResponseObject> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
-        if (result.hasErrors()) {
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .toList();
-            return ResponseEntity.badRequest().body(
-                    ResponseObject.builder()
-                            .message(String.join("; ", errorMessages))
-                            .status(HttpStatus.BAD_REQUEST)
-                            .build()
-            );
-
-        }
+    public ResponseEntity<Object> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
         try {
             User user = userService.createUser(userBody);
-            return ResponseEntity.ok(
-                    ResponseObject.builder()
-                            .message("Create new user successfully")
-                            .status(HttpStatus.CREATED)
-                            .data(user)
-                            .build()
-            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (DataIntegrityViolationException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("emails already exists").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (InvalidDepartmentIdException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (InvalidPositiontIdException e){
+            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        }catch(InvalidRoleIdException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ResponseObject.builder()
-                            .status(HttpStatus.BAD_REQUEST)
-                            .message(e.getMessage())
-                            .build());
+            throw new RuntimeException(e);
         }
 
     }

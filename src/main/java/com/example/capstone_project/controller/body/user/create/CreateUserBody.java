@@ -42,7 +42,8 @@ public class CreateUserBody {
     @NotEmpty(message = "Address cannot be empty")
     @Size(max = 200, message = "Address must be less than 200 characters")
     private String address;
-
+    @Size(max = 200, message = "Note must be less than 200 characters")
+    private String note;
 
 }
 

@@ -2,12 +2,16 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.entity.User;
-import com.example.capstone_project.repository.UserRepository;
+import com.example.capstone_project.entity.UserSetting;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.exception.PermissionDenyException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import jakarta.mail.MessagingException;
@@ -25,6 +29,8 @@ import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -33,7 +39,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService mailService;
+    private final MailRepository mailRepository;
+    private final UserSettingRepository userSettingRepository;
+    private final DepartmentRepository departmentRepository;
+    private final RoleRepository roleRepository;
+    private final PositionRepository positionRepository;
 
 
     @Override
@@ -78,19 +88,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(CreateUserBody createUserBody) throws PermissionDenyException, MessagingException {
+    public User createUser(CreateUserBody createUserBody) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_NEW_USER.getValue())) {
-            throw new PermissionDenyException("This account do not have right to create user");
+        User useradmin = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_NEW_USER.getValue()) && !useradmin.getIsDelete()) {
+            throw new UnauthorizedException("Unauthorized to create new user");
         } else {
             //register user
             //check email exist
             String email = createUserBody.getEmail();
 
-            Optional<User> user = userRepository.findUserByEmail(email);
-            if (user.isPresent()) {
+            //Optional<User> user = userRepository.findUserByEmail(email);
+            if ( userRepository.existsByEmail(email) ) {
                 throw new DataIntegrityViolationException("Email already exists");
+            }
+            //check department
+            if(!departmentRepository.existsById(createUserBody.getDepartmentId())){
+                throw new InvalidDepartmentIdException("Department does not exist");
+            }
+            if(!positionRepository.existsById(createUserBody.getPositionId())){
+                throw new InvalidPositiontIdException("Position does not exist");
+            }
+            if(!roleRepository.existsById(createUserBody.getRoleId())){
+                throw new InvalidRoleIdException("Role does not exist");
             }
 
             //convert from userDTO => user
@@ -101,10 +123,20 @@ public class UserServiceImpl implements UserService {
             newUser.setPassword(this.passwordEncoder.encode(password));
 
             newUser.setUsername(generateUsernameFromFullName(createUserBody.getFullName()));
-            userRepository.save(newUser);
-            String username = "Your account username is: " + newUser.getUsername() ;
+            newUser.setIsDelete(false);
 
-            mailService.sendEmail(newUser.getEmail(), newUser.getFullName(), newUser.getUsername(), password);
+            userRepository.save(newUser);
+
+            //create user setting
+            UserSetting userSetting = UserSetting.builder()
+                    .language("en")
+                    .theme("blue")
+                    .darkMode(false)
+                    .user(newUser)
+                    .build();
+            userSettingRepository.save(userSetting);
+
+            mailRepository.sendEmail(newUser.getEmail(), newUser.getFullName(), newUser.getUsername(), password);
 
             return newUser;
         }
@@ -151,12 +183,27 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        Long count = userRepository.getCountByName(usernameBuilder.toString());
-        if (count == null) {
-            return usernameBuilder.toString();
+        String lastestUsername = userRepository.getCountByName(usernameBuilder.toString());
+        if (lastestUsername != null) {
+            // Sử dụng biểu thức chính quy để tách phần số từ chuỗi
+            Pattern pattern = Pattern.compile("\\d+");
+            Matcher matcher = pattern.matcher(lastestUsername);
+            Long count = 0L;
+            String numericPart = "";
+            if (matcher.find()) {
+                numericPart = matcher.group();  // vi du 14 từ GiangDV14
+                count = Long.parseLong(numericPart); // 14
+            }
+            if (count == 0L) {
+                return usernameBuilder.toString() + 2; //vi du GiangDV -> GiangDV2
+            } else {
+                return usernameBuilder.toString() + (count + 1);
+            }
         } else {
-            return usernameBuilder.toString() + (count + 1);
+            return usernameBuilder.toString();
         }
+
+
     }
 
 

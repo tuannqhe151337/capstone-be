@@ -196,7 +196,8 @@ public class SeedConfiguration {
                     .email("mailho21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
-
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .build();
 
             User user2 = User.builder()
@@ -205,8 +206,9 @@ public class SeedConfiguration {
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(financeDepartment)
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .position(techlead)
-
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                       .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
@@ -223,7 +225,9 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Emailh23@gmail.com")
                     .address("Ha Noi ")
+                    .phoneNumber("0999988877")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .isDelete(false)
                     .build();
 
             User user4 = User.builder()
@@ -234,8 +238,9 @@ public class SeedConfiguration {
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-
+                    .isDelete(false)
                     .email("Emaifl2h3@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
@@ -249,8 +254,10 @@ public class SeedConfiguration {
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .isDelete(false)
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));

@@ -49,6 +49,7 @@ public class User extends BaseEntity {
 
     @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
     @Column(name = "phone_number")
+    @NotEmpty(message = "Password cannot be empty")
     private String phoneNumber;
 
     @Size(max = 200, message = "Address must be less than 200 characters")
@@ -82,7 +83,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = FinancialPlanFile_.USER)
     private List<FinancialPlanFile> financialPlanFiles;
 
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private Boolean isDelete = false;
+
+
+
 }
