@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
@@ -11,12 +12,15 @@ import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +85,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     {
                         listVersions.forEach(
                                 version -> {
-                                    if (Objects.equals(plan.getId(), version.getPlanId())){
+                                    if (Objects.equals(plan.getId(), version.getPlanId())) {
                                         plan.setVersion(version.getVersion());
                                     }
                                 }
@@ -92,6 +96,24 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             return listResult;
         }
         return null;
+    }
+
+    @Override
+    public FinancialPlan deletePlan(DeletePlanBody planBody) {
+        // Check authorization
+        if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
+
+            FinancialPlan financialPlan = planRepository.findById(planBody.getPlanId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Not found any plan have id = " + planBody.getPlanId()));
+
+            financialPlan.setDelete(true);
+
+            planRepository.save(financialPlan);
+
+            return financialPlan;
+        } else {
+            return null;
+        }
     }
 
 }
