@@ -88,6 +88,11 @@ public class SeedConfiguration {
                     .code("A-006")
                     .name("Deactivate user")
                     .build();
+//view user detail missing
+            Authority viewUserDetail = Authority.builder()
+                    .code("A-007")
+                    .name("view user detail")
+                    .build();
 
             Authority createTerm = Authority.builder()
                     .code("B-001")
@@ -164,7 +169,7 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewUserDetail, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -187,6 +192,7 @@ public class SeedConfiguration {
             // User
             User user1 = User.builder()
                     .username("username1")
+                    .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(accountingDepartment)
@@ -194,60 +200,74 @@ public class SeedConfiguration {
                     .phoneNumber("0922832938")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+                    .email("mailho21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
 
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .build();
 
             User user2 = User.builder()
                     .username("username2")
+                    .fullName("Sitchana Jaejan")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(financeDepartment)
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
                     .username("username3")
+                    .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Emailh23@gmail.com")
                     .address("Ha Noi ")
+                    .phoneNumber("0999988877")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .isDelete(false)
                     .build();
 
             User user4 = User.builder()
                     .username("username4")
+                    .fullName("Choi Woo-je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-
-                    .email("Email23@gmail.com")
+                    .isDelete(false)
+                    .email("Emaifl2h3@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user5 = User.builder()
                     .username("username5")
+                    .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Email23u@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .isDelete(false)
                     .build();
+
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
 
@@ -300,6 +320,7 @@ public class SeedConfiguration {
                     .authority(viewListUsers)
                     .build();
 
+
             RoleAuthority adminAuthority3 = RoleAuthority.builder()
                     .role(admin)
                     .authority(deleteUser)
@@ -318,6 +339,11 @@ public class SeedConfiguration {
             RoleAuthority adminAuthority6 = RoleAuthority.builder()
                     .role(admin)
                     .authority(deactivateUser)
+                    .build();
+
+            RoleAuthority adminAuthority7 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(viewUserDetail)
                     .build();
 
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
@@ -395,6 +421,12 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
+            RoleAuthority accountAuthority16 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(viewUserDetail)
+                    .build();
+
+
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(createTerm)
@@ -464,10 +496,14 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .authority(downloadAnnualReport)
                     .build();
+            RoleAuthority financialStaffAuthority15 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(viewUserDetail)
+                    .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountAuthority16,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
         };
     }

@@ -84,5 +84,5 @@ public class User extends BaseEntity {
 
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private Boolean isDelete = false;
 }

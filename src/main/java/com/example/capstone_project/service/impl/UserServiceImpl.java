@@ -6,12 +6,14 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -43,6 +45,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long userId) {
+        long actorId = UserHelper.getUserId();
+        User userActor =  userRepository.findById(actorId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + actorId));
+
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())
+                || userActor.getIsDelete() == true){
+          throw new UnauthorizedException("Unauthorized to view user details");
+        }
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
     }
