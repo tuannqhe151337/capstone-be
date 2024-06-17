@@ -46,9 +46,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long userId) {
         long actorId = UserHelper.getUserId();
-        User userActor =  userRepository.findById(actorId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + actorId));
-
         if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
           throw new UnauthorizedException("Unauthorized to view user details");
         }
