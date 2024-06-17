@@ -49,8 +49,7 @@ public class UserServiceImpl implements UserService {
         User userActor =  userRepository.findById(actorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + actorId));
 
-        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())
-                || userActor.getIsDelete() == true){
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
           throw new UnauthorizedException("Unauthorized to view user details");
         }
         return userRepository.findById(userId)
