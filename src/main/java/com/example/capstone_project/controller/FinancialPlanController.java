@@ -17,14 +17,15 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -261,26 +262,23 @@ public class FinancialPlanController {
     }
 
     @GetMapping("/plan-status")
-    public ResponseEntity<Responses<StatusResponse>> getListStatusPaging() {
-        Responses<StatusResponse> responses = new Responses<>();
-        responses.setData(List.of(
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("New")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(2L)
-                        .name("Waiting for reviewed")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Approved")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Reviewed")
-                        .build()
-        ));
+    public ResponseEntity<ListResponse<StatusResponse>> getListStatusPaging() {
+        // Get data
+        List<PlanStatus> costTypes = planService.getListPlanStatus();
+
+        // Response
+        ListResponse<StatusResponse> responses = new ListResponse<>();
+
+        if (costTypes != null) {
+
+            // Mapping to CostTypeResponse
+            responses.setData(costTypes.stream().map(status -> {
+                return new PlanStatusMapperImpl().mapToStatusResponseMapping(status);
+            }).toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
 
         return ResponseEntity.ok(responses);
     }

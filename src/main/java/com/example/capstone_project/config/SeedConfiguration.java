@@ -8,7 +8,6 @@ import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -521,7 +520,7 @@ public class SeedConfiguration {
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
                     .name("Waiting for reviewed")
-                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
+                    .code(PlanStatusCode.WAITING_FOR_REVIEWED)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
@@ -532,7 +531,7 @@ public class SeedConfiguration {
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
-                    .name("Denied")
+                    .name("Approved")
                     .code(PlanStatusCode.APPROVED)
                     .build();
 
