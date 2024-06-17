@@ -1,8 +1,9 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
@@ -21,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +41,7 @@ public class FinancialPlanController {
 
     private final JwtHelper jwtHelper;
     @GetMapping("/list")
-    public ResponseEntity<ListResponse<PlanResponse>> getListPlan(
+    public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
@@ -49,8 +51,8 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ){
-        ListResponse<PlanResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<PlanResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 PlanResponse.builder()
                         .id(1L)
                         .name("BU name_term_plan")
@@ -79,18 +81,18 @@ public class FinancialPlanController {
                         .version("V2").build()
                 ));
 
-        listResponse.setPagination(Pagination.builder()
-                .count(100)
+        listPaginationResponse.setPagination(Pagination.builder()
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
     @GetMapping("expenses")
-    public ResponseEntity<ListResponse<ExpenseResponse>> getListExpense(
+    public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = false) Integer termId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
@@ -100,8 +102,8 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListResponse<ExpenseResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<ExpenseResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 ExpenseResponse.builder()
                         .expenseId(1L)
                         .name("Promotion event")
@@ -150,14 +152,14 @@ public class FinancialPlanController {
                         .build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
-                .count(100)
+        listPaginationResponse.setPagination(Pagination.builder()
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
     @GetMapping("/detail")
@@ -269,15 +271,15 @@ public class FinancialPlanController {
     }
 
     @GetMapping("versions")
-    public ResponseEntity<ListResponse<VersionResponse>> getListVersion(
+    public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
             @RequestParam Integer planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ){
-        ListResponse<VersionResponse> listResponse = new ListResponse<>();
-        listResponse.setData(List.of(
+        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
+        listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
                         .version("v1")
                         .publishedDate(LocalDate.of(2024,4,10))
@@ -298,14 +300,14 @@ public class FinancialPlanController {
                                 .username("Anhln").build()).build()
         ));
 
-        listResponse.setPagination(Pagination.builder()
-                .count(100)
+        listPaginationResponse.setPagination(Pagination.builder()
+                .totalRecords(2222)
                 .page(10)
-                .displayRecord(0)
+                .limitRecordsPerPage(33)
                 .numPages(1)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(listPaginationResponse);
     }
 
 
@@ -316,5 +318,13 @@ public class FinancialPlanController {
     {
         System.out.println(planBody.toString());
         return ResponseEntity.ok("id " + planBody.getPlanId());
+    }
+
+    @PutMapping("/re-upload")
+    private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
+            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
+            ){
+
+        return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }
 }
