@@ -21,7 +21,6 @@ public interface PlanDetailMapper {
     @Mapping(expression = "java(planDetailResult.getDepartmentName())", target = "department.name")
     @Mapping(expression = "java(planDetailResult.getUserId())", target = "user.userId")
     @Mapping(expression = "java(planDetailResult.getUsername())", target = "user.username")
-    @Mapping(expression = "java(planDetailResult.getVersion())", target = "version")
     PlanDetailResponse mapToPlanDetailResponseMapping(PlanDetailResult planDetailResult);
 
 }

@@ -2,21 +2,18 @@ package com.example.capstone_project.utils.mapper.plan.create;
 
 import com.example.capstone_project.controller.body.plan.create.ExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.controller.responses.term.get.TermDetailResponse;
-import com.example.capstone_project.controller.responses.term.get.TermStatusResponse;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.PlanStatusCode;
-import com.example.capstone_project.utils.enums.TermCode;
 import org.mapstruct.Mapper;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CreatePlanMapper {
-    default FinancialPlan mapPlanBodyToPlanMapping(NewPlanBody newPlanBody, AccessTokenClaim tokenClaim) {
+    default FinancialPlan mapPlanBodyToPlanMapping(NewPlanBody newPlanBody, Long departmentId, Long userId) {
+        // Get user detail
+
+
         FinancialPlan plan = new FinancialPlan();
 
         plan.setName(newPlanBody.getPlanName());
@@ -26,40 +23,45 @@ public interface CreatePlanMapper {
                 .build());
 
 
-        plan.setDepartment(Department.builder().id(tokenClaim.getDepartmentId()).build());
+        plan.setDepartment(Department.builder().id(departmentId).build());
 
         plan.setStatus(PlanStatus.builder()
                 .id(1L)
                 .build());
 
-        List<FinancialPlanExpense> expenses =mapExpenseBodyToExpense(newPlanBody.getExpenses(),newPlanBody);
+        List<FinancialPlanExpense> expenses = mapExpenseBodyToExpense(newPlanBody.getExpenses(), newPlanBody);
 
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
-        expenses.forEach(expense ->{
+
+        FinancialPlanFile file = FinancialPlanFile.builder()
+                .plan(plan)
+                .name(newPlanBody.getFileName())
+                .user(User.builder().id(userId).build())
+                .planFileExpenses(expenseFile)
+                .build();
+
+        expenses.forEach(expense -> {
             expenseFile.add(FinancialPlanFileExpense.builder()
-                    .planExpense(expense).build());
+                    .planExpense(expense)
+                    .file(file)
+                    .build());
         });
 
         List<FinancialPlanFile> files = new ArrayList<>();
 
-        files.add(FinancialPlanFile.builder()
-                        .name(newPlanBody.getFileName())
-                        .version("v1")
-                        .user(User.builder().id(tokenClaim.getUserId()).build())
-                        .planFileExpenses(expenseFile)
-                        .build());
+        files.add(file);
 
         plan.setPlanFiles(files);
 
         return plan;
     }
 
-    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody){
+    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody) {
         List<FinancialPlanExpense> planExpenses = new ArrayList<>();
         for (int i = 0; i < expenseBodies.size(); i++) {
             ExpenseBody expenseBody = expenseBodies.get(i);
             planExpenses.add(FinancialPlanExpense.builder()
-                    .planExpenseKey(planBody.getFileName()+"_"+(i+1))
+                    .planExpenseKey(planBody.getFileName() + "_" + (i + 1))
                     .name(expenseBody.getName())
                     .unitPrice(expenseBody.getUnitPrice())
                     .amount(expenseBody.getAmount())

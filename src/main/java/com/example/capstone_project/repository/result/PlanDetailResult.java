@@ -19,5 +19,4 @@ public interface PlanDetailResult {
      String getDepartmentName();
      Long getUserId();
      String getUsername();
-     String getVersion();
 }

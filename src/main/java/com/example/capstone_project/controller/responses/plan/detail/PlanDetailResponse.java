@@ -24,5 +24,5 @@ public class PlanDetailResponse {
     private LocalDateTime createdAt;
     private DepartmentResponse department;
     private UserResponse user;
-    private String version;
+    private Integer version;
 }

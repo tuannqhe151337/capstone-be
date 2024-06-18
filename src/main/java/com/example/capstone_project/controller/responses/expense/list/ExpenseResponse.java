@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class ExpenseResponse {
-    private long expenseId;
+    private Long expenseId;
     private String name;
     private CostTypeResponse costType;
     private BigDecimal unitPrice;
-    private int amount;
+    private Integer amount;
     private String projectName;
     private String supplierName;
     private String pic;

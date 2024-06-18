@@ -1,8 +1,12 @@
 package com.example.capstone_project.utils.helper;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+
+import java.util.List;
 
 
 public class PaginationHelper {
@@ -73,4 +77,32 @@ public class PaginationHelper {
             };
         }
     }
+
+    public static Pageable handlingPaginationWithMultiSort(Integer page, Integer size, List<CustomSort> sorts){
+
+        // Handling page and pageSize
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+
+        if (size == null || size <= 0) {
+            size = 10;
+        }
+
+        if (sorts.isEmpty()) {
+            return handlingPagination(page, size, "","");
+        } else {
+            return PageRequest.of(page, size, Sort.by(
+                    sorts.stream().map(sort-> switch (sort.getSortType().toLowerCase()){
+                        case "desc", "descending" -> Sort.Order.desc(sort.getSortBy());
+                        default -> Sort.Order.asc(sort.getSortBy());
+                    }).toList()
+            ));
+        }
+    }
+    //Convert a LIST to a PAGE
+    public static <T> Page<T> createPage(List<T> list, PageRequest pageRequest) {
+        return new PageImpl<>(list, pageRequest, list.size());
+    }
+
 }

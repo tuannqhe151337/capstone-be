@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum PlanStatusCode {
-    NEW("New"),
-    WAITING_FOR_REVIEW("Waiting for review"),
-    APPROVED("Approved"),
-    REVIEWED("Reviewed");
+    NEW("new"),
+    WAITING_FOR_REVIEW("waiting-for-review"),
+    APPROVED("approved"),
+    REVIEWED("reviewed");
 
     private final String value;
     PlanStatusCode(String value) {
