@@ -2,6 +2,7 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cglib.core.Local;
@@ -25,9 +26,32 @@ public class SeedConfiguration {
             RoleAuthorityRepository roleAuthorityRepository,
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
-            UserSettingRepository userSettingRepository
+            UserSettingRepository userSettingRepository,
+            TermStatusRepository termStatusRepository
     ) {
         return args -> {
+            //Term Status - fixed code
+            TermStatus termStatus = TermStatus.
+                    builder()
+                    .id(1L).
+                    name("Not started")
+                    .code(TermCode.NOT_STARTED).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus2 = TermStatus.
+                    builder()
+                    .id(2L).
+                    name("In progress")
+                    .code(TermCode.IN_PROGRESS).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus3 = TermStatus.
+                    builder()
+                    .id(3L).
+                    name("Closed")
+                    .code(TermCode. CLOSED).build();
+
+            termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
             Department softwareDevelopmentDepartment = Department.builder()
                     .name("Software development")
