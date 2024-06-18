@@ -1,0 +1,16 @@
+package com.example.capstone_project.utils.enums;
+
+import lombok.Getter;
+
+@Getter
+public enum PlanStatusCode {
+    NEW("new"),
+    WAITING_FOR_REVIEW("waiting-for-review"),
+    APPROVED("approved"),
+    REVIEWED("reviewed");
+
+    private final String value;
+    PlanStatusCode(String value) {
+        this.value = value;
+    }
+}

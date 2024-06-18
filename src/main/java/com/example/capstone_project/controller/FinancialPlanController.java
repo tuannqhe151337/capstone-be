@@ -3,6 +3,8 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
+import com.example.capstone_project.controller.responses.CustomSort;
+import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
@@ -11,16 +13,25 @@ import com.example.capstone_project.controller.responses.expense.list.ExpenseRes
 import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.TermResponse;
-import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
-import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
+import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
+import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.entity.UserDetail;
+import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,55 +51,59 @@ import java.util.List;
 public class FinancialPlanController {
 
     private final JwtHelper jwtHelper;
+    private final FinancialPlanService planService;
+
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
-            @RequestParam(required = false) Integer termId,
-            @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Long termId,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
-        ListPaginationResponse<PlanResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                PlanResponse.builder()
-                        .id(1L)
-                        .name("BU name_term_plan")
-                        .status(StatusResponse.builder()
-                                .statusId(1L)
-                                .name("New").build())
-                        .term(TermResponse.builder()
-                                .termId(1L)
-                                .name("Term name 1").build())
-                        .department(DepartmentResponse.builder()
-                                .departmentId(1L)
-                                .name("BU 1").build())
-                        .version("V1").build(),
-                PlanResponse.builder()
-                        .id(2L)
-                        .name("BU name_term_plan")
-                        .status(StatusResponse.builder()
-                                .statusId(2L)
-                                .name("Approved").build())
-                        .term(TermResponse.builder()
-                                .termId(1L)
-                                .name("Term name 1").build())
-                        .department(DepartmentResponse.builder()
-                                .departmentId(2L)
-                                .name("BU 2").build())
-                        .version("V2").build()
-                ));
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
-                .page(10)
-                .limitRecordsPerPage(33)
-                .numPages(1)
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Get data
+        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
+
+        // Response
+        ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (plans != null) {
+            // Count total record
+            count = planService.countDistinct(query, termId, departmentId, statusId);
+
+            for (FinancialPlan plan : plans) {
+                //mapperToPlanResponse
+                response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listPaginationResponse);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("expenses")
@@ -165,7 +180,7 @@ public class FinancialPlanController {
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
             @RequestParam Integer planId
-    ){
+    ) {
         return ResponseEntity.ok(PlanDetailResponse.builder()
                 .id(1L)
                 .name("Plan name")
@@ -204,10 +219,10 @@ public class FinancialPlanController {
         Sheet sheet = wb.getSheet("Expense");
 
         String[][] tableData = {
-                {"Code Expense 1","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
-                {"Code Expense 2","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
-                {"Code Expense 3","31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
-                {"Code Expense 4","31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
+                {"Code Expense 1", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
+                {"Code Expense 2", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
+                {"Code Expense 3", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
+                {"Code Expense 4", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
         };
 
         Row row = null;
@@ -216,11 +231,11 @@ public class FinancialPlanController {
         int rowPosition = 2;
         int colPosition = 0;
 
-        for (int i = 0; i<tableData.length; i++){
-            row = sheet.getRow(i+rowPosition);
+        for (int i = 0; i < tableData.length; i++) {
+            row = sheet.getRow(i + rowPosition);
 
-            for (int j = 0; j<tableData[0].length;j++){
-                cell = row.getCell(j+colPosition);
+            for (int j = 0; j < tableData[0].length; j++) {
+                cell = row.getCell(j + colPosition);
 
                 cell.setCellValue(tableData[i][j]);
             }
@@ -282,7 +297,7 @@ public class FinancialPlanController {
         listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
                         .version("v1")
-                        .publishedDate(LocalDate.of(2024,4,10))
+                        .publishedDate(LocalDate.of(2024, 4, 10))
                         .uploadedBy(UserResponse.builder()
                                 .userId(1L)
                                 .username("Anhln").build()).build(),
@@ -311,11 +326,9 @@ public class FinancialPlanController {
     }
 
 
-
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
-            @Validated @RequestBody DeletePlanBody planBody)
-    {
+            @Validated @RequestBody DeletePlanBody planBody) {
         System.out.println(planBody.toString());
         return ResponseEntity.ok("id " + planBody.getPlanId());
     }
@@ -323,7 +336,7 @@ public class FinancialPlanController {
     @PutMapping("/re-upload")
     private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
             @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
-            ){
+    ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
     }
