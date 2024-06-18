@@ -421,11 +421,6 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
-            RoleAuthority accountAuthority16 = RoleAuthority.builder()
-                    .role(accountant)
-                    .authority(viewUserDetail)
-                    .build();
-
 
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
@@ -496,14 +491,11 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .authority(downloadAnnualReport)
                     .build();
-            RoleAuthority financialStaffAuthority15 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(viewUserDetail)
-                    .build();
+
 
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountAuthority16,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
         };
     }
