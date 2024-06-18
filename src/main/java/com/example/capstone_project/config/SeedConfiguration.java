@@ -3,6 +3,7 @@ package com.example.capstone_project.config;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.CostTypeCode;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,8 @@ public class SeedConfiguration {
             FinancialPlanRepository planRepository,
             TermRepository termRepository,
             TermStatusRepository termStatusRepository,
-            PlanStatusRepository planStatusRepository
+            PlanStatusRepository planStatusRepository,
+            CostTypeRepository costTypeRepository
     ) {
         return args -> {
             //Term Status - fixed code
@@ -245,7 +247,7 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
@@ -648,6 +650,38 @@ public class SeedConfiguration {
                     .build();
 
             planRepository.saveAll(List.of(financialPlan1,financialPlan2,financialPlan3,financialPlan4,financialPlan5));
+
+            CostType costType1 = CostType.builder()
+                    .name("Administration cost")
+                    .code(CostTypeCode.ADMINISTRATION_COSTS)
+                    .build();
+
+            CostType costType2 = CostType.builder()
+                    .name("Direct costs")
+                    .code(CostTypeCode.DIRECT_COSTS)
+                    .build();
+
+            CostType costType3 = CostType.builder()
+                    .name("Indirect cost")
+                    .code(CostTypeCode.INDIRECT_COSTS)
+                    .build();
+
+            CostType costType4 = CostType.builder()
+                    .name("Operating costs")
+                    .code(CostTypeCode.OPERATING_COSTS)
+                    .build();
+
+            CostType costType5 = CostType.builder()
+                    .name("Maintenance costs")
+                    .code(CostTypeCode.MAINTENANCE_COSTS)
+                    .build();
+
+            CostType costType6 = CostType.builder()
+                    .name("Manufacturing costs")
+                    .code(CostTypeCode.MANUFACTURING_COSTS)
+                    .build();
+
+            costTypeRepository.saveAll(List.of(costType1, costType2, costType3, costType4, costType5, costType6));
         };
     }
 }

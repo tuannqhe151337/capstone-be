@@ -1,8 +1,6 @@
 package com.example.capstone_project.entity;
 
-import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.util.List;

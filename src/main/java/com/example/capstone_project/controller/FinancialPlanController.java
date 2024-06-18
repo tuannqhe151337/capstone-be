@@ -95,7 +95,6 @@ public class FinancialPlanController {
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
-
         response.setPagination(Pagination.builder()
                 .totalRecords(count)
                 .page(pageInt)
@@ -324,7 +323,6 @@ public class FinancialPlanController {
 
         return ResponseEntity.ok(listPaginationResponse);
     }
-
 
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(

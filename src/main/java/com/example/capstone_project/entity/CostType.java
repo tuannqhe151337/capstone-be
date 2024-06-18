@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.CostTypeCode;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,8 +22,12 @@ public class CostType extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", unique = true)
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "code", unique = true)
+    @Enumerated(EnumType.STRING)
+    private CostTypeCode code;
 
     @OneToMany(mappedBy = Report_.COST_TYPE)
     private List<Report> reports;
