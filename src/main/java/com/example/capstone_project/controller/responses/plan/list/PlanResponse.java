@@ -6,6 +6,8 @@ import com.example.capstone_project.controller.responses.plan.TermResponse;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class PlanResponse {
@@ -15,4 +17,6 @@ public class PlanResponse {
     private StatusResponse status;
     private DepartmentResponse department;
     private String version;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

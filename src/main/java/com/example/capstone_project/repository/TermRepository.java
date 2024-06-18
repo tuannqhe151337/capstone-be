@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.Term;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +23,6 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
     long countDistinctListTermPaging(@Param("query") String query);
 
     //crud term
+
 
 }
