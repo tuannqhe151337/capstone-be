@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(CreateUserBody createUserBody) throws Exception {
+    public void createUser(User user) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();
 
@@ -97,47 +97,44 @@ public class UserServiceImpl implements UserService {
         } else {
             //register user
             //check email exist
-            String email = createUserBody.getEmail();
+            String email = user.getEmail();
 
             //Optional<User> user = userRepository.findUserByEmail(email);
             if ( userRepository.existsByEmail(email) ) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
             //check department
-            if(!departmentRepository.existsById(createUserBody.getDepartmentId())){
+            if(!departmentRepository.existsById(user.getDepartment().getId())){
                 throw new InvalidDepartmentIdException("Department does not exist");
             }
-            if(!positionRepository.existsById(createUserBody.getPositionId())){
+            if(!positionRepository.existsById(user.getPosition().getId())){
                 throw new InvalidPositiontIdException("Position does not exist");
             }
-            if(!roleRepository.existsById(createUserBody.getRoleId())){
+            if(!roleRepository.existsById(user.getRole().getId())){
                 throw new InvalidRoleIdException("Role does not exist");
             }
 
-            //convert from userDTO => user
-            User newUser = new CreateUserBodyMapperImpl().mapBodytoUser(createUserBody);
 
             //generate random password
             String password = generatePassayPassword();
-            newUser.setPassword(this.passwordEncoder.encode(password));
+            user.setPassword(this.passwordEncoder.encode(password));
 
-            newUser.setUsername(generateUsernameFromFullName(createUserBody.getFullName()));
-            newUser.setIsDelete(false);
+            user.setUsername(generateUsernameFromFullName(user.getFullName()));
+            user.setIsDelete(false);
 
-            userRepository.save(newUser);
+            userRepository.save(user);
 
             //create user setting
             UserSetting userSetting = UserSetting.builder()
                     .language("en")
                     .theme("blue")
                     .darkMode(false)
-                    .user(newUser)
+                    .user(user)
                     .build();
             userSettingRepository.save(userSetting);
 
-            mailRepository.sendEmail(newUser.getEmail(), newUser.getFullName(), newUser.getUsername(), password);
+            mailRepository.sendEmail(user.getEmail(), user.getFullName(), user.getUsername(), password);
 
-            return newUser;
         }
 
     }

@@ -94,7 +94,9 @@ public class UserController {
     @PostMapping
     public ResponseEntity<Object> createUser(@Valid @RequestBody CreateUserBody userBody, BindingResult result) {
         try {
-            User user = userService.createUser(userBody);
+//convert from userDTO => user
+            User newUser = new CreateUserBodyMapperImpl().mapBodytoUser(userBody);
+            userService.createUser(newUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);

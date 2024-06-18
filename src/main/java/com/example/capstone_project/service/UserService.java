@@ -15,7 +15,7 @@ public interface UserService {
 
     long countDistinct(String query);
 
-    User createUser(CreateUserBody user) throws Exception;
+    void createUser(User user) throws Exception;
 
     User getUserById(Long userId);
 
