@@ -8,4 +8,5 @@ import lombok.Data;
 public class CostTypeResponse {
     private long costTypeId;
     private String name;
+    private String code;
 }
