@@ -2,6 +2,7 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cglib.core.Local;
@@ -25,9 +26,32 @@ public class SeedConfiguration {
             RoleAuthorityRepository roleAuthorityRepository,
             DepartmentRepository departmentRepository,
             PositionRepository positionRepository,
-            UserSettingRepository userSettingRepository
+            UserSettingRepository userSettingRepository,
+            TermStatusRepository termStatusRepository
     ) {
         return args -> {
+            //Term Status - fixed code
+            TermStatus termStatus = TermStatus.
+                    builder()
+                    .id(1L).
+                    name("Not started")
+                    .code(TermCode.NOT_STARTED).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus2 = TermStatus.
+                    builder()
+                    .id(2L).
+                    name("In progress")
+                    .code(TermCode.IN_PROGRESS).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus3 = TermStatus.
+                    builder()
+                    .id(3L).
+                    name("Closed")
+                    .code(TermCode. CLOSED).build();
+
+            termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
             Department softwareDevelopmentDepartment = Department.builder()
                     .name("Software development")
@@ -203,7 +227,6 @@ public class SeedConfiguration {
                     .email("mailho21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
-
                     .isDelete(false)
                     .phoneNumber("0999988877")
                     .build();
@@ -218,6 +241,7 @@ public class SeedConfiguration {
                     .phoneNumber("0999988877")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .email("Emoaihl23@gmail.com")
                     .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
@@ -267,7 +291,6 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .isDelete(false)
                     .build();
-
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
 
@@ -319,7 +342,6 @@ public class SeedConfiguration {
                     .role(admin)
                     .authority(viewListUsers)
                     .build();
-
 
             RoleAuthority adminAuthority3 = RoleAuthority.builder()
                     .role(admin)
@@ -421,7 +443,6 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
-
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(createTerm)
@@ -492,8 +513,7 @@ public class SeedConfiguration {
                     .authority(downloadAnnualReport)
                     .build();
 
-
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14
             ));
