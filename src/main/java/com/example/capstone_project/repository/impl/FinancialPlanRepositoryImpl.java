@@ -29,7 +29,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 " LEFT JOIN plan.planFiles " +
                 " LEFT JOIN plan.status status" +
                 " WHERE plan.name like :query AND " +
-                " (:termId IS NULL OR plan.status.id = :termId) AND " +
+                " (:termId IS NULL OR plan.term.id = :termId) AND " +
                 " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
                 " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
                 " (plan.isDelete = false OR plan.isDelete is null) " +

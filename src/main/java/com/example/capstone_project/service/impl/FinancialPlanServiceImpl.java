@@ -1,6 +1,7 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.responses.CustomSort;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
@@ -31,7 +32,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserDetailRepository userDetailRepository;
 
     @Override
-    public long countDistinct(String query, Long termId, Long departmentId, Long statusId) {
+    public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority or role
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+                && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+        }
+
         return planRepository.countDistinct(query, termId, departmentId, statusId);
     }
 
@@ -40,9 +53,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
+
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
-        System.out.println("DepartmentId :" + userDetail.getDepartmentId());
+
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
 
@@ -81,7 +95,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     {
                         listVersions.forEach(
                                 version -> {
-                                    if (Objects.equals(plan.getId(), version.getPlanId())){
+                                    if (Objects.equals(plan.getId(), version.getPlanId())) {
                                         plan.setVersion(version.getVersion());
                                     }
                                 }

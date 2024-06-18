@@ -55,7 +55,6 @@ public class FinancialPlanController {
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
-            @RequestHeader("Authorization") String accessToken,
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) Long statusId,
