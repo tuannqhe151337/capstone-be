@@ -1,6 +1,8 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
+import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.entity.Authority;
 import com.example.capstone_project.entity.User;
@@ -37,6 +39,8 @@ public class AuthService {
 
     private final UserAuthorityRepository userAuthorityRepository;
 
+    private final UserDetailRepository userDetailRepository;
+
     public LoginResult login(String username, String password) throws Exception {
         // Login using authentication provider
         Authentication usernamePasswordAuthenticationToken = this.authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(username, password));
@@ -47,13 +51,18 @@ public class AuthService {
 
         // Get user and all authorities
         int userId = Integer.parseInt(usernamePasswordAuthenticationToken.getPrincipal().toString());
-        final User user = this.getDetailedUserById(userId);
+        final User user = this.getDetailedUserByIdFromDatabase(userId);
 
-        // Save authorities to redis
+        // Save to redis
         this.saveUserAuthoritiesToRedis(userId, user.getAuthorities());
+        this.saveUserDetailToRedis(userId, UserDetail.builder()
+                        .departmentId(user.getDepartment().getId())
+                        .roleCode(user.getRole().getCode())
+                        .build()
+        );
 
         // Generate token
-        String accessToken = this.jwtHelper.generateAccessToken(userId, user.getRole().getCode(), user.getDepartment().getId());
+        String accessToken = this.jwtHelper.generateAccessToken(userId);
         String refreshToken = this.jwtHelper.generateRefreshToken(userId);
 
         return LoginResult.builder()
@@ -77,15 +86,20 @@ public class AuthService {
             throw new Exception();
         }
 
-        // Get user and authorities
-        final User user = this.getUserWithRoleAndDepartmentAndAuthoritiesById(userIdFromToken);
+        // Get user and authorities and role and department
+        final User user = this.getUserWithRoleAndDepartmentAndAuthoritiesByIdFromDatabase(userIdFromToken);
 
-        // Save authorities to redis
-        this.saveUserAuthoritiesToRedis(userIdFromToken, user.getAuthorities());
+        // Save to redis
+        this.saveUserAuthoritiesToRedis(user.getId(), user.getAuthorities());
+        this.saveUserDetailToRedis(user.getId(), UserDetail.builder()
+                .departmentId(user.getDepartment().getId())
+                .roleCode(user.getRole().getCode())
+                .build()
+        );
 
         // Generate token
         TokenPair tokenPair = TokenPair.builder()
-                .accessToken(this.jwtHelper.generateAccessToken(userIdFromToken, user.getRole().getCode(), user.getDepartment().getId()))
+                .accessToken(this.jwtHelper.generateAccessToken(userIdFromToken))
                 .refreshToken(this.jwtHelper.generateRefreshToken(userIdFromToken))
                 .build();
 
@@ -98,15 +112,16 @@ public class AuthService {
     public void logout(String accessToken) {
         accessToken = accessToken.substring(7); // Remove Bearer
 
-        // Remove user authorities from redis
+        // Remove user authorities and data from redis
         final int userId = this.jwtHelper.extractUserIdFromAccessToken(accessToken);
         this.userAuthorityRepository.delete(userId);
+        this.userDetailRepository.delete(userId);
 
         // Add the accessToken into "blacklist"
         this.logoutTokenRepository.save(accessToken, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
     }
 
-    public User getDetailedUserById(int userId) throws Exception {
+    public User getDetailedUserByIdFromDatabase(int userId) throws Exception {
         // Get user
         Optional<User> userOptional = this.userRepository.findUserDetailedById((long) userId);
         if (userOptional.isEmpty()) {
@@ -129,7 +144,7 @@ public class AuthService {
         return user;
     }
 
-    private User getUserWithRoleAndDepartmentAndAuthoritiesById(int userId) throws Exception {
+    private User getUserWithRoleAndDepartmentAndAuthoritiesByIdFromDatabase(long userId) throws Exception {
         // Get user
         Optional<User> userOptional = this.userRepository.findUserWithRoleAndDepartmentById((long) userId);
         if (userOptional.isEmpty()) {
@@ -152,12 +167,16 @@ public class AuthService {
         return user;
     }
 
-    private void saveUserAuthoritiesToRedis(int userId, List<Authority> authorities) {
+    private void saveUserAuthoritiesToRedis(long userId, List<Authority> authorities) {
         List<String> authoritiesCodes = new ArrayList<>();
         for (Authority authority: authorities) {
             authoritiesCodes.add(authority.getCode().getValue());
         }
 
         this.userAuthorityRepository.save(userId, authoritiesCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
+    }
+
+    private void saveUserDetailToRedis(long userId, UserDetail userDetail) {
+        this.userDetailRepository.save(userId, userDetail, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
     }
 }

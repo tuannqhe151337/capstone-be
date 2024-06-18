@@ -1,11 +1,16 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
+import com.example.capstone_project.entity.CostType;
+import com.example.capstone_project.service.CostTypeService;
+import com.example.capstone_project.utils.helper.JwtHelper;
+import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -13,27 +18,29 @@ import java.util.List;
 @RequestMapping("/api/cost-type")
 @RequiredArgsConstructor
 public class CostTypeController {
+    private final CostTypeService costTypeService;
 
     @GetMapping("/list")
-    public ResponseEntity<List<CostTypeResponse>> confirmExpense() {
-        return ResponseEntity.ok(List.of(
-                CostTypeResponse.builder()
-                        .costTypeId(1L)
-                        .name("Direct cost")
-                        .build(),
-                CostTypeResponse.builder()
-                        .costTypeId(2L)
-                        .name("Administration cost")
-                        .build(),
-                CostTypeResponse.builder()
-                        .costTypeId(3L)
-                        .name("Coty type 3")
-                        .build(),
-                CostTypeResponse.builder()
-                        .costTypeId(4L)
-                        .name("Cost type 4")
-                        .build()
-        ));
+    public ResponseEntity<ListResponse<CostTypeResponse>> getListCostType() {
+
+        // Get data
+        List<CostType> costTypes = costTypeService.getListCostType();
+
+        // Response
+        ListResponse<CostTypeResponse> responses = new ListResponse<>();
+
+        if (costTypes != null) {
+
+            // Mapping to CostTypeResponse
+            responses.setData(costTypes.stream().map(x -> {
+                return new CostTypeMapperImpl().mapToCostTypeResponse(x);
+            }).toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok(responses);
     }
 
 }

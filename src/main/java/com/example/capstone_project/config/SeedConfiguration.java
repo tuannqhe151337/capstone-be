@@ -34,6 +34,28 @@ public class SeedConfiguration {
             ExpenseStatusRepository expenseStatusRepository
     ) {
         return args -> {
+            //Term Status - fixed code
+            TermStatus termStatus = TermStatus.
+                    builder()
+                    .id(1L).
+                    name("Not started")
+                    .code(TermCode.NOT_STARTED).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus2 = TermStatus.
+                    builder()
+                    .id(2L).
+                    name("In progress")
+                    .code(TermCode.IN_PROGRESS).build();
+
+            //Term Status - fixed code
+            TermStatus termStatus3 = TermStatus.
+                    builder()
+                    .id(3L).
+                    name("Closed")
+                    .code(TermCode.CLOSED).build();
+
+            termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
             Department softwareDevelopmentDepartment = Department.builder()
                     .name("Software development")
@@ -198,65 +220,77 @@ public class SeedConfiguration {
             // User
             User user1 = User.builder()
                     .username("username1")
+                    .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mail21@gmail.com")
+                    .email("mailho21@gmail.com")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
-
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .build();
 
             User user2 = User.builder()
                     .username("username2")
+                    .fullName("Sitchana Jaejan")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(financeDepartment)
+                    .isDelete(false)
+                    .phoneNumber("0999988877")
                     .position(techlead)
-
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
                     .build();
 
             User user3 = User.builder()
                     .username("username3")
+                    .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(financeDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Emailh23@gmail.com")
                     .address("Ha Noi ")
+                    .phoneNumber("0999988877")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .isDelete(false)
                     .build();
 
             User user4 = User.builder()
                     .username("username4")
+                    .fullName("Choi Woo-je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-
-                    .email("Email23@gmail.com")
+                    .isDelete(false)
+                    .email("Emaifl2h3@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user5 = User.builder()
                     .username("username5")
+                    .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
                     .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email23@gmail.com")
+                    .email("Email23u@gmail.com")
+                    .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .isDelete(false)
                     .build();
 
             userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
@@ -490,43 +524,27 @@ public class SeedConfiguration {
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
-            TermStatus status1 = TermStatus.builder()
-                    .id(1L)
-                    .name("New")
-                    .code(TermCode.NOT_STARTED)
-                    .build();
-
-            TermStatus status2 = TermStatus.builder()
-                    .id(2L)
-                    .name("In-Progress")
-                    .code(TermCode.IN_PROGRESS)
-                    .build();
-
-            TermStatus status3 = TermStatus.builder()
-                    .id(3L)
-                    .name("Close")
-                    .code(TermCode.CLOSED)
-                    .build();
-
-            termStatusRepository.saveAll(List.of(status1, status2, status3));
-
             PlanStatus planStatus1 = PlanStatus.builder()
                     .id(1L)
+                    .name("New")
                     .code(PlanStatusCode.NEW)
                     .build();
 
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
+                    .name("Waiting for reviewed")
                     .code(PlanStatusCode.WAITING_FOR_REVIEW)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
                     .id(3L)
+                    .name("Reviewed")
                     .code(PlanStatusCode.REVIEWED)
                     .build();
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
+                    .name("Denied")
                     .code(PlanStatusCode.APPROVED)
                     .build();
 
@@ -540,7 +558,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .user(user1)
-                    .status(status1)
+                    .status(termStatus)
                     .build();
 
             Term term2 = Term.builder()
@@ -551,7 +569,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
                     .user(user1)
-                    .status(status2)
+                    .status(termStatus2)
                     .build();
 
             Term term3 = Term.builder()
@@ -562,7 +580,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
                     .user(user2)
-                    .status(status3)
+                    .status(termStatus3)
                     .build();
 
             Term term4 = Term.builder()
@@ -573,7 +591,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
                     .user(user3)
-                    .status(status1)
+                    .status(termStatus)
                     .build();
 
             Term term5 = Term.builder()
@@ -584,7 +602,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .user(user4)
-                    .status(status2)
+                    .status(termStatus2)
                     .build();
 
             termRepository.saveAll(List.of(term1, term2, term3, term4, term5));
@@ -629,35 +647,35 @@ public class SeedConfiguration {
                     .status(planStatus1)
                     .build();
 
-            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
+            planRepository.saveAll(List.of(financialPlan1,financialPlan2,financialPlan3,financialPlan4,financialPlan5));
 
             CostType costType1 = CostType.builder()
-                    .id(1L)
+                    .name("Administration cost")
                     .code(CostTypeCode.ADMINISTRATION_COSTS)
                     .build();
 
             CostType costType2 = CostType.builder()
-                    .id(2L)
+                    .name("Direct costs")
                     .code(CostTypeCode.DIRECT_COSTS)
                     .build();
 
             CostType costType3 = CostType.builder()
-                    .id(3L)
+                    .name("Indirect cost")
                     .code(CostTypeCode.INDIRECT_COSTS)
                     .build();
 
             CostType costType4 = CostType.builder()
-                    .id(4L)
+                    .name("Operating costs")
                     .code(CostTypeCode.OPERATING_COSTS)
                     .build();
 
             CostType costType5 = CostType.builder()
-                    .id(5L)
+                    .name("Maintenance costs")
                     .code(CostTypeCode.MAINTENANCE_COSTS)
                     .build();
 
             CostType costType6 = CostType.builder()
-                    .id(6L)
+                    .name("Manufacturing costs")
                     .code(CostTypeCode.MANUFACTURING_COSTS)
                     .build();
 
@@ -687,4 +705,3 @@ public class SeedConfiguration {
         };
     }
 }
-

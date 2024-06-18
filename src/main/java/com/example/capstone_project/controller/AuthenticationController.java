@@ -42,7 +42,7 @@ public class AuthenticationController {
     public ResponseEntity<UserDataResponse> me() {
         try {
             int userId = UserHelper.getUserId();
-            User user = this.authService.getDetailedUserById(userId);
+            User user = this.authService.getDetailedUserByIdFromDatabase(userId);
 
             return ResponseEntity.ok(
                 new UserEntityDetailResponseMapperImpl().mapToUserDataResponse(user)
