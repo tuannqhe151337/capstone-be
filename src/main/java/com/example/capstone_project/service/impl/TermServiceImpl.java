@@ -1,6 +1,7 @@
 package com.example.capstone_project.service.impl;
 
 
+import com.example.capstone_project.repository.FinancialPlanRepository;
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
@@ -8,15 +9,15 @@ import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.helper.UserHelper;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
-@AllArgsConstructor
 public class TermServiceImpl implements TermService {
     private final TermRepository termRepository;
     private final UserAuthorityRepository userAuthorityRepository;
@@ -41,7 +42,8 @@ public class TermServiceImpl implements TermService {
     public List<Term> getListTermPaging(String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+            || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
             return termRepository.getListTermPaging(query, pageable);
 
         }

@@ -1,16 +1,14 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
-import com.example.capstone_project.controller.responses.term.paginate.TermPaginateResponse;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.service.DepartmentService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapper;
 import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,7 +28,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping("/plan-paging-department")
-    public ResponseEntity<ListResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
+    public ResponseEntity<ListPaginationResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -52,7 +51,7 @@ public class DepartmentController {
         List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
 
         // Response
-        ListResponse<DepartmentPaginateResponse> response = new ListResponse<>();
+        ListPaginationResponse<DepartmentPaginateResponse> response = new ListPaginationResponse<>();
 
         long count = 0;
 
@@ -71,45 +70,41 @@ public class DepartmentController {
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
-                .count(count)
+                .totalRecords(count)
                 .page(pageInt)
-                .displayRecord(sizeInt)
+                .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
 
         return ResponseEntity.ok(response);
-//        ListResponse<DepartmentPaginateResponse> listResponse = new ListResponse<>();
-//        listResponse.setData(List.of(
-//                DepartmentPaginateResponse.builder()
-//                        .departmentId(1L)
-//                        .name("Department 1")
-//                        .build(),
-//                DepartmentPaginateResponse.builder()
-//                        .departmentId(2L)
-//                        .name("Department 2")
-//                        .build(),
-//                DepartmentPaginateResponse.builder()
-//                        .departmentId(3L)
-//                        .name("Department 3")
-//                        .build(),
-//                DepartmentPaginateResponse.builder()
-//                        .departmentId(3L)
-//                        .name("Department 3")
-//                        .build(),
-//                DepartmentPaginateResponse.builder()
-//                        .departmentId(4L)
-//                        .name("Department 4")
-//                        .build()
-//        ));
-//
-//        listResponse.setPagination(Pagination.builder()
-//                .count(100)
-//                .page(10)
-//                .displayRecord(0)
-//                .numPages(1)
-//                .build());
-//
-//        return ResponseEntity.ok(listResponse);
     }
+
+    @GetMapping("/user-paging-department")
+    public ResponseEntity<ListResponse<DepartmentResponse>> getListDepartmentPagingUser() {
+        ListResponse<DepartmentResponse> departmentResponseList = new ListResponse<>();
+        departmentResponseList.setData(List.of(
+                DepartmentResponse.builder()
+                        .id(1L)
+                        .name("Department 1")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(2L)
+                        .name("Department 2")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(3L)
+                        .name("Department 3")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(3L)
+                        .name("Department 3")
+                        .build(),
+                DepartmentResponse.builder()
+                        .id(4L)
+                        .name("Department 4")
+                        .build()));
+        return ResponseEntity.ok(departmentResponseList);
+    }
+
 
 }
