@@ -3,12 +3,10 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlanExpense;
-import com.example.capstone_project.entity.FinancialPlan_;
-import com.example.capstone_project.entity.UserDetail;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanVersionResult;
@@ -34,6 +32,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanRepository planRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
+    private final TermRepository termRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
 
 
@@ -116,17 +115,29 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public void creatPlan(NewPlanBody planBody) throws Exception {
+    public FinancialPlan creatPlan(FinancialPlan plan) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
 
-        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), userId);
-
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())){
-            planRepository.save(plan);
+        // Check authorization
+        // Check any plan of user department is existing in this term
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue()) &&
+              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
+            return planRepository.save(plan);
+        } else {
+            return null;
         }
+    }
+
+    public UserDetail getUserDetail() throws Exception {
+        return userDetailRepository.get(UserHelper.getUserId());
+    }
+
+    @Override
+    public Term getTermById(Long termId) {
+        return termRepository.getReferenceById(termId);
     }
 }
