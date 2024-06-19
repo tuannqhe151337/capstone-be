@@ -3,6 +3,7 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -54,4 +55,6 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
 
 
     boolean existsByEmail(String email);
+
+
 }

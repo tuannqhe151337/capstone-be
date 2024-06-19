@@ -1,12 +1,14 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.repository.CustomDepartmentRepository;
 import com.example.capstone_project.repository.DepartmentRepository;
-import com.example.capstone_project.repository.redis.UserAuthorityRepository;
+
 import com.example.capstone_project.service.DepartmentService;
-import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.helper.UserHelper;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,11 +17,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
-    private final UserAuthorityRepository userAuthorityRepository;
+    private final CustomDepartmentRepository departmentCustomRepository;
 
     @Override
-    public List<Department> getAllDepartments() {
-        List<Department> departments = departmentRepository.findAllByOrderByNameAsc();
-        return departments;
+    public List<Department> getAllDepartments(String query, Pageable pageable) {
+        return departmentCustomRepository.getDepartmentWithPagination(query, pageable);
     }
+
+    @Override
+    public long countDistinct(String query) {
+        String queryPattern = "%" + query + "%";
+        return departmentRepository.countDistinct(queryPattern);
+    }
+
+
 }
