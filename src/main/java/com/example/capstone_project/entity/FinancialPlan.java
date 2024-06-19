@@ -1,7 +1,6 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.util.List;
@@ -21,6 +20,9 @@ public class FinancialPlan extends BaseEntity{
     @Column(name = "name")
     private String name;
 
+    @Transient
+    private Integer version;
+
     @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
     private List<FinancialPlanFile> planFiles;
 
@@ -38,7 +40,4 @@ public class FinancialPlan extends BaseEntity{
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
-
-    @NotEmpty(message = "Code cannot be empty")
-    private String code;
 }
