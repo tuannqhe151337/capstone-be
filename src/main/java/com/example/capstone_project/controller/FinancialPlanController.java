@@ -55,7 +55,6 @@ public class FinancialPlanController {
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
-            @RequestHeader("Authorization") String accessToken,
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) Long statusId,
@@ -95,7 +94,6 @@ public class FinancialPlanController {
         }
 
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
 
         response.setPagination(Pagination.builder()
                 .totalRecords(count)
@@ -325,7 +323,6 @@ public class FinancialPlanController {
 
         return ResponseEntity.ok(listPaginationResponse);
     }
-
 
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
