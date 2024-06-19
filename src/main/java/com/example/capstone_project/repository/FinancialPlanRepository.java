@@ -44,8 +44,8 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " JOIN fileExpense.planExpense expense " +
             " JOIN files.user user" +
             " WHERE plan.id = :planId AND " +
-            " plan.createdAt = (SELECT MAX(p.createdAt) FROM FinancialPlan p WHERE p.id = :planId) AND " +
-            " plan.isDelete = false " +
+            " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " plan.isDelete = false AND expense.isDelete = false " +
             " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.code, term.planDueDate, " +
             " plan.createdAt, department.id, department.name, user.id, user.username " )
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);

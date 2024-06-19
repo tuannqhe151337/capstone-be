@@ -797,7 +797,7 @@ public class SeedConfiguration {
 
             FinancialPlanFileExpense fileExpense1 = FinancialPlanFileExpense.builder()
                     .id(1L)
-                    .file(financialPlanFile1_2)
+                    .file(financialPlanFile1_1)
                     .planExpense(expenseList.get(0))
                     .build();
 
@@ -872,7 +872,7 @@ public class SeedConfiguration {
                     .planExpense(expenseList.get(14))
                     .build();
 
-            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense15, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
+            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
         };
     }
 }
