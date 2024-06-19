@@ -2,6 +2,7 @@ package com.example.capstone_project.service;
 
 
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +16,7 @@ public interface UserService {
 
     long countDistinct(String query);
 
-    User createUser(User user);
+    void createUser(User user) throws Exception;
 
     User getUserById(Long userId);
 

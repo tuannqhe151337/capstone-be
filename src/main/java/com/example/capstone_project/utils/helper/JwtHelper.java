@@ -1,7 +1,6 @@
 package com.example.capstone_project.utils.helper;
 
 
-import com.example.capstone_project.entity.AccessTokenClaim;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -44,10 +43,8 @@ public class JwtHelper {
                 .compact();
     }
 
-    public String generateAccessToken(Integer userId, String roleCole, long departmentId) {
+    public String generateAccessToken(Integer userId) {
         HashMap<String, Object> claims =  new HashMap<>();
-        claims.put("role", roleCole);
-        claims.put("departmentId", departmentId);
 
         return this.generateAccessToken(claims, userId);
     }
@@ -90,20 +87,6 @@ public class JwtHelper {
 
     public Integer extractUserIdFromAccessToken(String jwt) {
         return Integer.parseInt(extractClaim(jwt, Claims::getSubject));
-    }
-
-    public AccessTokenClaim parseToken(String accessToken) {
-        final Claims claims = this.extractAllClaims(accessToken);
-
-        long userId = Long.parseLong(claims.getSubject());
-        long departmentId = Long.parseLong(claims.get("departmentId").toString());
-        String role = claims.get("role").toString();
-
-        return AccessTokenClaim.builder()
-                .roleCode(role)
-                .userId(userId)
-                .departmentId(departmentId)
-                .build();
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
