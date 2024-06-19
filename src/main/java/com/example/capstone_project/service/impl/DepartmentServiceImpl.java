@@ -17,11 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
-    private final CustomDepartmentRepository departmentCustomRepository;
+
 
     @Override
     public List<Department> getAllDepartments(String query, Pageable pageable) {
-        return departmentCustomRepository.getDepartmentWithPagination(query, pageable);
+        return departmentRepository.getDepartmentWithPagination(query, pageable);
     }
 
     @Override
