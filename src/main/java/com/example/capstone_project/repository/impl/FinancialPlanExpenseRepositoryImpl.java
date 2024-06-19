@@ -2,6 +2,7 @@ package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.entity.FinancialPlanExpense_;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.repository.CustomFinancialPlanExpenseRepository;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
@@ -32,16 +33,16 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) {
 
         // HQL query
-        String hql = "SELECT expense FROM FinancialPlanExpense expense " +
+        String hql = " SELECT expense FROM FinancialPlanExpense expense " +
                 " LEFT JOIN expense.files files " +
                 " LEFT JOIN files.file.plan plan " +
-                " LEFT JOIN plan.planFiles " +
-                " LEFT JOIN plan.status status" +
-                " WHERE plan.name like :query AND " +
-                " (:termId IS NULL OR plan.term.id = :termId) AND " +
-                " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
-                " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
-                " (plan.isDelete = false OR plan.isDelete is null) " +
+                " LEFT JOIN expense.status status " +
+                " LEFT JOIN expense.costType costType " +
+                " WHERE :planId = plan.id AND " +
+                " expense.name like :query AND " +
+                " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
+                " (:statusId IS NULL OR status.id = :statusId) AND " +
+                " (expense.isDelete = false OR expense.isDelete is null) " +
                 " ORDER BY ";
 
         // Handling sort by and sort type
@@ -51,44 +52,23 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
 
             String sortType = order.getDirection().isAscending() ? "asc" : "desc";
             switch (order.getProperty().toLowerCase()) {
-                case "name", "plan_name", "plan.name":
-                    hql += "plan.name " + sortType;
+                case "name", "expense_name", "expense.name":
+                    hql += "expense.name " + sortType;
                     break;
                 case "status", "status_id", "status.id":
                     hql += "status.id " + sortType;
                     break;
-                case "department.id", "department_id", "department":
-                    hql += "department.id " + sortType;
+                case "costtype.id", "costtype_id", "costtype":
+                    hql += "costType.id " + sortType;
                     break;
-                case "term.id", "term_id", "term":
-                    hql += "term.id " + sortType;
-                    break;
-                case "start-date", "start_date", "start_at", "createdat":
-                    hql += "plan.createdAt " + sortType;
+                case "created-date", "created_date", "created_at", "createdat":
+                    hql += "expense.createdAt " + sortType;
                     break;
                 case "updated-date", "updated_date", "updated_at","updatedat":
-                    hql += "plan.updatedAt " + sortType;
-                    break;
-                case "accountant":
-                    hql += "CASE status.code\n" +
-                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 1\n" +
-                            "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 2\n" +
-                            "        WHEN '" + PlanStatusCode.NEW + "' THEN 3\n" +
-                            "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
-                            "        ELSE 5 \n" +
-                            "    END";
-                    break;
-                case "financial-staff", "financial_staff", "staff":
-                    hql += "CASE status.code\n" +
-                            "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 1\n" +
-                            "        WHEN '" + PlanStatusCode.NEW + "' THEN 2\n" +
-                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 3\n" +
-                            "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
-                            "        ELSE 5 \n" +
-                            "    END";
+                    hql += "expense.updatedAt " + sortType;
                     break;
                 default:
-                    hql += "plan.id " + sortType;
+                    hql += "expense.id " + sortType;
             }
 
             if (i != sortOrderList.size() - 1) {
@@ -99,17 +79,15 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         }
 
         // Handling join
-        EntityGraph<FinancialPlan> entityGraph = entityManager.createEntityGraph(FinancialPlan.class);
-        entityGraph.addAttributeNodes(FinancialPlan_.TERM);
-        entityGraph.addAttributeNodes(FinancialPlan_.DEPARTMENT);
-        entityGraph.addAttributeNodes(FinancialPlan_.STATUS);
-        entityGraph.addAttributeNodes(FinancialPlan_.PLAN_FILES);
+        EntityGraph<FinancialPlanExpense> entityGraph = entityManager.createEntityGraph(FinancialPlanExpense.class);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.STATUS);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.COST_TYPE);
 
         // Run query
-        return entityManager.createQuery(hql, FinancialPlan.class)
+        return entityManager.createQuery(hql, FinancialPlanExpense.class)
                 .setParameter("query", "%" + query + "%")
-                .setParameter("termId", termId)
-                .setParameter("departmentId", departmentId)
+                .setParameter("planId", planId)
+                .setParameter("costTypeId", costTypeId)
                 .setParameter("statusId", statusId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())

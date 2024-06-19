@@ -123,7 +123,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), userId);
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
             planRepository.save(plan);
         }
     }
@@ -133,7 +133,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             return planRepository.getFinancialPlanById(planId);
         }
         return null;
@@ -147,5 +147,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) {
         return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+    }
+
+    @Override
+    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
+        return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
     }
 }

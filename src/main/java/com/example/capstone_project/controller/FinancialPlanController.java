@@ -26,7 +26,9 @@ import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.plan.*;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapper;
+import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -112,7 +114,6 @@ public class FinancialPlanController {
     @GetMapping("expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestBody PlanExpensesBody planBody,
-            @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) String query,
@@ -144,15 +145,14 @@ public class FinancialPlanController {
         if (expenses != null) {
 
             // Count total record
-            count = planService.countDistinctListExpenseWithPaginate(query, termId, statusId, costTypeId);
+            count = planService.countDistinctListExpenseWithPaginate(query, planBody.getPlanId(), statusId, costTypeId);
 
             // Mapping to TermPaginateResponse
             expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
-
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
+        System.out.println("count = " + count);
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
