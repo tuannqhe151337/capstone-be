@@ -2,6 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -184,11 +185,11 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestParam Long planId
+            @RequestBody PlanDetailBody  planDetailBody
     ) {
 
         // Get data
-        PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
+        PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
 
         // Response
         PlanDetailResponse response;
@@ -196,7 +197,7 @@ public class FinancialPlanController {
         if (plan != null) {
             // Mapping to TermPaginateResponse
                 response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-                response.setVersion(planService.getPlanVersionById(planId));
+                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
