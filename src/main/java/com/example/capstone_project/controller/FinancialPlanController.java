@@ -1,9 +1,10 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.responses.CustomSort;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -20,10 +21,14 @@ import com.example.capstone_project.controller.responses.plan.version.VersionRes
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,6 +41,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -178,33 +184,24 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestParam Integer planId
+            @RequestParam Long planId
     ) {
-        return ResponseEntity.ok(PlanDetailResponse.builder()
-                .id(1L)
-                .name("Plan name")
-                .term(TermResponse.builder()
-                        .termId(1L)
-                        .name("Financial plan December Q3 2021")
-                        .build())
-                .biggestExpenditure(BigDecimal.valueOf(180000000))
-                .totalPlan(BigDecimal.valueOf(213425384))
-                .planDueDate(LocalDate.now())
-                .department(DepartmentResponse.builder()
-                        .departmentId(1L)
-                        .name("BU 01")
-                        .build())
-                .status(StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Waiting for approval")
-                        .build())
-                .version("version 2")
-                .createdAt(LocalDate.now())
-                .user(UserResponse.builder()
-                        .userId(1L)
-                        .username("Anhln")
-                        .build())
-                .build());
+
+        // Get data
+        PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
+
+        // Response
+        PlanDetailResponse response;
+
+        if (plan != null) {
+            // Mapping to TermPaginateResponse
+                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+                response.setVersion(planService.getPlanVersionById(planId));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/download")
@@ -337,5 +334,15 @@ public class FinancialPlanController {
     ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> confirmExpenses(
+            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+
+
+        planService.creatPlan(planBody);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("");
     }
 }

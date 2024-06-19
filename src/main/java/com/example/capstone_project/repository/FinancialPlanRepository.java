@@ -3,13 +3,14 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
+import com.example.capstone_project.repository.result.PlanDetailResult;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 
-public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
+public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
 
     List<FinancialPlan> findFinancialPlansByTermId(Long termId);
 
@@ -29,4 +30,28 @@ public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, L
             " file.isDelete = false " +
             " GROUP BY file.plan.id ")
     List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+
+    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
+            " SUM(expense.unitPrice * expense.amount) AS totalPlan, term.id AS termId, term.name AS termName, status.id AS statusId, " +
+            " status.code AS statusName, term.planDueDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
+            " user.id AS userId , user.username AS username" +
+            " FROM FinancialPlan plan " +
+            " JOIN plan.term term " +
+            " JOIN plan.status status " +
+            " JOIN plan.department department " +
+            " JOIN plan.planFiles files" +
+            " JOIN files.planFileExpenses fileExpense " +
+            " JOIN fileExpense.planExpense expense " +
+            " JOIN files.user user" +
+            " WHERE plan.id = :planId AND " +
+            " plan.createdAt = (SELECT MAX(p.createdAt) FROM FinancialPlan p WHERE p.id = :planId) AND " +
+            " plan.isDelete = false " +
+            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.code, term.planDueDate, " +
+            " plan.createdAt, department.id, department.name, user.id, user.username " )
+    PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
+
+    @Query(value = " SELECT DISTINCT count(file.plan.id) FROM FinancialPlanFile file " +
+            " WHERE file.plan.id = :planId" +
+            " GROUP BY file.plan.id ")
+    int getPlanVersionByPlanId(@Param("planId") Long planId);
 }

@@ -10,12 +10,15 @@ import java.util.List;
 @Data
 @Builder
 public class NewPlanBody {
-    @NotEmpty(message = "Term Id, can not be empty")
-    private long termId;
-    @NotEmpty(message = "Plan name, can not be empty")
+    @NotNull(message = "Term Id can not be null")
+    private Long termId;
+
+    @NotEmpty(message = "Plan name can not be empty")
     private String planName;
-    @NotEmpty(message = "File name, can not be empty")
+
+    @NotEmpty(message = "File name can not be empty")
     private String fileName;
-    @NotNull(message = "Expenses, can not be null")
+
+    @NotNull(message = "Expenses can not be null")
     private List<ExpenseBody> expenses;
 }

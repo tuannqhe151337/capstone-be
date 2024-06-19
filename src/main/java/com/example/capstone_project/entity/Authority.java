@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.AuthorityCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -24,7 +25,8 @@ public class Authority extends BaseEntity {
     private String name;
 
     @Column(name = "code")
-    private String code;
+    @Enumerated(EnumType.STRING)
+    private AuthorityCode code;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;

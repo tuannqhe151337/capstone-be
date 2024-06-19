@@ -1,21 +1,22 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
-import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
+import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanRepository planRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
+    private final FinancialPlanExpenseRepository expenseRepository;
+
 
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
@@ -108,4 +111,35 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         return null;
     }
 
+    @Override
+    @Transactional
+    public void creatPlan(NewPlanBody planBody) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), userId);
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())){
+            planRepository.save(plan);
+        }
+    }
+
+    @Override
+    public PlanDetailResult getPlanDetailByPlanId(Long planId) {
+
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())){
+            return planRepository.getFinancialPlanById(planId);
+        }
+        return null;
+    }
+
+    @Override
+    public int getPlanVersionById(Long planId) {
+        return planRepository.getPlanVersionByPlanId(planId);
+    }
 }
