@@ -1,9 +1,13 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
@@ -40,4 +44,14 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     long countDistinct(String query);
 
     User save(User user);
+
+    Optional<User> findUserByEmail(String email);
+
+    @Query(value = "SELECT user.username FROM User user" +
+            " WHERE TRIM(TRANSLATE(user.username, '0123456789', '          ')) = ?1" +
+            " ORDER BY LENGTH(user.username) DESC, user.username DESC LIMIT 1")
+    String getCountByName(String pattern);
+
+
+    boolean existsByEmail(String email);
 }
