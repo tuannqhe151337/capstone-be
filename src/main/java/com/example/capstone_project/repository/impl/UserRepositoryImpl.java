@@ -25,7 +25,7 @@ public class UserRepositoryImpl implements CustomUserRepository {
                 "left join user.department " +
                 "left join user.position " +
                 "where user.username like :query " +
-                "and user.isDelete = false " + // We actually want to get all deactivated users as well
+//                "and user.isDelete = false " + // We actually want to get all deactivated users as well
                 "order by ";
 
         // Handling sort by and sort type
