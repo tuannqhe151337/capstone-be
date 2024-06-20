@@ -2,10 +2,7 @@ package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
-import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.CostTypeCode;
-import com.example.capstone_project.utils.enums.PlanStatusCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +30,8 @@ public class SeedConfiguration {
             TermRepository termRepository,
             TermStatusRepository termStatusRepository,
             PlanStatusRepository planStatusRepository,
-            CostTypeRepository costTypeRepository
+            CostTypeRepository costTypeRepository,
+            ExpenseStatusRepository expenseStatusRepository
     ) {
         return args -> {
             //Term Status - fixed code
@@ -90,112 +88,112 @@ public class SeedConfiguration {
 
             // Authority
             Authority createUser = Authority.builder()
-                    .code("A-001")
+                    .code(AuthorityCode.CREATE_NEW_USER)
                     .name("Create new user")
                     .build();
 
             Authority viewListUsers = Authority.builder()
-                    .code("A-002")
+                    .code(AuthorityCode.VIEW_LIST_USERS)
                     .name("View list users")
                     .build();
 
             Authority deleteUser = Authority.builder()
-                    .code("A-003")
+                    .code(AuthorityCode.DELETE_USER)
                     .name("Delete user")
                     .build();
 
             Authority editUser = Authority.builder()
-                    .code("A-004")
+                    .code(AuthorityCode.EDIT_USER)
                     .name("Edit user")
                     .build();
 
             Authority activateUser = Authority.builder()
-                    .code("A-005")
+                    .code(AuthorityCode.ACTIVATE_USER)
                     .name("Activate user")
                     .build();
 
             Authority deactivateUser = Authority.builder()
-                    .code("A-006")
+                    .code(AuthorityCode.DEACTIVATE_USER)
                     .name("Deactivate user")
                     .build();
 
             Authority createTerm = Authority.builder()
-                    .code("B-001")
+                    .code(AuthorityCode.CREATE_TERM)
                     .name("Create term")
                     .build();
 
             Authority editTerm = Authority.builder()
-                    .code("B-002")
+                    .code(AuthorityCode.EDIT_TERM)
                     .name("Edit term")
                     .build();
 
             Authority viewTerm = Authority.builder()
-                    .code("B-003")
+                    .code(AuthorityCode.VIEW_TERM)
                     .name("View term")
                     .build();
 
             Authority startTerm = Authority.builder()
-                    .code("B-004")
+                    .code(AuthorityCode.START_TERM)
                     .name("Start term")
                     .build();
 
             Authority deleteTerm = Authority.builder()
-                    .code("B-005")
+                    .code(AuthorityCode.DELETE_TERM)
                     .name("Delete term")
                     .build();
 
             Authority importPlan = Authority.builder()
-                    .code("C-001")
+                    .code(AuthorityCode.IMPORT_PLAN)
                     .name("Import plan")
                     .build();
 
             Authority reUploadPlan = Authority.builder()
-                    .code("C-002")
+                    .code(AuthorityCode.RE_UPLOAD_PLAN)
                     .name("Reupload plan")
                     .build();
 
             Authority submitPlanForReview = Authority.builder()
-                    .code("C-003")
+                    .code(AuthorityCode.SUBMIT_PLAN_FOR_REVIEW)
                     .name("Submit plan for review")
                     .build();
 
             Authority deletePlan = Authority.builder()
-                    .code("C-004")
+                    .code(AuthorityCode.DELETE_PLAN)
                     .name("Delete plan")
                     .build();
 
             Authority downloadPlan = Authority.builder()
-                    .code("C-005")
+                    .code(AuthorityCode.DOWNLOAD_PLAN)
                     .name("Download plan")
                     .build();
 
             Authority approvePlan = Authority.builder()
-                    .code("C-006")
+                    .code(AuthorityCode.APPROVE_PLAN)
                     .name("Approve plan")
                     .build();
 
             Authority viewPlan = Authority.builder()
-                    .code(AuthorityCode.VIEW_PLAN.getValue())
+                    .code(AuthorityCode.VIEW_PLAN)
                     .name("View plan")
                     .build();
 
             Authority viewReport = Authority.builder() // Monthly, Quarterly, Half-year
-                    .code("D-001")
+                    .code(AuthorityCode.VIEW_REPORT)
                     .name("View report")
                     .build();
 
             Authority downloadReport = Authority.builder() // Monthly, Quarterly, Half-year
-                    .code("D-002")
+                    .code(AuthorityCode.DOWNLOAD_REPORT)
                     .name("Download report")
                     .build();
 
             Authority viewAnnualReport = Authority.builder()
-                    .code("E-001")
+                    .code(AuthorityCode.VIEW_ANNUAL_REPORT)
                     .name("View annual report")
                     .build();
 
             Authority downloadAnnualReport = Authority.builder()
-                    .code("E-002")
+                    .code(AuthorityCode.DOWNLOAD_ANNUAL_REPORT)
                     .name("Download annual report")
                     .build();
 
@@ -526,6 +524,7 @@ public class SeedConfiguration {
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
+            // Plan status
             PlanStatus planStatus1 = PlanStatus.builder()
                     .id(1L)
                     .name("New")
@@ -535,7 +534,7 @@ public class SeedConfiguration {
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
                     .name("Waiting for reviewed")
-                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
+                    .code(PlanStatusCode.WAITING_FOR_REVIEWED)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
@@ -546,11 +545,11 @@ public class SeedConfiguration {
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
-                    .name("Denied")
+                    .name("Approved")
                     .code(PlanStatusCode.APPROVED)
                     .build();
 
-            planStatusRepository.saveAll(List.of(planStatus1,planStatus2,planStatus3,planStatus4));
+            planStatusRepository.saveAll(List.of(planStatus1, planStatus2, planStatus3, planStatus4));
 
             Term term1 = Term.builder()
                     .id(1L)
@@ -607,7 +606,7 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            termRepository.saveAll(List.of(term1,term2,term3,term4,term5));
+            termRepository.saveAll(List.of(term1, term2, term3, term4, term5));
 
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .id(1L)
@@ -682,6 +681,28 @@ public class SeedConfiguration {
                     .build();
 
             costTypeRepository.saveAll(List.of(costType1, costType2, costType3, costType4, costType5, costType6));
+
+            ExpenseStatus expenseStatus1 = ExpenseStatus.builder()
+                    .id(1L)
+                    .code(ExpenseStatusCode.NEW)
+                    .build();
+
+            ExpenseStatus expenseStatus2 = ExpenseStatus.builder()
+                    .id(2L)
+                    .code(ExpenseStatusCode.WAITING_FOR_APPROVAL)
+                    .build();
+
+            ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
+                    .id(3L)
+                    .code(ExpenseStatusCode.APPROVED)
+                    .build();
+
+            ExpenseStatus expenseStatus4 = ExpenseStatus.builder()
+                    .id(4L)
+                    .code(ExpenseStatusCode.DENIED)
+                    .build();
+
+            expenseStatusRepository.saveAll(List.of(expenseStatus1, expenseStatus2, expenseStatus3, expenseStatus4));
         };
     }
 }

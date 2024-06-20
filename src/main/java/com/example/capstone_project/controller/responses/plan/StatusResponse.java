@@ -8,4 +8,5 @@ import lombok.Data;
 public class StatusResponse {
     private long statusId;
     private String name;
+    private String code;
 }
