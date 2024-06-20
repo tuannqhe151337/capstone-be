@@ -121,7 +121,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
+    ) throws Exception {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);

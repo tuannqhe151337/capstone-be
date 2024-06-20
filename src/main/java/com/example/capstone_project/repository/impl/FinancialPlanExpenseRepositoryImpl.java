@@ -35,11 +35,13 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         // HQL query
         String hql = " SELECT expense FROM FinancialPlanExpense expense " +
                 " LEFT JOIN expense.files files " +
-                " LEFT JOIN files.file.plan plan " +
+                " LEFT JOIN files.file file " +
+                " LEFT JOIN file.plan plan " +
                 " LEFT JOIN expense.status status " +
                 " LEFT JOIN expense.costType costType " +
                 " WHERE :planId = plan.id AND " +
                 " expense.name like :query AND " +
+                " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
                 " (:statusId IS NULL OR status.id = :statusId) AND " +
                 " (expense.isDelete = false OR expense.isDelete is null) " +

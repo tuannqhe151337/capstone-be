@@ -8,10 +8,12 @@ import org.springframework.data.repository.query.Param;
 public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialPlanExpense, Long>, CustomFinancialPlanExpenseRepository {
     @Query(" SELECT DISTINCT count(expense.id) FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
-            " LEFT JOIN files.file.plan plan " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
             " LEFT JOIN expense.status status " +
             " LEFT JOIN expense.costType costType " +
             " WHERE plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.name like %:query% AND " +
             " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
             " (:statusId IS NULL OR status.id = :statusId) AND " +

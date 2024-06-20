@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -145,9 +146,31 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) {
-        return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+    @Transactional
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        FinancialPlan plan = planRepository.getReferenceById(planId);
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Checkout role, accountant can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+
+                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+
+                // But financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())
+                    && userDetail.getDepartmentId() == plan.getDepartment().getId()) {
+
+                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+            }
+        }
+        return null;
     }
+
 
     @Override
     public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
