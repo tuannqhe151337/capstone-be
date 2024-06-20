@@ -2,7 +2,6 @@ package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
-import com.example.capstone_project.entity.PlanStatus_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.EntityGraph;
@@ -62,7 +61,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                     break;
                 case "accountant":
                     hql += "CASE status.code\n" +
-                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 1\n" +
+                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEWED + "' THEN 1\n" +
                             "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 2\n" +
                             "        WHEN '" + PlanStatusCode.NEW + "' THEN 3\n" +
                             "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
@@ -73,7 +72,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                     hql += "CASE status.code\n" +
                             "        WHEN '" + PlanStatusCode.REVIEWED + "' THEN 1\n" +
                             "        WHEN '" + PlanStatusCode.NEW + "' THEN 2\n" +
-                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEW + "' THEN 3\n" +
+                            "        WHEN '" + PlanStatusCode.WAITING_FOR_REVIEWED + "' THEN 3\n" +
                             "        WHEN '" + PlanStatusCode.APPROVED + "' THEN 4\n" +
                             "        ELSE 5 \n" +
                             "    END";

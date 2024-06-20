@@ -1,36 +1,35 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.responses.CustomSort;
-import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
 import com.example.capstone_project.repository.TermRepository;
+import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanRepository planRepository;
+    private final PlanStatusRepository planStatusRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
     private final TermRepository termRepository;
@@ -111,6 +110,21 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             return listResult;
         }
+        return null;
+    }
+
+    @Override
+    public List<PlanStatus> getListPlanStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            return planStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        }
+
         return null;
     }
 
