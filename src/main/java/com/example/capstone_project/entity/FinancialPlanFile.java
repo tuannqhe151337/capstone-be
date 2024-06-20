@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,10 +24,10 @@ public class FinancialPlanFile {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE)
-    private List<FinancialPlanFileExpense> planExpenses;
+    @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE, cascade = CascadeType.ALL)
+    private List<FinancialPlanFileExpense> planFileExpenses;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "financial_plan_id")
     private FinancialPlan plan;
 

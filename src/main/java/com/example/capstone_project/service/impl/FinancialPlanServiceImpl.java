@@ -2,7 +2,9 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
@@ -10,16 +12,15 @@ import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +32,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final PlanStatusRepository planStatusRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
+    private final TermRepository termRepository;
+    private final FinancialPlanExpenseRepository expenseRepository;
+
 
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
@@ -124,4 +128,32 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         return null;
     }
 
+    @Override
+    @Transactional
+    public FinancialPlan creatPlan(FinancialPlan plan, Term term) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authorization
+        // Check any plan of user department is existing in this term
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue()) &&
+              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId()) &&
+                LocalDateTime.now().isBefore(term.getPlanDueDate())) {
+            return planRepository.save(plan);
+        } else {
+            return null;
+        }
+    }
+
+    public UserDetail getUserDetail() throws Exception {
+        return userDetailRepository.get(UserHelper.getUserId());
+    }
+
+    @Override
+    public Term getTermById(Long termId) {
+        return termRepository.getReferenceById(termId);
+    }
 }

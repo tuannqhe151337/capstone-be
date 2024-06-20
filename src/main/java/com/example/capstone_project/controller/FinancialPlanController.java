@@ -1,9 +1,10 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.responses.CustomSort;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -22,6 +23,8 @@ import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
@@ -37,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -335,5 +339,27 @@ public class FinancialPlanController {
     ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> confirmExpenses(
+            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+        // Get user detail
+        UserDetail userDetail = planService.getUserDetail();
+
+        // Get term
+        Term term = planService.getTermById(planBody.getTermId());
+
+        // Mapping to planBody to FinancialPlan
+        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
+
+        // Save plan
+        FinancialPlan savedPlan = planService.creatPlan(plan, term);
+
+        if (savedPlan == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
     }
 }
