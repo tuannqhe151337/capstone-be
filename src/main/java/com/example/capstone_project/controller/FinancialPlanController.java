@@ -354,7 +354,7 @@ public class FinancialPlanController {
         FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
 
         // Save plan
-        FinancialPlan savedPlan = planService.creatPlan(plan);
+        FinancialPlan savedPlan = planService.creatPlan(plan, term);
 
         if (savedPlan == null){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

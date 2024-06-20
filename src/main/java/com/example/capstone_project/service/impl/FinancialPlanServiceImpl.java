@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -115,7 +116,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan creatPlan(FinancialPlan plan) throws Exception {
+    public FinancialPlan creatPlan(FinancialPlan plan, Term term) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -125,7 +126,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         // Check authorization
         // Check any plan of user department is existing in this term
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue()) &&
-              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
+              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId()) &&
+                LocalDateTime.now().isBefore(term.getPlanDueDate())) {
             return planRepository.save(plan);
         } else {
             return null;

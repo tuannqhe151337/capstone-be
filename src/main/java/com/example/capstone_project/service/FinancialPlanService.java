@@ -13,7 +13,7 @@ public interface FinancialPlanService {
 
     List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
 
-    FinancialPlan creatPlan(FinancialPlan plan) throws Exception;
+    FinancialPlan creatPlan(FinancialPlan plan, Term term) throws Exception;
 
     UserDetail getUserDetail() throws Exception;
 
