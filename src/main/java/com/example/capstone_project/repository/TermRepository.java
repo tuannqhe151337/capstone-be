@@ -18,7 +18,7 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " END ")
     boolean existsPlanOfDepartmentInTerm(long departmentId, Long termId);
 
-    @Query(value = " SELECT count(*) FROM Term term " +
+    @Query(value = " SELECT count(distinct (term.id) ) FROM Term term " +
             " LEFT JOIN term.financialPlans plan" +
             " WHERE term.name like %:query% AND " +
             " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
