@@ -186,7 +186,7 @@ public class FinancialPlanController {
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
             @RequestBody PlanDetailBody  planDetailBody
-    ) {
+    ) throws Exception {
 
         // Get data
         PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
@@ -195,7 +195,7 @@ public class FinancialPlanController {
         PlanDetailResponse response;
 
         if (plan != null) {
-            // Mapping to TermPaginateResponse
+            // Mapping to PlanDetail Response
                 response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
                 response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
         } else {

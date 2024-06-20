@@ -122,7 +122,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), userId);
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
             planRepository.save(plan);
         }
     }
@@ -136,11 +136,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())){
-            PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
-            // Check department BR
-            if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
-                return planResult;
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getFinancialPlanById(planId);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+
+                // Check department
+                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
+                    return planResult;
+                }
             }
         }
         return null;
