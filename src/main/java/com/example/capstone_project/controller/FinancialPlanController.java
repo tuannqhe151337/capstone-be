@@ -18,14 +18,13 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlan_;
-import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -345,10 +344,22 @@ public class FinancialPlanController {
     @PostMapping("/create")
     public ResponseEntity<String> confirmExpenses(
             @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+        // Get user detail
+        UserDetail userDetail = planService.getUserDetail();
 
+        // Get term
+        Term term = planService.getTermById(planBody.getTermId());
 
-        planService.creatPlan(planBody);
+        // Mapping to planBody to FinancialPlan
+        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("");
+        // Save plan
+        FinancialPlan savedPlan = planService.creatPlan(plan, term);
+
+        if (savedPlan == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
     }
 }
