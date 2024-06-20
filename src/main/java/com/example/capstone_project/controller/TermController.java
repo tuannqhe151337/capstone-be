@@ -272,7 +272,7 @@ public class TermController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
+    ) throws Exception {
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -310,7 +310,7 @@ public class TermController {
         response.setPagination(Pagination.builder()
                 .totalRecords(count)
                 .page(pageInt)
-                .numPages(sizeInt)
+                .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
 

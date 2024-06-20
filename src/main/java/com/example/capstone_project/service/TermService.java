@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface TermService {
-    long countDistinct(String query);
+    long countDistinct(String query) throws Exception;
 
-    List<Term> getListTermWhenCreatePlan(String query, Pageable pageable);
+    List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception;
 }

@@ -18,13 +18,15 @@ public class TermRepositoryImpl implements CustomTermRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) {
+    public List<Term> getListTermWhenCreatePlan(String query, Pageable pageable, Long departmentId) {
         // HQL query
         String hql = "SELECT term FROM Term term " +
                 " LEFT JOIN term.status " +
+                " LEFT JOIN term.financialPlans plan " +
                 " WHERE term.name LIKE :query AND " +
                 " term.status.name != :close AND " +
                 " term.planDueDate >= :now AND " +
+                " plan.department.id != :departmentId AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
 
@@ -69,6 +71,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
                 .setParameter("query", "%" + query + "%")
                 .setParameter("close", TermCode.CLOSED.getValue())
                 .setParameter("now", LocalDateTime.now())
+                .setParameter("departmentId", departmentId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
