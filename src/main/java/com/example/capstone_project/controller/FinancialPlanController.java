@@ -261,7 +261,7 @@ public class FinancialPlanController {
     }
 
     @GetMapping("/plan-status")
-    public ResponseEntity<ListResponse<StatusResponse>> getListStatusPaging() {
+    public ResponseEntity<ListResponse<StatusResponse>> getListStatus() {
         // Get data
         List<PlanStatus> costTypes = planService.getListPlanStatus();
 
