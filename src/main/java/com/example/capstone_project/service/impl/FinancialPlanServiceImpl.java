@@ -128,12 +128,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public PlanDetailResult getPlanDetailByPlanId(Long planId) {
-
+    public PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception {
+        // Get userId from token
         long userId = UserHelper.getUserId();
 
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())){
-            return planRepository.getFinancialPlanById(planId);
+            PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+            // Check department BR
+            if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
+                return planResult;
+            }
         }
         return null;
     }

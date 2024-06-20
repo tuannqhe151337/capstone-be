@@ -14,7 +14,7 @@ public interface FinancialPlanService {
 
     void creatPlan(NewPlanBody planBody) throws Exception;
 
-    PlanDetailResult getPlanDetailByPlanId(Long planId);
+    PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
     int getPlanVersionById(Long planId);
 }
