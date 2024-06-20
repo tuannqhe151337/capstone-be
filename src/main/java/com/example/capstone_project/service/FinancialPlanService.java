@@ -10,5 +10,5 @@ public interface FinancialPlanService {
 
     List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
 
-    FinancialPlan deletePlan(DeletePlanBody planBody);
+    FinancialPlan deletePlan(long planId);
 }

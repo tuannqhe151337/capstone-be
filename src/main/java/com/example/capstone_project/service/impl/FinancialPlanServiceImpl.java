@@ -113,12 +113,12 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public FinancialPlan deletePlan(DeletePlanBody planBody) {
+    public FinancialPlan deletePlan(long planId) {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
 
-            FinancialPlan financialPlan = planRepository.findById(planBody.getPlanId()).orElseThrow(() ->
-                    new ResourceNotFoundException("Not found any plan have id = " + planBody.getPlanId()));
+            FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
+                    new ResourceNotFoundException("Not found any plan have id = " + planId));
 
             financialPlan.setDelete(true);
 

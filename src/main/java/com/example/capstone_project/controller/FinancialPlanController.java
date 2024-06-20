@@ -328,7 +328,7 @@ public class FinancialPlanController {
     private ResponseEntity<String> deletePlan(
             @Validated @RequestBody DeletePlanBody planBody) {
 
-        FinancialPlan deletedPlan = planService.deletePlan(planBody);
+        FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
 
         if (deletedPlan == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
