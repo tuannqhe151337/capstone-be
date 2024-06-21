@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface DepartmentService {
 
-   List<Department> getAllDepartments
+   List<Department> getDepartmentWithPagination
            (String query, Pageable pageable);
    long countDistinct(String query);
 }

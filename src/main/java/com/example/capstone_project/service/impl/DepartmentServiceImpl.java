@@ -20,7 +20,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
     @Override
-    public List<Department> getAllDepartments(String query, Pageable pageable) {
+    public List<Department> getDepartmentWithPagination(String query, Pageable pageable) {
         return departmentRepository.getDepartmentWithPagination(query, pageable);
     }
 

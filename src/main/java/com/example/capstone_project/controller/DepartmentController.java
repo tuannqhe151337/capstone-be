@@ -90,17 +90,13 @@ public class DepartmentController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<Department> departments = departmentService.getAllDepartments(query, pageable);
-
-        for (Department department : departments) {
-            System.out.println(department.getName());
-        }
+        List<Department> departments = departmentService.getDepartmentWithPagination(query, pageable);
 
         //map
         List<DepartmentResponse> departmentResponses =
                new DepartToDepartResponseMapperImpl()
                         .mapDepartmentsToDepartmentResponses(departments);
-        //count , totalrecords
+        //count, totalrecords
         long totalRecords = departmentService.countDistinct(query);
         long numPages = PaginationHelper.calculateNumPages(totalRecords, sizeInt);
 

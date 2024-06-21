@@ -45,16 +45,12 @@ public class DepartmentRepositoryImpl implements CustomDepartmentRepository {
                 hql += " ";
             }
         }
-        EntityGraph<Department> entityGraph = entityManager.createEntityGraph(Department.class);
 
-        // Thêm các thuộc tính cần nạp vào EntityGraph
-        entityGraph.addAttributeNodes("id", "name", "isDelete");
         // Run query
         return entityManager.createQuery(hql, Department.class)
                 .setParameter("query", "%" + query + "%")
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
-                .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
     }
 }
