@@ -2,8 +2,11 @@ package com.example.capstone_project.controller;
 
 
 import com.example.capstone_project.controller.responses.ListResponse;
-import com.example.capstone_project.controller.responses.term.getTermStatus.TermStatusResponse;
+import com.example.capstone_project.controller.responses.term.getStatus.TermStatusResponse;
+import com.example.capstone_project.service.TermStatusService;
 import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.mapper.termStatus.TermStatusToTermStatusResponseMapper;
+import com.example.capstone_project.utils.mapper.termStatus.TermStatusToTermStatusResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,31 +20,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/term-status")
-@Validated
+
 public class TermStatusController {
+    private final TermStatusService termStatusService;
 
-    @GetMapping("/term-status-filter")
-    public ResponseEntity<List<TermStatusResponse>> getListTermStatusFilter(){
+    @GetMapping("/term-status-list")
+    public ResponseEntity<ListResponse<TermStatusResponse>> getListTermStatusFilter() {
         ListResponse<TermStatusResponse> listResponse = new ListResponse<>();
-        List<TermStatusResponse> termlist = new ArrayList<>();
-        termlist = List.of(
-                TermStatusResponse.builder()
-                        .id(1L)
-                        .name("CLOSED")
-                        .code(TermCode.CLOSED)
-                        .build(),
-                TermStatusResponse.builder()
-                        .id(2L)
-                        .name("IN_PROGRESS")
-                        .code(TermCode.IN_PROGRESS)
-                        .build(),
-                TermStatusResponse.builder()
-                        .id(3L)
-                        .name("NOT_STARTED")
-                        .code(TermCode.NOT_STARTED)
-                        .build()
-        );
+        List<TermStatusResponse> termlist =
+                new TermStatusToTermStatusResponseMapperImpl()
+                        .mmapTermStatusToTermStatusResponseList(termStatusService.getTermStatuses());
+        listResponse.setData(termlist);
 
-        return ResponseEntity.ok(termlist);
+        return ResponseEntity.ok(listResponse);
     }
 }
