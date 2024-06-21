@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User getUserById(Long userId) {
+    public User getUserById(Long userId) throws Exception{
         long actorId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
           throw new UnauthorizedException("Unauthorized to view user details");
