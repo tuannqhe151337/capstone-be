@@ -120,10 +120,6 @@ public class UserServiceImpl implements UserService {
         Position newPostion = entityManager.find(Position.class, updateUserBody.getPosition());
         user.setPosition(newPostion);
 
-        //check email can not dublicate
-        if(userRepository.existsByEmail(updateUserBody.getEmail()))
-            throw new DataIntegrityViolationException("Email address already in use");
-
 
         //check full name co thay doi khong de update username
         if (!updateUserBody.getFullName().equals(user.getFullName())) {
