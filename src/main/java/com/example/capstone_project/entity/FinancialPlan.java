@@ -23,18 +23,18 @@ public class FinancialPlan extends BaseEntity{
     @Transient
     private Integer version;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
+    @OneToMany(mappedBy = FinancialPlanFile_.PLAN, cascade=CascadeType.ALL)
     private List<FinancialPlanFile> planFiles;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
     @JoinColumn(name = "term_id")
     private Term term;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private PlanStatus status;
 
