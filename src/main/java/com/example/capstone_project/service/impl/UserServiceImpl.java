@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
+import com.example.capstone_project.repository.redis.UserDepartmentAuthorityRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.user.edit.UpdateUserBodyToUserEntityMapperImpl;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.passay.CharacterData;
@@ -44,6 +46,7 @@ import static org.passay.IllegalCharacterRule.ERROR_CODE;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository userAuthorityRepository;
+    @PersistenceContext
     private final EntityManager entityManager;
     private final AuthorityRepository authorityRepository;
     @Value("${application.security.access-token.expiration}")
@@ -51,6 +54,7 @@ public class UserServiceImpl implements UserService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
+    private final UserDepartmentAuthorityRepository departmentAuthorityRepository;
 
     @Override
     public List<User> getAllUsers(
@@ -94,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
         //check department
         //Optional<User> user = userRepository.findUserByEmail(email);
-        if ( userRepository.existsByEmail(updateUserBody.getEmail()) ) {
+        if (!updateUserBody.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(updateUserBody.getEmail())) {
             throw new DataIntegrityViolationException("Email already exists");
         }
         //check department
@@ -130,18 +134,19 @@ public class UserServiceImpl implements UserService {
 
         //get authority tu roleid
         List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
+        List<String> authCodes = getAuthCodes(authorities);
         //update authories o trong redis
-        saveAuthoritiesToRedis(user);
+        userAuthorityRepository.save(user.getId(), authCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
+        departmentAuthorityRepository.save(user.getId().intValue(), user.getDepartment().getId().intValue(), authCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
         return entityManager.merge(user);
     }
 
-    private void saveAuthoritiesToRedis(User user) {
-        List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
+    private List<String> getAuthCodes(List<Authority> authorityList) {
         List<String> authoritiesCodes = new ArrayList<>();
-        for (Authority authority : authorities) {
+        for (Authority authority : authorityList) {
             authoritiesCodes.add(authority.getCode());
         }
-        userAuthorityRepository.save(user.getId(), authoritiesCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
+        return authoritiesCodes;
     }
 
 

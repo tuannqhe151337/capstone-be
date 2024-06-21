@@ -139,7 +139,7 @@ public class UserController {
         } catch (UnauthorizedException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (DataIntegrityViolationException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("emails already exists").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("email already exists").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
