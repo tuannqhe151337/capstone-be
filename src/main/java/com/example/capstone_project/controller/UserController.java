@@ -2,11 +2,18 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.*;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
+import com.example.capstone_project.controller.responses.Pagination;
+
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.Position;
+import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -26,8 +33,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -141,14 +151,23 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Delete success");
+    public ResponseEntity<String> deactiveUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+        try {
+            userService.deactivateUser(deactiveUserBody);
+            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+        } catch (UnauthorizedException e) {
+            throw new UnauthorizedException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
+        }
     }
+
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
     }
+
 
 
 }
