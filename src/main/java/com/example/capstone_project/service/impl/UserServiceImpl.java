@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,8 +71,12 @@ public class UserServiceImpl implements UserService {
         if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
           throw new UnauthorizedException("Unauthorized to view user details");
         }
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
+        Optional<User> user = userRepository.findUserDetailedById(userId);
+        if (user.isEmpty()){
+            throw new ResourceNotFoundException("User not found");
+        }else {
+            return user.get();
+        }
     }
 
     @Override
