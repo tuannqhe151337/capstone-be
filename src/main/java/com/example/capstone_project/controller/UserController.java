@@ -15,6 +15,7 @@ import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
@@ -161,17 +162,16 @@ public class UserController {
     // build delete user REST API
     @DeleteMapping()
     public ResponseEntity<String> deactiveUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
-     try {
-         userService.deactivateUser(deactiveUserBody);
-         return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
-     }catch (UnauthorizedException e){
-         throw new UnauthorizedException(e.getMessage());
-     }catch (ResourceNotFoundException e){
-         throw new ResourceNotFoundException(e.getMessage());
-     }
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Delete success");
+        try {
+            userService.deactivateUser(deactiveUserBody);
+            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+        } catch (UnauthorizedException e) {
+            throw new UnauthorizedException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
+        }
     }
+
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
