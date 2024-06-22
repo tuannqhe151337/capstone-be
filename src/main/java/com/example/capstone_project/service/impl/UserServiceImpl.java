@@ -13,7 +13,9 @@ import com.example.capstone_project.utils.exception.department.InvalidDepartment
 import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
-
+import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
+import jakarta.mail.MessagingException;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +45,6 @@ public class UserServiceImpl implements UserService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
-
 
 
     @Override
@@ -63,10 +65,19 @@ public class UserServiceImpl implements UserService {
         return userRepository.countDistinct(query);
     }
 
+
     @Override
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
+    public User getUserById(Long userId) throws Exception{
+        long actorId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
+          throw new UnauthorizedException("Unauthorized to view user details");
+        }
+        Optional<User> user = userRepository.findUserDetailedById(userId);
+        if (user.isEmpty()){
+            throw new ResourceNotFoundException("User not found");
+        }else {
+            return user.get();
+        }
     }
 
     @Override
@@ -81,6 +92,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
+
         userRepository.deleteById(userId);
     }
 
@@ -198,8 +210,6 @@ public class UserServiceImpl implements UserService {
 
 
     }
-
-
 
     @Override
     public void activateUser(ActivateUserBody activateUserBody) {
