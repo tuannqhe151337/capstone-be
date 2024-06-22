@@ -2,6 +2,7 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.repository.*;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService {
     private final UserAuthorityRepository userAuthorityRepository;
     private final DepartmentRepository departmentRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PositionRepository positionRepository;
-    private final RoleRepository roleRepository;
-    private final UserSettingRepository userSettingRepository;
     private final MailRepository mailRepository;
+    private final UserSettingRepository userSettingRepository;
+    private final RoleRepository roleRepository;
+    private final PositionRepository positionRepository;
+
     @Override
     public List<User> getAllUsers(
             String query,
@@ -60,6 +61,7 @@ public class UserServiceImpl implements UserService {
     public long countDistinct(String query) {
         return userRepository.countDistinct(query);
     }
+
 
     @Override
     public User getUserById(Long userId) throws Exception{
@@ -210,5 +212,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
+    @Override
+    public void activateUser(ActivateUserBody activateUserBody) {
+        long userAdminId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.ACTIVATE_USER.getValue())) {
+            throw new UnauthorizedException("Unauthorized to activate user");
+        }
+        User user = userRepository.findById(activateUserBody.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + activateUserBody.getId()));
+        user.setIsDelete(false);
+        userRepository.save(user);
+    }
 }
