@@ -1,17 +1,15 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.*;
-
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
-import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.Position;
-import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
@@ -28,18 +26,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
-
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -119,29 +114,19 @@ public class UserController {
     }
 
     // build get user by id REST API
-    @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
-//        User user =  userService.getUserById(userId);
-//        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
-        User user = User.builder()
-                .id(1L)
-                .username("USERNAME")
-                .email("email@gmail.com")
-                .dob(LocalDateTime.now())
-                .note("NOTE")
-                .fullName("FULLNAME")
-                .phoneNumber("0999888777")
-                .address("ADDRESS")
-                .isDelete(false)
-                .position(Position.builder().id(1L).name("POSITION A").build())
-                .department(Department.builder().id(2L).name("DEPARTMENT").build())
-                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
-                .build();
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
-        return ResponseEntity.ok(userResponse);
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userid) {
+        try {
+            User user = userService.getUserById(userid);
+            UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
+            return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
+        }catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }catch (Exception e ){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // build update user REST API
@@ -159,5 +144,11 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("Delete success");
     }
+    // build delete user REST API
+    @PostMapping("/activate")
+    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+    }
+
 
 }
