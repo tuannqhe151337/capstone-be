@@ -3,13 +3,13 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 
-public interface FinancialPlanRepository extends CrudRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
+public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
 
     List<FinancialPlan> findFinancialPlansByTermId(Long termId);
 

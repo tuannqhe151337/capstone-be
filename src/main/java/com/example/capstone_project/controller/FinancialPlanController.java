@@ -1,9 +1,10 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.responses.CustomSort;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -17,14 +18,17 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
+import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -260,26 +265,23 @@ public class FinancialPlanController {
     }
 
     @GetMapping("/plan-status")
-    public ResponseEntity<Responses<StatusResponse>> getListStatusPaging() {
-        Responses<StatusResponse> responses = new Responses<>();
-        responses.setData(List.of(
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("New")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(2L)
-                        .name("Waiting for reviewed")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Approved")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Reviewed")
-                        .build()
-        ));
+    public ResponseEntity<ListResponse<StatusResponse>> getListStatus() {
+        // Get data
+        List<PlanStatus> costTypes = planService.getListPlanStatus();
+
+        // Response
+        ListResponse<StatusResponse> responses = new ListResponse<>();
+
+        if (costTypes != null) {
+
+            // Mapping to CostTypeResponse
+            responses.setData(costTypes.stream().map(status -> {
+                return new PlanStatusMapperImpl().mapToStatusResponseMapping(status);
+            }).toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
 
         return ResponseEntity.ok(responses);
     }
@@ -291,7 +293,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
         listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
@@ -327,8 +329,14 @@ public class FinancialPlanController {
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
             @Validated @RequestBody DeletePlanBody planBody) {
-        System.out.println(planBody.toString());
-        return ResponseEntity.ok("id " + planBody.getPlanId());
+
+        FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
+
+        if (deletedPlan == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
     }
 
     @PutMapping("/re-upload")
@@ -337,5 +345,27 @@ public class FinancialPlanController {
     ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> confirmExpenses(
+            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+        // Get user detail
+        UserDetail userDetail = planService.getUserDetail();
+
+        // Get term
+        Term term = planService.getTermById(planBody.getTermId());
+
+        // Mapping to planBody to FinancialPlan
+        FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
+
+        // Save plan
+        FinancialPlan savedPlan = planService.creatPlan(plan, term);
+
+        if (savedPlan == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
     }
 }

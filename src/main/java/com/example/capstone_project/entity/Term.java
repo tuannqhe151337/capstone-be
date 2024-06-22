@@ -1,12 +1,11 @@
 package com.example.capstone_project.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.example.capstone_project.utils.enums.TermDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import jakarta.validation.constraints.NotEmpty;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class Term extends BaseEntity{
     private User user;
 
     @NotNull(message = "Status cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private TermStatus status; //trong day da co isDelete roi
 
