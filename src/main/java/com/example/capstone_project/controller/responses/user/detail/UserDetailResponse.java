@@ -20,6 +20,8 @@ public class UserDetailResponse {
 
     private String username;
 
+    private String fullName;
+
     private String email;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)

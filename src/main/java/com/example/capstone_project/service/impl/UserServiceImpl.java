@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
@@ -13,14 +14,20 @@ import com.example.capstone_project.utils.exception.department.InvalidDepartment
 import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
+import jakarta.mail.MessagingException;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.passay.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +49,7 @@ public class UserServiceImpl implements UserService {
             Pageable pageable) {
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
             return userRepository.getUserWithPagination(query, pageable);
         }
 
@@ -54,18 +61,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.countDistinct(query);
     }
 
-
-
     @Override
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + userId));
+    public User getUserById(Long userId) throws Exception{
+        long actorId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
+          throw new UnauthorizedException("Unauthorized to view user details");
+        }
+        Optional<User> user = userRepository.findUserDetailedById(userId);
+        if (user.isEmpty()){
+            throw new ResourceNotFoundException("User not found");
+        }else {
+            return user.get();
+        }
     }
 
     @Override
     public User updateUser(Long userId, User user) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
 
         return userRepository.save(user);
     }

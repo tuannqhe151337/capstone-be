@@ -18,7 +18,7 @@ public interface UserService {
 
     void createUser(User user) throws Exception;
 
-    User getUserById(Long userId);
+    User getUserById(Long userId) throws Exception;
 
     User updateUser(Long userId, User user);
 

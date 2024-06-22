@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.user.activate.ActivateUserBo
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -123,30 +124,19 @@ public class UserController {
     }
 
     // build get user by id REST API
-    @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
-//        User user =  userService.getUserById(userId);
-//        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
-        User user = User.builder()
-                .id(1L)
-                .username("USERNAME")
-                .email("email@gmail.com")
-                .dob(LocalDateTime.now())
-                .note("NOTE")
-                .fullName("FULLNAME")
-                .phoneNumber("0999888777")
-                .address("ADDRESS")
-                .isDelete(false)
-                .position(Position.builder().id(1L).name("POSITION A").build())
-                .department(Department.builder().id(2L).name("DEPARTMENT").build())
-                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
-                .build();
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-
-        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
-        return ResponseEntity.ok(userResponse);
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userid) {
+        try {
+            User user = userService.getUserById(userid);
+            UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
+            return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
+        }catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }catch (Exception e ){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // build update user REST API
@@ -177,6 +167,7 @@ public class UserController {
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
     }
+
 
 
 }
