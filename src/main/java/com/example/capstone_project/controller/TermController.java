@@ -8,13 +8,19 @@ import com.example.capstone_project.controller.responses.term.getPlans.TermPlanD
 import com.example.capstone_project.controller.responses.term.getReports.TermReportResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermStatusResponse;
-import com.example.capstone_project.entity.TermDuration;
+import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
+import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
+import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.utils.enums.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -24,7 +30,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.paginate.TermPaginateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -259,4 +264,56 @@ public class TermController {
         return ResponseEntity.ok(listPaginationResponse);
     }
 
+
+    @GetMapping("/plan-create-select-term")
+    public ResponseEntity<ListPaginationResponse<TermWhenCreatePlanResponse>> getListTermWhenCreatePlan(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<Term> terms = termService.getListTermWhenCreatePlan(query, pageable);
+
+        // Response
+        ListPaginationResponse<TermWhenCreatePlanResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (terms != null) {
+
+            // Count total record
+            count = termService.countDistinct(query);
+
+            // Mapping to TermPaginateResponse
+            terms.forEach(term -> response.getData().add(new TermWhenCreatePlanMapperImpl().mapToTermWhenCreatePlanResponseMapper(term)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
+                .build());
+
+        return ResponseEntity.ok(response);
+    }
 }

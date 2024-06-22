@@ -619,7 +619,7 @@ public class SeedConfiguration {
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .id(2L)
                     .name("Financial Plan 2")
-                    .term(term1)
+                    .term(term2)
                     .department(softwareDevelopmentDepartment)
                     .status(planStatus2)
                     .build();
