@@ -19,4 +19,6 @@ public interface FinancialPlanService {
     Term getTermById(Long termId);
 
     List<PlanStatus> getListPlanStatus();
+
+    FinancialPlan deletePlan(long planId);
 }
