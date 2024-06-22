@@ -1,6 +1,6 @@
 package com.example.capstone_project.controller.responses.term.getTermDetail;
 
-import com.example.capstone_project.entity.TermDuration;
+import com.example.capstone_project.utils.enums.TermDuration;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

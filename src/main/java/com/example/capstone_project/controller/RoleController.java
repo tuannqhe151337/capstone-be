@@ -4,6 +4,9 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.user.PositionResponse;
 import com.example.capstone_project.controller.responses.user.RoleResponse;
+import com.example.capstone_project.service.RoleService;
+import com.example.capstone_project.utils.mapper.user.role.RoleToRoleResponseMapper;
+import com.example.capstone_project.utils.mapper.user.role.RoleToRoleResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,26 +20,15 @@ import java.util.List;
 @RequestMapping("/api/role")
 @RequiredArgsConstructor
 public class RoleController {
+    private final RoleService roleService;
+
     @GetMapping("/user-paging-role")
     public ResponseEntity<ListResponse<RoleResponse>> getListRolePagingUser() {
         ListResponse<RoleResponse> roleList = new ListResponse<>();
-        roleList.setData(List.of(
-                RoleResponse.builder()
-                        .id(1L)
-                        .name("Admin")
-                        .code("admin")
-                        .build(),
-                RoleResponse.builder()
-                        .id(2L)
-                        .name("Accountant")
-                        .code("accountant")
-                        .build(),
-                RoleResponse.builder()
-                        .id(3L)
-                        .name("Financial Staff")
-                        .code("financial-staff")
-                        .build() ));
-
+        List<RoleResponse> roles =
+                new RoleToRoleResponseMapperImpl()
+                        .mapRolesToRoleResponses(roleService.getRoles());
+        roleList.setData(roles);
         return ResponseEntity.ok(roleList);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.capstone_project.controller.body.term.update;
 
-import com.example.capstone_project.entity.TermDuration;
+import com.example.capstone_project.utils.enums.TermDuration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
