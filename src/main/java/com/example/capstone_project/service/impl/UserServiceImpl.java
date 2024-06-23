@@ -1,6 +1,8 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.repository.*;
@@ -17,10 +19,7 @@ import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMappe
 import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.passay.CharacterData;
-import org.passay.CharacterRule;
-import org.passay.EnglishCharacterData;
-import org.passay.PasswordGenerator;
+import org.passay.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,17 +33,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository userAuthorityRepository;
+    private final DepartmentRepository departmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailRepository mailRepository;
     private final UserSettingRepository userSettingRepository;
-    private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
-
 
     @Override
     public List<User> getAllUsers(
@@ -52,7 +50,7 @@ public class UserServiceImpl implements UserService {
             Pageable pageable) {
         long userId = UserHelper.getUserId();
 
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())){
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
             return userRepository.getUserWithPagination(query, pageable);
         }
 
@@ -88,11 +86,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + userId));
-
-        userRepository.deleteById(userId);
+    public void deactivateUser(DeactiveUserBody deactiveUserBody) {
+        long userAdminId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue()) ) {
+            throw new UnauthorizedException("Unauthorized to deactivate user");
+        }
+        User user = userRepository.findById(deactiveUserBody.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + deactiveUserBody.getId()));
+        user.setIsDelete(true);
+        userRepository.save(user);
     }
 
     @Override
@@ -210,5 +212,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
+    @Override
+    public void activateUser(ActivateUserBody activateUserBody) {
+        long userAdminId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.ACTIVATE_USER.getValue())) {
+            throw new UnauthorizedException("Unauthorized to activate user");
+        }
+        User user = userRepository.findById(activateUserBody.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User does not exist with id: " + activateUserBody.getId()));
+        user.setIsDelete(false);
+        userRepository.save(user);
+    }
 }

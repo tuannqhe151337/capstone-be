@@ -1,7 +1,8 @@
 package com.example.capstone_project.service;
 
 
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -21,5 +22,6 @@ public interface UserService {
 
     User updateUser(Long userId, User user);
 
-    void deleteUser(Long userId);
+    void activateUser(ActivateUserBody activateUserBody);
+    void deactivateUser(DeactiveUserBody deactiveUserBody);
 }
