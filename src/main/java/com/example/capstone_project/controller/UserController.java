@@ -1,18 +1,14 @@
 package com.example.capstone_project.controller;
+
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
-import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
-import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.Position;
-import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -36,7 +32,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -160,7 +155,6 @@ public class UserController {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
-
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
@@ -176,7 +170,6 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
     }
-
 
 
 }
