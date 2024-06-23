@@ -14,7 +14,11 @@ import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.utils.enums.TermDuration;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapper;
+import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
@@ -172,22 +176,18 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
-        TermDetailResponse termDetailResponse
-                = TermDetailResponse.builder()
-                .id(1L)
-                .name("TERM APRIL 2024")
-                .duration(TermDuration.MONTHLY)
-                .startDate(LocalDateTime.now())
-                .planDueDate(LocalDateTime.now())
-                .endDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
-                .status(TermStatusResponse.builder()
-                        .name("IN_PROGRESS")
-                        .isDelete(false)
-                        .code(TermCode.IN_PROGRESS).build())
-                .build();
-
+    public ResponseEntity<TermDetailResponse> getTermDetailById( @PathVariable("id") Long id) {
+        try {
+        TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl()
+                .mapTermToTermDetailResponse(termService.findTermById(id));
         return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+        } catch (UnauthorizedException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping

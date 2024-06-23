@@ -11,8 +11,11 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -46,5 +49,19 @@ public class TermServiceImpl implements TermService {
         }
 
         return null;
+    }
+
+    @Override
+    public Term findTermById(Long id) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
+            throw new UnauthorizedException("Unauthorized to access this resource");
+        }
+        if(termRepository.existsById(id)){
+            return termRepository.findTermById(id);
+        }else{
+            throw new ResourceNotFoundException("Term not found");
+        }
+
     }
 }
