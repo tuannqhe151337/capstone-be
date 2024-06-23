@@ -20,7 +20,7 @@ public interface UserService {
 
     User getUserById(Long userId) throws Exception;
 
-    User updateUser(UpdateUserBody updateUserBody) throws Exception;
+    void updateUser(User user) throws Exception;
 
     void activateUser(ActivateUserBody activateUserBody);
     void deactivateUser(DeactiveUserBody deactiveUserBody);

@@ -14,12 +14,13 @@ import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
-import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
 
+import com.example.capstone_project.utils.mapper.user.edit.UpdateUserBodyToUserEntityMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,9 +79,9 @@ public class UserController {
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
-                .totalRecords(100)
+                .totalRecords(count)
                 .page(pageInt)
-                .limitRecordsPerPage(4)
+                .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
 
@@ -103,14 +104,14 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositiontIdException e){
+        } catch (InvalidPositionIdException e){
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        }catch(InvalidRoleIdException e) {
+        } catch(InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.internalServerError().body(null);
         }
 
     }
@@ -122,11 +123,11 @@ public class UserController {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
-        }catch (UnauthorizedException e){
+        } catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }catch (Exception e ){
+        } catch (Exception e ){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -134,11 +135,11 @@ public class UserController {
     // build update user REST API
     @PutMapping()
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
-        User user = null;
         try {
-            user = userService.updateUser(updateUserBody);
-            UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
-            return ResponseEntity.status(HttpStatus.OK).body(userResponse);
+            userService.updateUser(
+                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+            );
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (UnauthorizedException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (DataIntegrityViolationException e) {
@@ -147,7 +148,7 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositiontIdException e) {
+        } catch (InvalidPositionIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidRoleIdException e) {
@@ -160,7 +161,7 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deactiveUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+    public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
             return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
@@ -176,11 +177,11 @@ public class UserController {
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
-        }catch (UnauthorizedException e){
+        } catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        }catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }catch (Exception e){
+        } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 

@@ -4,21 +4,20 @@ import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBo
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
-import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
-import com.example.capstone_project.repository.redis.UserDepartmentAuthorityRepository;
+import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
-import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
-import lombok.RequiredArgsConstructor;
-import org.passay.*;
+import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,7 +50,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PositionRepository positionRepository;
     private final AuthorityRepository authorityRepository;
-    private final UserDepartmentAuthorityRepository departmentAuthorityRepository;
+    private final UserDetailRepository userDetailRepository;
 
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
@@ -91,59 +90,60 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateUser(UpdateUserBody updateUserBody) throws Exception{
-
+    public void updateUser(User user) throws Exception{
+        // Authorization: check if user has the right AuthorityCode.EDIT_USER
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized");
         }
-        User user = userRepository.findById(updateUserBody.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + updateUserBody));
 
-        // Check department
-        // Optional<User> user = userRepository.findUserByEmail(email);
-        if (!updateUserBody.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(updateUserBody.getEmail())) {
+        // Find user from database to track what field is changed
+        User oldUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + user));
+
+        // Check email unique
+        if (!oldUser.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail())) {
             throw new DataIntegrityViolationException("Email already exists");
         }
 
         // Check department, position, role exists
-        if(!departmentRepository.existsById(updateUserBody.getDepartment())){
-            throw new InvalidDepartmentIdException("Department does not exist");
+        CheckDepartmentRolePositionExistsResult result = this.checkDepartmentRolePositionExists(
+                user.getDepartment().getId(),
+                user.getRole().getId(),
+                user.getPosition().getId(),
+                CheckDepartmentRolePositionExistsOption.builder()
+                        .getRole(true)
+                        .build()
+        );
+
+        // Check if fullName is updated so that we'll regenerate username
+        if (!oldUser.getFullName().equals(user.getFullName())) {
+            user.setUsername(generateUsernameFromFullName(user.getFullName()));
         }
 
-        if(!positionRepository.existsById(updateUserBody.getPosition())){
-            throw new InvalidPositiontIdException("Position does not exist");
-        }
+        // Save to database
+        userRepository.saveUserData(user, UpdateUserDataOption.builder()
+                        .ignoreFullName(oldUser.getFullName().equals(user.getFullName()))
+                        .ignoreUsername(oldUser.getFullName().equals(user.getFullName()))
+                        .ignoreEmail(oldUser.getEmail().equals(user.getEmail()))
+                        .ignoreDepartment(oldUser.getDepartment().getId().equals(user.getDepartment().getId()))
+                        .ignorePosition(oldUser.getPosition().getId().equals(user.getPosition().getId()))
+                        .ignoreRole(oldUser.getRole().getId().equals(user.getRole().getId()))
+                        .build());
 
-        if(!roleRepository.existsById(updateUserBody.getRole())){
-            throw new InvalidRoleIdException("Role does not exist");
-        }
+        // Update user's authorities and departmentId, roleCode into redis
+        List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
+        List<String> authCodes = getAuthCodes(authorities);
 
-//        //map update user body to user
-//        Department newDepartment = entityManager.find(Department.class, updateUserBody.getDepartment());
-//        user.setDepartment(newDepartment);
-//        Role newRole = entityManager.find(Role.class, updateUserBody.getRole());
-//        user.setRole(newRole);
-//        Position newPostion = entityManager.find(Position.class, updateUserBody.getPosition());
-//        user.setPosition(newPostion);
-//
-//
-//        //check full name co thay doi khong de update username
-//        if (!updateUserBody.getFullName().equals(user.getFullName())) {
-//            user.setUsername(generateUsernameFromFullName(updateUserBody.getFullName()));
-//        }
-//
-//        user = new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody, user);
-//
-//        //get authority tu roleid
-//        List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
-//        List<String> authCodes = getAuthCodes(authorities);
-//        //update authories o trong redis
-//        userAuthorityRepository.save(user.getId(), authCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
-//        departmentAuthorityRepository.save(user.getId().intValue(), user.getDepartment().getId().intValue(), authCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
-//        return entityManager.merge(user);
-
-        return null;
+        userAuthorityRepository.save(user.getId(), authCodes, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION));
+        userDetailRepository.save(
+                user.getId(),
+                UserDetail.builder()
+                        .roleCode(result.getRole().getCode())
+                        .departmentId(user.getDepartment().getId())
+                        .build(),
+                Duration.ofMillis(ACCESS_TOKEN_EXPIRATION)
+        );
     }
 
     private List<String> getAuthCodes(List<Authority> authorityList) {
@@ -175,27 +175,22 @@ public class UserServiceImpl implements UserService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_NEW_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized to create new user");
         } else {
-            //register user
-            //check email exist
+            // Check email exist
             String email = user.getEmail();
 
-            //Optional<User> user = userRepository.findUserByEmail(email);
-            if ( userRepository.existsByEmail(email) ) {
+            if (userRepository.existsByEmail(email) ) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
-            //check department
-            if(!departmentRepository.existsById(user.getDepartment().getId())){
-                throw new InvalidDepartmentIdException("Department does not exist");
-            }
-            if(!positionRepository.existsById(user.getPosition().getId())){
-                throw new InvalidPositiontIdException("Position does not exist");
-            }
-            if(!roleRepository.existsById(user.getRole().getId())){
-                throw new InvalidRoleIdException("Role does not exist");
-            }
 
+            // Check department or position or role exist
+            CheckDepartmentRolePositionExistsResult result = this.checkDepartmentRolePositionExists(
+                    user.getDepartment().getId(),
+                    user.getRole().getId(),
+                    user.getPosition().getId(),
+                    CheckDepartmentRolePositionExistsOption.builder().build()
+            );
 
-            //generate random password
+            // Generate random password
             String password = generatePassayPassword();
             user.setPassword(this.passwordEncoder.encode(password));
 
@@ -204,7 +199,7 @@ public class UserServiceImpl implements UserService {
 
             userRepository.save(user);
 
-            //create user setting
+            // Create user setting
             UserSetting userSetting = UserSetting.builder()
                     .language("en")
                     .theme("blue")
@@ -214,9 +209,55 @@ public class UserServiceImpl implements UserService {
             userSettingRepository.save(userSetting);
 
             mailRepository.sendEmail(user.getEmail(), user.getFullName(), user.getUsername(), password);
+        }
+    }
 
+    private CheckDepartmentRolePositionExistsResult checkDepartmentRolePositionExists(long departmentId, long roleId, long positionId, CheckDepartmentRolePositionExistsOption option)
+            throws InvalidDepartmentIdException, InvalidPositionIdException, InvalidRoleIdException {
+        // Result
+        CheckDepartmentRolePositionExistsResult result = new CheckDepartmentRolePositionExistsResult();
+
+        // Department
+        if (option.isGetDepartment()) {
+            Department department = departmentRepository.findById(departmentId)
+                    .orElseThrow(() -> new InvalidDepartmentIdException("Department does not exist"));
+
+            result.setDepartment(department);
+
+        } else {
+            if (!departmentRepository.existsById(departmentId)) {
+                throw new InvalidDepartmentIdException("Department does not exist");
+            }
         }
 
+
+        // Position
+        if (option.isGetPosition()) {
+            Position position = positionRepository.findById(positionId)
+                    .orElseThrow(() -> new InvalidPositionIdException("Position does not exist"));
+
+            result.setPosition(position);
+
+        } else {
+            if (!positionRepository.existsById(positionId)) {
+                throw new InvalidPositionIdException("Position does not exist");
+            }
+        }
+
+        // Role
+        if (option.isGetRole()) {
+            Role role = roleRepository.findById(roleId)
+                    .orElseThrow(() -> new InvalidRoleIdException("Role does not exist"));
+
+            result.setRole(role);
+
+        } else {
+            if (!roleRepository.existsById(roleId)) {
+                throw new InvalidRoleIdException("Role does not exist");
+            }
+        }
+
+        return result;
     }
 
     private String generatePassayPassword() {
@@ -249,7 +290,7 @@ public class UserServiceImpl implements UserService {
                 upperCaseRule, digitRule);
     }
 
-    public String generateUsernameFromFullName(String fullname) {
+    private String generateUsernameFromFullName(String fullname) {
         String[] nameParts = fullname.trim().split("\\s+");
         // Tạo username từ tên và họ
         StringBuilder usernameBuilder = new StringBuilder();
@@ -259,12 +300,12 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        String lastestUsername = userRepository.getCountByName(usernameBuilder.toString());
-        if (lastestUsername != null) {
+        String latestUsername = userRepository.getLatestSimilarUsername(usernameBuilder.toString());
+        if (latestUsername != null) {
             // Sử dụng biểu thức chính quy để tách phần số từ chuỗi
             Pattern pattern = Pattern.compile("\\d+");
-            Matcher matcher = pattern.matcher(lastestUsername);
-            Long count = 0L;
+            Matcher matcher = pattern.matcher(latestUsername);
+            long count = 0L;
             String numericPart = "";
             if (matcher.find()) {
                 numericPart = matcher.group();  // vi du 14 từ GiangDV14
@@ -291,4 +332,24 @@ public class UserServiceImpl implements UserService {
         user.setIsDelete(false);
         userRepository.save(user);
     }
+}
+
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class CheckDepartmentRolePositionExistsOption {
+    private boolean getDepartment;
+    private boolean getRole;
+    private boolean getPosition;
+}
+
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class CheckDepartmentRolePositionExistsResult {
+    private Department department;
+    private Role role;
+    private Position position;
 }

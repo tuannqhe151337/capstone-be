@@ -26,7 +26,7 @@ public class UserSetting {
     @Column(name = "dark_mode")
     private boolean darkMode;
 
-    @OneToOne()
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }

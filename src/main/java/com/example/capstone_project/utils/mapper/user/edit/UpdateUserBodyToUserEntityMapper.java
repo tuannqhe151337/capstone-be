@@ -9,8 +9,8 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UpdateUserBodyToUserEntityMapper {
-    @Mapping(source = "department", target = "department.id")
-    @Mapping(source = "role", target = "role.id")
-    @Mapping(source = "position", target = "position.id")
-    User updateUserFromDto(UpdateUserBody dto, @MappingTarget User entity);
+    @Mapping(source = "departmentId", target = "department.id")
+    @Mapping(source = "roleId", target = "role.id")
+    @Mapping(source = "positionId", target = "position.id")
+    User updateUserFromDto(UpdateUserBody dto);
 }

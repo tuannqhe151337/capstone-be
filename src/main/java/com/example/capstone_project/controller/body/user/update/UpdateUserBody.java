@@ -28,17 +28,17 @@ public class UpdateUserBody {
 
         @NotNull(message = "Department cannot be blank")
         @NotNull
-        private Long department;
+        private Long departmentId;
 
         @NotBlank(message = "Phone number cannot be blank")
         @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 digits")
         private String phoneNumber;
 
         @NotNull(message = "Role cannot be null")
-        private Long role;
+        private Long roleId;
 
         @NotNull(message = "Position cannot be null")
-        private Long position;
+        private Long positionId;
 
         @NotNull(message = "DOB cannot be null")
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
