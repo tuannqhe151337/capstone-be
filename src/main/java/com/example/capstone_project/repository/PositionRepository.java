@@ -8,8 +8,9 @@ import java.util.List;
 
 public interface PositionRepository extends JpaRepository<Position, Long> , CustomPositionRepository{
     List<Position> findAll();
+
     @Override
-    boolean existsById(Long aLong);
+    boolean existsById(Long id);
 
 
     @Query(value = "select distinct count(position.id) from Position position " +
