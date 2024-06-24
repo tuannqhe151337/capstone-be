@@ -12,4 +12,6 @@ public interface TermService {
     long countDistinct(String query) throws Exception;
 
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception;
+
+    void deleteTerm(Long id) throws Exception;
 }

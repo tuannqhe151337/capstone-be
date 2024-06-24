@@ -63,11 +63,4 @@ public class Term extends BaseEntity{
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 
-    @AssertTrue(message = "Plan due date must be before end date")
-    private boolean isPlanDueDateBeforeEndDate() {
-        if (planDueDate == null || endDate == null) {
-            return true; // Để @NotNull xử lý null check
-        }
-        return planDueDate.isBefore(endDate);
-    }
 }
