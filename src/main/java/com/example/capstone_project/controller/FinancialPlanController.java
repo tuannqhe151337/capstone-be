@@ -287,7 +287,7 @@ public class FinancialPlanController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
         listPaginationResponse.setData(List.of(
                 VersionResponse.builder()
@@ -323,8 +323,14 @@ public class FinancialPlanController {
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
             @Validated @RequestBody DeletePlanBody planBody) {
-        System.out.println(planBody.toString());
-        return ResponseEntity.ok("id " + planBody.getPlanId());
+
+        FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
+
+        if (deletedPlan == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
     }
 
     @PutMapping("/re-upload")

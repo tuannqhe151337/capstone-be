@@ -16,6 +16,7 @@ import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
@@ -160,6 +161,24 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public Term getTermById(Long termId) {
         return termRepository.getReferenceById(termId);
+    }
+
+    @Override
+    public FinancialPlan deletePlan(long planId) {
+        // Check authorization
+        if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
+
+            FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
+                    new ResourceNotFoundException("Not found any plan have id = " + planId));
+
+            financialPlan.setDelete(true);
+
+            planRepository.save(financialPlan);
+
+            return financialPlan;
+        } else {
+            return null;
+        }
     }
 
     @Override

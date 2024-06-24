@@ -1,25 +1,26 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.body.user.delete.DeleteUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
-import com.example.capstone_project.controller.responses.*;
-
+import com.example.capstone_project.controller.responses.ExceptionResponse;
+import com.example.capstone_project.controller.responses.ListPaginationResponse;
+import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
-import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.Position;
-import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
-import com.example.capstone_project.utils.exception.position.InvalidPositiontIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.user.edit.UpdateUserToUserDetailResponseMapperImpl;
+
+import com.example.capstone_project.utils.mapper.user.edit.UpdateUserBodyToUserEntityMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,18 +29,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/user")
-
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -81,9 +78,9 @@ public class UserController {
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
-                .totalRecords(100)
+                .totalRecords(count)
                 .page(pageInt)
-                .limitRecordsPerPage(4)
+                .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
 
@@ -106,58 +103,88 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositiontIdException e){
+        } catch (InvalidPositionIdException e){
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        }catch(InvalidRoleIdException e) {
+        } catch(InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.internalServerError().body(null);
         }
 
     }
 
     // build get user by id REST API
-    @GetMapping("{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userId) {
-//        User user =  userService.getUserById(userId);
-//        UserResponse userResponse = new UserMapperImpl().mapToUserResponse(user);
-        User user = User.builder()
-                .id(1L)
-                .username("USERNAME")
-                .email("email@gmail.com")
-                .dob(LocalDateTime.now())
-                .note("NOTE")
-                .fullName("FULLNAME")
-                .phoneNumber("0999888777")
-                .address("ADDRESS")
-                .isDelete(false)
-                .position(Position.builder().id(1L).name("POSITION A").build())
-                .department(Department.builder().id(2L).name("DEPARTMENT").build())
-                .role(Role.builder().id(1L).code("ROLE CODE").name("ROLE NAME").build())
-                .build();
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        UserDetailResponse userResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
-        return ResponseEntity.ok(userResponse);
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userid) {
+        try {
+            User user = userService.getUserById(userid);
+            UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
+            return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
+        } catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e ){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // build update user REST API
     @PutMapping()
-    public ResponseEntity<UserDetailResponse> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
-        User user = new User();
-        UserDetailResponse userDetailResponse = new UpdateUserToUserDetailResponseMapperImpl().mapUpdateUserToUserDetailResponse(updateUserBody);
-        userDetailResponse.setCreatedAt(LocalDateTime.now());
-        userDetailResponse.setUpdatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(userDetailResponse);
+    public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
+        try {
+            userService.updateUser(
+                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+            );
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        } catch (UnauthorizedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (DataIntegrityViolationException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("email already exists").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (InvalidDepartmentIdException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (InvalidPositionIdException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (InvalidRoleIdException e) {
+            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserBody deleteUserBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Delete success");
+    public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+        try {
+            userService.deactivateUser(deactiveUserBody);
+            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+        } catch (UnauthorizedException e) {
+            throw new UnauthorizedException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(e.getMessage());
+        }
     }
+    // build delete user REST API
+    @PostMapping("/activate")
+    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+        try {
+            userService.activateUser(activateUserBody);
+        } catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        } catch (ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+    }
+
 
 }

@@ -21,6 +21,8 @@ public interface FinancialPlanService {
 
     List<PlanStatus> getListPlanStatus();
 
+    FinancialPlan deletePlan(long planId);
+
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
     int getPlanVersionById(Long planId);

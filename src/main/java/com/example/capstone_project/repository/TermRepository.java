@@ -19,6 +19,18 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " END ")
     boolean existsPlanOfDepartmentInTerm(long departmentId, Long termId);
 
+    @Query(value = " SELECT count(distinct (term.id) ) FROM Term term " +
+            " LEFT JOIN term.financialPlans plan" +
+            " WHERE term.name like %:query% AND " +
+            " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
+            " term.status.name != :close AND " +
+            " term.planDueDate >= :now AND " +
+            " term.isDelete = false ")
+    long countDistinctListTermWhenCreatePlan(@Param("query") String query,
+                       @Param("close") String close,
+                       @Param("now") LocalDateTime now, @Param("departmentId") Long departmentId);
+
+
     @Query(value = "SELECT DISTINCT count(term.id) FROM Term term " +
             " WHERE term.name like %:query% AND " +
             " term.status.name != :close AND " +
