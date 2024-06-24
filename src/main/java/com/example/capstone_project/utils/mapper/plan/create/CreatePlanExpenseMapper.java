@@ -14,12 +14,12 @@ import java.util.stream.IntStream;
 @Mapper(componentModel = "spring")
 public interface CreatePlanExpenseMapper {
 
-    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody){
+    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody, String termName){
         List<FinancialPlanExpense> planExpenses = new ArrayList<>();
         for (int i = 0; i < expenseBodies.size(); i++) {
             ExpenseBody expenseBody = expenseBodies.get(i);
             planExpenses.add(FinancialPlanExpense.builder()
-                    .planExpenseKey(planBody.getFileName()+"_"+(i+1))
+                    .planExpenseKey(termName + "_" + planBody.getPlanName() + "_v1" + "_" + (i + 1))
                             .name(expenseBody.getName())
                             .unitPrice(expenseBody.getUnitPrice())
                             .amount(expenseBody.getAmount())

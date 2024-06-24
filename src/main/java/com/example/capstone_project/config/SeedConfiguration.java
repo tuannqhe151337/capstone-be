@@ -530,6 +530,7 @@ public class SeedConfiguration {
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
+            // Plan status
             PlanStatus planStatus1 = PlanStatus.builder()
                     .id(1L)
                     .name("New")
@@ -539,7 +540,7 @@ public class SeedConfiguration {
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
                     .name("Waiting for reviewed")
-                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
+                    .code(PlanStatusCode.WAITING_FOR_REVIEWED)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
@@ -550,7 +551,7 @@ public class SeedConfiguration {
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
-                    .name("Denied")
+                    .name("Approved")
                     .code(PlanStatusCode.APPROVED)
                     .build();
 
