@@ -1,6 +1,8 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
@@ -14,7 +16,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
 
     List<FinancialPlan> findFinancialPlansByTermId(Long termId);
 
-    @Query(value = "SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
+    @Query(value = " SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +
             " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
@@ -22,7 +24,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.isDelete = false ")
     long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
 
-    @Query(value = "SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version FROM FinancialPlanFile file " +
+    @Query(value = " SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
@@ -54,4 +56,20 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE file.plan.id = :planId" +
             " GROUP BY file.plan.id ")
     int getPlanVersionByPlanId(@Param("planId") Long planId);
+
+    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +
+            " costTypes.name AS costType, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
+            " expenses.projectName AS projectName, expenses.supplierName AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " statuses.code AS status  FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term terms " +
+            " LEFT JOIN plan.department departments " +
+            " LEFT JOIN expenses.costType costTypes " +
+            " LEFT JOIN expenses.status statuses  " +
+            " WHERE files.id = :fileId AND " +
+            " files.isDelete = false AND expenses.isDelete = false ")
+    List<ExpenseResult> getListExpense(@Param("file") Long fileId);
+
 }

@@ -5,12 +5,10 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
-import com.example.capstone_project.repository.FinancialPlanRepository;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.PlanStatusRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
@@ -21,11 +19,19 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -39,8 +45,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
     private final TermRepository termRepository;
+    private final FinancialPlanFileRepository financialPlanFileRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
-
+    private final DepartmentRepository departmentRepository;
 
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
@@ -212,4 +219,93 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
     }
+
+    @Override
+    public byte[] getBodyFileExcelXLSX(Long fileId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        List<ExpenseResult> expenses = null;
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (!userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                expenses = planRepository.getListExpense(fileId);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
+
+                // Check department
+                if ( departmentId == userDetail.getDepartmentId()) {
+                    expenses = planRepository.getListExpense(fileId);
+                }
+            }
+
+        }
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+            FileInputStream file = new FileInputStream(fileLocation);
+            XSSFWorkbook wb = new XSSFWorkbook(file);
+
+            Sheet sheet = wb.getSheet("Expense");
+
+            String[][] tableData = new String[expenses.size()][14];
+
+            // Convert list expense to matrix
+            for (int i = 0; i < expenses.size(); i++) {
+                ExpenseResult expense = expenses.get(i);
+                tableData[i][0] = expense.getExpenseCode();
+                tableData[i][1] = expense.getDate().toString();
+                tableData[i][2] = expense.getTerm();
+                tableData[i][3] = expense.getDepartment();
+                tableData[i][4] = expense.getExpense();
+                tableData[i][5] = expense.getCostType();
+                tableData[i][6] = expense.getUnitPrice();
+                tableData[i][7] = expense.getAmount();
+                tableData[i][8] = expense.getTotal();
+                tableData[i][9] = expense.getProjectName();
+                tableData[i][10] = expense.getSupplierName();
+                tableData[i][11] = expense.getPic();
+                tableData[i][12] = expense.getNote();
+                tableData[i][13] = expense.getStatus();
+            }
+
+            Row row = null;
+            Cell cell = null;
+
+            int rowPosition = 2;
+            int colPosition = 0;
+
+            for (int i = 0; i < tableData.length; i++) {
+                row = sheet.getRow(i + rowPosition);
+
+                for (int j = 0; j < tableData[0].length; j++) {
+                    cell = row.getCell(j + colPosition);
+
+                    cell.setCellValue(tableData[i][j]);
+                }
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            wb.write(out);
+            wb.close();
+            out.close();
+
+            return out.toByteArray();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String generateFileName(Long fileId) {
+        return null;
+    }
+
 }
