@@ -131,6 +131,9 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 case "createdat", "created_at", "create_at", "publisheddate", "published_date", "published-date":
                     hql += "file.createdAt " + sortType;
                     break;
+                case "fileid", "id", "file_id":
+                    hql += "file.id " + sortType;
+                    break;
                 default:
                     hql += "file.createdAt " + "desc";
             }

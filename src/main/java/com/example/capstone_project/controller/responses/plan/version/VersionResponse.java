@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class VersionResponse {
+    private Long planFileId;
     private LocalDateTime publishedDate;
     private UserResponse uploadedBy;
 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface PlanListVersionResponseMapper {
+    @Mapping(source = "id", target = "planFileId")
     @Mapping(source = "createdAt", target = "publishedDate")
     @Mapping(source = "user.id", target = "uploadedBy.userId")
     @Mapping(source = "user.username", target = "uploadedBy.username")
