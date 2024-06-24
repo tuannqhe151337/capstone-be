@@ -1,5 +1,6 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
@@ -24,4 +25,5 @@ public interface UserService {
 
     void activateUser(ActivateUserBody activateUserBody);
     void deactivateUser(DeactiveUserBody deactiveUserBody);
+    void changePassword(ChangePasswordBody changePasswordBody);
 }
