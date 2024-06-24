@@ -33,7 +33,6 @@ public class TermServiceImpl implements TermService {
     private final UserDetailRepository userDetailRepository;
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserRepository userRepository;
-    private final EntityManager entityManger;
     private final TermStatusRepository termStatusRepository;
 
     @Override

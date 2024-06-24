@@ -13,7 +13,7 @@ public enum TermDuration {
     QUARTERLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plusMonths(3);
+            return startDate.plusMonths(6);
         }
     },
     YEARLY {
