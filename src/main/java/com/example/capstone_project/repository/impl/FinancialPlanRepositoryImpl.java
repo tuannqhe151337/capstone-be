@@ -1,6 +1,8 @@
 package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlanFile;
+import com.example.capstone_project.entity.FinancialPlanFile_;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
@@ -101,6 +103,52 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 .setParameter("termId", termId)
                 .setParameter("departmentId", departmentId)
                 .setParameter("statusId", statusId)
+                .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
+                .setMaxResults(pageable.getPageSize())
+                .setHint("jakarta.persistence.fetchgraph", entityGraph)
+                .getResultList();
+    }
+
+    @Override
+    public List<FinancialPlanFile> getListVersionWithPaginate(Long planId, Pageable pageable) {
+        // HQL query
+        String hql = " SELECT file FROM FinancialPlanFile file " +
+                " LEFT JOIN file.user user " +
+                " WHERE file.plan.id = :planId AND " +
+                " file.isDelete = false " +
+                " ORDER BY ";
+
+        // Handling sort by and sort type
+        List<Sort.Order> sortOrderList = pageable.getSort().get().toList();
+        for (int i = 0; i < sortOrderList.size(); i++) {
+            Sort.Order order = sortOrderList.get(i);
+
+            String sortType = order.getDirection().isAscending() ? "asc" : "desc";
+            switch (order.getProperty().toLowerCase()) {
+                case "username", "user-name", "user_name":
+                    hql += "user.name " + sortType;
+                    break;
+                case "createdat", "created_at", "create_at", "publisheddate", "published_date", "published-date":
+                    hql += "file.createdAt " + sortType;
+                    break;
+                default:
+                    hql += "file.createdAt " + "desc";
+            }
+
+            if (i != sortOrderList.size() - 1) {
+                hql += ", ";
+            } else {
+                hql += " ";
+            }
+        }
+
+        // Handling join
+        EntityGraph<FinancialPlanFile> entityGraph = entityManager.createEntityGraph(FinancialPlanFile.class);
+        entityGraph.addAttributeNodes(FinancialPlanFile_.USER);
+
+        // Run query
+        return entityManager.createQuery(hql, FinancialPlanFile.class)
+                .setParameter("planId", planId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)

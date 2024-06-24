@@ -212,4 +212,36 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
     }
+
+    @Override
+    public List<FinancialPlanFile> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getListVersionWithPaginate(planId, pageable);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+
+                // Check department
+                if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
+                    return planRepository.getListVersionWithPaginate(planId, pageable);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public long countDistinctListPlanVersionPaging(Long planId) {
+        return planRepository.getPlanVersionByPlanId(planId);
+    }
 }

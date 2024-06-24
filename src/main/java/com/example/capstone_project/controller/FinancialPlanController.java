@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
+import com.example.capstone_project.controller.body.plan.version.PlanVersionBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -12,13 +13,13 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
@@ -32,6 +33,7 @@ import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImp
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -282,42 +284,49 @@ public class FinancialPlanController {
 
     @GetMapping("versions")
     public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
-            @RequestParam Integer planId,
+            @RequestBody PlanVersionBody planBody,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                VersionResponse.builder()
-                        .version("v1")
-                        .publishedDate(LocalDate.of(2024, 4, 10))
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v2")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v3")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build()
-        ));
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
-                .page(10)
-                .limitRecordsPerPage(33)
-                .numPages(1)
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<FinancialPlanFile> planFiles = planService.getListVersionWithPaginate(planBody.getPlanId(), pageable);
+
+        // Response
+        ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (planFiles != null) {
+
+            // Count total record
+            count = planService.countDistinctListPlanVersionPaging(planBody.getPlanId());
+
+            // Mapping to TermPaginateResponse
+            planFiles.forEach(file -> response.getData().add( new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listPaginationResponse);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete")
