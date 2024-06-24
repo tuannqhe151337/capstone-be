@@ -1,6 +1,7 @@
 package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.entity.PlanStatus;
@@ -21,4 +22,8 @@ public interface FinancialPlanService {
     List<PlanStatus> getListPlanStatus();
 
     FinancialPlan deletePlan(long planId);
+
+    PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
+
+    int getPlanVersionById(Long planId);
 }
