@@ -52,7 +52,7 @@ public class Term extends BaseEntity{
     @NotNull(message = "Status cannot be null")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
-    private TermStatus status; //trong day da co isDelete roi
+    private TermStatus status;
 
     @OneToMany(mappedBy = "term")
     private List<FinancialPlan> financialPlans;
