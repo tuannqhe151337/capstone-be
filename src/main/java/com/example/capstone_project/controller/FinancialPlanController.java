@@ -214,15 +214,16 @@ public class FinancialPlanController {
 
         /// Get data for file Excel
         byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
-        if (report == null) {
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateFileName(planBody.getFileId());
+
+            return createResponseEntity(report, outFileName);
+
+        } else {
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        // Create file name for file Excel
-        String outFileName = "report.xlsx";
-//                planService.generateFileName(planBody.getFileId());
-
-        return createResponseEntity(report, outFileName);
     }
 
     private ResponseEntity<byte[]> createResponseEntity(

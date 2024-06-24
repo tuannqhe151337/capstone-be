@@ -65,17 +65,36 @@ public class SeedConfiguration {
             // Department
             Department softwareDevelopmentDepartment = Department.builder()
                     .name("Software development")
+                    .code(DepartmentCode.IT)
                     .build();
 
             Department accountingDepartment = Department.builder()
                     .name("Accounting department")
+                    .code(DepartmentCode.ACCOUNTING)
                     .build();
 
             Department financeDepartment = Department.builder()
                     .name("Finance department")
+                    .code(DepartmentCode.FINANCE)
                     .build();
 
-            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment));
+            Department hireDepartment = Department.builder()
+                    .name("Hire department")
+                    .code(DepartmentCode.HR)
+                    .build();
+
+            Department communicationDepartment = Department.builder()
+                    .name("Finance department")
+                    .code(DepartmentCode.COMMUNICATION)
+                    .build();
+
+            Department marketingDepartment = Department.builder()
+                    .name("Finance department")
+                    .code(DepartmentCode.MARKETING)
+                    .build();
+
+
+            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment, hireDepartment, communicationDepartment, marketingDepartment));
 
             // Position
             Position techlead = Position.builder()

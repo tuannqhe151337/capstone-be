@@ -9,6 +9,7 @@ import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.ExpenseResult;
+import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
@@ -153,7 +154,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         // Check authorization
         // Check any plan of user department is existing in this term
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue()) &&
-              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId()) &&
+                !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId()) &&
                 LocalDateTime.now().isBefore(term.getPlanDueDate())) {
             return planRepository.save(plan);
         } else {
@@ -232,16 +233,16 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             // Accountant role can view all plan
-            if (!userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                expenses = planRepository.getListExpense(fileId);
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                expenses = planRepository.getListExpenseByFileId(fileId);
 
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
 
                 // Check department
-                if ( departmentId == userDetail.getDepartmentId()) {
-                    expenses = planRepository.getListExpense(fileId);
+                if (departmentId == userDetail.getDepartmentId()) {
+                    expenses = planRepository.getListExpenseByFileId(fileId);
                 }
             }
 
@@ -305,6 +306,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     public String generateFileName(Long fileId) {
+        int planId = planRepository.getPlanIdByFileId(fileId);
+        List<FileNameResult> fileNameResultList = financialPlanFileRepository.generateFileName(planId);
+        String result;
+        for (FileNameResult fileName : fileNameResultList) {
+            if (Objects.equals(fileName.getFileId(), fileId)){
+                return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xlsx";
+            }
+        }
         return null;
     }
 

@@ -68,8 +68,12 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " LEFT JOIN plan.department departments " +
             " LEFT JOIN expenses.costType costTypes " +
             " LEFT JOIN expenses.status statuses  " +
-            " WHERE files.id = :fileId AND " +
+            " WHERE file.id = :fileId AND " +
             " files.isDelete = false AND expenses.isDelete = false ")
-    List<ExpenseResult> getListExpense(@Param("file") Long fileId);
-
+    List<ExpenseResult> getListExpenseByFileId(@Param("fileId") Long fileId);
+    @Query(value = " SELECT plan.id FROM FinancialPlan plan " +
+            " JOIN plan.planFiles files " +
+            " WHERE files.id = :fileId AND " +
+            " plan.isDelete = false ")
+    int getPlanIdByFileId(@Param("fileId") Long fileId);
 }
