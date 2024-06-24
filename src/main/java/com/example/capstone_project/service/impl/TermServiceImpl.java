@@ -57,10 +57,11 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
-        if(termRepository.existsById(id)){
-            return termRepository.findTermById(id);
-        }else{
+        Term term = termRepository.findTermById(id);
+        if(term == null){
             throw new ResourceNotFoundException("Term not found");
+        }else{
+            return term;
         }
 
     }
