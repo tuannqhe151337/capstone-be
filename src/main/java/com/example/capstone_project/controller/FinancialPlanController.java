@@ -5,7 +5,6 @@ import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.body.plan.version.PlanVersionBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -284,7 +283,7 @@ public class FinancialPlanController {
 
     @GetMapping("versions")
     public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
-            @RequestBody PlanVersionBody planBody,
+            @RequestParam Long planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
@@ -298,7 +297,7 @@ public class FinancialPlanController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<FinancialPlanFile> planFiles = planService.getListVersionWithPaginate(planBody.getPlanId(), pageable);
+        List<FinancialPlanFile> planFiles = planService.getListVersionWithPaginate(planId, pageable);
 
         // Response
         ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
@@ -308,7 +307,7 @@ public class FinancialPlanController {
         if (planFiles != null) {
 
             // Count total record
-            count = planService.countDistinctListPlanVersionPaging(planBody.getPlanId());
+            count = planService.countDistinctListPlanVersionPaging(planId);
 
             // Mapping to TermPaginateResponse
             planFiles.forEach(file -> response.getData().add( new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
