@@ -1,10 +1,9 @@
 package com.example.capstone_project.service.impl;
 
-
 import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanRepository;
+
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.TermStatusRepository;
@@ -16,8 +15,8 @@ import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.UserHelper;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -55,6 +54,21 @@ public class TermServiceImpl implements TermService {
         }
 
         return null;
+    }
+
+    @Override
+    public Term findTermById(Long id) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
+            throw new UnauthorizedException("Unauthorized to access this resource");
+        }
+        Term term = termRepository.findTermById(id);
+        if(term == null){
+            throw new ResourceNotFoundException("Term not found");
+        }else{
+            return term;
+        }
+
     }
 
     @Override

@@ -8,20 +8,21 @@ import com.example.capstone_project.controller.responses.term.getPlans.PlanStatu
 import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
 import com.example.capstone_project.controller.responses.term.getReports.TermReportResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
-import com.example.capstone_project.controller.responses.term.getTermDetail.TermStatusResponse;
+
 import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.utils.enums.TermDuration;
+
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.TermCode;
+
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTermEntityMapper;
 import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTermEntityMapperImpl;
+import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
-import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ import java.util.*;
 @Validated
 public class TermController {
     private final TermService termService;
+
 
     @GetMapping("/report")
     public ResponseEntity<ListPaginationResponse<TermReportResponse>> getReportListByTerm
@@ -173,22 +175,18 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailmById(@PathVariable("id") Long id) {
-        TermDetailResponse termDetailResponse
-                = TermDetailResponse.builder()
-                .id(1L)
-                .name("TERM APRIL 2024")
-                .duration(TermDuration.MONTHLY)
-                .startDate(LocalDateTime.now())
-                .planDueDate(LocalDateTime.now())
-                .endDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
-                .status(TermStatusResponse.builder()
-                        .name("IN_PROGRESS")
-                        .isDelete(false)
-                        .code(TermCode.IN_PROGRESS).build())
-                .build();
-
+    public ResponseEntity<TermDetailResponse> getTermDetailById( @PathVariable("id") Long id) {
+        try {
+        TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl()
+                .mapTermToTermDetailResponse(termService.findTermById(id));
         return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+        } catch (UnauthorizedException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PostMapping

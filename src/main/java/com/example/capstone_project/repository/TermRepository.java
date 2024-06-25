@@ -41,6 +41,8 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
                        @Param("now") LocalDateTime now);
 
     //crud term
+    Term findTermById(Long id);
 
-
+    @Override
+    boolean existsById(Long aLong);
 }

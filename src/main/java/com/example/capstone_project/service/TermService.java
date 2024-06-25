@@ -14,4 +14,6 @@ public interface TermService {
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception;
 
     void createTerm(Term term) throws Exception;
+
+    Term findTermById(Long id) throws Exception;
 }
