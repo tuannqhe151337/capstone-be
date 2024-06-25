@@ -170,6 +170,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(ChangePasswordBody changePasswordBody) {
+        String oldPassword = changePasswordBody.getOldPassword();
+        String newPassword = changePasswordBody.getNewPassword();
+        long userId = UserHelper.getUserId();
+        User user = userRepository.getReferenceById(userId);
+        if(user.getPassword().equals(oldPassword)) {
+            user.setPassword(newPassword);
+        }else {
+            throw new UnauthorizedException("Password does not match");
+        }
 
     }
 
