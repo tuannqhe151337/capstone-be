@@ -17,6 +17,5 @@ public class ChangePasswordBody {
     private String oldPassword;
     @NotEmpty(message = "New password cannot be null")
     private String newPassword;
-    @NotEmpty(message = "Confirm password cannot be null")
-    private String confirmPassword;
+
 }
