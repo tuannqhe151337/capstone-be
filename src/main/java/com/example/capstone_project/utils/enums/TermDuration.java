@@ -13,13 +13,13 @@ public enum TermDuration {
     QUARTERLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plusMonths(6);
+            return startDate.plusMonths(3);
         }
     },
-    YEARLY {
+    HALF_YEARLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plusYears(1);
+            return startDate.plusMonths(6);
         }
     };
     private String value;
