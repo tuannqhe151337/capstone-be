@@ -2,6 +2,7 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -19,6 +20,7 @@ import com.example.capstone_project.controller.responses.plan.detail.PlanDetailR
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
@@ -26,6 +28,7 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
@@ -183,33 +186,24 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestParam Integer planId
-    ) {
-        return ResponseEntity.ok(PlanDetailResponse.builder()
-                .id(1L)
-                .name("Plan name")
-                .term(TermResponse.builder()
-                        .termId(1L)
-                        .name("Financial plan December Q3 2021")
-                        .build())
-                .biggestExpenditure(BigDecimal.valueOf(180000000))
-                .totalPlan(BigDecimal.valueOf(213425384))
-                .planDueDate(LocalDate.now())
-                .department(DepartmentResponse.builder()
-                        .departmentId(1L)
-                        .name("BU 01")
-                        .build())
-                .status(StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Waiting for approval")
-                        .build())
-                .version("version 2")
-                .createdAt(LocalDate.now())
-                .user(UserResponse.builder()
-                        .userId(1L)
-                        .username("Anhln")
-                        .build())
-                .build());
+            @RequestBody PlanDetailBody  planDetailBody
+    ) throws Exception {
+
+        // Get data
+        PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
+
+        // Response
+        PlanDetailResponse response;
+
+        if (plan != null) {
+            // Mapping to PlanDetail Response
+                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/download")

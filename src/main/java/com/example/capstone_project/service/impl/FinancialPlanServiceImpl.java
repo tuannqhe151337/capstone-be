@@ -2,12 +2,16 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlan_;
+import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
 import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -15,6 +19,7 @@ import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -174,5 +179,37 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getFinancialPlanById(planId);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+
+                // Check department
+                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
+                    return planResult;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public int getPlanVersionById(Long planId) {
+        return planRepository.getPlanVersionByPlanId(planId);
     }
 }

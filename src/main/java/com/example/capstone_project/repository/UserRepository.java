@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNullApi;
+
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
@@ -41,15 +43,12 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
     long countDistinct(String query);
 
-    User save(User user);
-
     Optional<User> findUserByEmail(String email);
 
     @Query(value = "SELECT user.username FROM User user" +
             " WHERE TRIM(TRANSLATE(user.username, '0123456789', '          ')) = ?1" +
             " ORDER BY LENGTH(user.username) DESC, user.username DESC LIMIT 1")
-    String getCountByName(String pattern);
-
+    String getLatestSimilarUsername(String pattern);
 
     boolean existsByEmail(String email);
 }

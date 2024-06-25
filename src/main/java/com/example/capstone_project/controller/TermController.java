@@ -3,24 +3,26 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.PlanStatusResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
 import com.example.capstone_project.controller.responses.term.getReports.TermReportResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
-import com.example.capstone_project.controller.responses.term.getTermDetail.TermStatusResponse;
+
 import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.utils.enums.TermDuration;
+
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.TermCode;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapper;
+import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTermEntityMapperImpl;
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
-import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -191,8 +190,26 @@ public class TermController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createTerm(@Valid @RequestBody CreateTermBody createTermBody) {
-        return ResponseEntity.status(HttpStatus.CREATED).body("Created successfully");
+    public ResponseEntity<Object> createTerm(@Valid @RequestBody CreateTermBody createTermBody) {
+        //map create term body to term entity
+        Term term = new CreateTermBodyToTermEntityMapperImpl().mapCreateTermBodyToTermEntity(createTermBody);
+        try {
+            termService.createTerm(term);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Create successfully");
+        } catch (UnauthorizedException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("Authorization").message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
+        } catch (InvalidDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("PlanDueDate").message("Plan due date must be within 5 days after end date.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
     }
 
     @PutMapping
