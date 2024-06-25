@@ -18,6 +18,7 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +73,22 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
+    public void startTermManually(Long termId) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.START_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized to start term");
+        }
+        Term term = termRepository.findTermById(termId);
+        if(term == null){
+            throw new ResourceNotFoundException("Term not found");
+        }
+        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+        term.setStatus(termStatus);
+        term.setStartDate(LocalDateTime.now());
+        termRepository.save(term);
+    }
+
+    @Override
     public void createTerm(Term term) throws Exception {
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
@@ -101,5 +118,8 @@ public class TermServiceImpl implements TermService {
         termRepository.save(term);
 
     }
+
+    //start term change status of this term
+
 
 }

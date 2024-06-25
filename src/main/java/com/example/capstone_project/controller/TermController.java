@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.PlanStatusResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
@@ -175,17 +176,17 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailById( @PathVariable("id") Long id) {
+    public ResponseEntity<TermDetailResponse> getTermDetailById(@PathVariable("id") Long id) {
         try {
-        TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl()
-                .mapTermToTermDetailResponse(termService.findTermById(id));
-        return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+            TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl()
+                    .mapTermToTermDetailResponse(termService.findTermById(id));
+            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
         } catch (UnauthorizedException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -214,7 +215,7 @@ public class TermController {
 
     @PutMapping
     public ResponseEntity<String> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
-      TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
+        TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
         return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
     }
 
@@ -332,5 +333,19 @@ public class TermController {
                 .build());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/start/{id}")
+    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+        try {
+            termService.startTermManually(termId);
+            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
