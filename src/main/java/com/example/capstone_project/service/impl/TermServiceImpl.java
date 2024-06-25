@@ -79,7 +79,7 @@ public class TermServiceImpl implements TermService {
         TermStatus status = termStatusRepository.getReferenceById(1L);
         term.setStatus(status);
 
-        User user = userRepository.findUserById(userId).get();
+        User user = userRepository.getReferenceById(userId);
         term.setUser(user);
 
         term.setEndDate(endTime);
