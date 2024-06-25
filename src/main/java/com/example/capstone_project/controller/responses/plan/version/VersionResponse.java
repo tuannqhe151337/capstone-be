@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class VersionResponse {
     private Long planFileId;
+    private Integer version;
     private LocalDateTime publishedDate;
     private UserResponse uploadedBy;
 }

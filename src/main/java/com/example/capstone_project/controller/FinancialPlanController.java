@@ -21,6 +21,8 @@ import com.example.capstone_project.controller.responses.plan.version.VersionRes
 import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
@@ -52,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -297,8 +300,8 @@ public class FinancialPlanController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<FinancialPlanFile> planFiles = planService.getListVersionWithPaginate(planId, pageable);
-
+        List<VersionResult> planFiles = planService.getListVersionWithPaginate(planId, pageable);
+        System.out.println(Arrays.toString(planFiles.toArray()));
         // Response
         ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
 

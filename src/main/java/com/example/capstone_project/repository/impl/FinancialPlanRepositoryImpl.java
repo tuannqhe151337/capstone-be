@@ -5,6 +5,8 @@ import com.example.capstone_project.entity.FinancialPlanFile;
 import com.example.capstone_project.entity.FinancialPlanFile_;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
+import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -110,9 +112,9 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
     }
 
     @Override
-    public List<FinancialPlanFile> getListVersionWithPaginate(Long planId, Pageable pageable) {
+    public List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) {
         // HQL query
-        String hql = " SELECT file FROM FinancialPlanFile file " +
+        String hql = " SELECT new com.example.capstone_project.repository.result.VersionResult(file.id AS fileId, (RANK() OVER(PARTITION BY file.plan.id ORDER BY file.createdAt ASC)), file.createdAt AS createdAt, user.id AS userId, user.username AS username) FROM FinancialPlanFile file " +
                 " LEFT JOIN file.user user " +
                 " WHERE file.plan.id = :planId AND " +
                 " file.isDelete = false " +
@@ -150,7 +152,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
         entityGraph.addAttributeNodes(FinancialPlanFile_.USER);
 
         // Run query
-        return entityManager.createQuery(hql, FinancialPlanFile.class)
+        return entityManager.createQuery(hql, VersionResult.class)
                 .setParameter("planId", planId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())

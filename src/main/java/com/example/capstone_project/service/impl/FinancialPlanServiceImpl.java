@@ -13,6 +13,7 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
@@ -214,7 +215,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<FinancialPlanFile> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception {
+    public List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
