@@ -603,7 +603,7 @@ public class SeedConfiguration {
             Term term4 = Term.builder()
                     .id(4L)
                     .name("Winter 2024")
-                    .duration(TermDuration.YEARLY)
+                    .duration(TermDuration.HALF_YEARLY)
                     .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
