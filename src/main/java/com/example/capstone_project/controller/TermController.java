@@ -209,7 +209,7 @@ public class TermController {
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
