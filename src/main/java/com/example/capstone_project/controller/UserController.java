@@ -195,6 +195,7 @@ public class UserController {
 
         try {
             userService.changePassword(changePasswordBody);
+
             return ResponseEntity.status(HttpStatus.OK).body("Change password success");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");

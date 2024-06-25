@@ -174,8 +174,9 @@ public class UserServiceImpl implements UserService {
         String newPassword = changePasswordBody.getNewPassword();
         long userId = UserHelper.getUserId();
         User user = userRepository.getReferenceById(userId);
-        if(user.getPassword().equals(oldPassword)) {
+        if(this.passwordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(this.passwordEncoder.encode(newPassword));
+            userRepository.save(user);
         }else {
             throw new IllegalArgumentException("Password does not match");
         }
