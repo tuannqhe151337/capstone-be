@@ -40,6 +40,10 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository
     ) {
         return args -> {
+            if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
+                return;
+            }
+
             //Term Status - fixed code
             TermStatus termStatus = TermStatus.
                     builder()
