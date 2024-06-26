@@ -49,6 +49,18 @@ public class JwtHelper {
         return this.generateAccessToken(claims, userId);
     }
 
+    private String genBlankToken() {
+        return Jwts.builder()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(this.getAccessTokenSecretKey())
+                .compact();
+    }
+
+    public String generateBlankToken() {
+        return this.genBlankToken();
+    }
+
     private String generateAccessToken(Map<String, Object> claims, Integer userId) {
         return Jwts.builder()
                 .claims(claims)
