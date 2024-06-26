@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.user.changePassword.ChangePa
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -26,4 +27,5 @@ public interface UserService {
     void activateUser(ActivateUserBody activateUserBody);
     void deactivateUser(DeactiveUserBody deactiveUserBody);
     void changePassword(ChangePasswordBody changePasswordBody);
+    void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
 }

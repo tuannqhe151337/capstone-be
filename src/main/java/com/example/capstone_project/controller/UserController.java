@@ -5,12 +5,15 @@ import com.example.capstone_project.controller.body.user.changePassword.ChangePa
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.entity.UserSetting;
+import com.example.capstone_project.repository.UserSettingRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -32,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
+    private final UserSettingRepository userSettingRepository;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -104,10 +109,10 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositionIdException e){
+        } catch (InvalidPositionIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch(InvalidRoleIdException e) {
+        } catch (InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
@@ -123,11 +128,11 @@ public class UserController {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e ){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -137,7 +142,7 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         try {
             userService.updateUser(
-                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+                    new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
             );
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (UnauthorizedException ex) {
@@ -171,27 +176,33 @@ public class UserController {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
+
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId() + " success");
     }
+
     @PostMapping("/change-password")
 
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
-
         return ResponseEntity.status(HttpStatus.OK).body("Change password success");
     }
 
+    @PutMapping("/user-setting/update")
+    public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
+                userService.updateUserSetting(updateUserSettingBody);
+        return ResponseEntity.status(HttpStatus.OK).body("Update user setting success");
 
+    }
 }

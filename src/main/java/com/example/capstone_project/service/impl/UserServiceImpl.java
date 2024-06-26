@@ -3,6 +3,7 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
@@ -76,22 +77,22 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User getUserById(Long userId) throws Exception{
+    public User getUserById(Long userId) throws Exception {
         long actorId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
-          throw new UnauthorizedException("Unauthorized to view user details");
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())) {
+            throw new UnauthorizedException("Unauthorized to view user details");
         }
         Optional<User> user = userRepository.findUserDetailedById(userId);
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             throw new ResourceNotFoundException("User not found");
-        }else {
+        } else {
             return user.get();
         }
     }
 
     @Transactional
     @Override
-    public void updateUser(User user) throws Exception{
+    public void updateUser(User user) throws Exception {
         // Authorization: check if user has the right AuthorityCode.EDIT_USER
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_USER.getValue())) {
@@ -124,13 +125,13 @@ public class UserServiceImpl implements UserService {
 
         // Save to database
         userRepository.saveUserData(user, UpdateUserDataOption.builder()
-                        .ignoreFullName(oldUser.getFullName().equals(user.getFullName()))
-                        .ignoreUsername(oldUser.getFullName().equals(user.getFullName()))
-                        .ignoreEmail(oldUser.getEmail().equals(user.getEmail()))
-                        .ignoreDepartment(oldUser.getDepartment().getId().equals(user.getDepartment().getId()))
-                        .ignorePosition(oldUser.getPosition().getId().equals(user.getPosition().getId()))
-                        .ignoreRole(oldUser.getRole().getId().equals(user.getRole().getId()))
-                        .build());
+                .ignoreFullName(oldUser.getFullName().equals(user.getFullName()))
+                .ignoreUsername(oldUser.getFullName().equals(user.getFullName()))
+                .ignoreEmail(oldUser.getEmail().equals(user.getEmail()))
+                .ignoreDepartment(oldUser.getDepartment().getId().equals(user.getDepartment().getId()))
+                .ignorePosition(oldUser.getPosition().getId().equals(user.getPosition().getId()))
+                .ignoreRole(oldUser.getRole().getId().equals(user.getRole().getId()))
+                .build());
 
         // Update user's authorities and departmentId, roleCode into redis
         List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
@@ -159,7 +160,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deactivateUser(DeactiveUserBody deactiveUserBody) {
         long userAdminId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue()) ) {
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized to deactivate user");
         }
         User user = userRepository.findById(deactiveUserBody.getId())
@@ -174,6 +175,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUserSetting(UpdateUserSettingBody updateUserSettingBody) {
+        long userId = UserHelper.getUserId();
+        User user = userRepository.getReferenceById(userId);
+        UserSetting userSetting = userSettingRepository.findByUserId(userId).get();
+        userSetting.setLanguage(updateUserSettingBody.getLanguage());
+        userSetting.setTheme(updateUserSettingBody.getTheme());
+        userSetting.setDarkMode(updateUserSettingBody.isDarkMode());
+        userSetting.setUser(user);
+        userSettingRepository.save(userSetting);
+
+    }
+
+    @Override
     public void createUser(User user) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();
@@ -184,7 +198,7 @@ public class UserServiceImpl implements UserService {
             // Check email exist
             String email = user.getEmail();
 
-            if (userRepository.existsByEmail(email) ) {
+            if (userRepository.existsByEmail(email)) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
 
