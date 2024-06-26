@@ -58,6 +58,18 @@ public class JwtHelper {
                 .signWith(this.getAccessTokenSecretKey())
                 .compact();
     }
+    public String genBlankToken() {
+
+        return this.generateBlankToken();
+    }
+
+    private String generateBlankToken() {
+        return Jwts.builder()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(this.getAccessTokenSecretKey())
+                .compact();
+    }
 
     public Integer extractUserIdFromExpiredAccessToken(String token) {
         try {
