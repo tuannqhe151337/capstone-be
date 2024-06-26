@@ -11,10 +11,12 @@ import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -211,5 +213,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    public List<ExpenseResult> getListExpenseByPlanId(Long planId) {
+        return expenseRepository.getListExpenseByPlanId(planId);
+    }
+
+    @Override
+    public String getLastExpenseCode(Long planId) {
+        return expenseRepository.getLastExpenseCode(planId);
+    }
+
+    @Override
+    public PlanVersionResult getCurrentVersionByPlanId(Long planId) {
+        return planRepository.getCurrentVersionByPlanId(planId);
     }
 }
