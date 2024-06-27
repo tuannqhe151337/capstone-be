@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.FinancialReportRepository;
@@ -8,6 +9,7 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -53,11 +55,27 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority or role
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())
                 && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
         }
 
         return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+    }
+
+    @Override
+    public FinancialReport deleteReport(Long reportId) {
+        // Check authorization
+        if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_REPORT.getValue())) {
+            FinancialReport financialReport = financialReportRepository.findById(reportId).orElseThrow(() ->
+                    new ResourceNotFoundException("Not found any report have id = " + reportId));
+            financialReport.setDelete(true);
+
+            financialReportRepository.save(financialReport);
+
+            return financialReport;
+        } else {
+            return null;
+        }
     }
 }
