@@ -340,13 +340,17 @@ public class FinancialPlanController {
     }
 
     @PutMapping("/re-upload")
-    private ResponseEntity<ListReUploadExpenseBody> reUploadPlan(
+    private ResponseEntity<String> reUploadPlan(
             @RequestBody ListReUploadExpenseBody reUploadExpenseBody
-    ) {
-
-        HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
+    ) throws Exception {
 
         List<ExpenseResult> listExpenseCreate = planService.getListExpenseByPlanId(reUploadExpenseBody.getPlanId());
+
+        if (listExpenseCreate == null || listExpenseCreate.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
         List<FinancialPlanExpense> listExpense = new ArrayList<>();
         String lastExpenseCode = planService.getLastExpenseCode(reUploadExpenseBody.getPlanId());
         String[] parts = lastExpenseCode.split("_");
@@ -378,12 +382,15 @@ public class FinancialPlanController {
             ) {
                 listExpense.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(expenseBody));
             } else if (!hashMapExpense.containsKey(expenseBody.getExpenseCode())) {
-                listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), lastIndexCode));
-                lastIndexCode++;
+                listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), ++lastIndexCode));
             }
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(reUploadExpenseBody);
+        FinancialPlan plan = new ReUploadExpensesMapperImpl().mapToPlanMapping(reUploadExpenseBody.getPlanId(), (long) UserHelper.getUserId(), version, listExpense);
+
+        planService.reUploadPlan(plan);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Re upload successful");
     }
 
     @PostMapping("/create")

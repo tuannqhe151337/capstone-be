@@ -26,9 +26,11 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
-    List<ExpenseResult> getListExpenseByPlanId(Long planId);
+    List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception;
 
     String getLastExpenseCode(Long planId);
 
     PlanVersionResult getCurrentVersionByPlanId(Long planId);
+
+    void reUploadPlan(FinancialPlan plan);
 }

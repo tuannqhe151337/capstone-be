@@ -14,7 +14,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ReUploadExpensesMapper {
     @Mapping(expression = "java(expenseResult.getExpenseId())", target = "id")
+    @Mapping(constant = "null", target = ".updatedAt")
     FinancialPlanExpense mapApprovedExpenseToPlanExpense(ExpenseResult expenseResult);
+    default FinancialPlanExpense mapUpdateExpenseToPlanExpenseWithNullUpdatedAt(ReUploadExpenseBody reUploadExpenseBody) {
+        FinancialPlanExpense expense = mapUpdateExpenseToPlanExpense(reUploadExpenseBody);
+        return expense;
+    }
 
     @Mapping(source = "expenseCode", target = "planExpenseKey")
     @Mapping(source = "expenseName", target = "name")
@@ -25,16 +30,17 @@ public interface ReUploadExpensesMapper {
     @Mapping(source = "supplerName", target = "supplierName")
     @Mapping(source = "pic", target = "pic")
     @Mapping(source = "notes", target = "note")
+    @Mapping(constant = "1L", target = "status.id")
     FinancialPlanExpense mapUpdateExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody);
 
     default FinancialPlanExpense newExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody, StringBuilder prefixExpenseKey, Integer version, Integer lastIndexCode) {
-
         return FinancialPlanExpense.builder()
                 .planExpenseKey(prefixExpenseKey + "v" + version + "_" + lastIndexCode)
                 .name(reUploadExpenseBody.getExpenseName())
                 .costType(CostType.builder()
                         .id(reUploadExpenseBody.getCostTypeId())
                         .build())
+                .status(ExpenseStatus.builder().id(1L).build())
                 .unitPrice(reUploadExpenseBody.getUnitPrice())
                 .amount(reUploadExpenseBody.getAmount())
                 .projectName(reUploadExpenseBody.getProjectName())
@@ -45,7 +51,7 @@ public interface ReUploadExpensesMapper {
     }
 
 
-    default FinancialPlan mapPlanBodyToPlanMapping(Long planId, Long userId, PlanVersionResult planVersionResult, List<FinancialPlanExpense> expenses) {
+    default FinancialPlan mapToPlanMapping(Long planId, Long userId, PlanVersionResult planVersionResult, List<FinancialPlanExpense> expenses) {
         // Get user detail
         FinancialPlan plan = new FinancialPlan();
 
@@ -59,7 +65,7 @@ public interface ReUploadExpensesMapper {
 
         FinancialPlanFile file = FinancialPlanFile.builder()
                 .plan(plan)
-                .name(planVersionResult.getTermName()+"_"+planVersionResult.getDepartmentCode()+"_v"+planVersionResult.getVersion())
+                .name(planVersionResult.getTermName() + "_" + planVersionResult.getDepartmentCode() + "_v" + planVersionResult.getVersion())
                 .user(User.builder().id(userId).build())
                 .planFileExpenses(expenseFile)
                 .build();
