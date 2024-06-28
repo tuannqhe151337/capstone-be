@@ -47,6 +47,7 @@ public class JwtHelper {
     @Value("${application.security.blank-token-otp.expiration}")
     private String BLANK_TOKEN_OTP_EXPIRATION;
 
+
     public String generateRefreshToken(Integer userId) {
         return Jwts.builder()
                 .subject(userId.toString())
@@ -63,6 +64,15 @@ public class JwtHelper {
     }
 
 
+    private String generateAccessToken(Map<String, Object> claims, Integer userId) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userId.toString())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(this.getAccessTokenSecretKey())
+                .compact();
+    }
     public String genBlankTokenEmail() {
         return this.generateBlankToken(BLANK_TOKEN_EMAIL_EXPIRATION, BLANK_TOKEN_EMAIL_SECRET_KEY);
     }
@@ -82,20 +92,9 @@ public class JwtHelper {
                 .signWith(this.getBlankTokenSecretKey(tokenSecretKey))
                 .compact();
     }
-    private SecretKey getBlankTokenSecretKey(String tokenSecretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(tokenSecretKey);
+    private SecretKey getBlankTokenSecretKey(String blankTokenSecretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(blankTokenSecretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-
-    private String generateAccessToken(Map<String, Object> claims, Integer userId) {
-        return Jwts.builder()
-                .claims(claims)
-                .subject(userId.toString())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(this.getAccessTokenSecretKey())
-                .compact();
     }
 
     public Integer extractUserIdFromExpiredAccessToken(String token) {
@@ -140,6 +139,7 @@ public class JwtHelper {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
 
     private SecretKey getAccessTokenSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(ACCESS_TOKEN_SECRET_KEY);
