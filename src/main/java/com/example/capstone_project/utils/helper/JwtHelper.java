@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +35,11 @@ public class JwtHelper {
 
     @Value("${application.security.refresh-token.expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
+    @Value("${application.security.blank-token.secret-key}")
+    private String BLANK_TOKEN_SECRET_KEY;
+
+    @Value("${application.security.blank-token.expiration}")
+    private String BLANK_TOKEN_EXPIRATION;
 
     public String generateRefreshToken(Integer userId) {
         return Jwts.builder()
@@ -49,16 +56,24 @@ public class JwtHelper {
         return this.generateAccessToken(claims, userId);
     }
 
-    private String genBlankToken() {
-        return Jwts.builder()
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(this.getAccessTokenSecretKey())
-                .compact();
+    public String genBlankToken() {
+        return this.generateBlankToken();
     }
 
-    public String generateBlankToken() {
-        return this.genBlankToken();
+    private String generateBlankToken() {
+        // Sử dụng LocalDateTime để xác định thời điểm hết hạn
+        long expire = Long.parseLong(BLANK_TOKEN_EXPIRATION);
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(expire);
+        Date expiryDate = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant());
+        return Jwts.builder()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(expiryDate)
+                .signWith(this.getBlankTokenSecretKey())
+                .compact();
+    }
+    private SecretKey getBlankTokenSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(BLANK_TOKEN_SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     private String generateAccessToken(Map<String, Object> claims, Integer userId) {
