@@ -8,8 +8,11 @@ import com.example.capstone_project.controller.responses.user.DepartmentResponse
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.service.DepartmentService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
+
 import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,30 +83,50 @@ public class DepartmentController {
     }
 
     @GetMapping("/user-paging-department")
-    public ResponseEntity<ListResponse<DepartmentResponse>> getListDepartmentPagingUser() {
-        ListResponse<DepartmentResponse> departmentResponseList = new ListResponse<>();
-        departmentResponseList.setData(List.of(
-                DepartmentResponse.builder()
-                        .id(1L)
-                        .name("Department 1")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(2L)
-                        .name("Department 2")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(3L)
-                        .name("Department 3")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(3L)
-                        .name("Department 3")
-                        .build(),
-                DepartmentResponse.builder()
-                        .id(4L)
-                        .name("Department 4")
-                        .build()));
-        return ResponseEntity.ok(departmentResponseList);
+    public ResponseEntity<ListPaginationResponse<DepartmentResponse>> getListDepartmentPagingUser(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ) {
+
+        int pageInt = PaginationHelper.convertPageToInteger(page) ;
+        int sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+
+        //map
+        List<DepartmentResponse> departmentResponses =
+               new DepartToDepartResponseMapperImpl()
+                        .mapDepartmentsToDepartmentResponses(departments);
+        //count, totalrecords
+        long totalRecords = departmentService.countDistinct(query);
+        long numPages = PaginationHelper.calculateNumPages(totalRecords, sizeInt);
+
+        // Response
+        ListPaginationResponse<DepartmentResponse> response = new ListPaginationResponse<>();
+
+        response.setData(departmentResponses);
+
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(totalRecords)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
+                .build());
+
+        return ResponseEntity.ok(response);
     }
 
 

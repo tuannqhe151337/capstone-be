@@ -13,6 +13,7 @@ public interface PlanDetailResult {
      String getTermName();
      Long getStatusId();
      String getStatusName();
+     String getStatusCode();
      LocalDateTime getPlanDueDate();
      LocalDateTime getCreatedAt();
      Long getDepartmentId();

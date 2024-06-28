@@ -15,6 +15,7 @@ public interface PlanDetailMapper {
     @Mapping(expression = "java(planDetailResult.getTermName())", target = "term.name")
     @Mapping(expression = "java(planDetailResult.getStatusId())", target = "status.statusId")
     @Mapping(expression = "java(planDetailResult.getStatusName())", target = "status.name")
+    @Mapping(expression = "java(planDetailResult.getStatusCode())", target = "status.code")
     @Mapping(expression = "java(planDetailResult.getPlanDueDate())", target = "planDueDate")
     @Mapping(expression = "java(planDetailResult.getCreatedAt())", target = "createdAt")
     @Mapping(expression = "java(planDetailResult.getDepartmentId())", target = "department.departmentId")

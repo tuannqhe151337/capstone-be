@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.Department;
+
 import com.example.capstone_project.repository.CustomDepartmentRepository;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -53,4 +54,5 @@ public class DepartmentRepositoryImpl implements CustomDepartmentRepository {
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
     }
+
 }

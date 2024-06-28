@@ -10,7 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CreatePlanMapper {
-    default FinancialPlan mapPlanBodyToPlanMapping(NewPlanBody newPlanBody, Long departmentId, Long userId) {
+    default FinancialPlan mapPlanBodyToPlanMapping(NewPlanBody newPlanBody, Long departmentId, Long userId, String termName) {
         // Get user detail
 
 
@@ -29,7 +29,7 @@ public interface CreatePlanMapper {
                 .id(1L)
                 .build());
 
-        List<FinancialPlanExpense> expenses = mapExpenseBodyToExpense(newPlanBody.getExpenses(), newPlanBody);
+        List<FinancialPlanExpense> expenses = mapExpenseBodyToExpense(newPlanBody.getExpenses(), newPlanBody, termName);
 
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
 
@@ -56,12 +56,12 @@ public interface CreatePlanMapper {
         return plan;
     }
 
-    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody) {
+    default List<FinancialPlanExpense> mapExpenseBodyToExpense(List<ExpenseBody> expenseBodies, NewPlanBody planBody, String termName) {
         List<FinancialPlanExpense> planExpenses = new ArrayList<>();
         for (int i = 0; i < expenseBodies.size(); i++) {
             ExpenseBody expenseBody = expenseBodies.get(i);
             planExpenses.add(FinancialPlanExpense.builder()
-                    .planExpenseKey(planBody.getFileName() + "_" + (i + 1))
+                    .planExpenseKey(termName + "_" + planBody.getPlanName() + "_v1" + "_" + (i + 1))
                     .name(expenseBody.getName())
                     .unitPrice(expenseBody.getUnitPrice())
                     .amount(expenseBody.getAmount())
