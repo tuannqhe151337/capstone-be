@@ -72,7 +72,8 @@ public class JwtHelper {
     }
     private String generateBlankToken() {
         // Sử dụng LocalDateTime để xác định thời điểm hết hạn
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(2);
+        long expire = Long.parseLong(BLANK_TOKEN_EXPIRATION);
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(expire);
         Date expiryDate = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .issuedAt(new Date(System.currentTimeMillis()))
