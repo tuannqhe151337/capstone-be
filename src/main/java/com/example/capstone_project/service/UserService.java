@@ -3,6 +3,7 @@ package com.example.capstone_project.service;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
@@ -29,5 +30,6 @@ public interface UserService {
     void deactivateUser(DeactiveUserBody deactiveUserBody);
     void changePassword(ChangePasswordBody changePasswordBody);
     void resetPassword(ResetPasswordBody resetPasswordBody);
+    String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
 }

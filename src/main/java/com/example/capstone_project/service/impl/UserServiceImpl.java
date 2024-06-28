@@ -3,12 +3,14 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.repository.impl.MailRepository;
 import com.example.capstone_project.repository.redis.OTPTokenRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
@@ -25,6 +27,7 @@ import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.passay.CharacterData;
@@ -39,6 +42,7 @@ import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.Duration;
@@ -61,18 +65,11 @@ public class UserServiceImpl implements UserService {
     private final UserIdTokenRepository userIdTokenRepository;
     private final JwtHelper jwtHelper;
 
-
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
 
-    @Value("${application.security.blank-token-email.secret-key}")
-    private String BLANK_TOKEN_EMAIL_SECRET_KEY;
-
     @Value("${application.security.blank-token-email.expiration}")
     private String BLANK_TOKEN_EMAIL_EXPIRATION;
-
-    @Value("${application.security.blank-token-otp.secret-key}")
-    private String BLANK_TOKEN_OTP_SECRET_KEY;
 
     @Value("${application.security.blank-token-otp.expiration}")
     private String BLANK_TOKEN_OTP_EXPIRATION;
@@ -98,22 +95,22 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User getUserById(Long userId) throws Exception{
+    public User getUserById(Long userId) throws Exception {
         long actorId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())){
-          throw new UnauthorizedException("Unauthorized to view user details");
+        if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())) {
+            throw new UnauthorizedException("Unauthorized to view user details");
         }
         Optional<User> user = userRepository.findUserDetailedById(userId);
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             throw new ResourceNotFoundException("User not found");
-        }else {
+        } else {
             return user.get();
         }
     }
 
     @Transactional
     @Override
-    public void updateUser(User user) throws Exception{
+    public void updateUser(User user) throws Exception {
         // Authorization: check if user has the right AuthorityCode.EDIT_USER
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_USER.getValue())) {
@@ -146,13 +143,13 @@ public class UserServiceImpl implements UserService {
 
         // Save to database
         userRepository.saveUserData(user, UpdateUserDataOption.builder()
-                        .ignoreFullName(oldUser.getFullName().equals(user.getFullName()))
-                        .ignoreUsername(oldUser.getFullName().equals(user.getFullName()))
-                        .ignoreEmail(oldUser.getEmail().equals(user.getEmail()))
-                        .ignoreDepartment(oldUser.getDepartment().getId().equals(user.getDepartment().getId()))
-                        .ignorePosition(oldUser.getPosition().getId().equals(user.getPosition().getId()))
-                        .ignoreRole(oldUser.getRole().getId().equals(user.getRole().getId()))
-                        .build());
+                .ignoreFullName(oldUser.getFullName().equals(user.getFullName()))
+                .ignoreUsername(oldUser.getFullName().equals(user.getFullName()))
+                .ignoreEmail(oldUser.getEmail().equals(user.getEmail()))
+                .ignoreDepartment(oldUser.getDepartment().getId().equals(user.getDepartment().getId()))
+                .ignorePosition(oldUser.getPosition().getId().equals(user.getPosition().getId()))
+                .ignoreRole(oldUser.getRole().getId().equals(user.getRole().getId()))
+                .build());
 
         // Update user's authorities and departmentId, roleCode into redis
         List<Authority> authorities = authorityRepository.findAuthoritiesOfRole(user.getRole().getId());
@@ -181,7 +178,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deactivateUser(DeactiveUserBody deactiveUserBody) {
         long userAdminId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue()) ) {
+        if (!userAuthorityRepository.get(userAdminId).contains(AuthorityCode.DEACTIVATE_USER.getValue())) {
             throw new UnauthorizedException("Unauthorized to deactivate user");
         }
         User user = userRepository.findById(deactiveUserBody.getId())
@@ -196,32 +193,30 @@ public class UserServiceImpl implements UserService {
         String newPassword = changePasswordBody.getNewPassword();
         long userId = UserHelper.getUserId();
         User user = userRepository.getReferenceById(userId);
-        if(this.passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (this.passwordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(this.passwordEncoder.encode(newPassword));
             userRepository.save(user);
-        }else {
+        } else {
             throw new IllegalArgumentException("Password does not match");
         }
 
     }
 
     @Override
-    public String otpValidate(OTPBody otp, String authHeader) throws Exception {
+    public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
         //get token from redis by id from header
-        String tokenHeader="";
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            tokenHeader=  authHeader.substring(7); // Loại bỏ "Bearer " để lấy mã token
-        }else {
+        if (authHeaderToken == null) {
             throw new DataIntegrityViolationException("Invalid token");
         }
         //compare otp
             //get userid
-        Long userId = otpTokenRepository.getUserID(tokenHeader);
+        String userId = otpTokenRepository.getUserID(authHeaderToken);
+
         if(userId == null){
-            throw new DataIntegrityViolationException("Invalid token, missing user id");
+            throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
         }
             //get otp
-        String savedOtp = otpTokenRepository.getOtpCode(tokenHeader,userId);
+        String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken,Long.parseLong(userId));
             //compare
         if(!savedOtp.equals(otp.getOtp())) {
             throw new UnauthorizedException("Invalid OTP");
@@ -230,10 +225,46 @@ public class UserServiceImpl implements UserService {
         String newTokenForUserId = jwtHelper.genBlankTokenOtp();
 
         //save token with id
-        userIdTokenRepository.save(newTokenForUserId, userId, Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
+        userIdTokenRepository.save(newTokenForUserId, Long.parseLong(userId), Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
 
         //return token
-        return tokenHeader;
+        return  newTokenForUserId;
+    }
+
+    @Override
+    public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
+        //email
+        String email = forgetPasswordEmailBody.getEmail();
+        //get user by email
+        Optional<User> user = userRepository.findUserByEmail(email);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("Email does not exist");
+        }
+        //generate blank token
+        String token = jwtHelper.genBlankTokenEmail();
+
+        //CHECK OTP EXIST to delete
+        otpTokenRepository.deleteOtpCodeExists(user.get().getId());
+
+        //generate otp
+        String otp = String.valueOf(generateOTP());
+
+        //save token with otp to redis  Duration.ofMillis(ACCESS_TOKEN_EXPIRATION)
+        int expire = Integer.parseInt(BLANK_TOKEN_EMAIL_EXPIRATION);
+        otpTokenRepository.save(user.get().getId(), token, otp, Duration.ofMillis(expire));
+
+        //send token to email
+        mailRepository.sendOTP(user.get().getEmail(), user.get().getUsername(), otp);
+
+        //return token to front end
+        return token;
+    }
+
+
+    private int generateOTP() {
+        Random random = new Random();
+        int OTP = 100000 + random.nextInt(900000);
+        return OTP;
     }
 
     @Override
@@ -256,7 +287,7 @@ public class UserServiceImpl implements UserService {
             // Check email exist
             String email = user.getEmail();
 
-            if (userRepository.existsByEmail(email) ) {
+            if (userRepository.existsByEmail(email)) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
 

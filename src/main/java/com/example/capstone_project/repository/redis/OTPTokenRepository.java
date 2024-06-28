@@ -1,4 +1,7 @@
 package com.example.capstone_project.repository.redis;
+
+
+import com.example.capstone_project.entity.UserDetail;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -6,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +29,7 @@ public class OTPTokenRepository {
     public void save(long userId, String tokenString,  String otpCode, Duration expiredTime) {
         HashMap<String, String> userAndOtp = new HashMap<>();
         userAndOtp.put("userId", String.valueOf(userId));
-        userAndOtp.put("optCode", otpCode);
+        userAndOtp.put("otpCode", otpCode);
 
         this.template.opsForHash().putAll(
                 this.generateKey(tokenString, userId),
@@ -38,7 +42,7 @@ public class OTPTokenRepository {
     public String getOtpCode(String tokenString, long userId) {
         Map<Object, Object> userAndOtp = this.template.opsForHash().entries(this.generateKey(tokenString, userId));
         for (Object key : userAndOtp.keySet()) {
-            if (key.toString().equals(Fields.OTP_CODE.getValue())) {
+            if (key.toString().equals("otpCode") ){
                 return (String) userAndOtp.get(key);
             }
         }
@@ -55,14 +59,14 @@ public class OTPTokenRepository {
         return null;
     }
     //get user id
-    public Long getUserID(String tokenString) {
+    public String getUserID(String tokenString) {
         Set<String> keys =  this.template.keys("*");
         if ( keys!= null) {
             for (String key : keys) {
                 if (key.contains(tokenString)) {
                     String[] parts = key.split(":");
                     String userId = parts[1];
-                  return Long.parseLong(userId);
+                  return userId;
                 }
             }
         }
