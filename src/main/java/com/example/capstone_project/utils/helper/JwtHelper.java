@@ -35,11 +35,17 @@ public class JwtHelper {
 
     @Value("${application.security.refresh-token.expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
-    @Value("${application.security.blank-token.secret-key}")
-    private String BLANK_TOKEN_SECRET_KEY;
+    @Value("${application.security.blank-token-email.secret-key}")
+    private String BLANK_TOKEN_EMAIL_SECRET_KEY;
 
-    @Value("${application.security.blank-token.expiration}")
-    private String BLANK_TOKEN_EXPIRATION;
+    @Value("${application.security.blank-token-email.expiration}")
+    private String BLANK_TOKEN_EMAIL_EXPIRATION;
+
+    @Value("${application.security.blank-token-otp.secret-key}")
+    private String BLANK_TOKEN_OTP_SECRET_KEY;
+
+    @Value("${application.security.blank-token-otp.expiration}")
+    private String BLANK_TOKEN_OTP_EXPIRATION;
 
     public String generateRefreshToken(Integer userId) {
         return Jwts.builder()
@@ -56,26 +62,31 @@ public class JwtHelper {
         return this.generateAccessToken(claims, userId);
     }
 
-    public String genBlankToken() {
-        return this.generateBlankToken();
-    }
 
-    private String generateBlankToken() {
+    public String genBlankTokenEmail() {
+        return this.generateBlankToken(BLANK_TOKEN_EMAIL_EXPIRATION, BLANK_TOKEN_EMAIL_SECRET_KEY);
+    }
+    public String genBlankTokenOtp() {
+        return this.generateBlankToken(BLANK_TOKEN_OTP_EXPIRATION, BLANK_TOKEN_OTP_SECRET_KEY);
+    }
+    private String generateBlankToken(String tokenExpiration, String tokenSecretKey) {
         // Sử dụng LocalDateTime để xác định thời điểm hết hạn
-        long expireInMillis = Long.parseLong(BLANK_TOKEN_EXPIRATION);
+
+        long expireInMillis = Long.parseLong(tokenExpiration);
         long expireMinute = expireInMillis / 60000;
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(expireMinute);
         Date expiryDate = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(expiryDate)
-                .signWith(this.getBlankTokenSecretKey())
+                .signWith(this.getBlankTokenSecretKey(tokenSecretKey))
                 .compact();
     }
-    private SecretKey getBlankTokenSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(BLANK_TOKEN_SECRET_KEY);
+    private SecretKey getBlankTokenSecretKey(String tokenSecretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(tokenSecretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
 
     private String generateAccessToken(Map<String, Object> claims, Integer userId) {
         return Jwts.builder()

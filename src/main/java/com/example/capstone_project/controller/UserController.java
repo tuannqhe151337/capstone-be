@@ -202,7 +202,7 @@ public class UserController {
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
             //return  Token  user:dnfpajsdfhp...:id, 6.
-        String token = jwtHelper.genBlankToken();
+        String token = jwtHelper.genBlankTokenOtp();
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 }
