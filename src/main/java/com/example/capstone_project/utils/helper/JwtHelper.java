@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +35,12 @@ public class JwtHelper {
 
     @Value("${application.security.refresh-token.expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
+
+    @Value("${application.security.blank-token.secret-key}")
+    private String BLANK_TOKEN_SECRET_KEY;
+
+    @Value("${application.security.blank-token.expiration}")
+    private String BLANK_TOKEN_EXPIRATION;
 
     public String generateRefreshToken(Integer userId) {
         return Jwts.builder()
@@ -58,17 +66,23 @@ public class JwtHelper {
                 .signWith(this.getAccessTokenSecretKey())
                 .compact();
     }
-    public String genBlankToken() {
 
+    public String genBlankToken() {
         return this.generateBlankToken();
     }
-
     private String generateBlankToken() {
+        // Sử dụng LocalDateTime để xác định thời điểm hết hạn
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(2);
+        Date expiryDate = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant());
         return Jwts.builder()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(this.getAccessTokenSecretKey())
+                .expiration(expiryDate)
+                .signWith(this.getBlankTokenSecretKey())
                 .compact();
+    }
+    private SecretKey getBlankTokenSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(BLANK_TOKEN_SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public Integer extractUserIdFromExpiredAccessToken(String token) {
@@ -113,6 +127,7 @@ public class JwtHelper {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
 
     private SecretKey getAccessTokenSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(ACCESS_TOKEN_SECRET_KEY);

@@ -200,7 +200,7 @@ public class UserController {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         //String generateAccessToken(Integer userId)
         String token = jwtHelper.genBlankToken();
-        return ResponseEntity.status(HttpStatus.OK).body(token );
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
 
