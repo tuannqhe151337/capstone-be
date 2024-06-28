@@ -4,6 +4,8 @@ import com.example.capstone_project.controller.body.user.activate.ActivateUserBo
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
@@ -18,6 +20,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -42,6 +45,7 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
+    private final JwtHelper jwtHelper;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -209,6 +213,18 @@ public class UserController {
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("reset password success");
     }
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+        //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
+        //String generateAccessToken(Integer userId)
+        String token = jwtHelper.genBlankTokenEmail();
+        return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
 
-
+    @PostMapping("/auth/otp")
+    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+            //return  Token  user:dnfpajsdfhp...:id, 6.
+        String token = jwtHelper.genBlankTokenOtp();
+        return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
 }
