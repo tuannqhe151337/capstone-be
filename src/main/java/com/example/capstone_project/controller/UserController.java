@@ -210,11 +210,19 @@ public class UserController {
         }
     }
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader,@RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+        try {
+            userService.resetPassword(authHeader, resetPasswordBody);
+            return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
     }
     @PostMapping("/auth/forgot-password")
-    public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+    public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         String token = null;
         try {
