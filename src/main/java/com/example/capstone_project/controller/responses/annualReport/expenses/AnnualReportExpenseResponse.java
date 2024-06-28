@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Builder
 public class AnnualReportExpenseResponse {
     private Long expenseId;
-    private String departmentName;
+    private DepartmentResponse department;
     private BigDecimal totalExpenses;
     private BigDecimal biggestExpenditure;
     private CostTypeResponse costType;
