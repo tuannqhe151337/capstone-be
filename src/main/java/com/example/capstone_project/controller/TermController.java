@@ -221,7 +221,6 @@ public class TermController {
 
     @DeleteMapping
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
-
         try {
             termService.deleteTerm(deleteTermBody.getId());
             return ResponseEntity.status(HttpStatus.OK).body("Deleted successfully");
@@ -230,7 +229,7 @@ public class TermController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Term not found");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 

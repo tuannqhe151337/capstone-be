@@ -64,10 +64,10 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.DELETE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized");
         }
-        Term currentterm = termRepository.findById(id).
+        Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
-        currentterm.setDelete(true);
-        termRepository.save(currentterm);
+        currentTerm.setDelete(true);
+        termRepository.save(currentTerm);
 
     }
 
