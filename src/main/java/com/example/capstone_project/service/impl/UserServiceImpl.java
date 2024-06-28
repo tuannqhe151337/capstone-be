@@ -185,20 +185,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String otpValidate(String otp) throws Exception {
+    public String otpValidate(String otp, String authHeader) throws Exception {
         //get token from redis by id from header
-
-
-        //compare token
+        String tokenHeader="";
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            tokenHeader=  authHeader.substring(7); // Loại bỏ "Bearer " để lấy mã token
+        }else {
+            throw new DataIntegrityViolationException("Invalid token");
+        }
+        //compare otp
+        //get otp
 
 
         //gen new token
 
         //save token with id
 
-
         //return token
-        return null;
+        return tokenHeader;
     }
 
     @Override
