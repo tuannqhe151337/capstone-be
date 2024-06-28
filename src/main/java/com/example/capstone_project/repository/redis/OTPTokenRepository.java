@@ -58,7 +58,20 @@ public class OTPTokenRepository {
         }
         return null;
     }
-
+    public void deleteOtpCodeExists(long userId) {
+        Set<String> keys =  this.template.keys("*");
+        if ( keys!= null) {
+            for (String key : keys) {
+                if (key.contains("user:"+userId+":otp-code")) {
+                    String[] parts = key.split(":");
+                    // get token 3rd part
+                    String token = parts[parts.length - 1];
+                    //xoa ca key and value do
+                    delete(token, userId);
+                }
+            }
+        }
+    }
     public void delete(String token, long userId) {
         this.template.delete(this.generateKey(token, userId));
     }

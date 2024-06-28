@@ -225,6 +225,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
+
+
         //email
         String email = forgetPasswordEmailBody.getEmail();
         //get user by email
@@ -234,6 +236,10 @@ public class UserServiceImpl implements UserService {
         }
         //generate blank token
         String token = jwtHelper.genBlankTokenEmail();
+
+        //CHECK OTP EXIST to delete
+        otpTokenRepository.deleteOtpCodeExists(user.get().getId());
+
         //generate otp
         String otp = String.valueOf(generateOTP());
 

@@ -218,12 +218,13 @@ public class UserController {
         String token = null;
         try {
             token = userService.forgetPassword(forgetPasswordEmailBody);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(token);
+
     }
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
