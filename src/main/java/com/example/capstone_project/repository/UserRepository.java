@@ -39,7 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     )
     Optional<User> findUserWithRoleAndDepartmentById(Long userId);
 
-    @Query(value = "select distinct count(user.id) from User user " +
+    @Query(value = "select count(distinct(user.id)) from User user " +
             "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
     long countDistinct(String query);
 
