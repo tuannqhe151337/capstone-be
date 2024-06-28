@@ -184,6 +184,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String otpValidate(String otp) throws Exception {
+        //get token from redis by id from header
+
+
+        //compare token
+
+
+        //gen new token
+
+        //save token with id
+
+
+        //return token
+        return null;
+    }
+
+    @Override
     public void createUser(User user) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();

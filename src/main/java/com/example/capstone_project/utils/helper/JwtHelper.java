@@ -35,7 +35,6 @@ public class JwtHelper {
 
     @Value("${application.security.refresh-token.expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
-
     @Value("${application.security.blank-token-email.secret-key}")
     private String BLANK_TOKEN_EMAIL_SECRET_KEY;
 
@@ -47,6 +46,7 @@ public class JwtHelper {
 
     @Value("${application.security.blank-token-otp.expiration}")
     private String BLANK_TOKEN_OTP_EXPIRATION;
+
 
     public String generateRefreshToken(Integer userId) {
         return Jwts.builder()
@@ -62,6 +62,7 @@ public class JwtHelper {
 
         return this.generateAccessToken(claims, userId);
     }
+
 
     private String generateAccessToken(Map<String, Object> claims, Integer userId) {
         return Jwts.builder()

@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.user.changePassword.ChangePa
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -215,5 +216,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
-
+    @PostMapping("/auth/otp")
+    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+            //return  Token  user:dnfpajsdfhp...:id, 6.
+        String token = jwtHelper.genBlankTokenOtp();
+        return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
 }
