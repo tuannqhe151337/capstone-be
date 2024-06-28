@@ -41,6 +41,10 @@ public class FinancialReport extends BaseEntity {
     @JoinColumn(name = "term_id")
     private Term term;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uploaded_by")
+    private User user;
+
     @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
     private List<FinancialReportExpense> reportExpenses;
 
