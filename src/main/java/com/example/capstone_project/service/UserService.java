@@ -26,4 +26,5 @@ public interface UserService {
     void activateUser(ActivateUserBody activateUserBody);
     void deactivateUser(DeactiveUserBody deactiveUserBody);
     void changePassword(ChangePasswordBody changePasswordBody);
+    String otpValidate(String otp) throws Exception;
 }
