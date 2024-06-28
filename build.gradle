@@ -2,7 +2,10 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.google.cloud.tools.jib' version '3.4.3'
 }
+
+// jib.to.image = 'gcr.io/my-gcp-project/my-app'
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'

@@ -7,19 +7,19 @@ public enum TermDuration {
     MONTHLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plus(1, ChronoUnit.MONTHS);
+            return startDate.plusMonths(1);
         }
     },
     QUARTERLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plus(3, ChronoUnit.MONTHS);
+            return startDate.plusMonths(3);
         }
     },
-    YEARLY {
+    HALF_YEARLY {
         @Override
         public LocalDateTime calculateEndDate(LocalDateTime startDate) {
-            return startDate.plus(1, ChronoUnit.YEARS);
+            return startDate.plusMonths(6);
         }
     };
     private String value;
