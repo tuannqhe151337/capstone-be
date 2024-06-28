@@ -262,7 +262,7 @@ public class TermController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        System.out.println("id = " + terms.get(0).getId());
+
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()
