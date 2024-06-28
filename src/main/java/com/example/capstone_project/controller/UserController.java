@@ -199,7 +199,7 @@ public class UserController {
     public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         //String generateAccessToken(Integer userId)
-        String token = jwtHelper.genBlankToken();
+        String token = jwtHelper.genBlankTokenEmail();
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
