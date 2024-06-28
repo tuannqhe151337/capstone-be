@@ -3,9 +3,14 @@ package com.example.capstone_project.repository.impl;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.User_;
 import com.example.capstone_project.repository.CustomUserRepository;
+import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -65,5 +70,53 @@ public class UserRepositoryImpl implements CustomUserRepository {
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
+    }
+
+    // Check out: https://stackoverflow.com/a/31186374 and https://stackoverflow.com/a/41203093
+    // It seems there's no easy way to dynamically update whatever fields we want without using criteria builder
+    @Override
+    public void saveUserData(User user, UpdateUserDataOption option) {
+        // Administration stuff: create criteria and root
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaUpdate<User> criteriaUpdate = builder.createCriteriaUpdate(User.class);
+        Root<User> userRoot = criteriaUpdate.from(User.class);
+
+        // Specify which field to update
+        if (!option.isIgnoreUsername()) {
+            criteriaUpdate.set(userRoot.get(User_.USERNAME), user.getUsername());
+        }
+
+        if (!option.isIgnoreEmail()) {
+            criteriaUpdate.set(userRoot.get(User_.EMAIL), user.getEmail());
+        }
+
+        criteriaUpdate.set(userRoot.get(User_.DOB), user.getDob());
+        criteriaUpdate.set(userRoot.get(User_.NOTE), user.getNote());
+
+        if (!option.isIgnoreFullName()) {
+            criteriaUpdate.set(userRoot.get(User_.FULL_NAME), user.getFullName());
+        }
+
+        criteriaUpdate.set(userRoot.get(User_.PHONE_NUMBER), user.getPhoneNumber());
+        criteriaUpdate.set(userRoot.get(User_.ADDRESS), user.getPhoneNumber());
+
+        if (!option.isIgnorePosition()) {
+            criteriaUpdate.set(userRoot.get(User_.POSITION), user.getPosition());
+        }
+
+        if (!option.isIgnoreDepartment()) {
+            criteriaUpdate.set(userRoot.get(User_.DEPARTMENT), user.getDepartment());
+        }
+
+        if (!option.isIgnoreRole()) {
+            criteriaUpdate.set(userRoot.get(User_.ROLE), user.getRole());
+        }
+
+        // Where
+        criteriaUpdate.where(builder.equal(userRoot.get(User_.ID), user.getId()));
+
+        // Update
+        Query query = entityManager.createQuery(criteriaUpdate);
+        query.executeUpdate();
     }
 }

@@ -14,7 +14,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
 
     List<FinancialPlan> findFinancialPlansByTermId(Long termId);
 
-    @Query(value = "SELECT DISTINCT count(plan.id) FROM FinancialPlan plan " +
+    @Query(value = "SELECT count(distinct (plan.id)) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +
             " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
@@ -22,7 +22,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.isDelete = false ")
     long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
 
-    @Query(value = "SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version FROM FinancialPlanFile file " +
+    @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
@@ -31,9 +31,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY file.plan.id ")
     List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
 
-    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
-            " SUM(expense.unitPrice * expense.amount) AS totalPlan, term.id AS termId, term.name AS termName, status.id AS statusId, " +
-            " status.code AS statusName, term.planDueDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
+    @Query(" SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
+            " SUM(expense.unitPrice * expense.amount) AS totalPlan, term.id AS termId, term.name AS termName, status.id AS statusId, status.name AS statusName, " +
+            " status.code AS statusCode, term.planDueDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialPlan plan " +
             " JOIN plan.term term " +
@@ -44,13 +44,13 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " JOIN fileExpense.planExpense expense " +
             " JOIN files.user user" +
             " WHERE plan.id = :planId AND " +
-            " plan.createdAt = (SELECT MAX(p.createdAt) FROM FinancialPlan p WHERE p.id = :planId) AND " +
-            " plan.isDelete = false " +
-            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.code, term.planDueDate, " +
-            " plan.createdAt, department.id, department.name, user.id, user.username " )
+            " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " plan.isDelete = false AND expense.isDelete = false " +
+            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.name, status.code, term.planDueDate, " +
+            " plan.createdAt, department.id, department.name, user.id, user.username ")
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
 
-    @Query(value = " SELECT DISTINCT count(file.plan.id) FROM FinancialPlanFile file " +
+    @Query(value = " SELECT count(distinct (file.plan.id)) FROM FinancialPlanFile file " +
             " WHERE file.plan.id = :planId" +
             " GROUP BY file.plan.id ")
     int getPlanVersionByPlanId(@Param("planId") Long planId);

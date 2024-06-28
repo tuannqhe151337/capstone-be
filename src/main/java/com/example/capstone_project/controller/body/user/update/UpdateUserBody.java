@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 public class UpdateUserBody {
-        @NotBlank(message = "Id cannot be blank")
-        private String id;
+        @NotNull(message = "Id cannot be blank")
+        private Long id;
 
         @NotBlank(message = "Full name cannot be blank")
         private String fullName;

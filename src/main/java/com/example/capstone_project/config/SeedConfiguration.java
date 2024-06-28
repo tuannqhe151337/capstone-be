@@ -40,6 +40,10 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository
     ) {
         return args -> {
+            if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
+                return;
+            }
+
             //Term Status - fixed code
             TermStatus termStatus = TermStatus.
                     builder()
@@ -122,6 +126,11 @@ public class SeedConfiguration {
                     .code(AuthorityCode.DEACTIVATE_USER)
                     .name("Deactivate user")
                     .build();
+//view user detail missing
+            Authority viewUserDetail = Authority.builder()
+                    .code(AuthorityCode.VIEW_USER_DETAILS)
+                    .name("view user detail")
+                    .build();
 
             Authority createTerm = Authority.builder()
                     .code(AuthorityCode.CREATE_TERM)
@@ -203,7 +212,7 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -370,6 +379,11 @@ public class SeedConfiguration {
                     .authority(deactivateUser)
                     .build();
 
+            RoleAuthority adminAuthority7 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(viewUserDetail)
+                    .build();
+
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(createTerm)
@@ -525,11 +539,12 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
+            // Plan status
             PlanStatus planStatus1 = PlanStatus.builder()
                     .id(1L)
                     .name("New")
@@ -539,7 +554,7 @@ public class SeedConfiguration {
             PlanStatus planStatus2 = PlanStatus.builder()
                     .id(2L)
                     .name("Waiting for reviewed")
-                    .code(PlanStatusCode.WAITING_FOR_REVIEW)
+                    .code(PlanStatusCode.WAITING_FOR_REVIEWED)
                     .build();
 
             PlanStatus planStatus3 = PlanStatus.builder()
@@ -550,7 +565,7 @@ public class SeedConfiguration {
 
             PlanStatus planStatus4 = PlanStatus.builder()
                     .id(4L)
-                    .name("Denied")
+                    .name("Approved")
                     .code(PlanStatusCode.APPROVED)
                     .build();
 
@@ -592,7 +607,7 @@ public class SeedConfiguration {
             Term term4 = Term.builder()
                     .id(4L)
                     .name("Winter 2024")
-                    .duration(TermDuration.YEARLY)
+                    .duration(TermDuration.HALF_YEARLY)
                     .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
@@ -622,7 +637,7 @@ public class SeedConfiguration {
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
-                    .term(term1)
+                    .term(term2)
                     .department(softwareDevelopmentDepartment)
                     .status(planStatus2)
                     .build();
@@ -797,7 +812,7 @@ public class SeedConfiguration {
 
             FinancialPlanFileExpense fileExpense1 = FinancialPlanFileExpense.builder()
                     .id(1L)
-                    .file(financialPlanFile1_2)
+                    .file(financialPlanFile1_1)
                     .planExpense(expenseList.get(0))
                     .build();
 
@@ -872,7 +887,7 @@ public class SeedConfiguration {
                     .planExpense(expenseList.get(14))
                     .build();
 
-            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense15, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
+            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
         };
     }
 }
