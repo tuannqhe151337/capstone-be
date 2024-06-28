@@ -3,13 +3,16 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.repository.redis.OTPTokenRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -18,6 +21,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -53,9 +57,26 @@ public class UserServiceImpl implements UserService {
     private final PositionRepository positionRepository;
     private final AuthorityRepository authorityRepository;
     private final UserDetailRepository userDetailRepository;
+    private final OTPTokenRepository otpTokenRepository;
+    private final UserIdTokenRepository userIdTokenRepository;
+    private final JwtHelper jwtHelper;
+
 
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
+
+    @Value("${application.security.blank-token-email.secret-key}")
+    private String BLANK_TOKEN_EMAIL_SECRET_KEY;
+
+    @Value("${application.security.blank-token-email.expiration}")
+    private String BLANK_TOKEN_EMAIL_EXPIRATION;
+
+    @Value("${application.security.blank-token-otp.secret-key}")
+    private String BLANK_TOKEN_OTP_SECRET_KEY;
+
+    @Value("${application.security.blank-token-otp.expiration}")
+    private String BLANK_TOKEN_OTP_EXPIRATION;
+
 
     @Override
     public List<User> getAllUsers(
@@ -185,7 +206,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String otpValidate(String otp, String authHeader) throws Exception {
+    public String otpValidate(OTPBody otp, String authHeader) throws Exception {
         //get token from redis by id from header
         String tokenHeader="";
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -194,12 +215,22 @@ public class UserServiceImpl implements UserService {
             throw new DataIntegrityViolationException("Invalid token");
         }
         //compare otp
-        //get otp
-
-
+            //get userid
+        Long userId = otpTokenRepository.getUserID(tokenHeader);
+        if(userId == null){
+            throw new DataIntegrityViolationException("Invalid token, missing user id");
+        }
+            //get otp
+        String savedOtp = otpTokenRepository.getOtpCode(tokenHeader,userId);
+            //compare
+        if(!savedOtp.equals(otp.getOtp())) {
+            throw new UnauthorizedException("Invalid OTP");
+        }
         //gen new token
+        String newTokenForUserId = jwtHelper.genBlankTokenOtp();
 
         //save token with id
+        userIdTokenRepository.save(newTokenForUserId, userId, Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
 
         //return token
         return tokenHeader;

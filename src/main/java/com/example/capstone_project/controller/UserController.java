@@ -222,9 +222,19 @@ public class UserController {
     }
 
     @PostMapping("/auth/otp")
-    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
             //return  Token  user:dnfpajsdfhp...:id, 6.
-        String token = jwtHelper.genBlankTokenOtp();
-        return ResponseEntity.status(HttpStatus.OK).body(token);
+        try {
+            String token = userService.otpValidate(otpBody, authHeader);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        }catch (DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+        }catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+
     }
 }
