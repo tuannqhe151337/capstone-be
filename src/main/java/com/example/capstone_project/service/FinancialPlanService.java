@@ -33,4 +33,6 @@ public interface FinancialPlanService {
     PlanVersionResult getCurrentVersionByPlanId(Long planId);
 
     void reUploadPlan(FinancialPlan plan);
+
+    FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId);
 }

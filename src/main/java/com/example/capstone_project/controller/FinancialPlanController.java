@@ -366,7 +366,7 @@ public class FinancialPlanController {
         for (ExpenseResult expenseResult : listExpenseCreate) {
             if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
                 hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
-                listExpense.add(new ReUploadExpensesMapperImpl().mapApprovedExpenseToPlanExpense(expenseResult));
+                listExpense.add(planService.getPlanExpenseReferenceById(expenseResult.getExpenseId()));
             } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
                 hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
             } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {

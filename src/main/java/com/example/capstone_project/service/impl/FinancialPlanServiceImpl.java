@@ -250,4 +250,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public void reUploadPlan(FinancialPlan plan) {
         planRepository.save(plan);
     }
+
+    @Override
+    public FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId) {
+        return expenseRepository.getReferenceById(expenseId);
+    }
 }
