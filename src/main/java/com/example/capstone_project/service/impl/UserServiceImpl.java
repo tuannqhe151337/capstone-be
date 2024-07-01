@@ -89,9 +89,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public long countDistinct(String query) {
-        return userRepository.countDistinct(query);
+    public List<User> getAllUsers(Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
+        long userId = UserHelper.getUserId();
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
+            return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
+        }
+        return List.of();
     }
+
 
 
     @Override
@@ -229,6 +234,11 @@ public class UserServiceImpl implements UserService {
 
         //return token
         return newTokenForUserId;
+    }
+
+    @Override
+    public long countDistinct(Long roleId, Long departmentId, Long positionId, String query) {
+        return userRepository.countDistinct(roleId, departmentId, positionId, query);
     }
 
     @Override

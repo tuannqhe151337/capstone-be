@@ -10,4 +10,6 @@ public interface CustomUserRepository {
     List<User> getUserWithPagination(String query, Pageable pageable);
 
     void saveUserData(User user, UpdateUserDataOption option);
+
+    List<User> getUserWithPagination(Long roleId, Long departmentId, Long statusId, String query, Pageable pageable);
 }

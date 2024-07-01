@@ -1,9 +1,9 @@
 package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.User;
+import org.springframework.data.repository.query.Param;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNullApi;
@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             "join fetch user.department " +
             "join fetch user.position " +
             "join fetch user.userSetting " +
-            "where user.id = :userId and (user.isDelete = false or user.isDelete is null)")
+            "where user.id = :userId")
     Optional<User> findUserDetailedById(Long userId);
 
     @Query(value = "select user from User user " +
@@ -39,9 +39,6 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     )
     Optional<User> findUserWithRoleAndDepartmentById(Long userId);
 
-    @Query(value = "select count(distinct(user.id)) from User user " +
-            "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
-    long countDistinct(String query);
 
     Optional<User> findUserByEmail(String email);
 
@@ -51,4 +48,15 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     String getLatestSimilarUsername(String pattern);
 
     boolean existsByEmail(String email);
+
+    @Query(value = "select count(distinct(user.id)) from User user " +
+            "where user.username like %:query% AND "+
+            " (user.role.id IS NULL OR user.role.id = :roleId) AND " +
+            " (user.department.id IS NULL OR user.department.id = :departmentId) AND " +
+            " (user.position.id IS NULL OR user.position.id = :positionId)")
+    long countDistinct(@Param("roleId") Long roleId,
+                       @Param("departmentId") Long departmentId,
+                       @Param("positionId") Long positionId, @Param("query") String query);
+
+
 }

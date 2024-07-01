@@ -9,6 +9,7 @@ import com.example.capstone_project.controller.body.user.resetPassword.ResetPass
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -17,8 +18,11 @@ public interface UserService {
             String query,
             Pageable pageable
     );
-
-    long countDistinct(String query);
+    List<User> getAllUsers(
+            Long roleId, Long departmentId, Long positionId,
+            String query,
+            Pageable pageable
+    );
 
     void createUser(User user) throws Exception;
 
@@ -32,4 +36,6 @@ public interface UserService {
     void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
+    long countDistinct( Long roleId, Long departmentId, Long positionId,  String query);
+
 }

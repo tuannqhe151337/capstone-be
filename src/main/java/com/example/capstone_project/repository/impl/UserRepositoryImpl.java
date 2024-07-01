@@ -119,4 +119,65 @@ public class UserRepositoryImpl implements CustomUserRepository {
         Query query = entityManager.createQuery(criteriaUpdate);
         query.executeUpdate();
     }
+
+    @Override
+    public List<User> getUserWithPagination(Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
+
+        // HQL query
+
+        String hql = "select user from User user " +
+                "left join user.role " +
+                "left join user.department " +
+                "left join user.position " +
+                "where user.username like :query AND" +
+                " (user.role.id IS NULL OR user.role.id = :roleId) AND " +
+                " (user.department.id IS NULL OR user.department.id = :departmentId) AND " +
+                " (user.position.id IS NULL OR user.position.id = :positionId) " +
+//                "and user.isDelete = false " + // We actually want to get all deactivated users as well
+                "order by ";
+
+        // Handling sort by and sort type
+        List<Sort.Order> sortOrderList = pageable.getSort().get().toList();
+        for (int i = 0; i < sortOrderList.size(); i++) {
+            Sort.Order order = sortOrderList.get(i);
+
+            String sortType = order.getDirection().isAscending() ? "asc" : "desc";
+            switch (order.getProperty().toLowerCase()) {
+                case "name", "username", "user_name":
+                    hql += "user.username " + sortType;
+                    break;
+                case "department.id", "department_id", "department":
+                    hql += "user.department.id " + sortType;
+                    break;
+                case "position.id", "position", "position_id":
+                    hql += "user.position.id " + sortType;
+                    break;
+                case "role", "role_id", "role.id":
+                    hql += "user.role.id " + sortType;
+                    break;
+                default:
+                    hql += "user.id " + sortType;
+            }
+
+            if (i != sortOrderList.size() - 1) {
+                hql += ", ";
+            } else {
+                hql += " ";
+            }
+        }
+
+        // Handling join
+        EntityGraph<User> entityGraph = entityManager.createEntityGraph(User.class);
+        entityGraph.addAttributeNodes(User_.ROLE);
+        entityGraph.addAttributeNodes(User_.DEPARTMENT);
+        entityGraph.addAttributeNodes(User_.POSITION);
+
+        // Run query
+        return entityManager.createQuery(hql, User.class)
+                .setParameter("query", "%" + query + "%")
+                .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
+                .setMaxResults(pageable.getPageSize())
+                .setHint("jakarta.persistence.fetchgraph", entityGraph)
+                .getResultList();
+    }
 }

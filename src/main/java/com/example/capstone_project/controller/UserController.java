@@ -46,16 +46,18 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
-    private final JwtHelper jwtHelper;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
+            @RequestParam(required = false) Long positionId,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
+    ){
         // Handling page and pageSize
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
@@ -69,9 +71,8 @@ public class UserController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
+        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+        long count = this.userService.countDistinct(roleId, departmentId, positionId, query);
 
         // Response
         ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
