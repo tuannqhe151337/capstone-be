@@ -47,13 +47,8 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
     @Override
     boolean existsById(Long aLong);
 
-    //query get all term having status = 1 (NOT_STARTED) , and startdate = now
-    @Query(value = "SELECT t FROM Term t " +
-            "WHERE t.status.id = 1 AND FUNCTION('DATE', t.startDate) = FUNCTION('DATE', CURRENT_TIMESTAMP)")
-    List<Term> findTermsByStatusIdAndStartDate();
-//
-//    @Query("SELECT e FROM Term e WHERE e.status.id = 1 AND DATE(e.startDate) = CURRENT_DATE")
-//    List<Term> findByStatusIdAndStartDate();
+
+
 
 
 }

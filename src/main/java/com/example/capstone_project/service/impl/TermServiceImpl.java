@@ -88,8 +88,8 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public void updateTermStatus(Term term) throws Exception {
-        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
         term.setStatus(termStatus);
         termRepository.save(term);
     }
