@@ -49,6 +49,9 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
+            @RequestParam(name = "roleId", required = false) Long roleId,
+            @RequestParam(name = "departmentId", required = false) Long departmentId,
+            @RequestParam(name = "positionId", required = false) Long positionId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -59,6 +62,7 @@ public class UserController {
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
+
         // Handling query
         if (query == null) {
             query = "";
@@ -68,9 +72,8 @@ public class UserController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
+        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
 
         // Response
         ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
@@ -204,15 +207,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body("Change password success");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
     }
+
     @PostMapping("/auth/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("reset password success");
     }
+
     @PostMapping("/auth/forgot-password")
     public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
@@ -223,7 +228,7 @@ public class UserController {
 
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
-            //return  Token  user:dnfpajsdfhp...:id, 6.
+        //return  Token  user:dnfpajsdfhp...:id, 6.
         String token = jwtHelper.genBlankTokenOtp();
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
