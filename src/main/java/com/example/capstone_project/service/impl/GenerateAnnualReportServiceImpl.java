@@ -25,7 +25,7 @@ import java.util.List;
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
     private final AnnualReportRepository annualReportRepository;
 
-    @Scheduled(cron = "*/20 * * * * *")
+    @Scheduled(cron = "*/180 * * * * *")
     @Transactional
     public void generateAnnualReport() {
         // Generate annual report

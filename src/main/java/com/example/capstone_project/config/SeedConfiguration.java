@@ -1039,12 +1039,12 @@ public class SeedConfiguration {
                     .totalDepartment(9)
                     .build();
 
-            AnnualReport annualReport5 = AnnualReport.builder()
-                    .year(2024)
-                    .totalTerm(9)
-                    .totalExpense(BigDecimal.valueOf(843513112))
-                    .totalDepartment(18)
-                    .build();
+//            AnnualReport annualReport5 = AnnualReport.builder()
+//                    .year(2024)
+//                    .totalTerm(9)
+//                    .totalExpense(BigDecimal.valueOf(843513112))
+//                    .totalDepartment(18)
+//                    .build();
 
             AnnualReport annualReport6 = AnnualReport.builder()
                     .year(2025)
@@ -1053,7 +1053,7 @@ public class SeedConfiguration {
                     .totalDepartment(12)
                     .build();
 
-            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport5, annualReport6));
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport6));
 
             List<Report> reports = new ArrayList<>();
             random = new Random();
@@ -1070,7 +1070,6 @@ public class SeedConfiguration {
                     case 2 -> annualReport2;
                     case 3 -> annualReport3;
                     case 4 -> annualReport4;
-                    case 5 -> annualReport5;
                     case 6 -> annualReport6;
                     default -> annualReport1; // Default case, should never be reached
                 };
