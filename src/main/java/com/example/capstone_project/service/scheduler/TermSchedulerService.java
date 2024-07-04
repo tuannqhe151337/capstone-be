@@ -20,7 +20,7 @@ public class TermSchedulerService {
 private final TermService termService;
 private final TermRepository termRepository;
 
-    @Scheduled(cron =  "0 0 0 * * *") // Execute at 12:00 AM every day
+    @Scheduled(cron =  "0 55 20 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void startTerm() throws Exception {
@@ -36,13 +36,13 @@ private final TermRepository termRepository;
             }
         }
     }
-    @Scheduled(cron =  "0 0 0 * * *") // Execute at 12:00 AM every day
+    @Scheduled(cron =  "0 55 20 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void endTerm() throws Exception {
         //START TERM
         List<Term> terms = termRepository.findAll();
-        //change status to 2 (IN_PROGRESS)
+        //change status to 3 (CLOSED)
         for(Term term : terms) {
             if(term.getStatus().getId() == 2 &&
                     term.getEndDate().toLocalDate().isEqual(LocalDate.now())){
