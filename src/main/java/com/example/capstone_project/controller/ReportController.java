@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -110,10 +111,15 @@ public class ReportController {
     }
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
-            @Valid @RequestBody DeleteReportBody reportBody
+            @Validated @RequestBody DeleteReportBody reportBody
     ) {
-        System.out.println(reportBody.toString());
-        return null;
+        FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
+
+        if (deletedReport == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok("Delete successful plan id: " + deletedReport.getId());
     }
 
     @GetMapping("/list")

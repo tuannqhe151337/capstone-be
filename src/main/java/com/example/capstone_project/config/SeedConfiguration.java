@@ -223,6 +223,11 @@ public class SeedConfiguration {
                     .name("Download report")
                     .build();
 
+            Authority deleteReport = Authority.builder()
+                    .code(AuthorityCode.DELETE_REPORT)
+                    .name("Delete report")
+                    .build();
+
             Authority viewAnnualReport = Authority.builder()
                     .code(AuthorityCode.VIEW_ANNUAL_REPORT)
                     .name("View annual report")
@@ -233,7 +238,7 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -470,6 +475,11 @@ public class SeedConfiguration {
                     .authority(downloadReport)
                     .build();
 
+            RoleAuthority accountantAuthority17 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(deleteReport)
+                    .build();
+
             RoleAuthority accountantAuthority14 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(viewAnnualReport)
@@ -560,9 +570,14 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
+            RoleAuthority financialStaffAuthority16 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(deleteReport)
+                    .build();
+
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
 
             // Plan status
