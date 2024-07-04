@@ -263,14 +263,14 @@ public class SeedConfiguration {
 
             // User
             User user1 = User.builder()
-                    .username("username1")
+                    .username("Anurakk")
                     .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mailho21@gmail.com")
+                    .email("giangdvhe163178@fpt.edu.vn")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .isDelete(false)

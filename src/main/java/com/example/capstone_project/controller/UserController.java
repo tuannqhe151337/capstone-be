@@ -211,7 +211,6 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
-
     }
 
     @PostMapping("/auth/reset-password")
@@ -222,11 +221,17 @@ public class UserController {
     @PostMapping("/auth/forgot-password")
     public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
-        //String generateAccessToken(Integer userId)
-        String token = jwtHelper.genBlankTokenEmail();
-        return ResponseEntity.status(HttpStatus.OK).body(token);
-    }
+        String token = null;
+        try {
+            token = userService.forgetPassword(forgetPasswordEmailBody);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
 
+    }
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
         //return  Token  user:dnfpajsdfhp...:id, 6.
