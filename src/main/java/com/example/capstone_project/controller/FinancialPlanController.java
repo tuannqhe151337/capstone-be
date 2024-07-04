@@ -1,8 +1,8 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
+import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
@@ -16,9 +16,13 @@ import com.example.capstone_project.controller.responses.plan.detail.PlanDetailR
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
@@ -26,6 +30,8 @@ import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImp
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +44,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.List;
 
@@ -287,11 +295,57 @@ public class FinancialPlanController {
     }
 
     @PutMapping("/re-upload")
-    private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
-            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
-    ) {
+    private ResponseEntity<String> reUploadPlan(
+            @RequestBody ListReUploadExpenseBody reUploadExpenseBody
+    ) throws Exception {
 
-        return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
+        List<ExpenseResult> listExpenseCreate = planService.getListExpenseByPlanId(reUploadExpenseBody.getPlanId());
+
+        if (listExpenseCreate == null || listExpenseCreate.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
+        List<FinancialPlanExpense> listExpense = new ArrayList<>();
+        String lastExpenseCode = planService.getLastExpenseCode(reUploadExpenseBody.getPlanId());
+        String[] parts = lastExpenseCode.split("_");
+        StringBuilder prefixExpenseKey = new StringBuilder();
+        for (int i = 0; i < parts.length - 2; i++) {
+            prefixExpenseKey.append(parts[i] + "_");
+        }
+
+        int lastIndexCode = Integer.parseInt(parts[parts.length - 1]);
+
+        PlanVersionResult version = planService.getCurrentVersionByPlanId(reUploadExpenseBody.getPlanId());
+
+        for (ExpenseResult expenseResult : listExpenseCreate) {
+            if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
+                hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
+                listExpense.add(planService.getPlanExpenseReferenceById(expenseResult.getExpenseId()));
+            } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
+                hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
+            } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {
+                hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.WAITING_FOR_APPROVAL);
+            } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
+                hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
+            }
+        }
+
+        for (ReUploadExpenseBody expenseBody : reUploadExpenseBody.getData()) {
+            if (hashMapExpense.containsKey(expenseBody.getExpenseCode()) &&
+                    !hashMapExpense.get(expenseBody.getExpenseCode()).getValue().equals(ExpenseStatusCode.APPROVED.getValue())
+            ) {
+                listExpense.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(expenseBody));
+            } else if (!hashMapExpense.containsKey(expenseBody.getExpenseCode())) {
+                listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), ++lastIndexCode));
+            }
+        }
+
+        FinancialPlan plan = new ReUploadExpensesMapperImpl().mapToPlanMapping(reUploadExpenseBody.getPlanId(), (long) UserHelper.getUserId(), version, listExpense);
+
+        planService.reUploadPlan(plan);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Re upload successful");
     }
 
     @PostMapping("/create")

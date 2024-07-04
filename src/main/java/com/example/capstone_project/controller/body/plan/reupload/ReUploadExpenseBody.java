@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.body.plan.reupload;
 
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 public class ReUploadExpenseBody {
     @NotEmpty(message = "Expense code can't be empty.")
-    private String expenseCode;
+    private ExpenseStatusCode expenseCode;
     @NotEmpty(message = "Expense name can't be empty.")
     private String expenseName;
     @NotNull(message = "Expense cost type id can't be null.")

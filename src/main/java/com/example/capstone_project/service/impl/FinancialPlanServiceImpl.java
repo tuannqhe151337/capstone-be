@@ -381,4 +381,48 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         return null;
     }
 
+
+    @Override
+    public List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception {
+
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authorization
+        // Check any plan of user department is existing in this term
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())) {
+            long departmentId = planRepository.getDepartmentIdByPlanId(planId);
+            // Check department
+            if (departmentId == userDetail.getDepartmentId()) {
+
+                return expenseRepository.getListExpenseByPlanId(planId);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getLastExpenseCode(Long planId) {
+        return expenseRepository.getLastExpenseCode(planId);
+    }
+
+    @Override
+    public PlanVersionResult getCurrentVersionByPlanId(Long planId) {
+        return planRepository.getCurrentVersionByPlanId(planId);
+    }
+
+    @Override
+    @Transactional
+    public void reUploadPlan(FinancialPlan plan) {
+        planRepository.save(plan);
+    }
+
+    @Override
+    public FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId) {
+        return expenseRepository.getReferenceById(expenseId);
+    }
 }

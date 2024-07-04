@@ -1,7 +1,10 @@
 package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.result.ExpenseResult;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import org.springframework.data.domain.Pageable;
 
@@ -37,4 +40,14 @@ public interface FinancialPlanService {
     byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
 
     String generateFileName(Long fileId);
+
+    List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception;
+
+    String getLastExpenseCode(Long planId);
+
+    PlanVersionResult getCurrentVersionByPlanId(Long planId);
+
+    void reUploadPlan(FinancialPlan plan);
+
+    FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId);
 }
