@@ -5,7 +5,7 @@ import com.example.capstone_project.entity.FinancialReportExpense;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
-public interface ExpenseResponseMapper {
+public interface ReportExpenseResponseMapper {
     @Mapping(source = "id", target = "expenseId")
     @Mapping(source = "costType.id", target = "costType.costTypeId")
     @Mapping(source = "status.id", target = "status.statusId")
