@@ -1,10 +1,7 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,12 +9,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(schema = "capstone_v2",name = "financial_reports")
+@Table(schema = "capstone_v2", name = "financial_reports")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
-public class FinancialReport {
+public class FinancialReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +25,17 @@ public class FinancialReport {
 
     @Column(name = "month")
     private LocalDate month;
+
+    @Column(name = "version")
+    private String version;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
+    @JoinColumn(name = "status_id")
+    private PlanStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")

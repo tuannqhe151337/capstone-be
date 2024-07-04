@@ -3,11 +3,15 @@ package com.example.capstone_project.controller.responses.report.list;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 public class ReportResponse {
-    private long reportId;
+    private Long reportId;
     private String name;
+    private String version;
+    private LocalDate month;
     private StatusResponse status;
     private TermResponse term;
     private DepartmentResponse department;
