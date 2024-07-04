@@ -235,7 +235,7 @@ public class UserServiceImpl implements UserService {
             // Check email exist
             String email = user.getEmail();
 
-            if (userRepository.existsByEmail(email)) {
+            if (userRepository.existsByEmail(email) ) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
 

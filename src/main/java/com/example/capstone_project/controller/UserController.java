@@ -6,6 +6,7 @@ import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
