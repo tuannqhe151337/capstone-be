@@ -1,7 +1,10 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
 import com.example.capstone_project.entity.AnnualReport;
+import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.AnnualReportRepository;
+import com.example.capstone_project.repository.ReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -33,5 +36,21 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     @Override
     public long countDistinctListAnnualReportPaging() {
         return annualReportRepository.countDistinctListAnnualReportPaging();
+    }
+
+    @Override
+    public List<Report> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable) {
+        // Get list authorities of this user
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            return annualReportRepository.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
+        }
+        return null;
+    }
+
+    @Override
+    public long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId) {
+        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId,costTypeId,departmentId);
     }
 }
