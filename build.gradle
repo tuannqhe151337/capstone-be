@@ -19,6 +19,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo1.maven.org/maven2' }
 }
 
 dependencies {
@@ -57,8 +58,20 @@ dependencies {
 
     implementation 'org.passay:passay:1.6.3'
 
+//TEST JUNIT MOCKITO
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.8.1'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation('org.mockito:mockito-core:3.7.7')
+
 
     testImplementation 'org.springframework.security:spring-security-test'
+
     compileOnly 'org.projectlombok:lombok'
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen
     compileOnly 'org.hibernate:hibernate-jpamodelgen:6.5.0.Final'

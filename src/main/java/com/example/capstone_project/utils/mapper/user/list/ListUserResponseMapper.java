@@ -5,6 +5,8 @@ import com.example.capstone_project.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface ListUserResponseMapper {
     @Mapping(source = "id", target = "userId")
@@ -19,4 +21,6 @@ public interface ListUserResponseMapper {
     @Mapping(source = "position.name", target = "position.name")
     @Mapping(source = "isDelete", target = "deactivate")
     UserResponse mapToUserResponse(User user);
+
+    List<UserResponse> mapToUserResponseList(List<User> users);
 }
