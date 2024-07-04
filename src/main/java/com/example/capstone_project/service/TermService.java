@@ -21,4 +21,5 @@ public interface TermService {
 
     Term findTermById(Long id) throws Exception;
 
+    Term updateTerm(Term term) throws Exception;
 }

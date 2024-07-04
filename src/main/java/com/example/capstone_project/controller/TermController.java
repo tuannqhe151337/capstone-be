@@ -13,6 +13,9 @@ import com.example.capstone_project.controller.responses.term.selectWhenCreatePl
 import com.example.capstone_project.entity.Term;
 
 import com.example.capstone_project.service.TermService;
+import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -23,6 +26,7 @@ import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTer
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -213,9 +217,24 @@ public class TermController {
     }
 
     @PutMapping
-    public ResponseEntity<String> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
-        TermDetailResponse termDetailResponse = new UpdateTermBodyToTermDetailResponseMapperImpl().mapDeleteTermBodyToDetail(updateTermBody);
-        return ResponseEntity.status(HttpStatus.OK).body("Updated successfully");
+    public ResponseEntity<TermDetailResponse> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
+
+        try {
+            Term term = new UpdateTermBodyToTermDetailResponseMapperImpl().mapTermBodyToTermEntity(updateTermBody);
+
+            TermDetailResponse termDetailResponse =
+                    new UpdateTermBodyToTermDetailResponseMapperImpl()
+                            .mapTermToTermDetailResponse(termService.updateTerm(term));
+
+            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @DeleteMapping
