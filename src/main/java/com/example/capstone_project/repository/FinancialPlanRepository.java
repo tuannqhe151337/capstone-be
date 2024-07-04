@@ -1,7 +1,6 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -71,9 +70,11 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE file.id = :fileId AND " +
             " files.isDelete = false AND expenses.isDelete = false ")
     List<ExpenseResult> getListExpenseByFileId(@Param("fileId") Long fileId);
+
     @Query(value = " SELECT plan.id FROM FinancialPlan plan " +
             " JOIN plan.planFiles files " +
             " WHERE files.id = :fileId AND " +
             " plan.isDelete = false ")
     int getPlanIdByFileId(@Param("fileId") Long fileId);
+
 }

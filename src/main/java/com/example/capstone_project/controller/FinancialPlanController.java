@@ -15,15 +15,17 @@ import com.example.capstone_project.controller.responses.Responses;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.helper.JwtHelper;
@@ -37,6 +39,7 @@ import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMa
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -56,6 +59,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -245,42 +249,49 @@ public class FinancialPlanController {
 
     @GetMapping("versions")
     public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
-            @RequestParam Integer planId,
+            @RequestParam Long planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                VersionResponse.builder()
-                        .version("v1")
-                        .publishedDate(LocalDate.of(2024, 4, 10))
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v2")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v3")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build()
-        ));
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
-                .page(10)
-                .limitRecordsPerPage(33)
-                .numPages(1)
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<VersionResult> planFiles = planService.getListVersionWithPaginate(planId, pageable);
+        System.out.println(Arrays.toString(planFiles.toArray()));
+        // Response
+        ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (planFiles != null) {
+
+            // Count total record
+            count = planService.countDistinctListPlanVersionPaging(planId);
+
+            // Mapping to TermPaginateResponse
+            planFiles.forEach(file -> response.getData().add( new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listPaginationResponse);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete")

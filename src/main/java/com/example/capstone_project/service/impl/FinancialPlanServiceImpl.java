@@ -13,6 +13,7 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
@@ -20,6 +21,7 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,8 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -222,6 +222,38 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
+    public List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getListVersionWithPaginate(planId, pageable);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+
+                // Check department
+                if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
+                    return planRepository.getListVersionWithPaginate(planId, pageable);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public long countDistinctListPlanVersionPaging(Long planId) {
+        return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
     @Transactional
     public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
         // Get userId from token
@@ -340,7 +372,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public String generateFileName(Long fileId) {
         int planId = planRepository.getPlanIdByFileId(fileId);
         List<FileNameResult> fileNameResultList = financialPlanFileRepository.generateFileName(planId);
-        String result;
+
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
                 return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xlsx";
