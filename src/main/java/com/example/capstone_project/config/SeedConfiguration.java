@@ -38,6 +38,8 @@ public class SeedConfiguration {
             ExpenseStatusRepository expenseStatusRepository,
             FinancialPlanFileRepository financialPlanFileRepository,
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
+            AnnualReportRepository annualReportRepository,
+            ReportRepository reportRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
             FinancialReportExpenseRepository financialReportExpenseRepository
@@ -1042,6 +1044,100 @@ public class SeedConfiguration {
 
             financialReportExpenseRepository.saveAll(reportExpenseList);
 
+
+            AnnualReport annualReport1 = AnnualReport.builder()
+                    .year(2019)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(1232212125))
+                    .totalDepartment(18)
+                    .build();
+
+            AnnualReport annualReport2 = AnnualReport.builder()
+                    .year(2020)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(461321564))
+                    .totalDepartment(11)
+                    .build();
+
+            AnnualReport annualReport3 = AnnualReport.builder()
+                    .year(2021)
+                    .totalTerm(22)
+                    .totalExpense(BigDecimal.valueOf(1231313213))
+                    .totalDepartment(8)
+                    .build();
+
+            AnnualReport annualReport4 = AnnualReport.builder()
+                    .year(2022)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(905135545))
+                    .totalDepartment(9)
+                    .build();
+
+            AnnualReport annualReport5 = AnnualReport.builder()
+                    .year(2023)
+                    .totalTerm(9)
+                    .totalExpense(BigDecimal.valueOf(843513112))
+                    .totalDepartment(18)
+                    .build();
+
+            AnnualReport annualReport6 = AnnualReport.builder()
+                    .year(2024)
+                    .totalTerm(6)
+                    .totalExpense(BigDecimal.valueOf(354564895))
+                    .totalDepartment(12)
+                    .build();
+
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport5, annualReport6));
+
+            List<Report> reports = new ArrayList<>();
+            random = new Random();
+            projectNameChar = 'A';
+            supplierNameChar = 'A';
+
+            for (int i = 1; i <= 15; i++) {
+                int randomAnnualReportIndex = random.nextInt(6) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomDepartmentIndex = random.nextInt(3) + 1;
+
+                AnnualReport randomAnnualReport = switch (randomAnnualReportIndex) {
+                    case 1 -> annualReport1;
+                    case 2 -> annualReport2;
+                    case 3 -> annualReport3;
+                    case 4 -> annualReport4;
+                    case 5 -> annualReport5;
+                    case 6 -> annualReport6;
+                    default -> annualReport1; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Department randomDepartment = switch (randomDepartmentIndex) {
+                    case 1 -> accountingDepartment;
+                    case 2 -> financeDepartment;
+                    case 3 -> softwareDevelopmentDepartment;
+                    default -> accountingDepartment; // Default case, should never be reached
+                };
+
+                Report report = Report.builder()
+                        .totalExpense(BigDecimal.valueOf(random.nextInt(5000000) + 2000000))
+                        .biggestExpenditure(BigDecimal.valueOf(random.nextInt(1500000) + 100000))
+                        .annualReport(randomAnnualReport)
+                        .department(randomDepartment)
+                        .costType(randomCostType)
+                        .build();
+
+                reports.add(report);
+            }
+
+            reportRepository.saveAll(reports);
         };
     }
 }
