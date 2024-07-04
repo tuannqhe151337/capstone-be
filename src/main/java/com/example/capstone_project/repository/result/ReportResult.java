@@ -2,12 +2,9 @@ package com.example.capstone_project.repository.result;
 
 import java.math.BigDecimal;
 
-public interface AnnualReportResult {
-    Integer getYear();
-
-    Integer getTotalTerm();
-
+public interface ReportResult {
+    Long getDepartmentId();
     BigDecimal getTotalExpense();
-
-    Integer getDepartment();
+    BigDecimal getBiggestExpense();
+    Long getCostTypeId();
 }

@@ -10,6 +10,7 @@ import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.service.GenerateAnnualReportService;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.mapper.annual.AnnualReportMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

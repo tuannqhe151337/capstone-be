@@ -32,6 +32,10 @@ public class FinancialReport {
     @JoinColumn(name = "term_id")
     private Term term;
 
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
     private List<FinancialReportExpense> reportExpenses;
 
