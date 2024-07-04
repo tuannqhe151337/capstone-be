@@ -28,4 +28,8 @@ public interface FinancialPlanService {
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
 
     long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
+
+    byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
+
+    String generateFileName(Long fileId);
 }

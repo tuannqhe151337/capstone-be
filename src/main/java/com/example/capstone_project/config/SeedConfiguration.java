@@ -67,31 +67,38 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
-            Department itDepartment = Department.builder()
-                    .name("IT")
-                    .build();
-
-            Department hrDepartment = Department.builder()
-                    .name("HR")
-                    .build();
-
-            Department financeDepartment = Department.builder()
-                    .name("Finance")
-                    .build();
-
-            Department communicationDepartment = Department.builder()
-                    .name("Communication")
-                    .build();
-
-            Department marketingDepartment = Department.builder()
-                    .name("Marketing")
+            Department softwareDevelopmentDepartment = Department.builder()
+                    .name("Software development")
+                    .code(DepartmentCode.IT)
                     .build();
 
             Department accountingDepartment = Department.builder()
-                    .name("Accounting")
+                    .name("Accounting department")
+                    .code(DepartmentCode.ACCOUNTING)
                     .build();
 
-            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
+            Department financeDepartment = Department.builder()
+                    .name("Finance department")
+                    .code(DepartmentCode.FINANCE)
+                    .build();
+
+            Department hireDepartment = Department.builder()
+                    .name("Hire department")
+                    .code(DepartmentCode.HR)
+                    .build();
+
+            Department communicationDepartment = Department.builder()
+                    .name("Finance department")
+                    .code(DepartmentCode.COMMUNICATION)
+                    .build();
+
+            Department marketingDepartment = Department.builder()
+                    .name("Finance department")
+                    .code(DepartmentCode.MARKETING)
+                    .build();
+
+
+            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment, hireDepartment, communicationDepartment, marketingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -295,7 +302,7 @@ public class SeedConfiguration {
                     .fullName("Choi Woo-je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .isDelete(false)
@@ -310,7 +317,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
@@ -643,14 +650,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus2)
                     .build();
 
