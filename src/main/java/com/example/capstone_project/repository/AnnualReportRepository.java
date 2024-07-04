@@ -19,12 +19,12 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
     long countDistinctListAnnualReportPaging();
 
     @Query(value = " SELECT year (term.planDueDate) AS year, count (term.id) AS totalTerm, " +
-            " sum (expense.amount*expense.unitPrice) AS TotalExpense, count (department.id)  FROM Term term " +
+            " sum (expense.amount*expense.unitPrice) AS totalExpense, count (department.id) AS totalDepartment FROM Term term " +
             " JOIN term.financialReports report" +
             " JOIN report.department department " +
             " JOIN report.reportExpenses expense " +
             " WHERE year (term.planDueDate) = year (:now) AND " +
-            " expense.status.name = :approved AND" +
+            " expense.status.code = :approved AND" +
             " term.isDelete = false AND " +
             " expense.isDelete = false AND " +
             " department.isDelete = false " +
@@ -37,7 +37,7 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " JOIN report.department department " +
             " JOIN report.term term " +
             " WHERE year(term.planDueDate) = year(:now) AND " +
-            " expense.status = :approved AND" +
+            " expense.status.code = :approved AND" +
             " term.isDelete = false AND " +
             " report.isDelete = false AND " +
             " department.isDelete = false AND " +

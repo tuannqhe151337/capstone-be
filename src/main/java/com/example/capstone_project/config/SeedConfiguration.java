@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ public class SeedConfiguration {
             FinancialPlanFileRepository financialPlanFileRepository,
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
+            FinancialReportRepository financialReportRepository,
+            FinancialReportExpenseRepository financialReportExpenseRepository,
             AnnualReportRepository annualReportRepository,
             ReportRepository reportRepository
     ) {
@@ -577,9 +580,9 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
                     .status(termStatus)
                     .build();
@@ -891,43 +894,160 @@ public class SeedConfiguration {
 
             financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
 
+            FinancialReport report1 = FinancialReport.builder()
+                    .name("Report Name 1")
+                    .month(LocalDate.now())
+                    .version("v3")
+                    .status(planStatus1)
+                    .department(accountingDepartment)
+                    .term(term1)
+                    .user(user1)
+                    .build();
+
+            FinancialReport report2 = FinancialReport.builder()
+                    .name("Report Name 2")
+                    .month(LocalDate.now())
+                    .version("v2")
+                    .status(planStatus2)
+                    .department(accountingDepartment)
+                    .term(term2)
+                    .user(user2)
+                    .build();
+
+            FinancialReport report3 = FinancialReport.builder()
+                    .name("Report Name 3")
+                    .month(LocalDate.now())
+                    .version("v3")
+                    .status(planStatus1)
+                    .department(softwareDevelopmentDepartment)
+                    .term(term1)
+                    .user(user1)
+                    .build();
+
+            FinancialReport report4 = FinancialReport.builder()
+                    .name("Report Name 4")
+                    .month(LocalDate.now())
+                    .version("v3")
+                    .status(planStatus4)
+                    .department(accountingDepartment)
+                    .term(term1)
+                    .user(user3)
+                    .build();
+
+            FinancialReport report5 = FinancialReport.builder()
+                    .name("Report Name 5")
+                    .month(LocalDate.now())
+                    .version("v1")
+                    .status(planStatus2)
+                    .department(accountingDepartment)
+                    .term(term3)
+                    .user(user4)
+                    .build();
+
+            FinancialReport report6 = FinancialReport.builder()
+                    .name("Report Name 6")
+                    .month(LocalDate.now())
+                    .version("v3")
+                    .status(planStatus2)
+                    .department(softwareDevelopmentDepartment)
+                    .term(term2)
+                    .user(user1)
+                    .build();
+
+            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
+
+            // Get 15 random expense
+            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
+            projectNameChar = 'A';
+            supplierNameChar = 'A';
+
+            for (int i = 1; i <= 15; i++) {
+                int randomStatusIndex = random.nextInt(4) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomReportIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(pics.length);
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 3 -> expenseStatus3;
+                    case 4 -> expenseStatus4;
+                    default -> expenseStatus3; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                FinancialReport randomReport = switch (randomReportIndex) {
+                    case 1 -> report1;
+                    case 2 -> report2;
+                    case 3 -> report3;
+                    case 4 -> report4;
+                    case 5 -> report5;
+                    case 6 -> report6;
+                    default -> report1; // Default case, should never be reached
+                };
+
+                FinancialReportExpense expense = FinancialReportExpense.builder()
+                        .name("Expense " + projectNameChar)
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
+                        .amount(random.nextInt(10) + 1)
+                        .financialReport(randomReport)
+                        .projectName("Project name " + projectNameChar++)
+                        .supplierName("Supplier name " + supplierNameChar++)
+                        .pic(pics[randomPicIndex])
+                        .costType(randomCostType)
+                        .status(randomExpenseStatus)
+                        .build();
+
+                reportExpenseList.add(expense);
+            }
+
+            financialReportExpenseRepository.saveAll(reportExpenseList);
+
+
             AnnualReport annualReport1 = AnnualReport.builder()
-                    .year(2019)
+                    .year(2020)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(1232212125))
                     .totalDepartment(18)
                     .build();
 
             AnnualReport annualReport2 = AnnualReport.builder()
-                    .year(2020)
+                    .year(2021)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(461321564))
                     .totalDepartment(11)
                     .build();
 
             AnnualReport annualReport3 = AnnualReport.builder()
-                    .year(2021)
+                    .year(2022)
                     .totalTerm(22)
                     .totalExpense(BigDecimal.valueOf(1231313213))
                     .totalDepartment(8)
                     .build();
 
             AnnualReport annualReport4 = AnnualReport.builder()
-                    .year(2022)
+                    .year(2023)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(905135545))
                     .totalDepartment(9)
                     .build();
 
             AnnualReport annualReport5 = AnnualReport.builder()
-                    .year(2023)
+                    .year(2024)
                     .totalTerm(9)
                     .totalExpense(BigDecimal.valueOf(843513112))
                     .totalDepartment(18)
                     .build();
 
             AnnualReport annualReport6 = AnnualReport.builder()
-                    .year(2024)
+                    .year(2025)
                     .totalTerm(6)
                     .totalExpense(BigDecimal.valueOf(354564895))
                     .totalDepartment(12)

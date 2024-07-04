@@ -9,5 +9,5 @@ public interface AnnualReportResult {
 
     BigDecimal getTotalExpense();
 
-    Integer getDepartment();
+    Integer getTotalDepartment();
 }

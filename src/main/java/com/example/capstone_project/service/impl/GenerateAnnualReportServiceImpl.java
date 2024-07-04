@@ -23,13 +23,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
-    private AnnualReportRepository annualReportRepository;
+    private final AnnualReportRepository annualReportRepository;
 
     @Scheduled(cron = "*/20 * * * * *")
     @Transactional
     public void generateAnnualReport() {
         // Generate annual report
         AnnualReportResult annualReportResult = annualReportRepository.getAnnualReport(LocalDate.now(), ExpenseStatusCode.APPROVED);
+        System.out.println(annualReportResult);
         AnnualReport annualReport = new AnnualReportMapperImpl().mapToAnnualReportMapping(annualReportResult);
 
         // Generate annual list reports
