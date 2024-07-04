@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
+import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -10,6 +11,7 @@ import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.Responses;
+import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
@@ -29,6 +31,8 @@ import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapper;
+import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
@@ -115,73 +119,56 @@ public class FinancialPlanController {
 
     @GetMapping("expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer termId,
-            @RequestParam(required = false) Integer statusId,
-            @RequestParam(required = false) Integer costTypeId,
+            @RequestBody PlanExpensesBody planBody,
+            @RequestParam(required = false) Long statusId,
+            @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<ExpenseResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                ExpenseResponse.builder()
-                        .expenseId(1L)
-                        .name("Promotion event")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(1L)
-                                .name("Direct cost").build())
-                        .unitPrice(BigDecimal.valueOf(15000000))
-                        .amount(3)
-                        .projectName("RECT")
-                        .supplierName("Hong Ha")
-                        .pic("HongHD9")
-                        .notes("Approximate")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(1L)
-                                .name("Waiting for approval").build())
-                        .build(),
-                ExpenseResponse.builder()
-                        .expenseId(2L)
-                        .name("Social media")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(1L)
-                                .name("Direct cost").build())
-                        .unitPrice(BigDecimal.valueOf(15000000))
-                        .amount(1)
-                        .projectName("IN22")
-                        .supplierName("Hong Ha")
-                        .pic("HongHD9")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(2L)
-                                .name("Waiting for approval").build())
-                        .build(),
-                ExpenseResponse.builder()
-                        .expenseId(3L)
-                        .name("Office supplier")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(2L)
-                                .name("Adminstration").build())
-                        .unitPrice(BigDecimal.valueOf(5000000))
-                        .amount(2)
-                        .projectName("CAM1")
-                        .supplierName("TuNM")
-                        .pic("TuanVV")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(1L)
-                                .name("Waiting for approval").build())
-                        .build()
-        ));
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
-                .page(10)
-                .limitRecordsPerPage(33)
-                .numPages(1)
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planBody.getPlanId(), query, statusId, costTypeId, pageable);
+
+        // Response
+        ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (expenses != null) {
+
+            // Count total record
+            count = planService.countDistinctListExpenseWithPaginate(query, planBody.getPlanId(), statusId, costTypeId);
+
+            // Mapping to TermPaginateResponse
+            expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        System.out.println("count = " + count);
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listPaginationResponse);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/detail")

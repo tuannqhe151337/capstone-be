@@ -55,7 +55,7 @@ public class ReportController {
                         .notes("Approximate")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(2L)
@@ -70,7 +70,7 @@ public class ReportController {
                         .pic("HongHD9")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(2L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(3L)
@@ -85,7 +85,7 @@ public class ReportController {
                         .pic("TuanVV")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build()
         ));
 

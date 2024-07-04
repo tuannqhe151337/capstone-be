@@ -3,6 +3,7 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
@@ -19,7 +20,6 @@ import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -211,5 +211,37 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    @Transactional
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        FinancialPlan plan = planRepository.getReferenceById(planId);
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Checkout role, accountant can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+
+                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+
+                // But financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())
+                    && userDetail.getDepartmentId() == plan.getDepartment().getId()) {
+
+                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
+        return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
     }
 }
