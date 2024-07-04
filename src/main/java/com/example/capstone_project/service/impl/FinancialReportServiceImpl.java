@@ -6,6 +6,8 @@ import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.FinancialReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
@@ -61,6 +63,33 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
 
         return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+    }
+
+    @Override
+    public ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return financialReportRepository.getFinancialReportById(reportId);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
+
+                // Check department
+                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
+                    return planResult;
+                }
+            }
+        }
+        return null;
     }
 
     @Override

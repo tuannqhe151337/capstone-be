@@ -1,15 +1,20 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
+import com.example.capstone_project.controller.body.report.detail.ReportDetailBody;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
-import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
+import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.report.ReportPaginateResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.report.list.DepartmentResponse;
 import com.example.capstone_project.controller.responses.report.list.ReportResponse;
-import com.example.capstone_project.controller.responses.report.list.StatusResponse;
-import com.example.capstone_project.controller.responses.report.list.TermResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -173,6 +175,28 @@ public class ReportController {
                 .limitRecordsPerPage(sizeInt)
                 .numPages(numPages)
                 .build());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ReportDetailResponse> getReportDetail(
+            @RequestBody ReportDetailBody reportDetailBody
+    ) throws Exception {
+
+        // Get data
+        ReportDetailResult report = reportService.getReportDetailByReportId(reportDetailBody.getReportId());
+
+        // Response
+        ReportDetailResponse response;
+
+        if (report != null) {
+            // Mapping to PlanDetail Response
+            response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
 
         return ResponseEntity.ok(response);
     }

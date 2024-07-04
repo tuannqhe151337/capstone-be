@@ -39,7 +39,8 @@ public class SeedConfiguration {
             FinancialPlanFileRepository financialPlanFileRepository,
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
-            FinancialReportRepository financialReportRepository
+            FinancialReportRepository financialReportRepository,
+            FinancialReportExpenseRepository financialReportExpenseRepository
     ) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
@@ -932,6 +933,7 @@ public class SeedConfiguration {
                     .status(planStatus1)
                     .department(accountingDepartment)
                     .term(term1)
+                    .user(user1)
                     .build();
 
             FinancialReport report2 = FinancialReport.builder()
@@ -941,6 +943,7 @@ public class SeedConfiguration {
                     .status(planStatus2)
                     .department(accountingDepartment)
                     .term(term2)
+                    .user(user2)
                     .build();
 
             FinancialReport report3 = FinancialReport.builder()
@@ -950,6 +953,7 @@ public class SeedConfiguration {
                     .status(planStatus1)
                     .department(softwareDevelopmentDepartment)
                     .term(term1)
+                    .user(user1)
                     .build();
 
             FinancialReport report4 = FinancialReport.builder()
@@ -959,6 +963,7 @@ public class SeedConfiguration {
                     .status(planStatus4)
                     .department(accountingDepartment)
                     .term(term1)
+                    .user(user3)
                     .build();
 
             FinancialReport report5 = FinancialReport.builder()
@@ -968,6 +973,7 @@ public class SeedConfiguration {
                     .status(planStatus2)
                     .department(accountingDepartment)
                     .term(term3)
+                    .user(user4)
                     .build();
 
             FinancialReport report6 = FinancialReport.builder()
@@ -977,9 +983,65 @@ public class SeedConfiguration {
                     .status(planStatus2)
                     .department(softwareDevelopmentDepartment)
                     .term(term2)
+                    .user(user1)
                     .build();
 
             financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
+
+            // Get 15 random expense
+            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
+            projectNameChar = 'A';
+            supplierNameChar = 'A';
+
+            for (int i = 1; i <= 15; i++) {
+                int randomStatusIndex = random.nextInt(4) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomReportIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(pics.length);
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 3 -> expenseStatus3;
+                    case 4 -> expenseStatus4;
+                    default -> expenseStatus3; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                FinancialReport randomReport = switch (randomReportIndex) {
+                    case 1 -> report1;
+                    case 2 -> report2;
+                    case 3 -> report3;
+                    case 4 -> report4;
+                    case 5 -> report5;
+                    case 6 -> report6;
+                    default -> report1; // Default case, should never be reached
+                };
+
+                FinancialReportExpense expense = FinancialReportExpense.builder()
+                        .name("Expense " + projectNameChar)
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
+                        .amount(random.nextInt(10) + 1)
+                        .financialReport(randomReport)
+                        .projectName("Project name " + projectNameChar++)
+                        .supplierName("Supplier name " + supplierNameChar++)
+                        .pic(pics[randomPicIndex])
+                        .costType(randomCostType)
+                        .status(randomExpenseStatus)
+                        .build();
+
+                reportExpenseList.add(expense);
+            }
+
+            financialReportExpenseRepository.saveAll(reportExpenseList);
+
         };
     }
 }
