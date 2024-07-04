@@ -63,9 +63,9 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
-        }else{
+        } else {
             return term;
         }
 
