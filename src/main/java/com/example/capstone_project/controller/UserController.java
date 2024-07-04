@@ -8,12 +8,15 @@ import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPa
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.entity.UserSetting;
+import com.example.capstone_project.repository.UserSettingRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -45,6 +48,7 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
+    private final UserSettingRepository userSettingRepository;
     private final JwtHelper jwtHelper;
 
     @GetMapping
@@ -202,15 +206,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body("Change password success");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
     }
+
     @PostMapping("/auth/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         return ResponseEntity.status(HttpStatus.OK).body("reset password success");
     }
+
     @PostMapping("/auth/forgot-password")
     public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
@@ -221,8 +227,15 @@ public class UserController {
 
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
-            //return  Token  user:dnfpajsdfhp...:id, 6.
+        //return  Token  user:dnfpajsdfhp...:id, 6.
         String token = jwtHelper.genBlankTokenOtp();
         return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
+
+    @PutMapping("/user-setting/update")
+    public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
+        userService.updateUserSetting(updateUserSettingBody);
+        return ResponseEntity.status(HttpStatus.OK).body("Update user setting success");
+
     }
 }
