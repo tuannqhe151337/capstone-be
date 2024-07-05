@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRepository {
 
@@ -51,4 +52,9 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
 
     @Override
     boolean existsById(Long aLong);
+
+
+
+
+
 }

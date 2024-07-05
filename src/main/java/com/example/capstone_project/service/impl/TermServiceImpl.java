@@ -136,6 +136,13 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
+        term.setStatus(termStatus);
+        termRepository.save(term);
+    }
+
+    @Override
     public void createTerm(Term term) throws Exception {
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
