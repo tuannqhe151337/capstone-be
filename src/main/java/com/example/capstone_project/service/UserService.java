@@ -32,9 +32,9 @@ public interface UserService {
 
     void changePassword(ChangePasswordBody changePasswordBody);
 
-    void resetPassword(ResetPasswordBody resetPasswordBody);
-
     void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
+
+    void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
 
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
 

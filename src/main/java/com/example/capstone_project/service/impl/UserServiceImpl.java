@@ -269,12 +269,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordBody resetPasswordBody) {
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
         //get new password
-
-        //get id from header to find that uswe
-
-        //update new password encoded
+        String newPassword = resetPasswordBody.getNewPassword();
+        //get id from header to find that user
+        String userId = userIdTokenRepository.find(authHeader);
+        Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User does not exist");
+        } else {
+            //update new password encoded
+            user.get().setPassword(this.passwordEncoder.encode(newPassword));
+        }
+        userRepository.save(user.get());
     }
 
     @Override
