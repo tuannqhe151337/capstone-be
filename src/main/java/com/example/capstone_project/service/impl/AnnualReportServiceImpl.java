@@ -23,19 +23,19 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     private final AnnualReportRepository annualReportRepository;
 
     @Override
-    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable) {
+    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable, String year) {
         // Get list authorities of this user
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            return annualReportRepository.getListAnnualReportPaging(pageable);
+            return annualReportRepository.getListAnnualReportPaging(pageable, year);
         }
         return null;
     }
 
     @Override
-    public long countDistinctListAnnualReportPaging() {
-        return annualReportRepository.countDistinctListAnnualReportPaging();
+    public long countDistinctListAnnualReportPaging(String year) {
+        return annualReportRepository.countDistinctListAnnualReportPaging(year);
     }
 
     @Override
