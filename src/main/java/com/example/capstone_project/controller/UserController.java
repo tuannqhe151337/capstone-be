@@ -56,6 +56,9 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
+            @RequestParam(name = "roleId", required = false) Long roleId,
+            @RequestParam(name = "departmentId", required = false) Long departmentId,
+            @RequestParam(name = "positionId", required = false) Long positionId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -75,9 +78,8 @@ public class UserController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
+        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
 
         // Response
         ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
@@ -215,7 +217,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader,@RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
             return ResponseEntity.status(HttpStatus.OK).body("reset password success");
@@ -228,7 +230,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/forgot-password")
-    public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+    public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         String token = null;
         try {
