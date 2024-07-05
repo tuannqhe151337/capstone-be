@@ -615,8 +615,8 @@ public class SeedConfiguration {
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2024, 7, 2, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
                     .status(termStatus)
                     .build();
@@ -625,8 +625,8 @@ public class SeedConfiguration {
                     .id(2L)
                     .name("Summer 2024")
                     .duration(TermDuration.QUARTERLY)
-                    .startDate(LocalDateTime.of(2024, 6, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 7, 2, 23, 59))
+                    .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
                     .user(user1)
                     .status(termStatus2)
@@ -637,7 +637,7 @@ public class SeedConfiguration {
                     .name("Fall 2024")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 7, 2, 23, 59))
+                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
                     .user(user2)
                     .status(termStatus2)
@@ -647,7 +647,7 @@ public class SeedConfiguration {
                     .id(4L)
                     .name("Winter 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.of(2024, 7, 2, 0, 0))
+                    .startDate(LocalDateTime.of(2025, 7, 2, 0, 0))
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
                     .user(user3)
@@ -1046,48 +1046,48 @@ public class SeedConfiguration {
 
 
             AnnualReport annualReport1 = AnnualReport.builder()
-                    .year(2019)
+                    .year(2020)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(1232212125))
                     .totalDepartment(18)
                     .build();
 
             AnnualReport annualReport2 = AnnualReport.builder()
-                    .year(2020)
+                    .year(2021)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(461321564))
                     .totalDepartment(11)
                     .build();
 
             AnnualReport annualReport3 = AnnualReport.builder()
-                    .year(2021)
+                    .year(2022)
                     .totalTerm(22)
                     .totalExpense(BigDecimal.valueOf(1231313213))
                     .totalDepartment(8)
                     .build();
 
             AnnualReport annualReport4 = AnnualReport.builder()
-                    .year(2022)
+                    .year(2023)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(905135545))
                     .totalDepartment(9)
                     .build();
 
-            AnnualReport annualReport5 = AnnualReport.builder()
-                    .year(2023)
-                    .totalTerm(9)
-                    .totalExpense(BigDecimal.valueOf(843513112))
-                    .totalDepartment(18)
-                    .build();
+//            AnnualReport annualReport5 = AnnualReport.builder()
+//                    .year(2024)
+//                    .totalTerm(9)
+//                    .totalExpense(BigDecimal.valueOf(843513112))
+//                    .totalDepartment(18)
+//                    .build();
 
             AnnualReport annualReport6 = AnnualReport.builder()
-                    .year(2024)
+                    .year(2025)
                     .totalTerm(6)
                     .totalExpense(BigDecimal.valueOf(354564895))
                     .totalDepartment(12)
                     .build();
 
-            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport5, annualReport6));
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport6));
 
             List<Report> reports = new ArrayList<>();
             random = new Random();
@@ -1104,7 +1104,6 @@ public class SeedConfiguration {
                     case 2 -> annualReport2;
                     case 3 -> annualReport3;
                     case 4 -> annualReport4;
-                    case 5 -> annualReport5;
                     case 6 -> annualReport6;
                     default -> annualReport1; // Default case, should never be reached
                 };

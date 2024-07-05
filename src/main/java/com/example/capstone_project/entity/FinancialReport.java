@@ -2,8 +2,6 @@ package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +31,7 @@ public class FinancialReport extends BaseEntity {
     @JoinColumn(name = "status_id")
     private PlanStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
     @JoinColumn(name = "department_id")
     private Department department;
 
