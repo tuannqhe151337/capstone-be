@@ -76,6 +76,7 @@ public class AnnualReportController {
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
+            @RequestParam(required = false) String year,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
@@ -85,12 +86,15 @@ public class AnnualReportController {
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
+        if (year == null) {
+            year = "";
+        }
 
         // Handling pagination
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable);
+        List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable, year);
 
         // Response
         ListPaginationResponse<AnnualReportResponse> response = new ListPaginationResponse<>();
@@ -100,7 +104,7 @@ public class AnnualReportController {
         if (annualReports != null) {
 
             // Count total record
-            count = annualReportService.countDistinctListAnnualReportPaging();
+            count = annualReportService.countDistinctListAnnualReportPaging(year);
 
             // Mapping to TermPaginateResponse
             annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));

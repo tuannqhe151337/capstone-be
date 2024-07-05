@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long>, CustomAnnualReportRepository {
     @Query(value = "SELECT count( distinct(annualReport)) FROM AnnualReport annualReport " +
-            " WHERE annualReport.isDelete = false ")
-    long countDistinctListAnnualReportPaging();
+            " WHERE annualReport.year = :year AND " +
+            " annualReport.isDelete = false ")
+    long countDistinctListAnnualReportPaging(String year);
 }
