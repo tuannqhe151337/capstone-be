@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.user.changePassword.ChangePa
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
@@ -33,9 +34,9 @@ public interface UserService {
 
     void resetPassword(ResetPasswordBody resetPasswordBody);
 
-    String otpValidate(String otp) throws Exception;
-
     void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
 
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
+
+    String otpValidate(OTPBody otp, String authHeader) throws Exception;
 }

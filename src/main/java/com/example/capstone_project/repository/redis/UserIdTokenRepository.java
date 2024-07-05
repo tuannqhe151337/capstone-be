@@ -21,8 +21,8 @@ public class UserIdTokenRepository {
         this.template.opsForValue().set(this.USER_ID+ ":otp-token:" + blankToken, String.valueOf(userId), expiredTime);
     }
 
-    public Boolean find(String accessToken) {
-        return Boolean.parseBoolean(this.template.opsForValue().get(this.USER_ID + accessToken));
+    public String find(String blankToken) {
+        return this.template.opsForValue().get(this.USER_ID+ ":otp-token:" + blankToken);
     }
 
     public void delete(String accessToken) {
