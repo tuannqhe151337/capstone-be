@@ -200,7 +200,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId() + " success");
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PostMapping("/change-password")
