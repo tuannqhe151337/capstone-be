@@ -18,7 +18,7 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
     @Override
     public List<AnnualReport> getListAnnualReportPaging(Pageable pageable, String year) {
         String hql = "SELECT annualReport FROM AnnualReport annualReport " +
-                " WHERE annualReport.year = :year AND " +
+                " WHERE (annualReport.year = :year OR :year IS NULL) AND " +
                 " annualReport.isDelete = false OR annualReport.isDelete is null " +
                 " ORDER BY ";
 
