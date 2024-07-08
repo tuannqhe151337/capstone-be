@@ -26,4 +26,6 @@ public interface TermService {
     void deleteTerm(Long id) throws Exception;
 
     void startTermManually(Long termId) throws Exception;
+
+    void updateTermStatus(Term term, Long statusId) throws Exception;
 }

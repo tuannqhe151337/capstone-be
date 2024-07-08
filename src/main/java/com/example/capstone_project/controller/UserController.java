@@ -35,6 +35,7 @@ import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMappe
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,9 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
+            @RequestParam(name = "roleId", required = false) Long roleId,
+            @RequestParam(name = "departmentId", required = false) Long departmentId,
+            @RequestParam(name = "positionId", required = false) Long positionId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -74,9 +78,8 @@ public class UserController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
+        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
 
         // Response
         ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
@@ -214,8 +217,16 @@ public class UserController {
     }
 
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+        try {
+            userService.resetPassword(authHeader, resetPasswordBody);
+            return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
     }
 
     @PostMapping("/auth/forgot-password")
@@ -232,17 +243,28 @@ public class UserController {
         }
 
     }
+
     @PostMapping("/auth/otp")
-    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("otp-token") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
         //return  Token  user:dnfpajsdfhp...:id, 6.
-        String token = jwtHelper.genBlankTokenOtp();
-        return ResponseEntity.status(HttpStatus.OK).body(token);
+        try {
+            String token = userService.otpValidate(otpBody, authHeader);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
+        } catch (InvalidDataAccessResourceUsageException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
     }
 
     @PutMapping("/user-setting/update")
     public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
         userService.updateUserSetting(updateUserSettingBody);
         return ResponseEntity.status(HttpStatus.OK).body("Update user setting success");
-
     }
 }

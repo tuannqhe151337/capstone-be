@@ -14,7 +14,8 @@ import java.util.List;
 @Table(schema = "capstone_v2",name = "terms")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class Term extends BaseEntity{

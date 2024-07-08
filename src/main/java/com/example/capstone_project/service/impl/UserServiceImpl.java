@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.user.changePassword.ChangePa
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
@@ -27,6 +28,7 @@ import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.passay.CharacterData;
@@ -67,14 +69,8 @@ public class UserServiceImpl implements UserService {
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
 
-    @Value("${application.security.blank-token-email.secret-key}")
-    private String BLANK_TOKEN_EMAIL_SECRET_KEY;
-
     @Value("${application.security.blank-token-email.expiration}")
     private String BLANK_TOKEN_EMAIL_EXPIRATION;
-
-    @Value("${application.security.blank-token-otp.secret-key}")
-    private String BLANK_TOKEN_OTP_SECRET_KEY;
 
     @Value("${application.security.blank-token-otp.expiration}")
     private String BLANK_TOKEN_OTP_EXPIRATION;
@@ -82,12 +78,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers(
-            String query,
-            Pageable pageable) {
+            Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
-            return userRepository.getUserWithPagination(query, pageable);
+            return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
         }
 
         return null;
@@ -208,26 +203,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String otpValidate(String otp) throws Exception {
+    public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
         //get token from redis by id from header
+        if (authHeaderToken == null) {
+            throw new DataIntegrityViolationException("Invalid token");
+        }
+        //compare otp
+        //get userid
+        String userId = otpTokenRepository.getUserID(authHeaderToken);
 
-
-        //compare token
-
-
+        if (userId == null) {
+            throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
+        }
+        //get otp
+        String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, Long.parseLong(userId));
+        //compare
+        if (!savedOtp.equals(otp.getOtp())) {
+            throw new UnauthorizedException("Invalid OTP");
+        }
         //gen new token
+        String newTokenForUserId = jwtHelper.genBlankTokenOtp();
 
         //save token with id
-
+        userIdTokenRepository.save(newTokenForUserId, Long.parseLong(userId), Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
 
         //return token
-        return null;
+        return newTokenForUserId;
     }
 
     @Override
     public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
-
-
         //email
         String email = forgetPasswordEmailBody.getEmail();
         //get user by email
@@ -255,6 +260,7 @@ public class UserServiceImpl implements UserService {
         return token;
     }
 
+
     private int generateOTP() {
         Random random = new Random();
         int OTP = 100000 + random.nextInt(900000);
@@ -262,12 +268,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordBody resetPasswordBody) {
+    public long countDistinct(String query, Long roleId, Long departmentId, Long positionId) {
+        return userRepository.countDistinct(roleId, departmentId, positionId, query);
+    }
+
+    @Override
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
         //get new password
-
-        //get id from header to find that uswe
-
-        //update new password encoded
+        String newPassword = resetPasswordBody.getNewPassword();
+        //get id from header to find that user
+        String userId = userIdTokenRepository.find(authHeader);
+        Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User does not exist");
+        } else {
+            //update new password encoded
+            user.get().setPassword(this.passwordEncoder.encode(newPassword));
+        }
+        userRepository.save(user.get());
     }
 
     @Override

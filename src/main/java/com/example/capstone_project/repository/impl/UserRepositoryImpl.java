@@ -23,15 +23,19 @@ public class UserRepositoryImpl implements CustomUserRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<User> getUserWithPagination(String query, Pageable pageable) {
+    public List<User> getUserWithPagination(Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
         // HQL query
         String hql = "select user from User user " +
                 "left join user.role " +
                 "left join user.department " +
                 "left join user.position " +
-                "where user.username like :query " +
+                "where user.username like :query AND" +
+                " (:roleId IS NULL OR user.role.id = :roleId) AND " +
+                " (:departmentId IS NULL OR user.department.id = :departmentId) AND " +
+                " (:positionId IS NULL OR user.position.id = :positionId) " +
 //                "and user.isDelete = false " + // We actually want to get all deactivated users as well
-                "order by ";
+                "ORDER BY ";
+
 
         // Handling sort by and sort type
         List<Sort.Order> sortOrderList = pageable.getSort().get().toList();
@@ -66,6 +70,9 @@ public class UserRepositoryImpl implements CustomUserRepository {
         // Run query
         return entityManager.createQuery(hql, User.class)
                 .setParameter("query", "%" + query + "%")
+                .setParameter("roleId", roleId)
+                .setParameter("departmentId", departmentId)
+                .setParameter("positionId", positionId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)

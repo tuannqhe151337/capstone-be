@@ -43,6 +43,18 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
     long countDistinct(String query);
 
+    @Query(value = "select count(distinct(user.id)) from User user " +
+            "where user.username like %:query% AND "+
+            " (:roleId IS NULL OR user.role.id = :roleId) AND " +
+            " (:departmentId IS NULL OR user.department.id = :departmentId) AND " +
+            " (:positionId IS NULL OR user.position.id = :positionId)")
+    long countDistinct(@Param("roleId") Long roleId,
+                       @Param("departmentId") Long departmentId,
+                       @Param("positionId") Long positionId,
+                       @Param("query") String query);
+
+
+
     Optional<User> findUserByEmail(String email);
 
     @Query(value = "SELECT user.username FROM User user" +

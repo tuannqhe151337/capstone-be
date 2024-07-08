@@ -16,9 +16,10 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
     private EntityManager entityManager;
 
     @Override
-    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable) {
+    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable, String year) {
         String hql = "SELECT annualReport FROM AnnualReport annualReport " +
-                " WHERE annualReport.isDelete = false OR annualReport.isDelete is null " +
+                " WHERE annualReport.year = :year AND " +
+                " annualReport.isDelete = false OR annualReport.isDelete is null " +
                 " ORDER BY ";
 
         // Handling sort by and sort type
@@ -51,6 +52,7 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
         }
 
         return entityManager.createQuery(hql, AnnualReport.class)
+                .setParameter("year",year)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
