@@ -105,7 +105,7 @@ public class UserRepositoryImpl implements CustomUserRepository {
         }
 
         criteriaUpdate.set(userRoot.get(User_.PHONE_NUMBER), user.getPhoneNumber());
-        criteriaUpdate.set(userRoot.get(User_.ADDRESS), user.getPhoneNumber());
+        criteriaUpdate.set(userRoot.get(User_.ADDRESS), user.getAddress());
 
         if (!option.isIgnorePosition()) {
             criteriaUpdate.set(userRoot.get(User_.POSITION), user.getPosition());
