@@ -86,10 +86,6 @@ public class AnnualReportController {
         Integer pageInt = PaginationHelper.convertPageToInteger(page);
         Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        if (year == null) {
-            year = "";
-        }
-
         // Handling pagination
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
