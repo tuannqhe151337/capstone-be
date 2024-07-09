@@ -42,7 +42,7 @@ public class ReportController {
 
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
-            @RequestBody ReportExpensesBody reportBody,
+            @RequestParam(required = true) Long reportId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -63,7 +63,7 @@ public class ReportController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<FinancialReportExpense> expenses = reportService.getListExpenseWithPaginate(reportBody.getReportId(), query, statusId, costTypeId, pageable);
+        List<FinancialReportExpense> expenses = reportService.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
 
         // Response
         ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
@@ -73,7 +73,7 @@ public class ReportController {
         if (expenses != null) {
 
             // Count total record
-            count = reportService.countDistinctListExpenseWithPaginate(query, reportBody.getReportId(), statusId, costTypeId);
+            count = reportService.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
 
             // Mapping to TermPaginateResponse
             expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
