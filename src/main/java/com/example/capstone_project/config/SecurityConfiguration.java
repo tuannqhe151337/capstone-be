@@ -21,7 +21,7 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 class SecurityConfiguration {
-    private static final String[] WHITE_LIST_URL = {"api/healthcheck", "/api/auth/login", "/api/auth/refresh-token", "/api-docs", "/swagger-ui-custom.html", "/swagger-ui/*"};
+    private static final String[] WHITE_LIST_URL =  {"/api/user/auth/reset-password","/api/user/auth/otp","/api/user/auth/forgot-password","api/healthcheck", "/api/auth/login", "/api/auth/refresh-token", "/api-docs", "/swagger-ui-custom.html", "/swagger-ui/*"};
 
     private final JwtTokenFilter jwtTokenFilter;
 

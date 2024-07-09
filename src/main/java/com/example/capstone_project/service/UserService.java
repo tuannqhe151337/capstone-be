@@ -3,6 +3,7 @@ package com.example.capstone_project.service;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +29,6 @@ public interface UserService {
     void deactivateUser(DeactiveUserBody deactiveUserBody);
 
     void changePassword(ChangePasswordBody changePasswordBody);
+    void resetPassword(ResetPasswordBody resetPasswordBody);
+    String otpValidate(String otp) throws Exception;
 }
