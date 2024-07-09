@@ -149,7 +149,7 @@ public class AnnualReportController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<AnnualReportResponse> getAnnualReportDiagram(
+    public ResponseEntity<AnnualReportResponse> getAnnualReportDetail(
             @RequestParam(required = true) Long annualReportId
     ) {
         // Get data
