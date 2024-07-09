@@ -175,11 +175,11 @@ public class ReportController {
 
     @GetMapping("/detail")
     public ResponseEntity<ReportDetailResponse> getReportDetail(
-            @RequestBody ReportDetailBody reportDetailBody
+            @RequestParam Long reportId
     ) throws Exception {
 
         // Get data
-        ReportDetailResult report = reportService.getReportDetailByReportId(reportDetailBody.getReportId());
+        ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
 
         // Response
         ReportDetailResponse response;
