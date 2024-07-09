@@ -44,7 +44,7 @@ public class TermServiceImpl implements TermService {
     private final TermStatusRepository termStatusRepository;
 
     @Override
-    public long countDistinct(String query) throws Exception {
+    public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
@@ -145,4 +145,21 @@ public class TermServiceImpl implements TermService {
 
     }
 
+    @Override
+    public List<Term> getListTermPaging(String query, Pageable pageable) {
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
+            return termRepository.getListTermPaging(query, pageable);
+
+        }
+
+        return null;
+    }
+
+    @Override
+    public long countDistinctListTermPaging(String query) {
+        return termRepository.countDistinctListTermPaging(query);
+    }
 }

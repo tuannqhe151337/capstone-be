@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class TermPaginateResponse {
-    private long termId;
+    private Long termId;
     private String name;
     private StatusResponse status;
     private LocalDateTime startDate;
