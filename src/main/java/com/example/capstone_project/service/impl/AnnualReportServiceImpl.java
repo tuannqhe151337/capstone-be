@@ -53,7 +53,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId) {
-        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId,costTypeId,departmentId);
+        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
     }
 
     @Override
@@ -62,6 +62,17 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
             return annualReportRepository.getAnnualReportCostTypeDiagram(annualReportId);
+        }
+        return null;
+
+    }
+
+    @Override
+    public AnnualReport getAnnualReportDetail(Long annualReportBody) {
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            return annualReportRepository.getReferenceById(annualReportBody);
         }
         return null;
 
