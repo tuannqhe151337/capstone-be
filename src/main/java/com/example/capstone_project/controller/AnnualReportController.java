@@ -129,10 +129,10 @@ public class AnnualReportController {
 
     @GetMapping("/diagram")
     public ResponseEntity<ListResponse<CostTypeDiagramResponse>> getAnnualReportDiagram(
-            @Validated @RequestBody AnnualReportExpenseBody annualReportBody
+            @RequestParam(required = true) Long annualReportId
     ) {
         // Get data
-        List<CostTypeDiagramResult> costTypeDiagrams = annualReportService.getAnnualReportCostTypeDiagram(annualReportBody.getAnnualReportId());
+        List<CostTypeDiagramResult> costTypeDiagrams = annualReportService.getAnnualReportCostTypeDiagram(annualReportId);
 
         // Response
         ListResponse<CostTypeDiagramResponse> response = new ListResponse<>();
