@@ -147,4 +147,25 @@ public class AnnualReportController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/detail")
+    public ResponseEntity<AnnualReportResponse> getAnnualReportDiagram(
+            @RequestParam(required = true) Long annualReportId
+    ) {
+        // Get data
+        AnnualReport annualReport = annualReportService.getAnnualReportDetail(annualReportId);
+
+        // Response
+        AnnualReportResponse response = null;
+
+        if (annualReport != null) {
+
+            response = new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        return ResponseEntity.ok(response);
+    }
 }
