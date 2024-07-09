@@ -32,7 +32,7 @@ public class AnnualReportController {
 
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense(
-            @Validated @RequestBody AnnualReportExpenseBody annualReportBody,
+            @RequestParam(required = true) Long annualReportId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) String page,
@@ -49,7 +49,7 @@ public class AnnualReportController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportBody.getAnnualReportId(), costTypeId, departmentId, pageable);
+        List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
 
         // Response
         ListPaginationResponse<AnnualReportExpenseResponse> response = new ListPaginationResponse<>();
@@ -59,7 +59,7 @@ public class AnnualReportController {
         if (reports != null) {
 
             // Count total record
-            count = annualReportService.countDistinctListExpenseWithPaginate(annualReportBody.getAnnualReportId(), costTypeId, departmentId);
+            count = annualReportService.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
 
             // Mapping to TermPaginateResponse
             reports.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
