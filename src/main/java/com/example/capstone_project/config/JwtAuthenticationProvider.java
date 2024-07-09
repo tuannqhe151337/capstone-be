@@ -32,7 +32,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         final String password = authentication.getCredentials().toString();
 
         // Check if user exists in the database
-        Optional<User> optionalUser = this.userRepository.findUserByUsername(username);
+        Optional<User> optionalUser = this.userRepository.findActiveUserByUsername(username);
         if (optionalUser.isEmpty()) {
             return null;
         }
