@@ -13,5 +13,6 @@ public interface DetailUserResponseMapper {
     @Mapping(source = "user.role.id", target = "role.id")
     @Mapping(source = "user.role.code", target = "role.code")
     @Mapping(source = "user.role.name", target = "role.name")
+    @Mapping(source = "user.dob", target = "dob")
     UserDetailResponse mapToUserDetail(User user);
 }
