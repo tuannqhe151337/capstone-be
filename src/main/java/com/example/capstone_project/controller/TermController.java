@@ -196,7 +196,7 @@ public class TermController {
         Term term = new CreateTermBodyToTermEntityMapperImpl().mapCreateTermBodyToTermEntity(createTermBody);
         try {
             termService.createTerm(term);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Create successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
                     .builder().field("Authorization").message(e.getMessage())
