@@ -239,7 +239,7 @@ public class TermController {
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
         try {
             termService.deleteTerm(deleteTermBody.getId());
-            return ResponseEntity.status(HttpStatus.OK).body("Deleted successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
