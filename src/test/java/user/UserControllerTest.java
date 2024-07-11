@@ -2,19 +2,25 @@ package user;
 
 import java.time.LocalDateTime;
 
-
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.example.capstone_project.config.JacksonConfig;
 import com.example.capstone_project.controller.UserController;
+import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+
+import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -46,8 +54,7 @@ public class UserControllerTest {
     private UserController userController;
 
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper();
 
 
     private Long userId;
@@ -58,11 +65,15 @@ public class UserControllerTest {
     private Position position;
     private Department department;
     private Role role;
+    @MockBean
+    private CreateUserBodyMapperImpl createUserBodyMapper = new CreateUserBodyMapperImpl();
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+
+
         userId = 1L;
         actorId = 2L;
 
@@ -148,5 +159,71 @@ public class UserControllerTest {
     }
 
     //create user test
+    @Test
+    public void testCreateUser_Success() throws Exception {
+
+        // Mock user input
+        CreateUserBody userBody = new CreateUserBody();
+        userBody.setFullName("Nutalomlok Nunu");
+        userBody.setPhoneNumber("0990900099");
+        userBody.setEmail("giangdvhe16317888@fpt.edu.vn");
+        userBody.setDepartmentId(1L);
+        userBody.setPositionId(1L);
+        userBody.setRoleId(1L);
+        userBody.setDob(LocalDateTime.of(2002, 11, 11, 0, 0));
+        userBody.setAddress("BAC GIANG");
+
+
+        String content = objectMapper.writeValueAsString(userBody); //object to json
+
+
+        // Mock UserService behavior
+        doNothing().when(userServiceImpl).createUser(any(User.class));
+
+        // Perform POST request
+        mockMvc.perform(MockMvcRequestBuilders.post("http://localhost:8080/api/user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))  //Json
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().string(""));
+    }
+
+    @Test
+    public void testCreateUser_Unauthorized() throws Exception {
+        // Mock user input
+        CreateUserBody userBody = new CreateUserBody();
+        // Mock UserService behavior
+        doNothing().when(userServiceImpl).createUser(any(User.class));
+        // Mocking the service method to throw exception
+        doThrow(new UnauthorizedException("Unauthorized")).when(userServiceImpl).createUser(any(User.class));
+
+
+        mockMvc.perform(MockMvcRequestBuilders.post("http://localhost:8080/api/user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userBody)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testCreateUser_EmailAlreadyExists() throws Exception {
+        // Mock user input
+        CreateUserBody userBody = new CreateUserBody();
+
+        // Mock UserService behavior
+        doNothing().when(userServiceImpl).createUser(any(User.class));
+
+        // Mocking the service method to throw exception
+        doThrow(new DataIntegrityViolationException("Email already exists")).when(userServiceImpl).createUser(any(User.class));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("http://localhost:8080/api/user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.field").value("email"))
+                .andExpect(jsonPath("$.message").value("emails already exists"));
+    }
 
 }
+
+
+
