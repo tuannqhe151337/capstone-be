@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.start.StartTermBody;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
@@ -353,10 +354,10 @@ public class TermController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/start/{id}")
-    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+    @PostMapping("/start")
+    public ResponseEntity<Object> startTermManually(@Valid @RequestBody StartTermBody startTermBody, BindingResult result) {
         try {
-            termService.startTermManually(termId);
+            termService.startTermManually(startTermBody.getTermId());
             return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
