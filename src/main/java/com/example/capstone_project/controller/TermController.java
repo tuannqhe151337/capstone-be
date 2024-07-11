@@ -358,7 +358,7 @@ public class TermController {
     public ResponseEntity<Object> startTermManually(@Valid @RequestBody StartTermBody startTermBody, BindingResult result) {
         try {
             termService.startTermManually(startTermBody.getTermId());
-            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
