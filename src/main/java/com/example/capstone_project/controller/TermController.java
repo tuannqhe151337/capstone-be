@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.start.StartTermBody;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
@@ -238,7 +239,7 @@ public class TermController {
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
         try {
             termService.deleteTerm(deleteTermBody.getId());
-            return ResponseEntity.status(HttpStatus.OK).body("Deleted successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
@@ -353,11 +354,11 @@ public class TermController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/start/{id}")
-    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+    @PostMapping("/start")
+    public ResponseEntity<Object> startTermManually(@Valid @RequestBody StartTermBody startTermBody, BindingResult result) {
         try {
-            termService.startTermManually(termId);
-            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+            termService.startTermManually(startTermBody.getTermId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
