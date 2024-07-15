@@ -1,6 +1,7 @@
 package user;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,8 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.capstone_project.config.JacksonConfig;
 import com.example.capstone_project.controller.UserController;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.responses.plan.UserResponse;
+
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
+import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -23,9 +25,6 @@ import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseM
 
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -254,9 +253,15 @@ public class UserControllerTest {
 
         when(userServiceImpl.getAllUsers(anyString(), any(Pageable.class)))
                 .thenReturn(userList);
-
+        List<UserResponse> userResponseList = new ArrayList<>();
+        if (!userList.isEmpty()) {
+            for (User user : userList) {
+                //mapperToUserResponse
+                userResponseList.add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+            }
+        }
         when(userServiceImpl.countDistinct(anyString()))
-                .thenReturn((long) userList.size());
+                .thenReturn((long) userResponseList.size());
 
         // Perform the GET request
         mockMvc.perform(MockMvcRequestBuilders.get("http://localhost:8080/api/user")
