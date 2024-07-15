@@ -1,4 +1,5 @@
-package com.example.capstone_project.controller.body.plan.detail;
+package com.example.capstone_project.controller.body.plan.download;
+
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PlanDetailBody {
-    @NotNull(message = "Plan Id can't be empty")
-    private Long planId;
+public class PlanDownloadBody {
+    @NotNull(message = "File Id can't be empty")
+    private Long fileId;
 }
+
