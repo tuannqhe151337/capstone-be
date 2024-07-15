@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
+import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -32,7 +33,9 @@ import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImp
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -186,7 +189,7 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestBody PlanDetailBody  planDetailBody
+            @RequestBody PlanDetailBody planDetailBody
     ) throws Exception {
 
         // Get data
@@ -197,8 +200,8 @@ public class FinancialPlanController {
 
         if (plan != null) {
             // Mapping to PlanDetail Response
-                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
+            response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+            response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -206,51 +209,44 @@ public class FinancialPlanController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/download")
+    @PostMapping("/download/xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @RequestParam Integer planId
+            @Valid @RequestBody PlanDownloadBody planBody
     ) throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
 
-        Sheet sheet = wb.getSheet("Expense");
+        /// Get data for file Excel
+        byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
-        String[][] tableData = {
-                {"Code Expense 1", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
-                {"Code Expense 2", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
-                {"Code Expense 3", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
-                {"Code Expense 4", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
-        };
+            return createExcelFileResponseEntity(report, outFileName);
 
-        Row row = null;
-        Cell cell = null;
+        } else {
 
-        int rowPosition = 2;
-        int colPosition = 0;
-
-        for (int i = 0; i < tableData.length; i++) {
-            row = sheet.getRow(i + rowPosition);
-
-            for (int j = 0; j < tableData[0].length; j++) {
-                cell = row.getCell(j + colPosition);
-
-                cell.setCellValue(tableData[i][j]);
-            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
-        byte[] report = out.toByteArray();
-
-        String outFileName = "report.xlsx";
-
-        return createResponseEntity(report, outFileName);
     }
 
-    private ResponseEntity<byte[]> createResponseEntity(
+    @PostMapping("/download/xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody PlanDownloadBody planBody
+    ) throws Exception {
+
+        /// Get data for file Excel
+        byte[] report = planService.getBodyFileExcelXLS(planBody.getFileId());
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateXLSFileName(planBody.getFileId());
+
+            return createExcelFileResponseEntity(report, outFileName);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+
+    private ResponseEntity<byte[]> createExcelFileResponseEntity(
             byte[] report, String fileName) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -356,10 +352,40 @@ public class FinancialPlanController {
         // Save plan
         FinancialPlan savedPlan = planService.creatPlan(plan, term);
 
-        if (savedPlan == null){
+        if (savedPlan == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+    }
+
+    @PostMapping("/download/template/xlsx")
+    public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+        FileInputStream file = new FileInputStream(fileLocation);
+        XSSFWorkbook wb = new XSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
+
+    }
+
+
+    @PostMapping("/download/template/xls")
+    public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+        FileInputStream file = new FileInputStream(fileLocation);
+        HSSFWorkbook wb = new HSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
     }
 }
