@@ -242,7 +242,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getBodyFileExcelXLSX(Long fileId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
-        System.out.println(expenses);
+
         if (expenses != null) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
