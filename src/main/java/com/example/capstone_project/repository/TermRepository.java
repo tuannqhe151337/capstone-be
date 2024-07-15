@@ -31,8 +31,9 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
                                              @Param("now") LocalDateTime now, @Param("departmentId") Long departmentId);
     @Query(value = " SELECT count(distinct (term.id)) FROM Term term " +
             " WHERE term.name like %:query% AND " +
+            ":statusId IS NULL OR term.status.id = :statusId AND " +
             " term.isDelete = false ")
-    long countDistinctListTermPaging(@Param("query") String query);
+    long countDistinctListTermPaging(@Param("statusId") Long statusId, @Param("query") String query);
 
     //crud term
     Term findTermById(Long id);

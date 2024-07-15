@@ -103,12 +103,12 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public List<Term> getListTermPaging(String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
-            return termRepository.getListTermPaging(query, pageable);
+            return termRepository.getListTermPaging(statusId, query, pageable);
 
         }
 
@@ -116,7 +116,7 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public long countDistinctListTermPaging(String query) {
-        return termRepository.countDistinctListTermPaging(query);
+    public long countDistinctListTermPaging(Long statusId, String query) {
+        return termRepository.countDistinctListTermPaging(statusId, query);
     }
 }
