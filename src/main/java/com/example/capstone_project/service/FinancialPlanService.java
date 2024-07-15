@@ -29,7 +29,11 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
+
     byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
 
-    String generateFileName(Long fileId);
+    String generateXLSXFileName(Long fileId);
+
+    String generateXLSFileName(Long fileId);
 }

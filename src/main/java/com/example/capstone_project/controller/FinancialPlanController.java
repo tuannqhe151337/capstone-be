@@ -33,6 +33,7 @@ import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImp
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -207,21 +208,39 @@ public class FinancialPlanController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/download")
+    @PostMapping("/download/xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @RequestBody PlanDownloadBody planBody
+            @Valid @RequestBody PlanDownloadBody planBody
     ) throws Exception {
 
         /// Get data for file Excel
         byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
         if (report != null) {
             // Create file name for file Excel
-            String outFileName = planService.generateFileName(planBody.getFileId());
+            String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
             return createResponseEntity(report, outFileName);
 
         } else {
 
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+
+    @PostMapping("/download/xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody PlanDownloadBody planBody
+    ) throws Exception {
+
+        /// Get data for file Excel
+        byte[] report = planService.getBodyFileExcelXLS(planBody.getFileId());
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateXLSFileName(planBody.getFileId());
+
+            return createResponseEntity(report, outFileName);
+
+        } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }

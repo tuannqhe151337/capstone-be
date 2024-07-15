@@ -18,11 +18,12 @@ import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -222,19 +222,51 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
+    public byte[] getBodyFileExcelXLS(Long fileId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+            FileInputStream file = new FileInputStream(fileLocation);
+            HSSFWorkbook wb = new HSSFWorkbook(file);
+
+            return fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
+
+    @Override
     public byte[] getBodyFileExcelXLSX(Long fileId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
+        System.out.println(expenses);
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+            FileInputStream file = new FileInputStream(fileLocation);
+            XSSFWorkbook wb = new XSSFWorkbook(file);
+
+            return fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
+
+    private List<ExpenseResult> getListExpenseByFileId(Long fileId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
 
-        List<ExpenseResult> expenses = null;
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                expenses = planRepository.getListExpenseByFileId(fileId);
+                return planRepository.getListExpenseByFileId(fileId);
 
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
@@ -242,79 +274,84 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
                 // Check department
                 if (departmentId == userDetail.getDepartmentId()) {
-                    expenses = planRepository.getListExpenseByFileId(fileId);
+                    return planRepository.getListExpenseByFileId(fileId);
                 }
             }
 
         }
-
-        if (expenses != null) {
-
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
-            XSSFWorkbook wb = new XSSFWorkbook(file);
-
-            Sheet sheet = wb.getSheet("Expense");
-
-            String[][] tableData = new String[expenses.size()][14];
-
-            // Convert list expense to matrix
-            for (int i = 0; i < expenses.size(); i++) {
-                ExpenseResult expense = expenses.get(i);
-                tableData[i][0] = expense.getExpenseCode();
-                tableData[i][1] = expense.getDate().toString();
-                tableData[i][2] = expense.getTerm();
-                tableData[i][3] = expense.getDepartment();
-                tableData[i][4] = expense.getExpense();
-                tableData[i][5] = expense.getCostType();
-                tableData[i][6] = expense.getUnitPrice();
-                tableData[i][7] = expense.getAmount();
-                tableData[i][8] = expense.getTotal();
-                tableData[i][9] = expense.getProjectName();
-                tableData[i][10] = expense.getSupplierName();
-                tableData[i][11] = expense.getPic();
-                tableData[i][12] = expense.getNote();
-                tableData[i][13] = expense.getStatus();
-            }
-
-            Row row = null;
-            Cell cell = null;
-
-            int rowPosition = 2;
-            int colPosition = 0;
-
-            for (int i = 0; i < tableData.length; i++) {
-                row = sheet.getRow(i + rowPosition);
-
-                for (int j = 0; j < tableData[0].length; j++) {
-                    cell = row.getCell(j + colPosition);
-
-                    cell.setCellValue(tableData[i][j]);
-                }
-            }
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            wb.write(out);
-            wb.close();
-            out.close();
-
-            return out.toByteArray();
-        }
-
         return null;
     }
 
+    private byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses) throws IOException {
+        Sheet sheet = wb.getSheet("Expense");
+
+        String[][] tableData = new String[expenses.size()][14];
+
+        // Convert list expense to matrix
+        for (int i = 0; i < expenses.size(); i++) {
+            ExpenseResult expense = expenses.get(i);
+            tableData[i][0] = expense.getExpenseCode();
+            tableData[i][1] = expense.getDate().toString();
+            tableData[i][2] = expense.getTerm();
+            tableData[i][3] = expense.getDepartment();
+            tableData[i][4] = expense.getExpense();
+            tableData[i][5] = expense.getCostType();
+            tableData[i][6] = expense.getUnitPrice();
+            tableData[i][7] = expense.getAmount();
+            tableData[i][8] = expense.getTotal();
+            tableData[i][9] = expense.getProjectName();
+            tableData[i][10] = expense.getSupplierName();
+            tableData[i][11] = expense.getPic();
+            tableData[i][12] = expense.getNote();
+            tableData[i][13] = expense.getStatus();
+        }
+
+        Row row = null;
+        Cell cell = null;
+
+        int rowPosition = 2;
+        int colPosition = 0;
+
+        for (int i = 0; i < tableData.length; i++) {
+            row = sheet.getRow(i + rowPosition);
+
+            for (int j = 0; j < tableData[0].length; j++) {
+                cell = row.getCell(j + colPosition);
+
+                cell.setCellValue(tableData[i][j]);
+            }
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+        return out.toByteArray();
+    }
+
     @Override
-    public String generateFileName(Long fileId) {
+    public String generateXLSXFileName(Long fileId) {
         int planId = planRepository.getPlanIdByFileId(fileId);
         List<FileNameResult> fileNameResultList = financialPlanFileRepository.generateFileName(planId);
-        String result;
+
         for (FileNameResult fileName : fileNameResultList) {
-            if (Objects.equals(fileName.getFileId(), fileId)){
+            if (Objects.equals(fileName.getFileId(), fileId)) {
                 return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xlsx";
             }
         }
         return null;
     }
 
+    @Override
+    public String generateXLSFileName(Long fileId) {
+        int planId = planRepository.getPlanIdByFileId(fileId);
+        List<FileNameResult> fileNameResultList = financialPlanFileRepository.generateFileName(planId);
+
+        for (FileNameResult fileName : fileNameResultList) {
+            if (Objects.equals(fileName.getFileId(), fileId)) {
+                return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xls";
+            }
+        }
+        return null;
+    }
 }
