@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +15,8 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 
+import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.impl.MailRepository;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -62,6 +67,15 @@ public class UserServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private AuthorityRepository authorityRepository;
+
+    @Mock
+    private UserDetailRepository userDetailRepository;
+
+
+    private User oldUser;
+
     private Long userId;
     private Long actorId;
     private User user;
@@ -104,6 +118,21 @@ public class UserServiceTest {
                 .isDelete(false)
                 .phoneNumber("0999988877")
                 .build();
+        oldUser = User.builder()
+                .id(userId)
+                .username("username1")
+                .fullName("Nutalomlokkkkk")
+                .password("password")
+                .role(role)
+                .department(department)
+                .position(position)
+                .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                .email("mailho2111@gmail.com")
+                .address("Ha Noi")
+                .isDelete(false)
+                .phoneNumber("0999988877")
+                .build();
+
 
         // Mock the SecurityContextHolder to return a valid user ID
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -113,6 +142,7 @@ public class UserServiceTest {
         when(authentication.getPrincipal()).thenReturn(actorId.toString());
 
         SecurityContextHolder.setContext(securityContext);
+
     }
 
     @Test
@@ -201,11 +231,50 @@ public class UserServiceTest {
         when(positionRepository.existsById(anyLong())).thenReturn(true);
         when(roleRepository.existsById(anyLong())).thenReturn(true);
 
-
         userServiceImpl.createUser(user);
 
         verify(userRepository, times(1)).save(user);
         verify(userSettingRepository, times(1)).save(any(UserSetting.class));
         verify(mailRepository, times(1)).sendEmail(eq("mailho21@gmail.com"), eq(user.getFullName()), eq(user.getUsername()), anyString());
     }
+    @Test
+    public void testGetUserPagingList_Success() throws Exception {
+
+    }
+    @Test
+    public void testUpdateUser_Success() throws Exception {
+        // Mock the necessary methods
+        //authority ok
+        when(UserHelper.getUserId()).thenReturn(1);
+        when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.EDIT_USER.getValue())));
+
+        //user exists
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        //exist
+        when(departmentRepository.existsById(user.getDepartment().getId())).thenReturn(true);
+        when(positionRepository.existsById(user.getDepartment().getId())).thenReturn(true);
+        when(roleRepository.findById(user.getRole().getId())).thenReturn(Optional.of(role));
+
+
+        // Initialize authority objects and set their codes
+        Authority authority1 = new Authority();
+        authority1.setCode(AuthorityCode.EDIT_USER);  // Ensure code is set
+        Authority authority2 = new Authority();
+        authority2.setCode(AuthorityCode.VIEW_USER_DETAILS);  // Ensure code is set
+
+        when(authorityRepository.findAuthoritiesOfRole(anyLong())).thenReturn(List.of(authority1, authority2));
+
+        // Perform the update
+        userServiceImpl.updateUser(user);
+
+        // Verify interactions and assert results
+        verify(userRepository, times(1)).findById(user.getId());
+        verify(userAuthorityRepository, times(1)).get(anyLong());
+        verify(userRepository, times(1)).saveUserData(eq(user), any(UpdateUserDataOption.class));
+        verify(userAuthorityRepository, times(1)).save(anyLong(), anyList(), any());
+        verify(userDetailRepository, times(1)).save(anyLong(), any(UserDetail.class), any());
+    }
+
+
 }
