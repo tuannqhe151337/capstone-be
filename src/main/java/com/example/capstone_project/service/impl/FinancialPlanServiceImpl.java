@@ -16,6 +16,7 @@ import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanFileRepository financialPlanFileRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
     private final DepartmentRepository departmentRepository;
+    private final HandleFileHelper handleFileHelper;
 
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
@@ -232,7 +234,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses);
         }
 
         return null;
@@ -249,7 +251,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses);
         }
 
         return null;
@@ -280,53 +282,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         }
         return null;
-    }
-
-    private byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses) throws IOException {
-        Sheet sheet = wb.getSheet("Expense");
-
-        String[][] tableData = new String[expenses.size()][14];
-
-        // Convert list expense to matrix
-        for (int i = 0; i < expenses.size(); i++) {
-            ExpenseResult expense = expenses.get(i);
-            tableData[i][0] = expense.getExpenseCode();
-            tableData[i][1] = expense.getDate().toString();
-            tableData[i][2] = expense.getTerm();
-            tableData[i][3] = expense.getDepartment();
-            tableData[i][4] = expense.getExpense();
-            tableData[i][5] = expense.getCostType();
-            tableData[i][6] = expense.getUnitPrice();
-            tableData[i][7] = expense.getAmount();
-            tableData[i][8] = expense.getTotal();
-            tableData[i][9] = expense.getProjectName();
-            tableData[i][10] = expense.getSupplierName();
-            tableData[i][11] = expense.getPic();
-            tableData[i][12] = expense.getNote();
-            tableData[i][13] = expense.getStatus();
-        }
-
-        Row row = null;
-        Cell cell = null;
-
-        int rowPosition = 2;
-        int colPosition = 0;
-
-        for (int i = 0; i < tableData.length; i++) {
-            row = sheet.getRow(i + rowPosition);
-
-            for (int j = 0; j < tableData[0].length; j++) {
-                cell = row.getCell(j + colPosition);
-
-                cell.setCellValue(tableData[i][j]);
-            }
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
-        return out.toByteArray();
     }
 
     @Override
