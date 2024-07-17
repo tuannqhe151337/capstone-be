@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 
 public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRepository {
+
     @Query(" SELECT CASE " +
             " WHEN EXISTS (SELECT 1 FROM Term term " +
             " JOIN term.financialPlans plan " +

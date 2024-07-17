@@ -43,8 +43,11 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public long countDistinctListTermWhenCreatePlan(String query) {
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now());
+    public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -106,7 +109,6 @@ public class TermServiceImpl implements TermService {
         termRepository.save(term);
 
     }
-
 
     @Override
     public List<Term> getListTermPaging(String query, Pageable pageable) {

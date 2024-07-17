@@ -9,7 +9,6 @@ import com.example.capstone_project.controller.responses.term.getPlans.TermPlanD
 import com.example.capstone_project.controller.responses.term.getReports.TermReportResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
 
-import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.Term;
 
@@ -263,7 +262,7 @@ public class TermController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        System.out.println("id = " + terms.get(0).getId());
+
         long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
         response.setPagination(Pagination.builder()

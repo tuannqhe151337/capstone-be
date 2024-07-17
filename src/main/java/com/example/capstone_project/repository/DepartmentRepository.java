@@ -3,15 +3,12 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long>, CustomDepartmentRepository  {
+    @Query(value = "select count(distinct(department.id)) from Department department " +
+            "where department.name like %:query% and (department.isDelete = false or department.isDelete is null)")
+    long countDistinct(String query);
 
     @Override
-    boolean existsById(Long aLong);
-
-    @Query(value = "SELECT count(distinct (department.id)) FROM Department department " +
-            " WHERE department.name like %:query% AND " +
-            " department.isDelete = false ")
-    long countDistinct(@Param("query") String query);
+    boolean existsById(Long id);
 }

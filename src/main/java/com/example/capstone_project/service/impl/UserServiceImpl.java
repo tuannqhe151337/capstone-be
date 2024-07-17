@@ -3,6 +3,7 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
@@ -181,6 +182,32 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Password does not match");
         }
 
+    }
+
+    @Override
+    public String otpValidate(String otp) throws Exception {
+        //get token from redis by id from header
+
+
+        //compare token
+
+
+        //gen new token
+
+        //save token with id
+
+
+        //return token
+        return null;
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordBody resetPasswordBody) {
+        //get new password
+
+        //get id from header to find that uswe
+
+        //update new password encoded
     }
 
     @Override
