@@ -7,6 +7,7 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.ReportPaginateResponseMapperImpl;
@@ -127,47 +128,51 @@ public class ReportController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
+            // Get data
+            List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
 
-        // Response
-        ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (reports != null) {
+            if (reports != null) {
 
-            // Count total record
-            count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+                // Count total record
+                count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
 
-            // Mapping to TermPaginateResponse
-            reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
+                // Mapping to TermPaginateResponse
+                reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
 
-        } else {
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 }

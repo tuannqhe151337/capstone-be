@@ -8,6 +8,7 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +39,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             }
 
             return financialReportRepository.getReportWithPagination(query, termId, departmentId, statusId, pageable);
+        } else {
+            throw new UnauthorizedException("Unauthorized to create plan");
         }
-
-        return null;
 
     }
 
@@ -56,6 +57,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())
                 && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+        } else {
+            throw new UnauthorizedException("Unauthorized to create plan");
         }
 
         return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
