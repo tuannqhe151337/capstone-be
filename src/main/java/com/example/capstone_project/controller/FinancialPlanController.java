@@ -223,18 +223,22 @@ public class FinancialPlanController {
     public ResponseEntity<byte[]> generateXlsxReport(
             @Valid @RequestBody PlanDownloadBody planBody
     ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
-        /// Get data for file Excel
-        byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
-        if (report != null) {
-            // Create file name for file Excel
-            String outFileName = planService.generateXLSXFileName(planBody.getFileId());
+                return createResponseEntity(report, outFileName);
 
-            return createResponseEntity(report, outFileName);
-
-        } else {
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 

@@ -71,6 +71,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE file.id = :fileId AND " +
             " files.isDelete = false AND expenses.isDelete = false ")
     List<ExpenseResult> getListExpenseByFileId(@Param("fileId") Long fileId);
+
     @Query(value = " SELECT plan.id FROM FinancialPlan plan " +
             " JOIN plan.planFiles files " +
             " WHERE files.id = :fileId AND " +
