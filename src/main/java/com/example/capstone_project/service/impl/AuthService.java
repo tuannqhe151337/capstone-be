@@ -123,7 +123,7 @@ public class AuthService {
 
     public User getDetailedUserByIdFromDatabase(int userId) throws Exception {
         // Get user
-        Optional<User> userOptional = this.userRepository.findUserDetailedById((long) userId);
+        Optional<User> userOptional = this.userRepository.findActiveUserDetailedById((long) userId);
         if (userOptional.isEmpty()) {
             throw new Exception("User does not exists!");
         }
@@ -146,7 +146,7 @@ public class AuthService {
 
     private User getUserWithRoleAndDepartmentAndAuthoritiesByIdFromDatabase(long userId) throws Exception {
         // Get user
-        Optional<User> userOptional = this.userRepository.findUserWithRoleAndDepartmentById((long) userId);
+        Optional<User> userOptional = this.userRepository.findActiveUserWithRoleAndDepartmentById(userId);
         if (userOptional.isEmpty()) {
             throw new Exception("User does not exists!");
         }

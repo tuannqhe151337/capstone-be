@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DeleteReportBody {
-    @NotNull(message = "Report Id can't be null")
+    @NotNull(message = "Report id can't be null")
     private Long reportId;
 }
