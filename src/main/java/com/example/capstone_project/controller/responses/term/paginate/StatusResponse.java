@@ -7,5 +7,6 @@ import lombok.Data;
 @Builder
 public class StatusResponse {
     private long statusId;
+    private String code;
     private String name;
 }
