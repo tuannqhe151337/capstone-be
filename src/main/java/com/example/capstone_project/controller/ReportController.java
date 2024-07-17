@@ -9,6 +9,7 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
@@ -51,47 +52,52 @@ public class ReportController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<FinancialReportExpense> expenses = reportService.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
+            // Get data
+            List<FinancialReportExpense> expenses = reportService.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
 
-        // Response
-        ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (expenses != null) {
+            if (expenses != null) {
 
-            // Count total record
-            count = reportService.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
+                // Count total record
+                count = reportService.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
 
-            // Mapping to TermPaginateResponse
-            expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
-        } else {
+                // Mapping to TermPaginateResponse
+                expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
             @Valid @RequestBody DeleteReportBody reportBody
