@@ -7,6 +7,7 @@ import com.example.capstone_project.controller.responses.department.paginate.Dep
 import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.service.DepartmentService;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 
@@ -38,48 +39,52 @@ public class DepartmentController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+            // Get data
+            List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
 
-        // Response
-        ListPaginationResponse<DepartmentPaginateResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<DepartmentPaginateResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (departments != null) {
+            if (departments != null) {
 
-            // Count total record
-            count = departmentService.countDistinctListDepartmentPaging(query);
+                // Count total record
+                count = departmentService.countDistinctListDepartmentPaging(query);
 
-            // Mapping to TermPaginateResponse
-            departments.forEach(department -> response.getData().add(new DepartmentPaginateResponseMapperImpl().mapToDepartmentPaginateResponseMapping(department)));
+                // Mapping to TermPaginateResponse
+                departments.forEach(department -> response.getData().add(new DepartmentPaginateResponseMapperImpl().mapToDepartmentPaginateResponseMapping(department)));
 
-        } else {
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user-paging-department")
