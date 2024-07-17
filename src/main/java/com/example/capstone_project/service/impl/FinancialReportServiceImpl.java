@@ -79,7 +79,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
                 if (planResult == null) {
-                    throw new ResourceNotFoundException("");
+                    throw new ResourceNotFoundException("Not found any report have id = " + reportId);
                 }
                 return planResult;
                 // Financial staff can only view plan of their department
@@ -91,9 +91,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     return planResult;
                 }
             }
-            throw new UnauthorizedException("");
+            throw new UnauthorizedException("Unauthorized to view report");
         } else {
-            throw new UnauthorizedException("");
+            throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 }
