@@ -73,13 +73,17 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     }
 
     @Override
-    public AnnualReport getAnnualReportDetail(Long annualReportBody) {
+    public AnnualReport getAnnualReportDetail(Long annualReportId) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            return annualReportRepository.getReferenceById(annualReportBody);
+            if (annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            }
+            return annualReportRepository.getReferenceById(annualReportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
         }
-        return null;
 
     }
 }

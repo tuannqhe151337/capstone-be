@@ -160,20 +160,26 @@ public class AnnualReportController {
     public ResponseEntity<AnnualReportResponse> getAnnualReportDetail(
             @RequestParam(required = true) Long annualReportId
     ) {
-        // Get data
-        AnnualReport annualReport = annualReportService.getAnnualReportDetail(annualReportId);
+        try {
+            // Get data
+            AnnualReport annualReport = annualReportService.getAnnualReportDetail(annualReportId);
 
-        // Response
-        AnnualReportResponse response = null;
+            // Response
+            AnnualReportResponse response = null;
 
-        if (annualReport != null) {
+            if (annualReport != null) {
 
-            response = new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport);
+                response = new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport);
 
-        } else {
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        return ResponseEntity.ok(response);
     }
 }
