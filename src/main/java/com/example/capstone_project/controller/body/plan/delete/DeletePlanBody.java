@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class DeletePlanBody {
-    @NotNull(message = "Plan Id need to delete can't be empty")
+    @NotNull(message = "Plan id need to delete can't be empty")
     private Long planId;
 }
