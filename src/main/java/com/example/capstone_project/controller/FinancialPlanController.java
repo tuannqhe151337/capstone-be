@@ -2,10 +2,12 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -24,17 +26,27 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.helper.UserHelper;
+import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
+import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapper;
 import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +68,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FinancialPlanController {
 
-    private final JwtHelper jwtHelper;
     private final FinancialPlanService planService;
 
     @GetMapping("/list")
@@ -70,45 +81,51 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Get data
-        List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
-
-        // Response
-        ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
-
-        long count = 0;
-
-        if (plans != null) {
-            // Count total record
-            count = planService.countDistinct(query, termId, departmentId, statusId);
-
-            for (FinancialPlan plan : plans) {
-                //mapperToPlanResponse
-                response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
+            // Handling query
+            if (query == null) {
+                query = "";
             }
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+
+            // Get data
+            List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
+
+            // Response
+            ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
+
+            long count = 0;
+
+            if (plans != null) {
+                // Count total record
+                count = planService.countDistinct(query, termId, departmentId, statusId);
+
+                for (FinancialPlan plan : plans) {
+                    //mapperToPlanResponse
+                    response.getData().add(new ListPlanResponseMapperImpl().mapToPlanResponseMapper(plan));
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("expenses")
@@ -122,69 +139,78 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+            // Get data
+            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
 
-        // Response
-        ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (expenses != null) {
+            if (expenses != null) {
 
-            // Count total record
-            count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+                // Count total record
+                count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
 
-            // Mapping to TermPaginateResponse
-            expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
-        } else {
+                // Mapping to TermPaginateResponse
+                expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            System.out.println("count = " + count);
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        System.out.println("count = " + count);
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @RequestParam Long planId
-    ) {
+            @Valid @RequestBody PlanDetailBody planDetailBody
+    ) throws Exception {
+        try {
+            // Get data
+            PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
 
-        // Get data
-        PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
+            // Response
+            PlanDetailResponse response;
 
-        // Response
-        PlanDetailResponse response;
+            if (plan != null) {
+                // Mapping to PlanDetail Response
+                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
 
-        if (plan != null) {
-            // Mapping to TermPaginateResponse
-            response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-            response.setVersion(planService.getPlanVersionById(planId));
-        } else {
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/download")
@@ -240,28 +266,30 @@ public class FinancialPlanController {
     }
 
     @GetMapping("/plan-status")
-    public ResponseEntity<Responses<StatusResponse>> getListStatusPaging() {
-        Responses<StatusResponse> responses = new Responses<>();
-        responses.setData(List.of(
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("New")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(2L)
-                        .name("Waiting for reviewed")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Approved")
-                        .build(),
-                StatusResponse.builder()
-                        .statusId(1L)
-                        .name("Reviewed")
-                        .build()
-        ));
+    public ResponseEntity<ListResponse<StatusResponse>> getListStatus() {
+        try {
+            // Get data
+            List<PlanStatus> costTypes = planService.getListPlanStatus();
 
-        return ResponseEntity.ok(responses);
+            // Response
+            ListResponse<StatusResponse> responses = new ListResponse<>();
+
+            if (costTypes != null) {
+
+                // Mapping to CostTypeResponse
+                responses.setData(costTypes.stream().map(status -> {
+                    return new PlanStatusMapperImpl().mapToStatusResponseMapping(status);
+                }).toList());
+            } else {
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(responses);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
     @GetMapping("versions")
@@ -306,14 +334,26 @@ public class FinancialPlanController {
 
     @DeleteMapping("/delete")
     private ResponseEntity<String> deletePlan(
-            @Validated @RequestBody DeletePlanBody planBody) {
-        System.out.println(planBody.toString());
-        return ResponseEntity.ok("id " + planBody.getPlanId());
+            @Valid @RequestBody DeletePlanBody planBody, BindingResult bindingResult) {
+        try {
+            FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
+
+            if (deletedPlan == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete plan");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found any plan have id = " + planBody.getPlanId());
+        }
+
     }
 
     @PutMapping("/re-upload")
     private ResponseEntity<ListBody<ReUploadExpenseBody>> reUploadPlan(
-            @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
+            @Valid @RequestBody ListBody<ReUploadExpenseBody> expenseListBody
     ) {
 
         return ResponseEntity.status(HttpStatus.OK).body(expenseListBody);
@@ -321,11 +361,31 @@ public class FinancialPlanController {
 
     @PostMapping("/create")
     public ResponseEntity<String> confirmExpenses(
-            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+            @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+        try {
+            // Get user detail
+            UserDetail userDetail = planService.getUserDetail();
 
+            // Get term
+            Term term = planService.getTermById(planBody.getTermId());
 
-        planService.creatPlan(planBody);
+            // Mapping to planBody to FinancialPlan
+            FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("");
+            // Save plan
+            FinancialPlan savedPlan = planService.creatPlan(plan, term);
+
+            if (savedPlan == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
+        } catch (InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+        }
     }
 }
