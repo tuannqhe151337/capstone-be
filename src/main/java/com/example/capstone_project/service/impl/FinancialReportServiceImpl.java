@@ -89,6 +89,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 // Check department
                 if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
                     return planResult;
+                } else {
+                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
                 }
             }
             throw new UnauthorizedException("Unauthorized to view report");
