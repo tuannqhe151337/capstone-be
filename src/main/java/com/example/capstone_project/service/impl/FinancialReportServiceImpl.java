@@ -2,7 +2,6 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.DepartmentRepository;
 import com.example.capstone_project.repository.FinancialReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
@@ -11,6 +10,8 @@ import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +73,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     @Override
     public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
-        List<ExpenseResult> expenses = getListExpenseByFileId(reportId);
+        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
 
         if (expenses != null) {
 
@@ -98,7 +99,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     @Override
     public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
-        List<ExpenseResult> expenses = getListExpenseByFileId(reportId);
+        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
 
         if (expenses != null) {
 
@@ -124,7 +125,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         return null;
     }
 
-    private List<ExpenseResult> getListExpenseByFileId(Long reportId) throws Exception {
+    private List<ExpenseResult> getListExpenseByReportId(Long reportId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -132,7 +133,10 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)){
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 return financialReportRepository.getListExpenseByReportId(reportId);
@@ -144,11 +148,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 // Check department
                 if (departmentId == userDetail.getDepartmentId()) {
                     return financialReportRepository.getListExpenseByReportId(reportId);
+                } else {
+                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
                 }
             }
-
+            throw new UnauthorizedException("Unauthorized to view report");
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
         }
-        return null;
+
     }
 
 

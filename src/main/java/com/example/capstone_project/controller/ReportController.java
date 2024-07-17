@@ -9,6 +9,8 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.ReportPaginateResponseMapperImpl;
@@ -47,7 +49,7 @@ public class ReportController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         ListPaginationResponse<ExpenseResponse> listResponse = new ListPaginationResponse<>();
         listResponse.setData(List.of(
                 ExpenseResponse.builder()
@@ -107,6 +109,7 @@ public class ReportController {
 
         return ResponseEntity.ok(listResponse);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
             @Valid @RequestBody DeleteReportBody reportBody
@@ -174,18 +177,23 @@ public class ReportController {
     public ResponseEntity<byte[]> generateXlsxReport(
             @Valid @RequestBody ReportDownloadBody reportBody
     ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = reportService.getBodyFileExcelXLSX(reportBody.getReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = reportService.generateXLSXFileName(reportBody.getReportId());
 
-        /// Get data for file Excel
-        byte[] report = reportService.getBodyFileExcelXLSX(reportBody.getReportId());
-        if (report != null) {
-            // Create file name for file Excel
-            String outFileName = reportService.generateXLSXFileName(reportBody.getReportId());
+                return createFileReportResponseEntity(report, outFileName);
 
-            return createFileReportResponseEntity(report, outFileName);
+            } else {
 
-        } else {
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -193,17 +201,22 @@ public class ReportController {
     public ResponseEntity<byte[]> generateXlsReport(
             @Valid @RequestBody ReportDownloadBody reportBody
     ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = reportService.getBodyFileExcelXLS(reportBody.getReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = reportService.generateXLSFileName(reportBody.getReportId());
 
-        /// Get data for file Excel
-        byte[] report = reportService.getBodyFileExcelXLS(reportBody.getReportId());
-        if (report != null) {
-            // Create file name for file Excel
-            String outFileName = reportService.generateXLSFileName(reportBody.getReportId());
+                return createFileReportResponseEntity(report, outFileName);
 
-            return createFileReportResponseEntity(report, outFileName);
-
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
