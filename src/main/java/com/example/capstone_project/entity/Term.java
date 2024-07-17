@@ -1,6 +1,7 @@
 package com.example.capstone_project.entity;
 
 import com.example.capstone_project.utils.enums.TermDuration;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -44,30 +45,21 @@ public class Term extends BaseEntity{
     @Column(name = "plan_due_date")
     private LocalDateTime planDueDate;
 
-    @NotNull(message = "User cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User user;
 
-    @NotNull(message = "Status cannot be null")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private TermStatus status; //trong day da co isDelete roi
 
-    @OneToMany(mappedBy = "term")
+    @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialPlan> financialPlans;
 
-    @OneToMany(mappedBy = "term")
+    @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialReport> financialReports;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 
-    @AssertTrue(message = "Plan due date must be before end date")
-    private boolean isPlanDueDateBeforeEndDate() {
-        if (planDueDate == null || endDate == null) {
-            return true; // Để @NotNull xử lý null check
-        }
-        return planDueDate.isBefore(endDate);
-    }
 }

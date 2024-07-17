@@ -1,8 +1,12 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -16,6 +20,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -31,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -39,6 +45,7 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
+    private final JwtHelper jwtHelper;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -103,10 +110,10 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositionIdException e){
+        } catch (InvalidPositionIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch(InvalidRoleIdException e) {
+        } catch (InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
@@ -122,11 +129,11 @@ public class UserController {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e ){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -136,7 +143,7 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         try {
             userService.updateUser(
-                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+                    new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
             );
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (UnauthorizedException ex) {
@@ -160,31 +167,64 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
-            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(e.getMessage());
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
+
     // build delete user REST API
     @PostMapping("/activate")
-    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    @PostMapping("/change-password")
 
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
+
+        try {
+            userService.changePassword(changePasswordBody);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Change password success");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
+
+    }
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+        return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+    }
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+        //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
+        //String generateAccessToken(Integer userId)
+        String token = jwtHelper.genBlankTokenEmail();
+        return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
+
+    @PostMapping("/auth/otp")
+    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+            //return  Token  user:dnfpajsdfhp...:id, 6.
+        String token = jwtHelper.genBlankTokenOtp();
+        return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
 }
