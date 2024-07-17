@@ -18,10 +18,14 @@ import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -70,7 +74,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        } else {
 
             // Handling pagination
             Pageable pageable = null;
@@ -117,7 +123,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             return listResult;
         }
-        return null;
     }
 
     @Override
@@ -130,9 +135,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             return planStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
 
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
         }
 
-        return null;
     }
 
     @Override
@@ -146,13 +152,16 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authorization
         // Check any plan of user department is existing in this term
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue()) &&
-              !termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId()) &&
-                LocalDateTime.now().isBefore(term.getPlanDueDate())) {
-            return planRepository.save(plan);
-        } else {
-            return null;
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
+            throw new UnauthorizedException("Unauthorized to create plan");
         }
+        if (termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
+            throw new DuplicateKeyException("This term already have plan of department id = " + userDetail.getDepartmentId());
+        }
+        if (!LocalDateTime.now().isBefore(term.getPlanDueDate())) {
+            throw new InvalidDateException("Plan due date of this term was expired");
+        }
+        return planRepository.save(plan);
     }
 
     public UserDetail getUserDetail() throws Exception {
@@ -161,10 +170,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     public Term getTermById(Long termId) {
+        termRepository.findById(termId).orElseThrow(() ->
+                new ResourceNotFoundException("Not found any term have id = " + termId));
+
         return termRepository.getReferenceById(termId);
     }
 
     @Override
+    @Transactional
     public FinancialPlan deletePlan(long planId) {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
@@ -178,7 +191,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             return financialPlan;
         } else {
-            return null;
+            throw new UnauthorizedException("Unauthorized to delete plan");
         }
     }
 
@@ -194,19 +207,33 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                return planRepository.getFinancialPlanById(planId);
+                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
 
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
+
+                return planResult;
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
 
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
+
                 // Check department
                 if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
                     return planResult;
+                } else {
+                    throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
+            } else {
+                throw new UnauthorizedException("Unauthorized to view plan");
             }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
         }
-        return null;
     }
 
     @Override
@@ -235,10 +262,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 // Check department
                 if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
                     return planRepository.getListVersionWithPaginate(planId, pageable);
+                } else {
+                    throw new UnauthorizedException("User can't view this plan detail because departmentId of plan not equal with departmentId of user");
                 }
+            } else {
+                throw new UnauthorizedException("Unauthorized to view plan");
             }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
         }
-        return null;
     }
 
     @Override
