@@ -396,17 +396,22 @@ public class FinancialPlanController {
     public ResponseEntity<byte[]> generateLastVersionXlsReport(
             @Valid @RequestBody PlanBody planBody
     ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
 
-        /// Get data for file Excel
-        byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
-        if (report != null) {
-            // Create file name for file Excel
-            String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
+                return createResponseEntity(report, outFileName);
 
-            return createResponseEntity(report, outFileName);
-
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -414,17 +419,22 @@ public class FinancialPlanController {
     public ResponseEntity<byte[]> generateLastVersionXlsxReport(
             @Valid @RequestBody PlanBody planBody
     ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
 
-        /// Get data for file Excel
-        byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
-        if (report != null) {
-            // Create file name for file Excel
-            String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
+                return createResponseEntity(report, outFileName);
 
-            return createResponseEntity(report, outFileName);
-
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }
