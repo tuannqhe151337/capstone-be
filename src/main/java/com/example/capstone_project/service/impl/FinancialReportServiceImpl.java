@@ -10,6 +10,8 @@ import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -75,8 +77,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                return financialReportRepository.getFinancialReportById(reportId);
-
+                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("");
+                }
+                return planResult;
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
@@ -86,7 +91,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     return planResult;
                 }
             }
+            throw new UnauthorizedException("");
+        } else {
+            throw new UnauthorizedException("");
         }
-        return null;
     }
 }

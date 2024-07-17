@@ -11,6 +11,8 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
@@ -50,7 +52,7 @@ public class ReportController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         ListPaginationResponse<ExpenseResponse> listResponse = new ListPaginationResponse<>();
         listResponse.setData(List.of(
                 ExpenseResponse.builder()
@@ -110,6 +112,7 @@ public class ReportController {
 
         return ResponseEntity.ok(listResponse);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
             @Valid @RequestBody DeleteReportBody reportBody
@@ -177,21 +180,27 @@ public class ReportController {
     public ResponseEntity<ReportDetailResponse> getReportDetail(
             @RequestParam Long reportId
     ) throws Exception {
+        try {
+            // Get data
+            ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
 
-        // Get data
-        ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
+            // Response
+            ReportDetailResponse response;
 
-        // Response
-        ReportDetailResponse response;
+            if (report != null) {
+                // Mapping to PlanDetail Response
+                response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
 
-        if (report != null) {
-            // Mapping to PlanDetail Response
-            response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
 
-        } else {
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        return ResponseEntity.ok(response);
     }
 }
