@@ -77,10 +77,10 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = UserSetting_.USER, fetch = FetchType.LAZY)
     private UserSetting userSetting;
 
-    @OneToMany(mappedBy = Term_.USER)
+    @OneToMany(mappedBy = Term_.USER, fetch = FetchType.LAZY)
     private List<Term> terms;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.USER)
+    @OneToMany(mappedBy = FinancialPlanFile_.USER, fetch = FetchType.LAZY)
     private List<FinancialPlanFile> financialPlanFiles;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")

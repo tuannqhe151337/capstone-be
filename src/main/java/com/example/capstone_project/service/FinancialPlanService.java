@@ -1,7 +1,7 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 
@@ -26,13 +26,8 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
-    List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception;
-
-    String getLastExpenseCode(Long planId);
-
-    PlanVersionResult getCurrentVersionByPlanId(Long planId);
+    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
 
     void reUploadPlan(FinancialPlan plan);
 
-    FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId);
 }
