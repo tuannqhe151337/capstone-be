@@ -10,6 +10,8 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -53,7 +55,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId) {
-        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId,costTypeId,departmentId);
+        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
     }
 
     @Override
@@ -61,9 +63,12 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            }
             return annualReportRepository.getAnnualReportCostTypeDiagram(annualReportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
         }
-        return null;
-
     }
 }
