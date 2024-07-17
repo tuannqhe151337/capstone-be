@@ -14,6 +14,7 @@ import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
+    @Transactional
     public FinancialReport deleteReport(Long reportId) {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_REPORT.getValue())) {
@@ -75,7 +77,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             return financialReport;
         } else {
-            return null;
+            throw new ResourceNotFoundException("Unauthorized to delete report");
         }
     }
 }

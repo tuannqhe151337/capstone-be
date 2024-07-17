@@ -7,6 +7,8 @@ import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.ReportPaginateResponseMapperImpl;
@@ -113,13 +115,20 @@ public class ReportController {
     public ResponseEntity<String> deleteReport(
             @Validated @RequestBody DeleteReportBody reportBody
     ) {
-        FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
+        try {
+            FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
 
-        if (deletedReport == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            if (deletedReport == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok("Delete successful plan id: " + deletedReport.getId());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete report");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.ok("Not found resource");
+
         }
-
-        return ResponseEntity.ok("Delete successful plan id: " + deletedReport.getId());
     }
 
     @GetMapping("/list")
