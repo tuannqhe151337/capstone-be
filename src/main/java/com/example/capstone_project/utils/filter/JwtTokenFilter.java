@@ -47,18 +47,21 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         // Set to security context holder
-        final Integer userId = jwtHelper.extractUserIdFromAccessToken(accessToken);
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userId,
-                    null,
-                    List.of()
-            );
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-        }
+        try {
+            final Integer userId = jwtHelper.extractUserIdFromAccessToken(accessToken);
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userId,
+                        null,
+                        List.of()
+                );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+
+        } catch (Exception e) {}
 
         filterChain.doFilter(request, response);
     }
