@@ -242,7 +242,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check exist
-        if (planRepository.existsById(planId)) {
+        if (!planRepository.existsById(planId)) {
             throw new ResourceNotFoundException("Not found any plan have id = " + planId);
         }
 
