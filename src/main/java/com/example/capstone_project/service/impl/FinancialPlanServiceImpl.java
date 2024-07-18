@@ -439,8 +439,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xls";
+        } else {
+            throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }
-        return null;
     }
 
     @Override
@@ -466,7 +467,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xlsx";
+        } else {
+            throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }
-        return null;
     }
 }
