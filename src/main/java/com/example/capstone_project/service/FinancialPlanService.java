@@ -29,6 +29,8 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
+
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
 
     long countDistinctListPlanVersionPaging(Long planId);
@@ -39,7 +41,9 @@ public interface FinancialPlanService {
 
     byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
 
-    String generateFileName(Long fileId);
+    String generateXLSXFileName(Long fileId);
+
+    String generateXLSFileName(Long fileId);
 
     List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception;
 
