@@ -48,7 +48,13 @@ public class UserRepositoryImpl implements CustomUserRepository {
                     hql += "user.username " + sortType;
                     break;
                 case "role":
-                    hql += "user.role " + sortType;
+                    hql += "user.role.id " + sortType;
+                    break;
+                case "department":
+                    hql += "user.department.id " + sortType;
+                    break;
+                case "position":
+                    hql += "user.position.id " + sortType;
                     break;
                 default:
                     hql += "user.id " + sortType;
