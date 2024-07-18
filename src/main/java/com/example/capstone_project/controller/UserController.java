@@ -58,43 +58,47 @@ public class UserController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
-
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
-        // Get data
-        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
-        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
-
-        // Response
-        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
-
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                //mapperToUserResponse
-                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+            // Handling query
+            if (query == null) {
+                query = "";
             }
+
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+            // Get data
+            List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+            long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
+
+            // Response
+            ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
+
+            if (users != null && !users.isEmpty()) {
+                for (User user : users) {
+                    //mapperToUserResponse
+                    response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+                }
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     // build create user REST API
