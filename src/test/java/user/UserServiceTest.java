@@ -13,17 +13,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
+
 import com.example.capstone_project.service.impl.MailRepository;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
+import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -232,7 +238,6 @@ public class UserServiceTest {
             verify(userRepository, times(1)).findUserDetailedById(userId);
         }
 
-
         //create user test
         @Test
         public void testCreateUser_Unauthorized() {
@@ -312,11 +317,117 @@ public class UserServiceTest {
             verify(userDetailRepository, times(1)).save(anyLong(), any(UserDetail.class), any());
         }
 
+        @Test
+        public void testCreateUser_DepartmentNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
 
+            when(departmentRepository.existsById(anyLong())).thenReturn(false);
+            Exception exception = assertThrows(InvalidDepartmentIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Department does not exist", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_PositionNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+
+            when(positionRepository.existsById(anyLong())).thenReturn(false);
+            when(departmentRepository.existsById(anyLong())).thenReturn(true);
+            Exception exception = assertThrows(InvalidPositionIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Position does not exist", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_RoleNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+            when(positionRepository.existsById(anyLong())).thenReturn(true);
+            when(departmentRepository.existsById(anyLong())).thenReturn(true);
+            when(roleRepository.existsById(anyLong())).thenReturn(false);
+            Exception exception = assertThrows(InvalidRoleIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Role does not exist", exception.getMessage());
+        }
+        @Test
+        void testActivateUser_Unauthorized() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of()));
+
+            assertThrows(UnauthorizedException.class, () -> userServiceImpl.activateUser(activateUserBody));
+        }
+
+        @Test
+        void testActivateUser_UserNotFound() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.ACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.activateUser(activateUserBody));
+        }
+
+        @Test
+        void testActivateUser_Success() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.ACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+            userServiceImpl.activateUser(activateUserBody);
+
+            assertFalse(user.getIsDelete());
+
+            verify(userRepository, times(1)).save(user);
+        }
+        @Test
+        void testDeactivateUser_Unauthorized() {
+            DeactiveUserBody deactivateUserBody =   DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of()));
+            assertThrows(UnauthorizedException.class, () -> userServiceImpl.deactivateUser(deactivateUserBody));
+        }
+
+        @Test
+        void testDeactivateUser_UserNotFound() {
+           DeactiveUserBody deactiveUserBody = DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.DEACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.deactivateUser(deactiveUserBody));
+        }
+
+        @Test
+        void testDeactivateUser_Success() {
+            DeactiveUserBody deactivateUserBody = DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.DEACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+            userServiceImpl.deactivateUser(deactivateUserBody);
+
+            assertTrue(user.getIsDelete());
+
+            verify(userRepository, times(1)).save(user);
+        }
+        //list
 
 
     }
-
 
     @Nested
     class TestsWithCustomSetup {
@@ -324,6 +435,7 @@ public class UserServiceTest {
         void setUp() {
             // Custom setup for this test group if needed
         }
+
         @Test
         void testGenerateUsernameFromFullName_NoExistingUsernames() throws Exception {
             String fullname = "Nguyen Van Anh";
@@ -342,6 +454,7 @@ public class UserServiceTest {
             String result = (String) method.invoke(userServiceImpl, fullname);
             assertEquals("AnhNV2", result);
         }
+
         @Test
         void testGenerateUsernameFromFullName_ExistingUsernamesWithNumbers() throws Exception {
             String fullname = "Nguyen Van Anh";
@@ -351,6 +464,7 @@ public class UserServiceTest {
             String result = (String) method.invoke(userServiceImpl, fullname);
             assertEquals("AnhNV6", result);
         }
+
         @Test
         public void testGeneratePassayPassword() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
             Method method = UserServiceImpl.class.getDeclaredMethod("generatePassayPassword");
@@ -385,7 +499,7 @@ public class UserServiceTest {
             assertTrue(specialCharCount >= 2, "Password should have at least 2 special characters");
         }
 
-    }
 
+    }
 
 }
