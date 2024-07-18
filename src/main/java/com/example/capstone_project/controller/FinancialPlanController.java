@@ -170,7 +170,7 @@ public class FinancialPlanController {
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-            System.out.println("count = " + count);
+
             long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
 
             response.setPagination(Pagination.builder()
@@ -184,6 +184,8 @@ public class FinancialPlanController {
 
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

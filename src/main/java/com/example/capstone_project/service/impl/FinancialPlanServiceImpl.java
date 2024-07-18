@@ -233,16 +233,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    @Transactional
     public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
 
-        FinancialPlan plan = planRepository.getReferenceById(planId);
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Check exist
+            if (!planRepository.existsById(planId)) {
+                throw new ResourceNotFoundException("Not found any plan have id = " + planId);
+            }
+
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
@@ -251,17 +254,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 // But financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
 
-                if (userDetail.getDepartmentId() == plan.getDepartment().getId()) {
+                if (userDetail.getDepartmentId() == planRepository.getDepartmentIdByPlanId(planId)) {
 
                     return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
                 } else {
                     throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
             }
-            throw new UnauthorizedException("Unauthorized to view plan");
-        } else {
-            throw new UnauthorizedException("Unauthorized to view plan");
         }
+        throw new UnauthorizedException("Unauthorized to view plan");
     }
 
 
