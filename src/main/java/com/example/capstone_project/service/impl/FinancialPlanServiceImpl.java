@@ -406,11 +406,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
-        if (!planRepository.existsById(planId)) {
-            throw new ResourceNotFoundException("Not found any plan have id = " + planId);
-        }
+
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            if (!planRepository.existsById(planId)) {
+                throw new ResourceNotFoundException("Not found any plan have id = " + planId);
+            }
+
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 return planRepository.getListExpenseByPlanId(planId);
@@ -426,10 +429,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
                 }
             }
-            throw new UnauthorizedException("Unauthorized to download plan");
-        } else {
-            throw new UnauthorizedException("Unauthorized to download plan");
         }
+        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
