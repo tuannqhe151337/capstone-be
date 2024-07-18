@@ -349,7 +349,7 @@ public class FinancialPlanController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> confirmExpenses(
+    public ResponseEntity<Object> confirmExpenses(
             @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         // Get user detail
         UserDetail userDetail = planService.getUserDetail();
@@ -367,6 +367,6 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 }
