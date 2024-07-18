@@ -241,14 +241,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
 
-        // Check exist
-        if (!planRepository.existsById(planId)) {
-            throw new ResourceNotFoundException("Not found any plan have id = " + planId);
-        }
-
         // Check authorization
         // Check any plan of user department is existing in this term
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())) {
+
+            // Check exist
+            if (!planRepository.existsById(planId)) {
+                throw new ResourceNotFoundException("Not found any plan have id = " + planId);
+            }
+
             long departmentId = planRepository.getDepartmentIdByPlanId(planId);
             // Check department
             if (departmentId == userDetail.getDepartmentId()) {
