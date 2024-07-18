@@ -375,6 +375,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         int planId = planRepository.getPlanIdByFileId(fileId);
         List<FileNameResult> fileNameResultList = financialPlanFileRepository.generateFileName(planId);
 
+        if (fileNameResultList == null) {
+            throw new ResourceNotFoundException("Not exist file id = " + fileId);
+        }
+
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
                 return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xls";
