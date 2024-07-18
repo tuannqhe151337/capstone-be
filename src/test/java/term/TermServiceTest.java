@@ -122,10 +122,8 @@ public class TermServiceTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
-
-
     @Test
-    void testGetUserById_Unauthorized() {
+    void testCreateTerm_Unauthorized() {
         when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
         when(userAuthorityRepository.get(actorId)).thenReturn(Set.of());
 
@@ -171,4 +169,9 @@ public class TermServiceTest {
         verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
         verify(termRepository, times(1)).save(term);
     }
+    //list term management
+
+
+
+
 }
