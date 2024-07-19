@@ -360,6 +360,6 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 }
