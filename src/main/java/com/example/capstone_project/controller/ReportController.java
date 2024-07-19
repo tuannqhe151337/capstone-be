@@ -51,7 +51,7 @@ public class ReportController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ){
+    ) {
         ListPaginationResponse<ExpenseResponse> listResponse = new ListPaginationResponse<>();
         listResponse.setData(List.of(
                 ExpenseResponse.builder()
@@ -111,6 +111,7 @@ public class ReportController {
 
         return ResponseEntity.ok(listResponse);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
             @Validated @RequestBody DeleteReportBody reportBody
@@ -122,11 +123,11 @@ public class ReportController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.ok("Delete successful plan id: " + deletedReport.getId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete report");
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.ok("Not found resource");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
         }
     }
