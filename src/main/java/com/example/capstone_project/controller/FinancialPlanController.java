@@ -343,11 +343,11 @@ public class FinancialPlanController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete plan");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found any plan have id = " + planBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
     }
@@ -449,7 +449,6 @@ public class FinancialPlanController {
 
         return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
     }
-
 
     @PostMapping("/download/template/xls")
     public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
