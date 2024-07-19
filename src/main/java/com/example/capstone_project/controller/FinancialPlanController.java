@@ -341,7 +341,7 @@ public class FinancialPlanController {
             if (deletedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-            s
+
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
