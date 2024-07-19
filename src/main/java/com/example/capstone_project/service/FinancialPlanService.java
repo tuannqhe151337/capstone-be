@@ -1,5 +1,6 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.entity.*;
@@ -29,6 +30,8 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
+
     byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
 
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
@@ -45,13 +48,6 @@ public interface FinancialPlanService {
 
     String generateXLSFileName(Long fileId);
 
-    List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception;
-
-    String getLastExpenseCode(Long planId);
-
-    PlanVersionResult getCurrentVersionByPlanId(Long planId);
-
     void reUploadPlan(FinancialPlan plan);
 
-    FinancialPlanExpense getPlanExpenseReferenceById(Long expenseId);
 }
