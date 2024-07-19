@@ -341,12 +341,12 @@ public class FinancialPlanController {
             if (deletedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-
-            return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
+            s
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete plan");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found any plan have id = " + planBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
     }
@@ -360,11 +360,11 @@ public class FinancialPlanController {
 
             planService.reUploadPlan(plan);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Re upload successful");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete plan");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found any plan have id = " + reUploadExpenseBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
