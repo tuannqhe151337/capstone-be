@@ -23,7 +23,7 @@ public interface ReUploadExpensesMapper {
     @Mapping(source = "unitPrice", target = "unitPrice")
     @Mapping(source = "amount", target = "amount")
     @Mapping(source = "projectName", target = "projectName")
-    @Mapping(source = "supplerName", target = "supplierName")
+    @Mapping(source = "supplierName", target = "supplierName")
     @Mapping(source = "pic", target = "pic")
     @Mapping(source = "notes", target = "note")
     @Mapping(constant = "1L", target = "status.id")
@@ -40,7 +40,7 @@ public interface ReUploadExpensesMapper {
                 .unitPrice(reUploadExpenseBody.getUnitPrice())
                 .amount(reUploadExpenseBody.getAmount())
                 .projectName(reUploadExpenseBody.getProjectName())
-                .supplierName(reUploadExpenseBody.getSupplerName())
+                .supplierName(reUploadExpenseBody.getSupplierName())
                 .pic(reUploadExpenseBody.getPic())
                 .note(reUploadExpenseBody.getNotes()
                 ).build();
