@@ -327,7 +327,7 @@ public class FinancialPlanController {
     }
 
     @DeleteMapping("/delete")
-    private ResponseEntity<String> deletePlan(
+    private ResponseEntity<Object> deletePlan(
             @Validated @RequestBody DeletePlanBody planBody) {
 
         FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
@@ -336,7 +336,7 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PutMapping("/re-upload")
