@@ -1,6 +1,13 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.repository.CustomDepartmentRepository;
+import com.example.capstone_project.repository.DepartmentRepository;
+
+import com.example.capstone_project.service.DepartmentService;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import com.example.capstone_project.repository.DepartmentRepository;
 
 import com.example.capstone_project.service.DepartmentService;
@@ -49,4 +56,5 @@ public class DepartmentServiceImpl implements DepartmentService {
         String queryPattern = "%" + query + "%";
         return departmentRepository.countDistinct(queryPattern);
     }
+
 }

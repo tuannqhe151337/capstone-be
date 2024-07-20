@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
@@ -141,47 +142,54 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+            // Get data
+            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
 
-        // Response
-        ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (expenses != null) {
+            if (expenses != null) {
 
-            // Count total record
-            count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+                // Count total record
+                count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
 
-            // Mapping to TermPaginateResponse
-            expenses.forEach(expense -> response.getData().add(new PlanExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
-        } else {
+                // Mapping to TermPaginateResponse
+                expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        System.out.println("count = " + count);
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/detail")
