@@ -18,5 +18,5 @@ public interface AnnualReportService {
 
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
 
-    AnnualReport getAnnualReportDetail(Long annualReportBody);
+    AnnualReport getAnnualReportDetail(Long annualReportId);
 }
