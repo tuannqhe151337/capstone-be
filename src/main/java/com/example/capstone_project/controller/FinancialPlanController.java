@@ -383,11 +383,11 @@ public class FinancialPlanController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> confirmExpenses(
-            @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<Object> confirmExpenses(
+            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         try {
-            // Get user detail
-            UserDetail userDetail = planService.getUserDetail();
+        // Get user detail
+        UserDetail userDetail = planService.getUserDetail();
 
             // Get term
             Term term = planService.getTermById(planBody.getTermId());
@@ -402,13 +402,11 @@ public class FinancialPlanController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
-        } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
-        } catch (InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (DuplicateKeyException | InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
