@@ -87,4 +87,20 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE plan.id = :planId AND " +
             " plan.isDelete = false ")
     long getDepartmentIdByPlanId(Long planId);
+
+    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +
+            " costTypes.name AS costType, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
+            " expenses.projectName AS projectName, expenses.supplierName AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " statuses.code AS status  FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term terms " +
+            " LEFT JOIN plan.department departments " +
+            " LEFT JOIN expenses.costType costTypes " +
+            " LEFT JOIN expenses.status statuses  " +
+            " WHERE plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.isDelete = false AND expenses.isDelete = false ")
+    List<ExpenseResult> getListExpenseByPlanId(Long planId);
 }

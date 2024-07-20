@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PlanDownloadBody {
-    @NotNull(message = "File Id can't be empty")
-    private Long fileId;
+public class PlanBody {
+    @NotNull(message = "Plan Id can't be empty")
+    Long planId;
 }
-

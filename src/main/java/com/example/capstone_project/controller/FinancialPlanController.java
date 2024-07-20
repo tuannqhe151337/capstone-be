@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
+import com.example.capstone_project.controller.body.plan.download.PlanBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
@@ -411,31 +412,49 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/template/xlsx")
-    public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
+    @PostMapping("/download/last-version-xls")
+    public ResponseEntity<byte[]> generateLastVersionXlsReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
+                return createExcelFileResponseEntity(report, outFileName);
 
-        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
-    @PostMapping("/download/template/xls")
-    public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-        FileInputStream file = new FileInputStream(fileLocation);
-        HSSFWorkbook wb = new HSSFWorkbook(file);
+    @PostMapping("/download/last-version-xlsx")
+    public ResponseEntity<byte[]> generateLastVersionXlsxReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
+                return createExcelFileResponseEntity(report, outFileName);
 
-        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }
