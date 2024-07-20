@@ -42,6 +42,7 @@ import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import jakarta.validation.Valid;
+import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -215,7 +216,6 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
     }
 
     @PostMapping("/download/xlsx")
@@ -302,43 +302,47 @@ public class FinancialPlanController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<VersionResult> planFiles = planService.getListVersionWithPaginate(planId, pageable);
-        System.out.println(Arrays.toString(planFiles.toArray()));
-        // Response
-        ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
+            // Get data
+            List<VersionResult> planFiles = planService.getListVersionWithPaginate(planId, pageable);
 
-        long count = 0;
+            // Response
+            ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
 
-        if (planFiles != null) {
+            long count = 0;
 
-            // Count total record
-            count = planService.countDistinctListPlanVersionPaging(planId);
+            if (planFiles != null) {
 
-            // Mapping to TermPaginateResponse
-            planFiles.forEach(file -> response.getData().add(new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
+                // Count total record
+                count = planService.countDistinctListPlanVersionPaging(planId);
 
-        } else {
+                // Mapping to TermPaginateResponse
+                planFiles.forEach(file -> response.getData().add(new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete")

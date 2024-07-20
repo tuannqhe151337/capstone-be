@@ -221,11 +221,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                return planRepository.getFinancialPlanById(planId);
+                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
 
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
+
+                return planResult;
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
 
                 // Check department
                 if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
@@ -267,10 +276,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 // Check department
                 if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
                     return planRepository.getListVersionWithPaginate(planId, pageable);
+                } else {
+                    throw new UnauthorizedException("User can't view this plan detail because departmentId of plan not equal with departmentId of user");
                 }
+            } else {
+                throw new UnauthorizedException("Unauthorized to view plan");
             }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
         }
-        return null;
     }
 
     @Override
