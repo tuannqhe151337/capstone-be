@@ -114,7 +114,7 @@ public class AnnualReportController {
                 annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
 
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
             long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
