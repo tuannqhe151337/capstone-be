@@ -36,6 +36,14 @@ public class TermServiceImpl implements TermService {
     private final TermStatusRepository termStatusRepository;
 
     @Override
+    public long countDistinct(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+    }
+
+    @Override
     public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());

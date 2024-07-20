@@ -5,6 +5,7 @@ import com.example.capstone_project.repository.DepartmentRepository;
 
 import com.example.capstone_project.service.DepartmentService;
 
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -33,9 +34,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())
         || listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
             return departmentRepository.getListDepartmentWithPagination(query, pageable);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view list department");
         }
-
-        return null;
     }
 
     @Override
