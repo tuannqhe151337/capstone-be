@@ -1,7 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
-import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.AnnualReportRepository;
@@ -10,6 +8,7 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +47,13 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (!annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any annual report have id = " + annualReportId);
+            }
             return annualReportRepository.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
         }
-        return null;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
@@ -41,44 +42,50 @@ public class AnnualReportController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
+            // Get data
+            List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
 
-        // Response
-        ListPaginationResponse<AnnualReportExpenseResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<AnnualReportExpenseResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (reports != null) {
+            if (reports != null) {
 
-            // Count total record
-            count = annualReportService.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
+                // Count total record
+                count = annualReportService.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
 
-            // Mapping to TermPaginateResponse
-            reports.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
+                // Mapping to TermPaginateResponse
+                reports.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
 
-        } else {
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/list")
