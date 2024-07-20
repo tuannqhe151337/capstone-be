@@ -10,6 +10,8 @@ import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
@@ -94,18 +96,27 @@ public class ReportController {
 
         return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteReport(
             @Validated @RequestBody DeleteReportBody reportBody
     ) {
-        FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
+        try {
+            FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
 
-        if (deletedReport == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            if (deletedReport == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete report");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
         }
-
-        return ResponseEntity.ok("Delete successful plan id: " + deletedReport.getId());
     }
+
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<ReportResponse>> getListReport(

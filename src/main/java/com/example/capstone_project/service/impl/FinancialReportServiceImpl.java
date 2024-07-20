@@ -99,6 +99,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
+    @Transactional
     public FinancialReport deleteReport(Long reportId) {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_REPORT.getValue())) {
@@ -110,7 +111,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             return financialReport;
         } else {
-            return null;
+            throw new ResourceNotFoundException("Unauthorized to delete report");
         }
     }
 
