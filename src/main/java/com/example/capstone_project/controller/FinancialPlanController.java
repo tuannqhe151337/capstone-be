@@ -171,7 +171,7 @@ public class FinancialPlanController {
                 count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
 
                 // Mapping to TermPaginateResponse
-                expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+                expenses.forEach(expense -> response.getData().add(new PlanExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
