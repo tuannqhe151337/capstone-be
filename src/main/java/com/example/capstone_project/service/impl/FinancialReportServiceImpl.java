@@ -14,6 +14,7 @@ import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -132,20 +133,27 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         FinancialReport report = financialReportRepository.getReferenceById(reportId);
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
                 return expenseRepository.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
 
                 // But financial staff can only view plan of their department
-            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())
-                    && userDetail.getDepartmentId() == report.getDepartment().getId()) {
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
 
-                return expenseRepository.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
+                if (userDetail.getDepartmentId() == report.getDepartment().getId()) {
+
+                    return expenseRepository.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
+                } else {
+
+                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
+                }
             }
+            throw new UnauthorizedException("Unauthorized to view report");
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
         }
-        return null;
     }
 
     @Override
