@@ -6,9 +6,10 @@ import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
-import com.example.capstone_project.service.impl.MailRepository;
+import com.example.capstone_project.repository.impl.MailRepository;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,7 +107,7 @@ public class UserServiceTest {
                 .phoneNumber("0999988877")
                 .build();
         user2 = User.builder()
-                .id(userId)
+                .id(2L)
                 .username("username2")
                 .fullName("Nuto Nu")
                 .password("password")
@@ -131,9 +131,7 @@ public class UserServiceTest {
 
         SecurityContextHolder.setContext(securityContext);
     }
-
     //test get all user list
-
     @Test
     void testGetAllUsers_WithAuthority() {
         // Mock user authority check
@@ -141,27 +139,51 @@ public class UserServiceTest {
         when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
 
         // Mock repository response
-        List<User> expectedUsers = Arrays.asList(user2);
-        when(userRepository.getUserWithPagination(anyLong(), anyLong(), anyLong(), anyString(), any(Pageable.class)))
+        //suppose that any entered inputs will return this list
+        List<User> expectedUsers = Arrays.asList(user, user2);
+        when(userRepository.getUserWithPagination(1L, 1L, 1L, "username", pageable))
                 .thenReturn(expectedUsers);
 
         // Test getAllUsers method
-        List<User> actualUsers = userServiceImpl.getAllUsers(1L, 1L, 5L, "username2", pageable);
+        List<User> actualUsers = userServiceImpl.getAllUsers(1L, 1L, 1L, "username", pageable);
 
         // Verify repository method call
-        verify(userRepository).getUserWithPagination(1L, 1L, 5L, "username2", pageable);
+        verify(userRepository).getUserWithPagination(1L, 1L, 1L, "username", pageable);
 
         // Assert the result
         assertEquals(expectedUsers, actualUsers);
     }
+    @Test
+    void testGetAllUsers_WithoutAuthority() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(userId));
+        when(userAuthorityRepository.get(userId)).thenReturn((Set.of()));
 
+        UnauthorizedException exception = assertThrows(UnauthorizedException.class, () -> {
+            userServiceImpl.getAllUsers(1L, 1L, 1L, "username", pageable);
+        });
 
+        assertEquals("Unauthorized to view all users", exception.getMessage());
+        verify(userRepository, never()).getUserWithPagination(1L, 1L, 1L, "username", pageable);
+    }
+    @Test
+    void testGetAllUsers_EmptyResult() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(userId));
+        when(userAuthorityRepository.get(userId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
 
+//        // Mock repository response to return empty list
+//        when(userRepository.getUserWithPagination(anyLong(), anyLong(), anyLong(), anyString(), any(Pageable.class)))
+//                .thenReturn(Collections.emptyList());
 
+        // Test getAllUsers method
+        List<User> actualUsers = userServiceImpl.getAllUsers(1L, 1L, 1L, "username", pageable);
 
+        // Verify repository method call
+        verify(userRepository).getUserWithPagination(1L, 1L, 1L, "username", pageable);
 
-
-
-
+        // Assert the result
+        assertTrue(actualUsers.isEmpty());
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.example.capstone_project.service.impl;
+package com.example.capstone_project.repository.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
