@@ -83,8 +83,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                return financialReportRepository.getFinancialReportById(reportId);
-
+                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+                }
+                return planResult;
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
@@ -92,10 +95,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 // Check department
                 if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
                     return planResult;
+                } else {
+                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
                 }
             }
+            throw new UnauthorizedException("Unauthorized to view report");
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
         }
-        return null;
     }
 
     @Override
