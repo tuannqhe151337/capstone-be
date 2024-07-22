@@ -9,6 +9,7 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
@@ -95,6 +96,8 @@ public class ReportController {
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
