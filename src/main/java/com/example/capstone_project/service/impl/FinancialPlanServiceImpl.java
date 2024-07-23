@@ -305,7 +305,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public void approvalAllExpenses(Long planId) {
+    public void approvalAllExpenses(Long planId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -314,23 +314,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            List<FinancialPlanExpense> expenses = expenseRepository.getListExpense;
-            if (listExpenseId.size() == totalExpense) {
-
-                listExpenseId.forEach(expense -> {
-                    if (!expenseRepository.existsById(expense)) {
-                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
-                    } else {
-                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
-                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
-                        expenses.add(updateExpense);
-                    }
-
-                });
-                expenseRepository.saveAll(expenses);
-            } else {
-                throw new InvalidInputException("List expense Id invalid ");
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseByPlanId(planId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expense is empty");
             }
+            expenses.forEach(expense -> {
+                expense.setStatus(expenseStatusRepository.getReferenceById(3L));
+            });
+            expenseRepository.saveAll(expenses);
         } else {
             throw new UnauthorizedException("Unauthorized to approval plan");
         }
