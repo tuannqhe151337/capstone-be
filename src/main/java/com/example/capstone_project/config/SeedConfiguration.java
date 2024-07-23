@@ -618,7 +618,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
-                    .status(termStatus)
+                    .status(termStatus2)
                     .build();
 
             Term term2 = Term.builder()

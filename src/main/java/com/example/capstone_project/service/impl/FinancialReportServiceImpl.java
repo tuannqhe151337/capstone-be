@@ -137,9 +137,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
 
-        FinancialReport report = financialReportRepository.getReferenceById(reportId);
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+
+            FinancialReport report = financialReportRepository.getReferenceById(reportId);
+
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 

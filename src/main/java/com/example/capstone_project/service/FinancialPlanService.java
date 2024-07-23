@@ -2,8 +2,8 @@ package com.example.capstone_project.service;
 
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.entity.*;
+import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
+import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
@@ -57,4 +57,6 @@ public interface FinancialPlanService {
     byte[] getLastVersionBodyFileExcelXLSX(Long planId) throws Exception;
 
     String generateXLSXFileNameByPlanId(Long planId);
+
+    void approvalExpenses(List<Long> listExpenses) throws Exception;
 }

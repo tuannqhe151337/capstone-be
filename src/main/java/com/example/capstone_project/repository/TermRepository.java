@@ -49,4 +49,11 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
 
     @Override
     boolean existsById(Long aLong);
+
+    @Query( " SELECT term FROM Term term " +
+            " JOIN term.financialPlans plan " +
+            " JOIN plan.planFiles file " +
+            " WHERE  file.id = :fileId AND " +
+            " term.isDelete = false ")
+    Term getTermByFileId(Long fileId);
 }
