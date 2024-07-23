@@ -29,4 +29,6 @@ public interface FinancialPlanService {
     int getPlanVersionById(Long planId);
 
     void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+
+    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 }

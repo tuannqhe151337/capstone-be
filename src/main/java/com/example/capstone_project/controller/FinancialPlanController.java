@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
+import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
@@ -402,6 +403,21 @@ public class FinancialPlanController {
         try {
 
             planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PutMapping("/expense-deny")
+    public ResponseEntity<String> denyExpenses(
+            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
+        try {
+
+            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
