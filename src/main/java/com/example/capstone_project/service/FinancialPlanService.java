@@ -28,5 +28,5 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
-    void approvalExpenses(List<ApprovalExpenseBody> listExpenses);
+    void approvalExpenses(List<Long> listExpenses) throws Exception;
 }

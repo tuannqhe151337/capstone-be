@@ -6,17 +6,17 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
-import com.example.capstone_project.repository.FinancialPlanRepository;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.PlanStatusRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -45,6 +46,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserDetailRepository userDetailRepository;
     private final TermRepository termRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final FinancialPlanFileRepository financialPlanFileRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
 
 
     @Override
@@ -233,7 +236,39 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public void approvalExpenses(List<ApprovalExpenseBody> listExpenses) {
+    @Transactional
+    public void approvalExpenses(List<Long> listExpenses) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
 
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            List<FinancialPlanFile> files = financialPlanFileRepository.getFileOfListExpense(listExpenses);
+            if (files.size() == 1) {
+                // Check term status and plan due date
+                Term termInfo = termRepository.getTermByFileId(files.get(0).getId());
+                if (!termInfo.getPlanDueDate().isAfter(LocalDateTime.now())) {
+                    throw new InvalidInputException("Can't not approval expenses because plan due date is: " + termInfo.getPlanDueDate());
+                }
+                if (!termInfo.getStatus().getCode().equals(TermCode.IN_PROGRESS)) {
+                    throw new InvalidInputException("Term not start (In progress)");
+                }
+                listExpenses.forEach(expense -> {
+                    FinancialPlanExpense updateExpense = expenseRepository.findById(expense).orElseThrow(() -> new ResourceNotFoundException("Not found expense have id = " + expense));
+                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                    expenses.add(updateExpense);
+                });
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense not in same file");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
     }
 }

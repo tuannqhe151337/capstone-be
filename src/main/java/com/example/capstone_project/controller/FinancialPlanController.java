@@ -21,6 +21,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -54,6 +55,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -398,17 +400,16 @@ public class FinancialPlanController {
     public ResponseEntity<String> approvalExpenses(
             @Valid @RequestBody ListBody<ApprovalExpenseBody> body, BindingResult bindingResult) throws Exception {
         try {
-            List<ApprovalExpenseBody> listExpenses = body.getData();
-
+            List<ApprovalExpenseBody> listExpenseBodies = body.getData();
+            List<Long> listExpenses = new ArrayList<>();
+            listExpenseBodies.forEach(expense -> listExpenses.add(expense.getExpenseId()));
             planService.approvalExpenses(listExpenses);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
-        } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
-        } catch (InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }
