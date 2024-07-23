@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRepository {
 
@@ -27,8 +28,17 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " term.planDueDate >= :now AND " +
             " term.isDelete = false ")
     long countDistinctListTermWhenCreatePlan(@Param("query") String query,
-                                             @Param("close") String close,
-                                             @Param("now") LocalDateTime now, @Param("departmentId") Long departmentId);
+                                             @Param("close") String close, @Param("now") LocalDateTime now,
+                                             @Param("departmentId") Long departmentId);
+
+    @Query(value = "SELECT count(distinct (term.id)) FROM Term term " +
+            " WHERE term.name like %:query% AND " +
+            " term.status.name != :close AND " +
+            " term.planDueDate >= :now AND " +
+            " term.isDelete = false ")
+    long countDistinctListTermWhenCreatePlan(@Param("query") String query, @Param("close") String close,
+                                             @Param("now") LocalDateTime now);
+
     @Query(value = " SELECT count(distinct (term.id)) FROM Term term " +
             " WHERE term.name like %:query% AND " +
             " term.isDelete = false ")
@@ -39,4 +49,11 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
 
     @Override
     boolean existsById(Long aLong);
+
+    @Query( " SELECT term FROM Term term " +
+            " JOIN term.financialPlans plan " +
+            " JOIN plan.planFiles file " +
+            " WHERE  file.id = :fileId AND " +
+            " term.isDelete = false ")
+    Term getTermByFileId(Long fileId);
 }

@@ -14,7 +14,8 @@ import java.util.List;
 @Table(schema = "capstone_v2",name = "terms")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class Term extends BaseEntity{
@@ -51,7 +52,7 @@ public class Term extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
-    private TermStatus status; //trong day da co isDelete roi
+    private TermStatus status;
 
     @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialPlan> financialPlans;
