@@ -1,5 +1,6 @@
 package term;
 
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -24,6 +25,7 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -199,6 +203,63 @@ public class TermServiceTest {
         verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
         verify(termRepository, times(1)).save(term);
     }
+    @Test
+    public void testGetListTermPaging_withAuthority() {
+        // Given
+        List<Term> terms = Arrays.asList(term1, term2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Long statusId = 1L;
+
+        when(UserHelper.getUserId()).thenReturn(1);
+        when(userAuthorityRepository.get(1)).thenReturn((Set.of(AuthorityCode.VIEW_TERM.getValue())));
+        when(termRepository.getListTermPaging(statusId, "", pageable)).thenReturn(terms);
+
+        // When
+        List<Term> result = termServiceImpl.getListTermPaging(statusId, "", pageable);
+
+        // Then
+        Assertions.assertNotNull(result);
+        assertEquals(2, result.size());
+        Assertions.assertTrue(result.contains(term1));
+        Assertions.assertTrue(result.contains(term2));
+    }
+    @Test
+    public void testGetListTermPaging_withoutAuthority() {
+        // Given
+        List<Term> terms = Arrays.asList(term1, term2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Long statusId = 1L;
+
+        when(UserHelper.getUserId()).thenReturn(1);
+        when(userAuthorityRepository.get(1)).thenReturn((Set.of(AuthorityCode.CREATE_TERM.getValue())));
+
+        // When
+        List<Term> result = termServiceImpl.getListTermPaging(statusId, "", pageable);
+        // Then
+        assertNull(result);
+
+    }
+    @Test
+    public void testGetListTermPaging_checkRepositoryCall() {
+        // Given
+        List<Term> terms = Arrays.asList(term1, term2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Long statusId = 1L;
+
+        when(UserHelper.getUserId()).thenReturn(1);
+        when(userAuthorityRepository.get(1)).thenReturn((Set.of(AuthorityCode.VIEW_TERM.getValue())));
+        when(termRepository.getListTermPaging(statusId, "query", pageable)).thenReturn(terms);
+
+        // When
+        termServiceImpl.getListTermPaging(statusId, "query", pageable);
+
+        // Then
+        verify(termRepository, times(1)).getListTermPaging(statusId, "query", pageable); // Đảm bảo phương thức được gọi với tham số chính xác
+    }
+
+
+
+
 
 
 }
