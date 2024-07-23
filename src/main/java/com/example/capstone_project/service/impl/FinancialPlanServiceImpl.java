@@ -237,7 +237,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public void approvalExpenses(List<Long> listExpenses) throws Exception {
+    public void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -248,27 +248,25 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense in one file
-            List<FinancialPlanFile> files = financialPlanFileRepository.getFileOfListExpense(listExpenses);
-            if (files.size() == 1) {
-                // Check term status and plan due date
-                Term termInfo = termRepository.getTermByFileId(files.get(0).getId());
-                if (!termInfo.getPlanDueDate().isAfter(LocalDateTime.now())) {
-                    throw new InvalidInputException("Can't not approval expenses because plan due date is: " + termInfo.getPlanDueDate());
-                }
-                if (!termInfo.getStatus().getCode().equals(TermCode.IN_PROGRESS)) {
-                    throw new InvalidInputException("Term not start (In progress)");
-                }
+            long totalExpense = expenseRepository.countTotalExpenseInPlanLastVersion(planId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenses.size() == totalExpense) {
+
                 listExpenses.forEach(expense -> {
-                    FinancialPlanExpense updateExpense = expenseRepository.findById(expense).orElseThrow(() -> new ResourceNotFoundException("Not found expense have id = " + expense));
-                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
-                    expenses.add(updateExpense);
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                        expenses.add(updateExpense);
+                    }
+
                 });
                 expenseRepository.saveAll(expenses);
             } else {
-                throw new InvalidInputException("List expense not in same file");
+                throw new InvalidInputException("List expense Id invalid ");
             }
         } else {
-            throw new UnauthorizedException("Unauthorized to view plan");
+            throw new UnauthorizedException("Unauthorized to approval plan");
         }
     }
 }

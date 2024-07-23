@@ -401,7 +401,7 @@ public class FinancialPlanController {
             @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
         try {
 
-            planService.approvalExpenses(body.getListExpenseId());
+            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
