@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface CustomTermRepository {
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable, Long departmentId);
-
     List<Term> getListTermPaging(Long statusID, String query, Pageable pageable);
+
+
+
 }
