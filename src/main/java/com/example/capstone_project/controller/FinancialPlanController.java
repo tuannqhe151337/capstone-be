@@ -398,12 +398,10 @@ public class FinancialPlanController {
 
     @PutMapping("/expense-approval")
     public ResponseEntity<String> approvalExpenses(
-            @Valid @RequestBody ListBody<ApprovalExpenseBody> body, BindingResult bindingResult) throws Exception {
+            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
         try {
-            List<ApprovalExpenseBody> listExpenseBodies = body.getData();
-            List<Long> listExpenses = new ArrayList<>();
-            listExpenseBodies.forEach(expense -> listExpenses.add(expense.getExpenseId()));
-            planService.approvalExpenses(listExpenses);
+
+            planService.approvalExpenses(body.getListExpenseId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {

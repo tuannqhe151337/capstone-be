@@ -6,11 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ApprovalExpenseBody {
-    @NotNull(message = "Term Id can not be null")
-    private Long expenseId;
+    @NotNull(message = "List expense id can not be null")
+    private List<Long> listExpenseId;
 }
