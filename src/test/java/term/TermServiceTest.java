@@ -168,7 +168,9 @@ public class TermServiceTest {
         verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
         verify(termRepository, times(1)).save(term);
     }
-    //list term management
+    //term schedule
+
+
 
 
 
