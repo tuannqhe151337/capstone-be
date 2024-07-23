@@ -13,9 +13,9 @@ public interface TermService {
 
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception;
 
-    List<Term> getListTermPaging(String query, Pageable pageable);
+    List<Term> getListTermPaging(Long statusId, String query, Pageable pageable);
 
-    long countDistinctListTermPaging(String query);
+    long countDistinctListTermPaging(Long statusId, String query);
 
     long countDistinct(String query) throws Exception;
 

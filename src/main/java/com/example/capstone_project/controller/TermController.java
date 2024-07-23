@@ -130,6 +130,7 @@ public class TermController {
 
     @GetMapping("/plan-paging-term")
     public ResponseEntity<ListPaginationResponse<TermPaginateResponse>> getListTermPaging(
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -149,7 +150,7 @@ public class TermController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<Term> terms = termService.getListTermPaging(query, pageable);
+        List<Term> terms = termService.getListTermPaging(statusId, query, pageable);
 
         // Response
         ListPaginationResponse<TermPaginateResponse> response = new ListPaginationResponse<>();
@@ -159,7 +160,7 @@ public class TermController {
         if (terms != null) {
 
             // Count total record
-            count = termService.countDistinctListTermPaging(query);
+            count = termService.countDistinctListTermPaging(statusId, query);
 
             // Mapping to TermPaginateResponse
             terms.forEach(term -> response.getData().add( new TermPaginateResponseMapperImpl().mapToTermPaginateResponseMapper(term)));
@@ -183,6 +184,7 @@ public class TermController {
 
     @GetMapping("/plan-create-select-term")
     public ResponseEntity<ListPaginationResponse<TermWhenCreatePlanResponse>> getListTermWhenCreatePlan(
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,

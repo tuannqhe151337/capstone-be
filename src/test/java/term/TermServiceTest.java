@@ -61,6 +61,8 @@ public class TermServiceTest {
     private Role role;
 
     private Term term;
+    private Term term1;
+    private Term term2;
 
     private long userId = 1L;
     private User user;
@@ -114,6 +116,25 @@ public class TermServiceTest {
                 .duration(TermDuration.HALF_YEARLY)
                 .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
+                .user(user)
+                .status(termStatus)
+                .build();
+        term1 = Term.builder()
+                .id(4L)
+                .name("Winterrrr 2024")
+                .duration(TermDuration.HALF_YEARLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(1))
+                .user(user)
+                .status(termStatus)
+                .build();
+
+        term2 = Term.builder()
+                .id(5L)
+                .name("Winnnnter 2024")
+                .duration(TermDuration.HALF_YEARLY)
+                .startDate(LocalDateTime.now().minusDays(2))
+                .endDate(LocalDateTime.now())
                 .user(user)
                 .status(termStatus)
                 .build();
