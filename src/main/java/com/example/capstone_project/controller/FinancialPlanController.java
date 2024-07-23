@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
@@ -28,6 +29,8 @@ import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -64,8 +67,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -386,8 +387,8 @@ public class FinancialPlanController {
     public ResponseEntity<Object> confirmExpenses(
             @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         try {
-        // Get user detail
-        UserDetail userDetail = planService.getUserDetail();
+            // Get user detail
+            UserDetail userDetail = planService.getUserDetail();
 
             // Get term
             Term term = planService.getTermById(planBody.getTermId());
@@ -453,6 +454,20 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PutMapping("/expense-approval")
+    public ResponseEntity<String> approvalExpenses(
+            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+        try {
+            planService.approvalExpenses(body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }
