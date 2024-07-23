@@ -67,6 +67,7 @@ public class TermServiceTest {
     private Term term;
     private Term term1;
     private Term term2;
+    private Term updateTerm;
 
     private long userId = 1L;
     private User user;
@@ -142,7 +143,15 @@ public class TermServiceTest {
                 .user(user)
                 .status(termStatus)
                 .build();
-
+        updateTerm = Term.builder()
+                .id(5L)
+                .name("Winnnnter 2024")
+                .duration(TermDuration.HALF_YEARLY)
+                .startDate(LocalDateTime.now().minusDays(2))
+                .endDate(LocalDateTime.now())
+                .user(user)
+                .status(termStatus)
+                .build();
 
 
         // Mock the SecurityContextHolder to return a valid user ID
@@ -203,6 +212,7 @@ public class TermServiceTest {
         verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
         verify(termRepository, times(1)).save(term);
     }
+
     @Test
     public void testGetListTermPaging_withAuthority() {
         // Given
@@ -223,6 +233,7 @@ public class TermServiceTest {
         Assertions.assertTrue(result.contains(term1));
         Assertions.assertTrue(result.contains(term2));
     }
+
     @Test
     public void testGetListTermPaging_withoutAuthority() {
         // Given
@@ -239,6 +250,7 @@ public class TermServiceTest {
         assertNull(result);
 
     }
+
     @Test
     public void testGetListTermPaging_checkRepositoryCall() {
         // Given
@@ -258,8 +270,25 @@ public class TermServiceTest {
     }
 
 
+    @Test
+    void testUpdateTerm_success() throws Exception {
+        // Given
+        when(UserHelper.getUserId()).thenReturn(1);
+        when(userRepository.findUserById(user.getId())).thenReturn(Optional.ofNullable(updateTerm.getUser()));
+        when(userAuthorityRepository.get(1)).thenReturn((Set.of(AuthorityCode.EDIT_TERM.getValue())));
+        // Mocking the repository methods
+        when(termRepository.findById(5L)).thenReturn(Optional.of(term));
+        when(termRepository.save(any(Term.class))).thenReturn(updateTerm);
 
+        // When
+        Term result = termServiceImpl.updateTerm(updateTerm);
 
+        // Then
+        assertNotNull(result);
+        assertEquals(updateTerm.getStartDate(), result.getStartDate());
+        assertNotNull(result.getEndDate()); // Ensure endDate is calculated
+        verify(termRepository, times(1)).save(updateTerm); // Verify save was called
+    }
 
 
 }
