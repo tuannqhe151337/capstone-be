@@ -31,4 +31,6 @@ public interface FinancialPlanService {
     void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+
+    void approvalAllExpenses(Long planId);
 }
