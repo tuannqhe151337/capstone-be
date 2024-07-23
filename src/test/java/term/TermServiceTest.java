@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,6 +16,7 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 
 import com.example.capstone_project.service.impl.TermServiceImpl;
 import com.example.capstone_project.service.impl.UserServiceImpl;
+import com.example.capstone_project.service.scheduler.TermSchedulerService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.enums.TermDuration;
@@ -32,6 +35,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class TermServiceTest {
@@ -47,14 +51,17 @@ public class TermServiceTest {
     @Mock
     private TermRepository termRepository;
 
+
     @InjectMocks
     private TermServiceImpl termServiceImpl;
+
 
     private Position position;
     private Department department;
     private Role role;
 
     private Term term;
+
     private long userId = 1L;
     private User user;
     private TermStatus termStatus;
@@ -101,7 +108,7 @@ public class TermServiceTest {
                 .id(1L).
                 name("Not started")
                 .code(TermCode.NEW).build();
-       term = Term.builder()
+        term = Term.builder()
                 .id(4L)
                 .name("Winter 2024")
                 .duration(TermDuration.HALF_YEARLY)
@@ -111,6 +118,8 @@ public class TermServiceTest {
                 .status(termStatus)
                 .build();
 
+
+
         // Mock the SecurityContextHolder to return a valid user ID
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
@@ -119,6 +128,7 @@ public class TermServiceTest {
         when(authentication.getPrincipal()).thenReturn(actorId.toString());
 
         SecurityContextHolder.setContext(securityContext);
+
     }
 
     @Test
@@ -127,7 +137,7 @@ public class TermServiceTest {
         when(userAuthorityRepository.get(actorId)).thenReturn(Set.of());
 
         Exception exception = assertThrows(UnauthorizedException.class, () -> {
-          termServiceImpl.createTerm(term);
+            termServiceImpl.createTerm(term);
         });
 
         assertEquals("Unauthorized to create term", exception.getMessage());
@@ -168,11 +178,11 @@ public class TermServiceTest {
         verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
         verify(termRepository, times(1)).save(term);
     }
-    //term schedule
-
-
-
-
 
 
 }
+
+
+
+
+
