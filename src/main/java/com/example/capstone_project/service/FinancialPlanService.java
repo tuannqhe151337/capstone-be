@@ -1,5 +1,6 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.entity.Term;
@@ -26,4 +27,6 @@ public interface FinancialPlanService {
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
     int getPlanVersionById(Long planId);
+
+    void approvalExpenses(List<ApprovalExpenseBody> listExpenses);
 }

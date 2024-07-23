@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
@@ -382,6 +383,24 @@ public class FinancialPlanController {
             if (savedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
+        } catch (InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+        }
+    }
+
+    @PutMapping("/expense-approval")
+    public ResponseEntity<String> approvalExpenses(
+            @Valid @RequestBody ListBody<ApprovalExpenseBody> body, BindingResult bindingResult) throws Exception {
+        try {
+            List<ApprovalExpenseBody> listExpenses = body.getData();
+
+            planService.approvalExpenses(listExpenses);
 
             return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
         } catch (UnauthorizedException e) {
