@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class DepartmentPaginateResponse {
-    private long departmentId;
+    private Long departmentId;
     private String name;
 }

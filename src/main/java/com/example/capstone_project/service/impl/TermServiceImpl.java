@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+
 import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserDetail;
@@ -35,6 +36,14 @@ public class TermServiceImpl implements TermService {
     private final TermStatusRepository termStatusRepository;
 
     @Override
+    public long countDistinct(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+    }
+
+    @Override
     public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
@@ -57,18 +66,88 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
+
+    public Term updateTerm(Term term) throws Exception {
+
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized to update term");
+        }
+        //get current term to extract its status
+
+        Term currentterm = termRepository.findById(term.getId()).
+                orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + term.getId()));
+        LocalDateTime startDate = term.getStartDate();
+        if (!currentterm.getStartDate().equals(startDate)) {
+            //generate new end date from new startdate
+            LocalDateTime endDate = term.getDuration().calculateEndDate(startDate);
+            term.setEndDate(endDate);
+        }
+
+        //check plan due date
+        if (term.getPlanDueDate() != null && term.getEndDate() != null &&
+                ChronoUnit.DAYS.between(term.getEndDate(), term.getPlanDueDate()) > 5) {
+            throw new InvalidDateException("Plan due date must be within 5 days after end date.");
+        }
+
+        //status
+        term.setStatus(currentterm.getStatus());
+        //create-by
+        User userby = userRepository.findUserById(userId).get();
+        term.setUser(userby);
+
+        return termRepository.save(term);
+    }
+
+    @Override
+    public void deleteTerm(Long id) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.DELETE_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        Term currentTerm = termRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
+        currentTerm.setDelete(true);
+        termRepository.save(currentTerm);
+
+    }
+
+    @Override
     public Term findTermById(Long id) throws Exception {
         long userId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
-        }else{
+        } else {
             return term;
         }
 
+    }
+
+    @Override
+    public void startTermManually(Long termId) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.START_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized to start term");
+        }
+        Term term = termRepository.findTermById(termId);
+        if (term == null) {
+            throw new ResourceNotFoundException("Term not found");
+        }
+        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+        term.setStatus(termStatus);
+        term.setStartDate(LocalDateTime.now());
+        termRepository.save(term);
+    }
+
+    @Override
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
+        term.setStatus(termStatus);
+        termRepository.save(term);
     }
 
     @Override
@@ -99,7 +178,6 @@ public class TermServiceImpl implements TermService {
         term.setEndDate(endTime);
 
         termRepository.save(term);
-
     }
 
     @Override
