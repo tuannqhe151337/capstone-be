@@ -13,10 +13,7 @@ import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.responses.ListResponse;
-import com.example.capstone_project.controller.responses.ListPaginationResponse;
-import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
@@ -31,8 +28,6 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -40,7 +35,6 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
-import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
@@ -57,19 +51,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @RestController
@@ -530,5 +520,21 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
+    }
+
+    @PutMapping("/submit-for-review")
+    private ResponseEntity<String> submitPlanForReview(
+            @Valid @RequestBody SubmitPlanBody submitPlanBody, BindingResult bindingResult
+    ) {
+        try {
+            planService.submitPlanForReview(submitPlanBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }

@@ -53,13 +53,15 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
     boolean existsById(Long aLong);
 
     @Query(value = " SELECT term FROM Term term " +
-            " WHERE Term.status.code = :termCode AND " +
+            " JOIN term.status status " +
+            " WHERE status.code = :termCode AND " +
             " cast(term.startDate as localdate)  = cast(:now as localdate) AND " +
             " term.isDelete = false ")
     List<Term> getListTermNeedToStart(TermCode termCode, LocalDateTime now);
 
     @Query(value = " SELECT term FROM Term term " +
-            " WHERE Term.status.code = :termCode AND " +
+            " JOIN term.status status " +
+            " WHERE status.code = :termCode AND " +
             " cast(term.startDate as localdate)  = cast(:now as localdate) AND " +
             " term.isDelete = false ")
     List<Term> getListTermNeedToClose(TermCode termCode, LocalDateTime now);

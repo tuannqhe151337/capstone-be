@@ -67,4 +67,6 @@ public interface FinancialPlanService {
 
     List<ExpenseStatus> getListExpenseStatus();
 
+
+    void submitPlanForReview(Long planId) throws Exception;
 }

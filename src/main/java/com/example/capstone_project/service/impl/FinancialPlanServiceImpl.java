@@ -16,10 +16,7 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -751,6 +748,38 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             return expenseStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
 
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
+
+    @Override
+    public void submitPlanForReview(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.SUBMIT_PLAN_FOR_REVIEW.getValue())) {
+            // Check exist
+            FinancialPlan plan = planRepository.findById(planId).orElseThrow(() -> new ResourceNotFoundException("Not found any plan have id = " + planId));
+            // Check department
+            if (plan.getDepartment().getId() == userDetail.getDepartmentId() &&
+                    plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
+                List<FinancialPlanExpense> listExpenseNeedToSubmit = new ArrayList<>();
+                expenseRepository.getListExpenseNewInLastVersion(planId).forEach(expense -> {
+                    // Change expense status from new to waiting for approval - 2L
+                    expense.setStatus(expenseStatusRepository.getReferenceById(2L));
+                    listExpenseNeedToSubmit.add(expense);
+                });
+                expenseRepository.saveAll(listExpenseNeedToSubmit);
+                // Change plan status
+                plan.setStatus(planStatusRepository.getReferenceById(2L));
+                planRepository.save(plan);
+            } else {
+                throw new UnauthorizedException("User can't submit this plan because departmentId of plan not equal with departmentId of user");
+            }
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");
         }
