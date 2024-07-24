@@ -1,13 +1,9 @@
 package com.example.capstone_project.service.scheduler;
 
-import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.PlanStatus;
-import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.repository.FinancialPlanRepository;
-import com.example.capstone_project.repository.FinancialReportExpenseRepository;
-import com.example.capstone_project.repository.PlanStatusRepository;
-import com.example.capstone_project.repository.TermRepository;
+import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.service.TermService;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +25,8 @@ public class TermSchedulerService {
     private final TermRepository termRepository;
     private final FinancialPlanRepository planRepository;
     private final PlanStatusRepository planStatusRepository;
-    private final FinancialReportExpenseRepository expenseRepository;
+    private final FinancialPlanExpenseRepository expenseRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
 
 
     @Scheduled(cron = "0 55 20 * * *") // Execute at 12:00 AM every day
@@ -37,7 +34,7 @@ public class TermSchedulerService {
     @Async
     public void startTerm() throws Exception {
         //START TERM
-        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NOT_STARTED, LocalDateTime.now());
+        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NEW, LocalDateTime.now());
         //change status to 2 (IN_PROGRESS)
         if (terms != null) {
             for (Term term : terms) {
@@ -58,16 +55,31 @@ public class TermSchedulerService {
                 termService.updateTermStatus(term, 3L);
 
                 List<FinancialPlan> listPlanNeedToClose = new ArrayList<>();
+                List<FinancialPlanExpense> listExpenseNeedToClose = new ArrayList<>();
                 planRepository.findAllByTermId(term.getId()).forEach(plan -> {
                     if (plan.getStatus().getCode().equals(PlanStatusCode.WAITING_FOR_REVIEWED)
                             || plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
+
                         // 3L - Reviewed
                         plan.setStatus(planStatusRepository.getReferenceById(3L));
+
                         // Change status expense
+                        expenseRepository.getListExpenseNeedToCloseByPlanId(plan.getId(), ExpenseStatusCode.WAITING_FOR_APPROVAL).forEach(expense -> {
+                            // Change expense status from waiting to deny
+                            expense.setStatus(expenseStatusRepository.getReferenceById(4L));
+                            listExpenseNeedToClose.add(expense);
+                        });
                         listPlanNeedToClose.add(plan);
                     }
-                });
 
+                    expenseRepository.saveAll(listExpenseNeedToClose);
+                    // Create new report
+                    FinancialReport report = FinancialReport.builder()
+                            .name()
+                            .month()
+                            .term()
+                            .reportExpenses().build();
+                });
                 planRepository.saveAll(listPlanNeedToClose);
 
                 // Generate report

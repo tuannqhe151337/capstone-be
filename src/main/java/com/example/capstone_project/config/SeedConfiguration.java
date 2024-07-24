@@ -40,12 +40,16 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository
     ) {
         return args -> {
+            if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
+                return;
+            }
+
             //Term Status - fixed code
             TermStatus termStatus = TermStatus.
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NOT_STARTED).build();
+                    .code(TermCode.NEW).build();
 
             //Term Status - fixed code
             TermStatus termStatus2 = TermStatus.
@@ -575,7 +579,7 @@ public class SeedConfiguration {
                     .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
                     .user(user1)
-                    .status(termStatus)
+                    .status(termStatus2)
                     .build();
 
             Term term2 = Term.builder()
