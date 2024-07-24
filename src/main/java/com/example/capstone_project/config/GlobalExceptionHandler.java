@@ -19,14 +19,14 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        @ExceptionHandler(ConstraintViolationException.class)
-        @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-        public ResponseEntity<List<ExceptionResponse>> handleConstraintViolationException(Exception ex, WebRequest request) {
-            String exceptionMessage = ex.getMessage();
-            List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse(exceptionMessage);
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ResponseEntity<List<ExceptionResponse>> handleConstraintViolationException(Exception ex, WebRequest request) {
+        String exceptionMessage = ex.getMessage();
+        List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse(exceptionMessage);
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
-        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
