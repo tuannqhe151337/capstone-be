@@ -392,4 +392,31 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
         }
     }
+
+    @GetMapping("/expense-status")
+    public ResponseEntity<ListResponse<StatusResponse>> getListExpenseStatus() {
+        try {
+            // Get data
+            List<ExpenseStatus> costTypes = planService.getListExpenseStatus();
+
+            // Response
+            ListResponse<StatusResponse> responses = new ListResponse<>();
+
+            if (costTypes != null) {
+
+                // Mapping to CostTypeResponse
+                responses.setData(costTypes.stream().map(status -> {
+                    return new PlanStatusMapperImpl().mapExpenseStatusToStatusResponseMapping(status);
+                }).toList());
+            } else {
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(responses);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+    }
 }

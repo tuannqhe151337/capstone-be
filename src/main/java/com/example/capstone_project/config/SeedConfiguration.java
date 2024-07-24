@@ -260,7 +260,7 @@ public class SeedConfiguration {
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Emoaihl23@gmail.com")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002,11,11, 0,0,0))
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user3 = User.builder()
@@ -663,7 +663,7 @@ public class SeedConfiguration {
                     .status(planStatus1)
                     .build();
 
-            planRepository.saveAll(List.of(financialPlan1,financialPlan2,financialPlan3,financialPlan4,financialPlan5));
+            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
 
             CostType costType1 = CostType.builder()
                     .name("Administration cost")
@@ -699,21 +699,25 @@ public class SeedConfiguration {
 
             ExpenseStatus expenseStatus1 = ExpenseStatus.builder()
                     .id(1L)
+                    .name("New")
                     .code(ExpenseStatusCode.NEW)
                     .build();
 
             ExpenseStatus expenseStatus2 = ExpenseStatus.builder()
                     .id(2L)
+                    .name("Waiting for approval")
                     .code(ExpenseStatusCode.WAITING_FOR_APPROVAL)
                     .build();
 
             ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
                     .id(3L)
+                    .name("Approved")
                     .code(ExpenseStatusCode.APPROVED)
                     .build();
 
             ExpenseStatus expenseStatus4 = ExpenseStatus.builder()
                     .id(4L)
+                    .name("Denied")
                     .code(ExpenseStatusCode.DENIED)
                     .build();
 

@@ -5,10 +5,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
-import com.example.capstone_project.repository.FinancialPlanRepository;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.PlanStatusRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanDetailResult;
@@ -44,6 +41,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserDetailRepository userDetailRepository;
     private final TermRepository termRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
 
 
     @Override
@@ -229,5 +227,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    public List<ExpenseStatus> getListExpenseStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            return expenseStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
     }
 }
