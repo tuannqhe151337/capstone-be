@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.PlanStatus;
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.FinancialReportExpenseRepository;
 import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.service.TermService;
@@ -28,6 +29,7 @@ public class TermSchedulerService {
     private final TermRepository termRepository;
     private final FinancialPlanRepository planRepository;
     private final PlanStatusRepository planStatusRepository;
+    private final FinancialReportExpenseRepository expenseRepository;
 
 
     @Scheduled(cron = "0 55 20 * * *") // Execute at 12:00 AM every day
@@ -61,10 +63,17 @@ public class TermSchedulerService {
                             || plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
                         // 3L - Reviewed
                         plan.setStatus(planStatusRepository.getReferenceById(3L));
+                        // Change status expense
                         listPlanNeedToClose.add(plan);
                     }
                 });
+
                 planRepository.saveAll(listPlanNeedToClose);
+
+                // Generate report
+                listPlanNeedToClose.forEach(plan -> {
+
+                });
             }
         }
     }
