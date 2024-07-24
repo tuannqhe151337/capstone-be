@@ -46,7 +46,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 // Financial staff only see list-plan of their department
                 departmentId = userDetail.getDepartmentId();
@@ -54,7 +54,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             return financialReportRepository.getReportWithPagination(query, termId, departmentId, statusId, pageable);
         } else {
-            throw new UnauthorizedException("Unauthorized to create plan");
+            throw new UnauthorizedException("Unauthorized to view report");
         }
 
     }
@@ -68,14 +68,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority or role
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())
-                && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-            departmentId = userDetail.getDepartmentId();
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                departmentId = userDetail.getDepartmentId();
+            }
+            return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
         } else {
             throw new UnauthorizedException("Unauthorized to create plan");
         }
 
-        return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
     }
 
     @Override
