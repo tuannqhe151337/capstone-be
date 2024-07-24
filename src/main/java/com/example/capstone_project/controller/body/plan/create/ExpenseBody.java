@@ -15,8 +15,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExpenseBody {
     @NotEmpty(message = "Name can not be empty")
     @Size(max = 100, message = "Expense name must be less than 100 characters")
