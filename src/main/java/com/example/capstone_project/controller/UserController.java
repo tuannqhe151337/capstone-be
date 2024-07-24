@@ -65,42 +65,46 @@ public class UserController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
         // Handling query
         if (query == null) {
             query = "";
         }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
-        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
+            // Get data
+            List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+            long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
 
-        // Response
-        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
 
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                //mapperToUserResponse
-                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+            if (users != null && !users.isEmpty()) {
+                for (User user : users) {
+                    //mapperToUserResponse
+                    response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+                }
             }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     // build create user REST API
@@ -204,16 +208,19 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
+
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
 
         try {
             userService.changePassword(changePasswordBody);
+
             return ResponseEntity.status(HttpStatus.OK).body("Change password success");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
+
     }
 
     @PostMapping("/auth/reset-password")

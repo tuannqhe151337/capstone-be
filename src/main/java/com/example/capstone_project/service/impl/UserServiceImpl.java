@@ -83,9 +83,9 @@ public class UserServiceImpl implements UserService {
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
             return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
+        }else{
+            throw new UnauthorizedException("Unauthorized to view all users");
         }
-
-        return null;
     }
 
     @Override
