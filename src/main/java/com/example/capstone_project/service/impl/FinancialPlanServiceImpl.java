@@ -259,9 +259,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                         updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
                         expenses.add(updateExpense);
                     }
-
                 });
                 expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
