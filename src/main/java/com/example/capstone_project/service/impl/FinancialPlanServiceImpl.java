@@ -695,4 +695,28 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             throw new UnauthorizedException("Unauthorized to approval plan");
         }
     }
+
+    @Override
+    public void approvalAllExpenses(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseByPlanId(planId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expense is empty");
+            }
+            expenses.forEach(expense -> {
+                expense.setStatus(expenseStatusRepository.getReferenceById(3L));
+            });
+            expenseRepository.saveAll(expenses);
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
+    }
+
 }

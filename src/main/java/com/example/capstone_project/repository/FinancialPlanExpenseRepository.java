@@ -59,4 +59,16 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     long countTotalExpenseInPlanLastVersion(Long planId, List<Long> listExpenses, TermCode inProgress, LocalDateTime now);
+    @Query( " SELECT expense FROM FinancialPlanExpense expense " +
+            " JOIN expense.files fileExpense " +
+            " JOIN fileExpense.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN term.status status " +
+            " WHERE plan.id = :planId AND " +
+            " status.code = :inProgress AND " +
+            " term.planDueDate >= :now AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " expense.isDelete = false ")
+    List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
 }
