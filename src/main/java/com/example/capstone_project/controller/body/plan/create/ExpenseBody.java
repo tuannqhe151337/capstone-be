@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class ExpenseBody {
     @NotNull(message = "Cost type id can not be null")
     private Long costTypeId;
 
-    @NotNull( message = "Unit price can't be null")
+    @NotNull(message = "Unit price can't be null")
     @Range(min = 0, message = "Unit price can not be negative")
     private BigDecimal unitPrice;
 

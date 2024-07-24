@@ -95,4 +95,13 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     List<FinancialPlanExpense> getListExpenseLastVersionByPlanId(Long planId);
+
+    @Query(value = "SELECT expenses FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " WHERE plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.isDelete = false AND expenses.isDelete = false ")
+    List<FinancialPlanExpense> getListExpenseNewInLastVersion(Long planId);
 }
