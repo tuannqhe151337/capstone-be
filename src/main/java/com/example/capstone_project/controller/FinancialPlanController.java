@@ -5,13 +5,11 @@ import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
+import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
@@ -19,18 +17,14 @@ import com.example.capstone_project.controller.responses.plan.version.VersionRes
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
-import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +33,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -384,6 +375,21 @@ public class FinancialPlanController {
             }
 
             return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
+        } catch (InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+        }
+    }
+
+    @PutMapping("/submit-for-review")
+    private ResponseEntity<String> submitPlanForReview(
+            @Valid @RequestBody SubmitPlanBody submitPlanBody, BindingResult bindingResult
+    ) {
+        try {
+            planService.submitPlanForReview(submitPlanBody.getPlanId());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
         } catch (DuplicateKeyException e) {

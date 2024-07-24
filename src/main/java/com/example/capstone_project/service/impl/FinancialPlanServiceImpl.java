@@ -5,10 +5,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
-import com.example.capstone_project.repository.FinancialPlanRepository;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.PlanStatusRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.PlanDetailResult;
@@ -44,6 +41,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserDetailRepository userDetailRepository;
     private final TermRepository termRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final DepartmentRepository departmentRepository;
 
 
     @Override
@@ -229,5 +227,27 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    public void submitPlanForReview(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.SUBMIT_PLAN_FOR_REVIEW.getValue())) {
+            // Check exist
+            FinancialPlan plan = planRepository.findById(planId).orElseThrow(() -> new ResourceNotFoundException("Not found any plan have id = " + planId);)
+            // Check department
+            if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
+
+            } else {
+                throw new UnauthorizedException("User can't submit this plan because departmentId of plan not equal with departmentId of user");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
     }
 }
