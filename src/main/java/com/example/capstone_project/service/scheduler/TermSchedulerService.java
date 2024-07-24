@@ -1,8 +1,14 @@
 package com.example.capstone_project.service.scheduler;
 
+import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.PlanStatus;
 import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.PlanStatusRepository;
 import com.example.capstone_project.repository.TermRepository;
 import com.example.capstone_project.service.TermService;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.scheduling.annotation.Async;
@@ -12,47 +18,54 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class TermSchedulerService {
-private final TermService termService;
-private final TermRepository termRepository;
+    private final TermService termService;
+    private final TermRepository termRepository;
+    private final FinancialPlanRepository planRepository;
+    private final PlanStatusRepository planStatusRepository;
 
-    @Scheduled(cron =  "0 55 20 * * *") // Execute at 12:00 AM every day
+
+    @Scheduled(cron = "0 55 20 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void startTerm() throws Exception {
-  //START TERM
-      List<Term> terms = termRepository.findAll();
+        //START TERM
+        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NOT_STARTED, LocalDateTime.now());
         //change status to 2 (IN_PROGRESS)
-        for(Term term : terms) {
-            //check term status not started (id 1) - turn to in progress (id 2)
-            if(term.getStatus().getId() == 1 &&
-                    //date-month-year equals today, now
-                    term.getStartDate().toLocalDate().isEqual(LocalDate.now())){
+        if (terms != null) {
+            for (Term term : terms) {
                 termService.updateTermStatus(term, 2L);
             }
         }
     }
-    @Scheduled(cron =  "0 55 20 * * *") // Execute at 12:00 AM every day
+
+    @Scheduled(cron = "0 55 20 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void endTerm() throws Exception {
         //START TERM
-        List<Term> terms = termRepository.findAll();
+        List<Term> terms = termRepository.getListTermNeedToClose(TermCode.IN_PROGRESS, LocalDateTime.now());
         //change status to 3 (CLOSED)
-        for(Term term : terms) {
-            if(term.getStatus().getId() == 2 &&
-                    term.getEndDate().toLocalDate().isEqual(LocalDate.now())){
+        if (terms != null) {
+            for (Term term : terms) {
                 termService.updateTermStatus(term, 3L);
+
+                List<FinancialPlan> listPlanNeedToClose = new ArrayList<>();
+                planRepository.findAllByTermId(term.getId()).forEach(plan -> {
+                    if (plan.getStatus().getCode().equals(PlanStatusCode.WAITING_FOR_REVIEWED)
+                            || plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
+                        // 3L - Reviewed
+                        plan.setStatus(planStatusRepository.getReferenceById(3L));
+                        listPlanNeedToClose.add(plan);
+                    }
+                });
+                planRepository.saveAll(listPlanNeedToClose);
             }
         }
     }
-
-
-
-
-
 }
