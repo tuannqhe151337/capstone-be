@@ -1,7 +1,6 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
@@ -719,4 +718,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
     }
 
+
+    @Override
+    public List<ExpenseStatus> getListExpenseStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            return expenseStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
 }

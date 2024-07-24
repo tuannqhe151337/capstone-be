@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpens
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
@@ -63,4 +64,7 @@ public interface FinancialPlanService {
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
     void approvalAllExpenses(Long planId) throws Exception;
+
+    List<ExpenseStatus> getListExpenseStatus();
+
 }
