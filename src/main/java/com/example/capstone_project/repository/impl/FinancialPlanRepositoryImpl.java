@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
@@ -106,4 +107,5 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
     }
+
 }

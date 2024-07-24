@@ -10,4 +10,15 @@ public interface DepartmentRepository extends JpaRepository<Department, Long>, C
     long countDistinct(String query);
 
     boolean existsById(Long id);
+    @Query(value = " SELECT DISTINCT department.id FROM Department department " +
+            " JOIN department.plans plan " +
+            " JOIN plan.planFiles file " +
+            " WHERE file.id = :fileId AND " +
+            " file.isDelete = false ")
+    long getDepartmentIdByFileId(Long fileId);
+    @Query(value = " SELECT DISTINCT department.id FROM Department department " +
+            " JOIN department.plans plan " +
+            " WHERE plan.id = :planId AND " +
+            " plan.isDelete = false AND department.isDelete = false ")
+    long getDepartmentIdByPlanId(Long planId);
 }

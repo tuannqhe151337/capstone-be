@@ -7,6 +7,8 @@ import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
+import com.example.capstone_project.controller.body.plan.download.PlanBody;
+import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
@@ -223,48 +225,45 @@ public class FinancialPlanController {
 
     }
 
-    @PostMapping("/download")
+    @PostMapping("/download/xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @RequestParam Integer planId
+            @Valid @RequestBody PlanDownloadBody planBody
     ) throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
-        Sheet sheet = wb.getSheet("Expense");
+                return createResponseEntity(report, outFileName);
 
-        String[][] tableData = {
-                {"Code Expense 1", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
-                {"Code Expense 2", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
-                {"Code Expense 3", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
-                {"Code Expense 4", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
-        };
-
-        Row row = null;
-        Cell cell = null;
-
-        int rowPosition = 2;
-        int colPosition = 0;
-
-        for (int i = 0; i < tableData.length; i++) {
-            row = sheet.getRow(i + rowPosition);
-
-            for (int j = 0; j < tableData[0].length; j++) {
-                cell = row.getCell(j + colPosition);
-
-                cell.setCellValue(tableData[i][j]);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+    }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
-        byte[] report = out.toByteArray();
+    @PostMapping("/download/xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody PlanDownloadBody planBody
+    ) throws Exception {
 
-        String outFileName = "report.xlsx";
+        /// Get data for file Excel
+        byte[] report = planService.getBodyFileExcelXLS(planBody.getFileId());
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateXLSFileName(planBody.getFileId());
 
-        return createResponseEntity(report, outFileName);
+            return createResponseEntity(report, outFileName);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
     }
 
     private ResponseEntity<byte[]> createResponseEntity(
@@ -396,6 +395,52 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
         } catch (InvalidDateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+        }
+    }
+
+    @PostMapping("/download/last-version-xls")
+    public ResponseEntity<byte[]> generateLastVersionXlsReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
+
+                return createResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/download/last-version-xlsx")
+    public ResponseEntity<byte[]> generateLastVersionXlsxReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
+
+                return createResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
