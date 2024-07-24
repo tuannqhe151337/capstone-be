@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.Term;
+import com.example.capstone_project.utils.enums.TermCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,4 +51,16 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
 
     @Override
     boolean existsById(Long aLong);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE Term.status.code = :termCode AND " +
+            " cast(term.startDate as localdate)  = cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToStart(TermCode termCode, LocalDateTime now);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE Term.status.code = :termCode AND " +
+            " cast(term.startDate as localdate)  = cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToClose(TermCode termCode, LocalDateTime now);
 }

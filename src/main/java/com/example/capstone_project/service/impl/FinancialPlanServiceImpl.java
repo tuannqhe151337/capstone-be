@@ -68,7 +68,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final HandleFileHelper handleFileHelper;
     private final ExpenseStatusRepository expenseStatusRepository;
 
-
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
         // Get userId from token
@@ -653,6 +652,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
                 });
                 expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+                expenseRepository.saveAll(expenses);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
@@ -687,6 +693,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
                 });
                 expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+                expenseRepository.saveAll(expenses);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
@@ -712,6 +725,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             expenses.forEach(expense -> {
                 expense.setStatus(expenseStatusRepository.getReferenceById(3L));
             });
+
+            expenseRepository.saveAll(expenses);
+            // Get plan of this list expense
+            FinancialPlan plan = planRepository.getReferenceById(planId);
+            // Change status to Approved
+            plan.setStatus(planStatusRepository.getReferenceById(4L));
+
+            planRepository.save(plan);
+
             expenseRepository.saveAll(expenses);
         } else {
             throw new UnauthorizedException("Unauthorized to approval plan");
