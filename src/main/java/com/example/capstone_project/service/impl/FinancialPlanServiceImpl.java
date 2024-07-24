@@ -335,6 +335,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             expenses.forEach(expense -> {
                 expense.setStatus(expenseStatusRepository.getReferenceById(3L));
             });
+
+            expenseRepository.saveAll(expenses);
+            // Get plan of this list expense
+            FinancialPlan plan = planRepository.getReferenceById(planId);
+            // Change status to Approved
+            plan.setStatus(planStatusRepository.getReferenceById(4L));
+
+            planRepository.save(plan);
+
             expenseRepository.saveAll(expenses);
         } else {
             throw new UnauthorizedException("Unauthorized to approval plan");
