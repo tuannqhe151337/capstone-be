@@ -4,13 +4,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExpenseBody {
     @NotEmpty(message = "Name can not be empty")
     @Size(max = 100, message = "Expense name must be less than 100 characters")
