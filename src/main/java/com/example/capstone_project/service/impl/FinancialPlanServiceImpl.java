@@ -18,6 +18,9 @@ import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
+import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -72,14 +75,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
-
+        PlanStatusCode statusCode = PlanStatusCode.NEW;
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+            statusCode = null;
         }
 
-        return planRepository.countDistinct(query, termId, departmentId, statusId);
+        return planRepository.countDistinct(query, termId, departmentId, statusId, statusCode);
     }
 
     @Override
@@ -95,7 +99,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             throw new UnauthorizedException("Unauthorized to view plan");
         } else {
-
+            PlanStatusCode statusCode = null;
             // Handling pagination
             Pageable pageable = null;
             if (sortBy == null || sortBy.isEmpty()) {
@@ -105,6 +109,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                             CustomSort.builder().sortBy(FinancialPlan_.UPDATED_AT).sortType("desc").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
                     ));
+
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
                 } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                     // Default sort of financial staff role
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
@@ -124,7 +131,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 ));
             }
 
-            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable);
+            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable, statusCode);
             List<PlanVersionResult> listVersions = planRepository.getListPlanVersion(query, termId, departmentId, statusId);
 
             listResult.forEach(plan ->
