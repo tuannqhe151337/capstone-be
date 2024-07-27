@@ -19,7 +19,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
     private EntityManager entityManager;
 
     @Override
-    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) {
+    public List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable, PlanStatusCode statusCode) {
 
         // HQL query
         String hql = "SELECT plan FROM FinancialPlan plan " +
@@ -31,6 +31,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 " (:termId IS NULL OR plan.term.id = :termId) AND " +
                 " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
                 " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
+                " (:statusCode IS NULL OR status.code != :statusCode) AND " +
                 " (plan.isDelete = false OR plan.isDelete is null) " +
                 " ORDER BY ";
 
@@ -56,7 +57,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 case "start-date", "start_date", "start_at", "createdat":
                     hql += "plan.createdAt " + sortType;
                     break;
-                case "updated-date", "updated_date", "updated_at","updatedat":
+                case "updated-date", "updated_date", "updated_at", "updatedat":
                     hql += "plan.updatedAt " + sortType;
                     break;
                 case "accountant":
@@ -101,6 +102,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 .setParameter("termId", termId)
                 .setParameter("departmentId", departmentId)
                 .setParameter("statusId", statusId)
+                .setParameter("statusCode", statusCode)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
