@@ -1,125 +1,185 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
-import com.example.capstone_project.controller.responses.annualReport.expenses.CostTypeResponse;
+import com.example.capstone_project.entity.AnnualReport;
+import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
+import com.example.capstone_project.service.AnnualReportService;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
+import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/annual-report")
 @RequiredArgsConstructor
 public class AnnualReportController {
+    private final AnnualReportService annualReportService;
+
     @GetMapping("/expenses")
-    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense() {
-        ListPaginationResponse<AnnualReportExpenseResponse> listResponse = new ListPaginationResponse<>();
-        listResponse.setData(
-                List.of(
-                        AnnualReportExpenseResponse.builder()
-                                .expenseId(1L)
-                                .departmentName("BU 1")
-                                .totalExpenses(BigDecimal.valueOf(513123545))
-                                .biggestExpenditure(BigDecimal.valueOf(5313215))
-                                .costType(CostTypeResponse.builder()
-                                        .costTypeId(1L)
-                                        .name("Marketing").build())
-                                .build(),
-                        AnnualReportExpenseResponse.builder()
-                                .expenseId(2L)
-                                .departmentName("BU 2")
-                                .totalExpenses(BigDecimal.valueOf(1234568623))
-                                .biggestExpenditure(BigDecimal.valueOf(51453123))
-                                .costType(CostTypeResponse.builder()
-                                        .costTypeId(1L)
-                                        .name("Marketing").build())
-                                .build(),
-                        AnnualReportExpenseResponse.builder()
-                                .expenseId(3L)
-                                .departmentName("BU 3")
-                                .totalExpenses(BigDecimal.valueOf(12145641.25))
-                                .biggestExpenditure(BigDecimal.valueOf(645554))
-                                .costType(CostTypeResponse.builder()
-                                        .costTypeId(1L)
-                                        .name("Marketing").build())
-                                .build()
-                )
-        );
-
-        listResponse.setPagination(Pagination.builder()
-                .totalRecords(100)
-                .page(10)
-                .limitRecordsPerPage(0)
-                .numPages(1)
-                .build());
-
-        return ResponseEntity.ok(listResponse);
-    }
-
-    @GetMapping("/list")
-    public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
-            @RequestParam(required = false) String query,
+    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense(
+            @RequestParam(required = true) Long annualReportId,
+            @RequestParam(required = false) Long costTypeId,
+            @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListPaginationResponse<AnnualReportResponse> listResponse = new ListPaginationResponse<>();
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listResponse.setData(
-                List.of(
-                        AnnualReportResponse.builder()
-                                .annualReportId(1L)
-                                .name("Report 2022")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2023, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(2L)
-                                .name("Report 2021")
-                                .totalTerm(15)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(15)
-                                .createDate(LocalDateTime.of(2022, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(3L)
-                                .name("Report 2020")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2021, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(4L)
-                                .name("Report 2019")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2020, 1, 5, 0, 0))
-                                .build()
-                )
-        );
 
-        listResponse.setPagination(Pagination.builder()
-                .totalRecords(100)
-                .page(10)
-                .limitRecordsPerPage(0)
-                .numPages(1)
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
+
+        // Response
+        ListPaginationResponse<AnnualReportExpenseResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (reports != null) {
+
+            // Count total record
+            count = annualReportService.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
+
+            // Mapping to TermPaginateResponse
+            reports.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortType
+    ) {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable);
+
+        // Response
+        ListPaginationResponse<AnnualReportResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (annualReports != null) {
+
+            // Count total record
+            count = annualReportService.countDistinctListAnnualReportPaging();
+
+            // Mapping to TermPaginateResponse
+            annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
+                .build());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/diagram")
+    public ResponseEntity<ListResponse<CostTypeDiagramResponse>> getAnnualReportDiagram(
+            @RequestParam(required = true) Long annualReportId
+    ) {
+        try {
+            // Get data
+            List<CostTypeDiagramResult> costTypeDiagrams = annualReportService.getAnnualReportCostTypeDiagram(annualReportId);
+
+            // Response
+            ListResponse<CostTypeDiagramResponse> response = new ListResponse<>();
+
+            if (costTypeDiagrams != null) {
+
+                costTypeDiagrams.forEach(costTypeDiagram -> response.getData().add(new CostTypeDiagramMapperImpl().mapToCostTypeDiagramResponseMapping(costTypeDiagram)));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<AnnualReportResponse> getAnnualReportDetail(
+            @RequestParam(required = true) Long annualReportId
+    ) {
+        try {
+            // Get data
+            AnnualReport annualReport = annualReportService.getAnnualReportDetail(annualReportId);
+
+            // Response
+            AnnualReportResponse response = null;
+
+            if (annualReport != null) {
+
+                response = new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }
