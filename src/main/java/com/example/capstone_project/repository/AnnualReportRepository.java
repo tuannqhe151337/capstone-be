@@ -2,6 +2,7 @@ package com.example.capstone_project.repository;
 
 import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.entity.AnnualReport;
+import com.example.capstone_project.repository.result.AnnualReportExpenseResult;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +30,12 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " annualReport.isDelete = false AND report.isDelete = false " +
             " GROUP BY costTypeId, costTypeName ")
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
+    @Query(value = " SELECT report.department.name AS department, report.totalExpense AS totalExpense, report.biggestExpenditure AS biggestExpenditure, report.costType.name AS costType FROM Report report " +
+            " WHERE report.annualReport.id = :annualReportId AND " +
+            " report.isDelete = false ")
+    List<AnnualReportExpenseResult> getListExpenseByAnnualReportId(Long annualReportId);
+    @Query(value = " SELECT annualReport.year FROM AnnualReport annualReport " +
+            " WHERE annualReport.id = :annualReportId AND " +
+            " annualReport.isDelete = false ")
+    String getYear(Long annualReportId);
 }
