@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -312,6 +313,7 @@ public class UserServiceImpl implements UserService {
             // Check email exist
             String email = user.getEmail();
 
+
             if (userRepository.existsByEmail(email)) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
@@ -345,6 +347,7 @@ public class UserServiceImpl implements UserService {
             mailRepository.sendEmail(user.getEmail(), user.getFullName(), user.getUsername(), password);
         }
     }
+
 
     private CheckDepartmentRolePositionExistsResult checkDepartmentRolePositionExists(long departmentId, long roleId, long positionId, CheckDepartmentRolePositionExistsOption option)
             throws InvalidDepartmentIdException, InvalidPositionIdException, InvalidRoleIdException {

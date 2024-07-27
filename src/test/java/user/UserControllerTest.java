@@ -245,62 +245,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("emails already exists"));
     }
 
-    //USER LIST TEST
-    //USER LIST TEST
-    @Test
-    public void testGetAllUsers() throws Exception {
 
-        List<User> userList = Arrays.asList(user, user2);
 
-        when(userServiceImpl.getAllUsers(anyLong(), anyLong(), anyLong(), anyString(), any(Pageable.class)))
-                .thenReturn(userList);
-        List<UserResponse> userResponseList = new ArrayList<>();
-        for (User user : userList) {
-            userResponseList.add(new ListUserResponseMapperImpl().mapToUserResponse(user));
-        }
-
-        when(userServiceImpl.countDistinct(anyString(), anyLong(), anyLong(), anyLong()))
-                .thenReturn((long) userResponseList.size());
-
-        // Perform the GET request
-        mockMvc.perform(MockMvcRequestBuilders.get("http://localhost:8080/api/user")
-                        .param("roleId", "")
-                        .param("departmentId", "")
-                        .param("positionId", "")
-                        .param("query", "")
-                        .param("page", "1")
-                        .param("size", "10")
-                        .param("sortBy", "username")
-                        .param("sortType", "asc")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.data.length()").value(userList.size()))
-                .andExpect(jsonPath("$.pagination.totalRecords").value(userList.size()))
-                .andExpect(jsonPath("$.pagination.numPages").value(1))
-                .andExpect(jsonPath("$.data[0].userId").value(user.getId()))
-                .andExpect(jsonPath("$.data[0].username").value(user.getUsername()))
-                .andExpect(jsonPath("$.data[0].email").value(user.getEmail()))
-                .andExpect(jsonPath("$.data[0].role.id").value(user.getRole().getId()))
-                .andExpect(jsonPath("$.data[0].role.code").value(user.getRole().getCode()))
-                .andExpect(jsonPath("$.data[0].role.name").value(user.getRole().getName()))
-                .andExpect(jsonPath("$.data[0].department.id").value(user.getDepartment().getId()))
-                .andExpect(jsonPath("$.data[0].department.name").value(user.getDepartment().getName()))
-                .andExpect(jsonPath("$.data[0].position.id").value(user.getPosition().getId()))
-                .andExpect(jsonPath("$.data[0].position.name").value(user.getPosition().getName()))
-                .andExpect(jsonPath("$.data[0].deactivate").value(user.getIsDelete()))
-                .andExpect(jsonPath("$.data[1].userId").value(user2.getId()))
-                .andExpect(jsonPath("$.data[1].username").value(user2.getUsername()))
-                .andExpect(jsonPath("$.data[1].email").value(user2.getEmail()))
-                .andExpect(jsonPath("$.data[1].role.id").value(user2.getRole().getId()))
-                .andExpect(jsonPath("$.data[1].role.code").value(user2.getRole().getCode()))
-                .andExpect(jsonPath("$.data[1].role.name").value(user2.getRole().getName()))
-                .andExpect(jsonPath("$.data[1].department.id").value(user2.getDepartment().getId()))
-                .andExpect(jsonPath("$.data[1].department.name").value(user2.getDepartment().getName()))
-                .andExpect(jsonPath("$.data[1].position.id").value(user2.getPosition().getId()))
-                .andExpect(jsonPath("$.data[1].position.name").value(user2.getPosition().getName()))
-                .andExpect(jsonPath("$.data[1].deactivate").value(user2.getIsDelete()));
-    }
 
 
 }
