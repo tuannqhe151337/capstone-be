@@ -1,17 +1,19 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
-import com.example.capstone_project.controller.body.report.detail.ReportDetailBody;
-import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
+import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
 
 import jakarta.validation.Valid;
@@ -41,7 +43,7 @@ public class ReportController {
 
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
-            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = true) Long reportId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
             @RequestParam(required = false) String query,
@@ -49,65 +51,53 @@ public class ReportController {
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<ExpenseResponse> listResponse = new ListPaginationResponse<>();
-        listResponse.setData(List.of(
-                ExpenseResponse.builder()
-                        .expenseId(1L)
-                        .name("Promotion event")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(1L)
-                                .name("Direct cost").build())
-                        .unitPrice(BigDecimal.valueOf(15000000))
-                        .amount(3)
-                        .projectName("RECT")
-                        .supplierName("Hong Ha")
-                        .pic("HongHD9")
-                        .notes("Approximate")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(1L)
-                                .code("Waiting for approval").build())
-                        .build(),
-                ExpenseResponse.builder()
-                        .expenseId(2L)
-                        .name("Social media")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(1L)
-                                .name("Direct cost").build())
-                        .unitPrice(BigDecimal.valueOf(15000000))
-                        .amount(1)
-                        .projectName("IN22")
-                        .supplierName("Hong Ha")
-                        .pic("HongHD9")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(2L)
-                                .code("Waiting for approval").build())
-                        .build(),
-                ExpenseResponse.builder()
-                        .expenseId(3L)
-                        .name("Office supplier")
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(2L)
-                                .name("Adminstration").build())
-                        .unitPrice(BigDecimal.valueOf(5000000))
-                        .amount(2)
-                        .projectName("CAM1")
-                        .supplierName("TuNM")
-                        .pic("TuanVV")
-                        .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
-                                .statusId(1L)
-                                .code("Waiting for approval").build())
-                        .build()
-        ));
+    ) throws Exception {
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        listResponse.setPagination(Pagination.builder()
-                .totalRecords(100)
-                .page(10)
-                .limitRecordsPerPage(0)
-                .numPages(1)
-                .build());
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        return ResponseEntity.ok(listResponse);
+            // Get data
+            List<FinancialReportExpense> expenses = reportService.getListExpenseWithPaginate(reportId, query, statusId, costTypeId, pageable);
+
+            // Response
+            ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
+
+            long count = 0;
+
+            if (expenses != null) {
+
+                // Count total record
+                count = reportService.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
+
+                // Mapping to TermPaginateResponse
+                expenses.forEach(expense -> response.getData().add(new ReportExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @DeleteMapping("/delete")

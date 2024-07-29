@@ -27,7 +27,7 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
@@ -147,7 +147,7 @@ public class FinancialPlanController {
                 count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
 
                 // Mapping to TermPaginateResponse
-                expenses.forEach(expense -> response.getData().add(new ExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
+                expenses.forEach(expense -> response.getData().add(new PlanExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
