@@ -206,7 +206,7 @@ public class UserServiceImpl implements UserService {
     public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
         //get token from redis by id from header
         if (authHeaderToken == null) {
-            throw new DataIntegrityViolationException("Invalid token");
+            throw new DataIntegrityViolationException("Bearer token does not exist");
         }
         //compare otp
         //get userid
@@ -214,6 +214,11 @@ public class UserServiceImpl implements UserService {
 
         if (userId == null) {
             throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
+        }
+        //Check user id existed
+        Optional<User> user = userRepository.findById(Long.parseLong(userId));
+        if(user.isEmpty() || user.get().getIsDelete() == false) {
+            throw new ResourceNotFoundException("User not found");
         }
         //get otp
         String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, Long.parseLong(userId));
@@ -230,6 +235,8 @@ public class UserServiceImpl implements UserService {
         //return token
         return newTokenForUserId;
     }
+
+
 
     @Override
     public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
