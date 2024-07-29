@@ -1,12 +1,31 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.utils.enums.TermCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.data.repository.query.Param;
 
 public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialPlanExpense, Long>, CustomFinancialPlanExpenseRepository {
-    @Query(" SELECT DISTINCT count(expense.id) FROM FinancialPlanExpense expense " +
+    @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
+            " JOIN expense.files fileExpense " +
+            " JOIN fileExpense.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN term.status status " +
+            " WHERE expense.id IN (:listExpenses) AND " +
+            " status.code = :inProgress AND " +
+            " term.planDueDate >= :now AND " +
+            " plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " expense.isDelete = false ")
+    long countTotalExpenseInPlanLastVersion(Long planId, List<Long> listExpenses, TermCode inProgress, LocalDateTime now);
+
+    @Query(" SELECT count(distinct (expense.id)) FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +
@@ -18,5 +37,5 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
             " (:statusId IS NULL OR status.id = :statusId) AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
-    long countDistinctListExpenseWithPaginate(@Param("query") String query,@Param("planId") Long planId,@Param("statusId") Long statusId,@Param("costTypeId") Long costTypeId);
+    long countDistinctListExpenseWithPaginate(@Param("query") String query, @Param("planId") Long planId, @Param("statusId") Long statusId, @Param("costTypeId") Long costTypeId);
 }

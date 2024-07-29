@@ -1,10 +1,24 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
+import com.example.capstone_project.controller.body.report.detail.ReportDetailBody;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
+import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
+import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
+import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.ReportDetailResult;
+import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
+import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,10 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.report.list.DepartmentResponse;
 import com.example.capstone_project.controller.responses.report.list.ReportResponse;
-import com.example.capstone_project.controller.responses.report.list.StatusResponse;
-import com.example.capstone_project.controller.responses.report.list.TermResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,6 +38,7 @@ import java.util.List;
 @RequestMapping("/api/report")
 @RequiredArgsConstructor
 public class ReportController {
+    private final FinancialReportService reportService;
 
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
@@ -108,91 +120,78 @@ public class ReportController {
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<ReportResponse>> getListReport(
-            @RequestParam(required = false) Integer termId,
-            @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Long termId,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<ReportResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                        ReportResponse.builder()
-                                .reportId(1L)
-                                .name("BU name_Q1_report")
-                                .status(StatusResponse.builder()
-                                        .statusId(1L)
-                                        .name("Approved").build()
-                                )
-                                .term(TermResponse.builder()
-                                        .termId(1L)
-                                        .name("Term name 1")
-                                        .build())
-                                .department(DepartmentResponse.builder()
-                                        .departmentId(1L)
-                                        .name("Department 1")
-                                        .build())
-                                .build(),
-                        ReportResponse.builder()
-                                .reportId(2L)
-                                .name("BU name_Q2_report")
-                                .status(StatusResponse.builder()
-                                        .statusId(1L)
-                                        .name("Approved").build()
-                                )
-                                .term(TermResponse.builder()
-                                        .termId(2L)
-                                        .name("Term name 2")
-                                        .build())
-                                .department(DepartmentResponse.builder()
-                                        .departmentId(1L)
-                                        .name("Department 1")
-                                        .build())
-                                .build(),
-                        ReportResponse.builder()
-                                .reportId(3L)
-                                .name("BU name_Q3_report")
-                                .status(StatusResponse.builder()
-                                        .statusId(2L)
-                                        .name("Reviewed").build()
-                                )
-                                .term(TermResponse.builder()
-                                        .termId(1L)
-                                        .name("Term name 1")
-                                        .build())
-                                .department(DepartmentResponse.builder()
-                                        .departmentId(3L)
-                                        .name("Department 3")
-                                        .build())
-                                .build(),
-                        ReportResponse.builder()
-                                .reportId(4L)
-                                .name("BU name_Q4_report")
-                                .status(StatusResponse.builder()
-                                        .statusId(3L)
-                                        .name("Denied").build()
-                                )
-                                .term(TermResponse.builder()
-                                        .termId(1L)
-                                        .name("Term name 1")
-                                        .build())
-                                .department(DepartmentResponse.builder()
-                                        .departmentId(2L)
-                                        .name("Department 2")
-                                        .build())
-                                .build()
-                )
-        );
+    ) throws Exception {
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(777)
-                .page(10)
-                .limitRecordsPerPage(555)
-                .numPages(1)
+        // Handling query
+        if (query == null) {
+            query = "";
+        }
+
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
+
+        // Response
+        ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (reports != null) {
+
+            // Count total record
+            count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+
+            // Mapping to TermPaginateResponse
+            reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listPaginationResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ReportDetailResponse> getReportDetail(
+            @RequestBody ReportDetailBody reportDetailBody
+    ) throws Exception {
+
+        // Get data
+        ReportDetailResult report = reportService.getReportDetailByReportId(reportDetailBody.getReportId());
+
+        // Response
+        ReportDetailResponse response;
+
+        if (report != null) {
+            // Mapping to PlanDetail Response
+            response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

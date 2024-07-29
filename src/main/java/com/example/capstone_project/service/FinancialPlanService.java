@@ -1,5 +1,6 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,8 @@ public interface FinancialPlanService {
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
     int getPlanVersionById(Long planId);
+
+    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
 
