@@ -81,4 +81,5 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE plan.id = :planId AND " +
             " plan.isDelete = false ")
     long getDepartmentIdByPlanId(Long planId);
+
 }

@@ -13,6 +13,7 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
@@ -56,7 +57,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanFileRepository financialPlanFileRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
-
     private final DepartmentRepository departmentRepository;
 
     @Override
@@ -219,11 +219,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             // Accountant role can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                return planRepository.getFinancialPlanById(planId);
+                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
 
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
+
+                return planResult;
                 // Financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+
+                if (planResult == null) {
+                    throw new ResourceNotFoundException("Not found plan id = " + planId);
+                }
 
                 // Check department
                 if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
@@ -241,6 +250,43 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     public int getPlanVersionById(Long planId) {
+        return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    public List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getListVersionWithPaginate(planId, pageable);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+
+                // Check department
+                if (plan.getDepartment().getId() == userDetail.getDepartmentId()) {
+                    return planRepository.getListVersionWithPaginate(planId, pageable);
+                } else {
+                    throw new UnauthorizedException("User can't view this plan detail because departmentId of plan not equal with departmentId of user");
+                }
+            } else {
+                throw new UnauthorizedException("Unauthorized to view plan");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
+
+    @Override
+    public long countDistinctListPlanVersionPaging(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
     }
 
@@ -276,7 +322,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
         throw new UnauthorizedException("Unauthorized to view plan");
     }
-
 
     @Override
     public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {

@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.domain.Pageable;
+import com.example.capstone_project.repository.result.VersionResult;
 
 import java.util.List;
 
@@ -39,4 +40,8 @@ public interface FinancialPlanService {
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
 
     long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
+
+    List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
+
+    long countDistinctListPlanVersionPaging(Long planId);
 }

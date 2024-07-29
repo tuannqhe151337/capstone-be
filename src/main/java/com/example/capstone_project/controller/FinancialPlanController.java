@@ -16,8 +16,11 @@ import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -31,6 +34,7 @@ import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseRespon
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
+import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +46,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -181,19 +186,16 @@ public class FinancialPlanController {
             // Response
             PlanDetailResponse response;
 
-            if (plan != null) {
-                // Mapping to PlanDetail Response
-                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
+            // Mapping to PlanDetail Response
+            response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+            response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-
     }
 
     @PostMapping("/download/xlsx")
@@ -274,42 +276,53 @@ public class FinancialPlanController {
 
     @GetMapping("versions")
     public ResponseEntity<ListPaginationResponse<VersionResponse>> getListVersion(
-            @RequestParam Integer planId,
+            @RequestParam Long planId,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
-    ) {
-        ListPaginationResponse<VersionResponse> listPaginationResponse = new ListPaginationResponse<>();
-        listPaginationResponse.setData(List.of(
-                VersionResponse.builder()
-                        .version("v1")
-                        .publishedDate(LocalDate.of(2024, 4, 10))
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v2")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build(),
-                VersionResponse.builder()
-                        .version("v3")
-                        .publishedDate(LocalDate.now())
-                        .uploadedBy(UserResponse.builder()
-                                .userId(1L)
-                                .username("Anhln").build()).build()
-        ));
+    ) throws Exception {
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listPaginationResponse.setPagination(Pagination.builder()
-                .totalRecords(2222)
-                .page(10)
-                .limitRecordsPerPage(33)
-                .numPages(1)
-                .build());
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        return ResponseEntity.ok(listPaginationResponse);
+            // Get data
+            List<VersionResult> planFiles = planService.getListVersionWithPaginate(planId, pageable);
+
+            // Response
+            ListPaginationResponse<VersionResponse> response = new ListPaginationResponse<>();
+
+            long count = 0;
+
+            if (planFiles != null) {
+
+                // Count total record
+                count = planService.countDistinctListPlanVersionPaging(planId);
+
+                // Mapping to TermPaginateResponse
+                planFiles.forEach(file -> response.getData().add(new PlanListVersionResponseMapperImpl().mapToPlanVersionResponseMapper(file)));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
 
     @DeleteMapping("/delete")
@@ -322,11 +335,11 @@ public class FinancialPlanController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.ok("Delete successful plan id: " + deletedPlan.getId());
+            return ResponseEntity.ok(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete plan");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found any plan have id = " + planBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
     }
@@ -359,13 +372,11 @@ public class FinancialPlanController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Create successful");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to create plan");
-        } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This term already have plan of this department");
-        } catch (InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Plan due date of this term was expired");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (DuplicateKeyException | InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
