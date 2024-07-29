@@ -103,6 +103,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     departmentId = userDetail.getDepartmentId();
                 }
             } else {
+                if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
+                } else {
+                    // Financial staff only see list-plan of their department
+                    departmentId = userDetail.getDepartmentId();
+                }
                 // Sort by request
                 if (sortBy.equals("id") || sortBy.equals("ID")) {
                     // Sort by id
