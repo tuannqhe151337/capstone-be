@@ -17,10 +17,9 @@ public interface TermService {
 
     long countDistinctListTermPaging(String query);
 
-    long countDistinct(String query) throws Exception;
-
     void createTerm(Term term) throws Exception;
 
     Term findTermById(Long id) throws Exception;
-
+    void startTermManually(Long termId) throws Exception;
+    Term updateTerm(Term term) throws Exception ;
 }

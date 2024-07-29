@@ -12,10 +12,16 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 
 import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapperImpl;
+import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.service.DepartmentService;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
