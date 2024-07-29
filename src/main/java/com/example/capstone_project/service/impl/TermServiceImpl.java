@@ -35,6 +35,14 @@ public class TermServiceImpl implements TermService {
     private final TermStatusRepository termStatusRepository;
 
     @Override
+    public long countDistinct(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+    }
+
+    @Override
     public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
@@ -63,9 +71,9 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
-        }else{
+        } else {
             return term;
         }
 

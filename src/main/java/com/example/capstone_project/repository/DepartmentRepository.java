@@ -9,6 +9,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long>, C
             "where department.name like %:query% and (department.isDelete = false or department.isDelete is null)")
     long countDistinct(String query);
 
+    @Override
     boolean existsById(Long id);
     @Query(value = " SELECT DISTINCT department.id FROM Department department " +
             " JOIN department.plans plan " +

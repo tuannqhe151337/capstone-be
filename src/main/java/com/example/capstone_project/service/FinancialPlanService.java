@@ -6,8 +6,6 @@ import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.entity.PlanStatus;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 public interface FinancialPlanService {
@@ -36,4 +34,6 @@ public interface FinancialPlanService {
     String generateXLSXFileName(Long fileId);
 
     String generateXLSFileName(Long fileId);
+
+    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 }

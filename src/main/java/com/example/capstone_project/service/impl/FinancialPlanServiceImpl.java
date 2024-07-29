@@ -15,12 +15,13 @@ import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -29,7 +30,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -53,6 +54,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final TermRepository termRepository;
     private final FinancialPlanFileRepository financialPlanFileRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
+
     private final DepartmentRepository departmentRepository;
 
     @Override
@@ -238,6 +241,46 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public int getPlanVersionById(Long planId) {
         return planRepository.getPlanVersionByPlanId(planId);
+    }
+
+    @Override
+    @Transactional
+    public void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countTotalExpenseInPlanLastVersion(planId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenses.size() == totalExpense) {
+
+                listExpenses.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                        expenses.add(updateExpense);
+                    }
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
     }
 
     @Override
