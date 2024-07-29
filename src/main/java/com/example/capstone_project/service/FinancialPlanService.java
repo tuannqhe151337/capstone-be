@@ -26,6 +26,14 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
+
+    byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
+
+    String generateXLSXFileName(Long fileId);
+
+    String generateXLSFileName(Long fileId);
+
     void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;

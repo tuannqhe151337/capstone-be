@@ -4,21 +4,14 @@ import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.ListBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
-import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
+import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.Responses;
-import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
-import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.DepartmentResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.TermResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
@@ -26,44 +19,29 @@ import com.example.capstone_project.controller.responses.plan.version.VersionRes
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
-import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapper;
 import com.example.capstone_project.utils.mapper.plan.expenses.ExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -218,48 +196,45 @@ public class FinancialPlanController {
 
     }
 
-    @PostMapping("/download")
+    @PostMapping("/download/xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @RequestParam Integer planId
+            @Valid @RequestBody PlanDownloadBody planBody
     ) throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
-        Sheet sheet = wb.getSheet("Expense");
+                return createResponseEntity(report, outFileName);
 
-        String[][] tableData = {
-                {"Code Expense 1", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Promotion event", "Direction cost", "15000000", "3", "45000000", "RECT", "Hong Ha", "HongHD9", "Approximate", "Waiting for approximate"},
-                {"Code Expense 2", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Social media", "Direction cost", "1000000", "3", "3000000", "CAM1", "Internal", "LanNT12", "", "Approved"},
-                {"Code Expense 3", "31/05/2024", "Financial plan December Q3 2021", "BU 01", "Office supplies", "Administration cost", "1000000", "5", "5000000", "RECT1", "Internal", "AnhMN2", "", "Approved"},
-                {"Code Expense 4", "31/05/2024", "Financial plan December Q3 2021", "BU 02", "Internal training", "Operating cost", "1000000", "4", "4000000", "CAM2", "Internal", "LanNT12", "", "Waiting for approval"}
-        };
-
-        Row row = null;
-        Cell cell = null;
-
-        int rowPosition = 2;
-        int colPosition = 0;
-
-        for (int i = 0; i < tableData.length; i++) {
-            row = sheet.getRow(i + rowPosition);
-
-            for (int j = 0; j < tableData[0].length; j++) {
-                cell = row.getCell(j + colPosition);
-
-                cell.setCellValue(tableData[i][j]);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+    }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
-        byte[] report = out.toByteArray();
+    @PostMapping("/download/xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody PlanDownloadBody planBody
+    ) throws Exception {
 
-        String outFileName = "report.xlsx";
+        /// Get data for file Excel
+        byte[] report = planService.getBodyFileExcelXLS(planBody.getFileId());
+        if (report != null) {
+            // Create file name for file Excel
+            String outFileName = planService.generateXLSFileName(planBody.getFileId());
 
-        return createResponseEntity(report, outFileName);
+            return createResponseEntity(report, outFileName);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
     }
 
     private ResponseEntity<byte[]> createResponseEntity(

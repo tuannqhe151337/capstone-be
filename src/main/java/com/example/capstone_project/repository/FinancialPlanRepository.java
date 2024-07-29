@@ -1,6 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
@@ -54,6 +55,28 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE file.plan.id = :planId" +
             " GROUP BY file.plan.id ")
     int getPlanVersionByPlanId(@Param("planId") Long planId);
+
+    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +
+            " costTypes.name AS costType, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
+            " expenses.projectName AS projectName, expenses.supplierName AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " statuses.code AS status  FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term terms " +
+            " LEFT JOIN plan.department departments " +
+            " LEFT JOIN expenses.costType costTypes " +
+            " LEFT JOIN expenses.status statuses  " +
+            " WHERE file.id = :fileId AND " +
+            " files.isDelete = false AND expenses.isDelete = false ")
+    List<ExpenseResult> getListExpenseByFileId(@Param("fileId") Long fileId);
+
+    @Query(value = " SELECT plan.id FROM FinancialPlan plan " +
+            " JOIN plan.planFiles files " +
+            " WHERE files.id = :fileId AND " +
+            " plan.isDelete = false ")
+    int getPlanIdByFileId(@Param("fileId") Long fileId);
+
     @Query(value = " SELECT plan.department.id FROM FinancialPlan plan " +
             " WHERE plan.id = :planId AND " +
             " plan.isDelete = false ")

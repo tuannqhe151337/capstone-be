@@ -11,4 +11,10 @@ public interface DepartmentRepository extends JpaRepository<Department, Long>, C
 
     @Override
     boolean existsById(Long id);
+    @Query(value = " SELECT DISTINCT department.id FROM Department department " +
+            " JOIN department.plans plan " +
+            " JOIN plan.planFiles file " +
+            " WHERE file.id = :fileId AND " +
+            " file.isDelete = false ")
+    long getDepartmentIdByFileId(Long fileId);
 }
