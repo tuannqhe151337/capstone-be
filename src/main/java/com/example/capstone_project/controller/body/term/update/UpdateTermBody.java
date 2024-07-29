@@ -31,20 +31,9 @@ public class UpdateTermBody {
     @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
 
-    @NotNull(message = "End date cannot be null")
-    @Future(message = "End due date must be in the future")
-    private LocalDateTime endDate;
 
     @NotNull(message = "Plan due date cannot be null")
     @Future(message = "Plan due date must be in the future")
     private LocalDateTime planDueDate;
 
-
-    @AssertTrue(message = "Plan due date must be before end date")
-    private boolean isPlanDueDateBeforeEndDate() {
-        if (planDueDate == null || endDate == null) {
-            return true; // Để @NotNull xử lý null check
-        }
-        return planDueDate.isBefore(endDate);
-    }
 }

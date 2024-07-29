@@ -12,7 +12,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 
-import com.example.capstone_project.service.impl.MailRepository;
+import com.example.capstone_project.repository.impl.MailRepository;
 import com.example.capstone_project.service.impl.TermServiceImpl;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
