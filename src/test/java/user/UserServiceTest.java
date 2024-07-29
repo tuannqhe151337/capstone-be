@@ -1,7 +1,9 @@
 package user;
 
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
@@ -93,6 +95,10 @@ public class UserServiceTest {
     private User user2;
     private User oldUser;
     private Pageable pageable;
+    private UserSetting userSetting;
+    private final String oldPassword = "oldPassword";
+    private final String newPassword = "newPassword";
+
 
     @Nested
     class TestsWithCommonSetup {
@@ -160,6 +166,14 @@ public class UserServiceTest {
                     .phoneNumber("0999988877")
                     .build();
             pageable = PageRequest.of(0, 10);
+            userSetting = UserSetting.builder()
+                    .id(1L)
+                    .user(user)
+                    .language("en")
+                    .theme("light")
+                    .darkMode(false)
+                    .build();
+
 
             // Mock the SecurityContextHolder to return a valid user ID
             SecurityContext securityContext = mock(SecurityContext.class);
@@ -518,6 +532,187 @@ public class UserServiceTest {
             // Assert exception message
             assertEquals("User not found", exception.getMessage());
         }
+        //GET LIST USER
+
+        @Test
+        void testGetAllUsers_WithInvalidParameters() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock repository response
+            List<User> expectedUsers = Arrays.asList();
+
+            // Test getAllUsers method with invalid parameters
+            List<User> actualUsers = userServiceImpl.getAllUsers(-1L, -1L, -1L, "", pageable);
+
+            // Verify repository method call
+            verify(userRepository).getUserWithPagination(-1L, -1L, -1L, "", pageable);
+
+            // Assert the result
+            assertEquals(expectedUsers, actualUsers);
+        }
+
+        @Test
+        void testGetAllUsers_WithStringParameters() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock repository response
+            List<User> expectedUsers = Arrays.asList(user, user2);
+            when(userRepository.getUserWithPagination(anyLong(), anyLong(), anyLong(), anyString(), any(Pageable.class)))
+                    .thenReturn(expectedUsers);
+
+            // Test getAllUsers method with string parameters
+            List<User> actualUsers = userServiceImpl.getAllUsers(1L, 1L, 1L, "", pageable);
+
+            // Verify repository method call
+            verify(userRepository).getUserWithPagination(1L, 1L, 1L, "", pageable);
+
+            // Assert the result
+            assertEquals(expectedUsers, actualUsers);
+        }
+        @Test
+        void testUpdateUserSetting_Success() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user and user setting retrieval
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+            when(userSettingRepository.findByUserId(actorId)).thenReturn(Optional.of(userSetting));
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Call updateUserSetting method
+            userServiceImpl.updateUserSetting(updateUserSettingBody);
+
+            // Verify updates and repository save call
+            assertEquals("fr", userSetting.getLanguage());
+            assertEquals("dark", userSetting.getTheme());
+            assertTrue(userSetting.isDarkMode());
+            verify(userSettingRepository).save(userSetting);
+        }
+
+        @Test
+        void testUpdateUserSetting_UserSettingNotFound() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user retrieval
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock user setting retrieval to return empty
+            when(userSettingRepository.findByUserId(actorId)).thenReturn(Optional.empty());
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Verify that the method throws an exception
+            assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.updateUserSetting(updateUserSettingBody);
+            });
+
+            // Verify that the save method was never called
+            verify(userSettingRepository, never()).save(any(UserSetting.class));
+        }
+
+        @Test
+        void testUpdateUserSetting_UserNotFound() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user retrieval to throw an exception
+            when(userRepository.getReferenceById(actorId)).thenThrow(new RuntimeException("User not found"));
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Verify that the method throws an exception
+            assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.updateUserSetting(updateUserSettingBody);
+            });
+
+            // Verify that the save method was never called
+            verify(userSettingRepository, never()).save(any(UserSetting.class));
+        }
+        @Test
+        void testChangePassword_Success() throws Exception {
+            // Mock user ID retrieval and user retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock password matching and encoding
+            when(passwordEncoder.matches(oldPassword, user.getPassword())).thenReturn(true);
+            when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+            // Call changePassword method
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+            userServiceImpl.changePassword(changePasswordBody);
+
+            // Verify user password was updated and saved
+            assertEquals("encodedNewPassword", user.getPassword());
+            verify(userRepository).save(user);
+        }
+
+        @Test
+        void testChangePassword_OldPasswordIncorrect() {
+            // Mock user ID retrieval and user retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock password matching to return false
+            when(passwordEncoder.matches(oldPassword, user.getPassword())).thenReturn(false);
+
+            // Create change password body
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+
+            // Verify that an exception is thrown
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+                userServiceImpl.changePassword(changePasswordBody);
+            });
+            assertEquals("Password does not match", thrown.getMessage());
+
+            // Verify that save was not called
+            verify(userRepository, never()).save(user);
+        }
+
+        @Test
+        void testChangePassword_UserNotFound() {
+            // Mock user ID retrieval to return validUserId
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user repository to throw an exception
+            when(userRepository.getReferenceById(actorId)).thenThrow(new RuntimeException("User not found"));
+
+            // Create change password body
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+
+            // Verify that an exception is thrown
+            RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.changePassword(changePasswordBody);
+            });
+            assertEquals("User not found", thrown.getMessage());
+
+            // Verify that save was not called
+            verify(userRepository, never()).save(any(User.class));
+        }
 
 
 
@@ -557,7 +752,6 @@ public class UserServiceTest {
             // Verify repository method is not called
             verify(userRepository, never()).findUserDetailedById(anyLong());
         }
-
 
         @Test
         void testGenerateUsernameFromFullName_NoExistingUsernames() throws Exception {
@@ -621,7 +815,6 @@ public class UserServiceTest {
                     .count();
             assertTrue(specialCharCount >= 2, "Password should have at least 2 special characters");
         }
-
 
     }
 }

@@ -33,6 +33,8 @@ import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseM
 import com.example.capstone_project.utils.mapper.user.edit.UpdateUserBodyToUserEntityMapperImpl;
 import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMapperImpl;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -137,7 +139,7 @@ public class UserController {
 
     // build get user by id REST API
     @GetMapping("/detail/{id}")
-    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") Long userid) {
+    public ResponseEntity<UserDetailResponse> getUserById(@Valid @PathVariable("id") @NotNull @Min(1) Long userid) {
         try {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
@@ -259,10 +261,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(token);
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+        }catch(ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User by ID not found");
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
         } catch (InvalidDataAccessResourceUsageException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token, missing user id");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

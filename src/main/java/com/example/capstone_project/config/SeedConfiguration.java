@@ -309,7 +309,7 @@ public class SeedConfiguration {
 
             User user4 = User.builder()
                     .username("username4")
-                    .fullName("Choi Woo-je")
+                    .fullName("Choi Wooje")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
