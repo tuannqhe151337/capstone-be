@@ -7,6 +7,7 @@ import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPa
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -32,4 +33,5 @@ public interface UserService {
     void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
+    void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
 }

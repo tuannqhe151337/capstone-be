@@ -6,6 +6,7 @@ import com.example.capstone_project.controller.body.user.activate.ActivateUserBo
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
@@ -281,6 +282,19 @@ public class UserServiceImpl implements UserService {
             user.get().setPassword(this.passwordEncoder.encode(newPassword));
         }
         userRepository.save(user.get());
+    }
+
+    @Override
+    public void updateUserSetting(UpdateUserSettingBody updateUserSettingBody) {
+        long userId = UserHelper.getUserId();
+        User user = userRepository.getReferenceById(userId);
+        UserSetting userSetting = userSettingRepository.findByUserId(userId).get();
+        userSetting.setLanguage(updateUserSettingBody.getLanguage());
+        userSetting.setTheme(updateUserSettingBody.getTheme());
+        userSetting.setDarkMode(updateUserSettingBody.isDarkMode());
+        userSetting.setUser(user);
+        userSettingRepository.save(userSetting);
+
     }
 
     @Override

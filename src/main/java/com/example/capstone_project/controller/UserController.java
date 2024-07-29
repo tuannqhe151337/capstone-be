@@ -8,6 +8,7 @@ import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPa
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -20,7 +21,6 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -37,7 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -46,7 +45,6 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
-    private final JwtHelper jwtHelper;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -196,13 +194,13 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
-
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
+
 
         try {
             userService.changePassword(changePasswordBody);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Change password success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
         }catch (Exception e){
@@ -210,7 +208,7 @@ public class UserController {
         }
     }
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader,@RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
             return ResponseEntity.status(HttpStatus.OK).body("reset password success");
@@ -219,7 +217,12 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
 
+    @PutMapping("/user-setting/update")
+    public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
+                userService.updateUserSetting(updateUserSettingBody);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
     @PostMapping("/auth/forgot-password")
     public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
@@ -251,6 +254,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-
     }
-}
+    }
+

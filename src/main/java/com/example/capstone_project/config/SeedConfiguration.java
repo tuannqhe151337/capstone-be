@@ -95,6 +95,9 @@ public class SeedConfiguration {
             Department accountingDepartment = Department.builder()
                     .name("Accounting")
                     .build();
+            Department softwareDevelopmentDepartment = Department.builder()
+                    .name("Software")
+                    .build();
 
             departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
 
