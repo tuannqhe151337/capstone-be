@@ -40,7 +40,9 @@ public class SeedConfiguration {
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
-            FinancialReportExpenseRepository financialReportExpenseRepository
+            FinancialReportExpenseRepository financialReportExpenseRepository,
+            AnnualReportRepository annualReportRepository,
+            ReportRepository reportRepository
     ) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
@@ -70,19 +72,37 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
-            Department softwareDevelopmentDepartment = Department.builder()
-                    .name("Software development")
+            Department itDepartment = Department.builder()
+                    .name("IT")
+                    .code(DepartmentCode.IT)
                     .build();
 
-            Department accountingDepartment = Department.builder()
-                    .name("Accounting department")
+            Department hrDepartment = Department.builder()
+                    .name("HR")
+                    .code(DepartmentCode.HR)
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance department")
+                    .name("Finance")
+                    .code(DepartmentCode.FINANCE)
                     .build();
 
-            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment));
+            Department communicationDepartment = Department.builder()
+                    .name("Communication")
+                    .code(DepartmentCode.COMMUNICATION)
+                    .build();
+
+            Department marketingDepartment = Department.builder()
+                    .name("Marketing")
+                    .code(DepartmentCode.MARKETING)
+                    .build();
+
+            Department accountingDepartment = Department.builder()
+                    .name("Accounting")
+                    .code(DepartmentCode.ACCOUNTING)
+                    .build();
+
+            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -205,6 +225,11 @@ public class SeedConfiguration {
                     .name("Download report")
                     .build();
 
+            Authority deleteReport = Authority.builder()
+                    .code(AuthorityCode.DELETE_REPORT)
+                    .name("Delete report")
+                    .build();
+
             Authority viewAnnualReport = Authority.builder()
                     .code(AuthorityCode.VIEW_ANNUAL_REPORT)
                     .name("View annual report")
@@ -215,7 +240,7 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, viewAnnualReport, downloadAnnualReport));
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport));
 
             // Role
             Role admin = Role.builder()
@@ -237,14 +262,14 @@ public class SeedConfiguration {
 
             // User
             User user1 = User.builder()
-                    .username("username1")
+                    .username("Anurakk")
                     .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
                     .department(accountingDepartment)
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("mailho21@gmail.com")
+                    .email("giangdvhe163178@fpt.edu.vn")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .isDelete(false)
@@ -286,7 +311,7 @@ public class SeedConfiguration {
                     .fullName("Choi Woo-je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .isDelete(false)
@@ -301,7 +326,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
@@ -452,6 +477,11 @@ public class SeedConfiguration {
                     .authority(downloadReport)
                     .build();
 
+            RoleAuthority accountantAuthority17 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(deleteReport)
+                    .build();
+
             RoleAuthority accountantAuthority14 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(viewAnnualReport)
@@ -542,9 +572,14 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
+            RoleAuthority financialStaffAuthority16 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(deleteReport)
+                    .build();
+
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
+                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
 
             // Plan status
@@ -578,11 +613,11 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
+                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
-                    .status(termStatus)
+                    .status(termStatus2)
                     .build();
 
             Term term2 = Term.builder()
@@ -634,14 +669,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus2)
                     .build();
 
@@ -917,7 +952,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term1)
                     .user(user1)
                     .build();
@@ -947,7 +982,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term2)
                     .user(user1)
                     .build();
@@ -1008,6 +1043,99 @@ public class SeedConfiguration {
 
             financialReportExpenseRepository.saveAll(reportExpenseList);
 
+
+            AnnualReport annualReport1 = AnnualReport.builder()
+                    .year(2020)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(1232212125))
+                    .totalDepartment(18)
+                    .build();
+
+            AnnualReport annualReport2 = AnnualReport.builder()
+                    .year(2021)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(461321564))
+                    .totalDepartment(11)
+                    .build();
+
+            AnnualReport annualReport3 = AnnualReport.builder()
+                    .year(2022)
+                    .totalTerm(22)
+                    .totalExpense(BigDecimal.valueOf(1231313213))
+                    .totalDepartment(8)
+                    .build();
+
+            AnnualReport annualReport4 = AnnualReport.builder()
+                    .year(2023)
+                    .totalTerm(12)
+                    .totalExpense(BigDecimal.valueOf(905135545))
+                    .totalDepartment(9)
+                    .build();
+
+//            AnnualReport annualReport5 = AnnualReport.builder()
+//                    .year(2024)
+//                    .totalTerm(9)
+//                    .totalExpense(BigDecimal.valueOf(843513112))
+//                    .totalDepartment(18)
+//                    .build();
+
+            AnnualReport annualReport6 = AnnualReport.builder()
+                    .year(2025)
+                    .totalTerm(6)
+                    .totalExpense(BigDecimal.valueOf(354564895))
+                    .totalDepartment(12)
+                    .build();
+
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport6));
+
+            List<Report> reports = new ArrayList<>();
+            random = new Random();
+            projectNameChar = 'A';
+            supplierNameChar = 'A';
+
+            for (int i = 1; i <= 15; i++) {
+                int randomAnnualReportIndex = random.nextInt(6) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomDepartmentIndex = random.nextInt(3) + 1;
+
+                AnnualReport randomAnnualReport = switch (randomAnnualReportIndex) {
+                    case 1 -> annualReport1;
+                    case 2 -> annualReport2;
+                    case 3 -> annualReport3;
+                    case 4 -> annualReport4;
+                    case 6 -> annualReport6;
+                    default -> annualReport1; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Department randomDepartment = switch (randomDepartmentIndex) {
+                    case 1 -> accountingDepartment;
+                    case 2 -> financeDepartment;
+                    case 3 -> itDepartment;
+                    default -> accountingDepartment; // Default case, should never be reached
+                };
+
+                Report report = Report.builder()
+                        .totalExpense(BigDecimal.valueOf(random.nextInt(5000000) + 2000000))
+                        .biggestExpenditure(BigDecimal.valueOf(random.nextInt(1500000) + 100000))
+                        .annualReport(randomAnnualReport)
+                        .department(randomDepartment)
+                        .costType(randomCostType)
+                        .build();
+
+                reports.add(report);
+            }
+
+            reportRepository.saveAll(reports);
         };
     }
 }

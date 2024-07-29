@@ -17,4 +17,6 @@ public interface FinancialReportService {
     long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer statusId, Integer costTypeId);
 
     ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception;
+
+    FinancialReport deleteReport(Long reportId);
 }
