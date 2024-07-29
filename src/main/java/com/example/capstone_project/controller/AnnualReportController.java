@@ -6,7 +6,13 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.CostTypeResponse;
+import com.example.capstone_project.entity.AnnualReport;
+import com.example.capstone_project.service.AnnualReportService;
+import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +27,8 @@ import java.util.List;
 @RequestMapping("/api/annual-report")
 @RequiredArgsConstructor
 public class AnnualReportController {
+    private final AnnualReportService annualReportService;
+
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense() {
         ListPaginationResponse<AnnualReportExpenseResponse> listResponse = new ListPaginationResponse<>();
@@ -68,58 +76,48 @@ public class AnnualReportController {
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
-            @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        ListPaginationResponse<AnnualReportResponse> listResponse = new ListPaginationResponse<>();
+        // Handling page and pageSize
+        Integer pageInt = PaginationHelper.convertPageToInteger(page);
+        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        listResponse.setData(
-                List.of(
-                        AnnualReportResponse.builder()
-                                .annualReportId(1L)
-                                .name("Report 2022")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2023, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(2L)
-                                .name("Report 2021")
-                                .totalTerm(15)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(15)
-                                .createDate(LocalDateTime.of(2022, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(3L)
-                                .name("Report 2020")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2021, 1, 5, 0, 0))
-                                .build(),
-                        AnnualReportResponse.builder()
-                                .annualReportId(4L)
-                                .name("Report 2019")
-                                .totalTerm(12)
-                                .totalExpense(BigDecimal.valueOf(213232523))
-                                .totalDepartment(10)
-                                .createDate(LocalDateTime.of(2020, 1, 5, 0, 0))
-                                .build()
-                )
-        );
 
-        listResponse.setPagination(Pagination.builder()
-                .totalRecords(100)
-                .page(10)
-                .limitRecordsPerPage(0)
-                .numPages(1)
+        // Handling pagination
+        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+        // Get data
+        List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable);
+
+        // Response
+        ListPaginationResponse<AnnualReportResponse> response = new ListPaginationResponse<>();
+
+        long count = 0;
+
+        if (annualReports != null) {
+
+            // Count total record
+            count = annualReportService.countDistinctListAnnualReportPaging();
+
+            // Mapping to TermPaginateResponse
+            annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+        response.setPagination(Pagination.builder()
+                .totalRecords(count)
+                .page(pageInt)
+                .limitRecordsPerPage(sizeInt)
+                .numPages(numPages)
                 .build());
 
-        return ResponseEntity.ok(listResponse);
+        return ResponseEntity.ok(response);
     }
 }
