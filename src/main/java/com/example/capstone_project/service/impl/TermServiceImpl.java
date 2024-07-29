@@ -25,6 +25,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,13 +44,6 @@ public class TermServiceImpl implements TermService {
     private final UserRepository userRepository;
     private final TermStatusRepository termStatusRepository;
 
-    @Override
-    public long countDistinct(String query) throws Exception {
-        // Get user detail
-        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
-
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
-    }
 
     @Override
     public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
@@ -121,6 +115,21 @@ public class TermServiceImpl implements TermService {
         }
 
     }
+    @Override
+    public void startTermManually(Long termId) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.START_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized to start term");
+        }
+        Term term = termRepository.findTermById(termId);
+        if(term == null){
+            throw new ResourceNotFoundException("Term not found");
+        }
+        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+        term.setStatus(termStatus);
+        term.setStartDate(LocalDateTime.now());
+        termRepository.save(term);
+    }
 
     @Override
     public void createTerm(Term term) throws Exception {
@@ -170,4 +179,7 @@ public class TermServiceImpl implements TermService {
     public long countDistinctListTermPaging(String query) {
         return termRepository.countDistinctListTermPaging(query);
     }
+    //start term change status of this term
+
+
 }

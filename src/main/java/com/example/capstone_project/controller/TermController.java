@@ -3,19 +3,18 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.PlanStatusResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
 import com.example.capstone_project.controller.responses.term.getReports.TermReportResponse;
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
 
+import com.example.capstone_project.controller.responses.term.paginate.StatusResponse;
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.entity.Term;
 
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.TermCode;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -26,7 +25,6 @@ import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTer
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
-import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -345,5 +343,19 @@ public class TermController {
                 .build());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/start/{id}")
+    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+        try {
+            termService.startTermManually(termId);
+            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
