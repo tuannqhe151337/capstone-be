@@ -14,6 +14,9 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
 
     Optional<User> findUserByUsername(String username);
 
+    @Query(value = "select user from User user where user.username = :username and (user.isDelete = false or user.isDelete is null)")
+    Optional<User> findActiveUserByUsername(String username);
+
     @Query(value = "select user from User user " +
             "join fetch user.role " +
             "join fetch user.department " +
@@ -29,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             "join fetch user.department " +
             "join fetch user.position " +
             "join fetch user.userSetting " +
-            "where user.id = :userId and (user.isDelete = false or user.isDelete is null)")
+            "where user.id = :userId")
     Optional<User> findUserDetailedById(Long userId);
 
     @Query(value = "select user from User user " +
@@ -40,7 +43,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     Optional<User> findUserWithRoleAndDepartmentById(Long userId);
 
     @Query(value = "select count(distinct(user.id)) from User user " +
-            "where user.username like %:query% and (user.isDelete = false or user.isDelete is null)")
+            "where user.username like %:query%")
     long countDistinct(String query);
 
     @Query(value = "select count(distinct(user.id)) from User user " +
@@ -54,6 +57,21 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
                        @Param("query") String query);
 
 
+
+    @Query(value = "select user from User user " +
+            "join fetch user.role " +
+            "join fetch user.department " +
+            "join fetch user.position " +
+            "join fetch user.userSetting " +
+            "where user.id = :userId and (user.isDelete = false or user.isDelete is null)")
+    Optional<User> findActiveUserDetailedById(Long userId);
+
+    @Query(value = "select user from User user " +
+            "join fetch user.role " +
+            "join fetch user.department " +
+            "where user.id = :userId and (user.isDelete = false or user.isDelete is null)"
+    )
+    Optional<User> findActiveUserWithRoleAndDepartmentById(Long userId);
 
     Optional<User> findUserByEmail(String email);
 
