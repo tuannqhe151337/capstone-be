@@ -78,15 +78,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers(
-            String query,
-            Pageable pageable) {
+            Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
-            return userRepository.getUserWithPagination(query, pageable);
+            return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
+        }else{
+            throw new UnauthorizedException("Unauthorized to view all users");
         }
 
-        return null;
     }
 
     @Override
@@ -204,6 +204,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void resetPassword(ResetPasswordBody resetPasswordBody) {
+
+    }
+
+    @Override
+    public String otpValidate(String otp) throws Exception {
+        return "";
+    }
+
+    @Override
     public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
         //get token from redis by id from header
         if (authHeaderToken == null) {
@@ -266,6 +276,11 @@ public class UserServiceImpl implements UserService {
         Random random = new Random();
         int OTP = 100000 + random.nextInt(900000);
         return OTP;
+    }
+
+    @Override
+    public long countDistinct(String query, Long roleId, Long departmentId, Long positionId) {
+        return userRepository.countDistinct(roleId, departmentId, positionId, query);
     }
 
     @Override

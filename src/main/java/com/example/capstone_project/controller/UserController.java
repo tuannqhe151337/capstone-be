@@ -51,49 +51,56 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
+            @RequestParam(name = "roleId", required = false) Long roleId,
+            @RequestParam(name = "departmentId", required = false) Long departmentId,
+            @RequestParam(name = "positionId", required = false) Long positionId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
-        // Get data
-        List<User> users = userService.getAllUsers(query, pageable);
-
-        long count = this.userService.countDistinct(query);
-
-        // Response
-        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
-
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                //mapperToUserResponse
-                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+            // Handling query
+            if (query == null) {
+                query = "";
             }
+
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+            // Get data
+            List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+            long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
+
+            // Response
+            ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
+
+            if (users != null && !users.isEmpty()) {
+                for (User user : users) {
+                    //mapperToUserResponse
+                    response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+                }
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     // build create user REST API
@@ -179,6 +186,7 @@ public class UserController {
             throw new ResourceNotFoundException(e.getMessage());
         }
     }
+
     // build delete user REST API
     @PostMapping("/activate")
     public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
@@ -194,10 +202,10 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
     }
+
     @PostMapping("/change-password")
 
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
-
 
         try {
             userService.changePassword(changePasswordBody);
@@ -209,6 +217,7 @@ public class UserController {
         }
 
     }
+
     @PostMapping("/auth/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
@@ -226,6 +235,7 @@ public class UserController {
                 userService.updateUserSetting(updateUserSettingBody);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
     @PostMapping("/auth/forgot-password")
     public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.

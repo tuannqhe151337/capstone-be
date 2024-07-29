@@ -14,10 +14,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface UserService {
-    List<User> getAllUsers(
-            String query,
-            Pageable pageable
-    );
+    List<User> getAllUsers(Long roleId, Long departmentId, Long positionId, String query, Pageable pageable);
 
     long countDistinct(String query);
 
@@ -32,6 +29,9 @@ public interface UserService {
     void deactivateUser(DeactiveUserBody deactiveUserBody);
 
     void changePassword(ChangePasswordBody changePasswordBody);
+    void resetPassword(ResetPasswordBody resetPasswordBody);
+    String otpValidate(String otp) throws Exception;
+    long countDistinct(String query, Long roleId, Long departmentId, Long positionId);
     void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
