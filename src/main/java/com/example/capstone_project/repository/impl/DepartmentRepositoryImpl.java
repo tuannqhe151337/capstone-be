@@ -18,12 +18,13 @@ public class DepartmentRepositoryImpl implements CustomDepartmentRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Department> getDepartmentWithPagination(String query, Pageable pageable) {
+    public List<Department> getListDepartmentWithPagination(String query, Pageable pageable) {
+
         // HQL query
-        String hql = "select department from Department department " +
-                "where department.name like :query " +
-                "and department.isDelete = false " +
-                "order by ";
+        String hql = "SELECT department FROM Department department " +
+                " WHERE department.name like :query AND " +
+                " department.isDelete = false " +
+                " ORDER BY ";
 
         // Handling sort by and sort type
         List<Sort.Order> sortOrderList = pageable.getSort().get().toList();
@@ -32,7 +33,7 @@ public class DepartmentRepositoryImpl implements CustomDepartmentRepository {
 
             String sortType = order.getDirection().isAscending() ? "asc" : "desc";
             switch (order.getProperty().toLowerCase()) {
-                case "name":
+                case "name", "department_name", "department.name" :
                     hql += "department.name " + sortType;
                     break;
                 default:
@@ -53,4 +54,5 @@ public class DepartmentRepositoryImpl implements CustomDepartmentRepository {
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
     }
+
 }
