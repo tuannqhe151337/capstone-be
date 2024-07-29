@@ -19,8 +19,8 @@ public class FinancialReportStatus extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialReportExpense_.STATUS)
-    private List<FinancialReportExpense> reportExpenses;
+//    @OneToMany(mappedBy = FinancialReportExpense_.STATUS)
+//    private List<FinancialReportExpense> reportExpenses;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private boolean isDelete;

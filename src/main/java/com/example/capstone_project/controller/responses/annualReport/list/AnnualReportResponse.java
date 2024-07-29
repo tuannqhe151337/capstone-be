@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AnnualReportResponse {
     private Long annualReportId;
-    private String name;
+    private String year;
     private Integer totalTerm;
     private BigDecimal totalExpense;
     private Integer totalDepartment;

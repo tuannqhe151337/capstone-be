@@ -5,7 +5,6 @@ import com.example.capstone_project.entity.FinancialPlanFile;
 import com.example.capstone_project.entity.FinancialPlanFile_;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.repository.CustomFinancialPlanRepository;
-import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.utils.enums.PlanStatusCode;
 import jakarta.persistence.EntityGraph;
@@ -60,7 +59,7 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 case "start-date", "start_date", "start_at", "createdat":
                     hql += "plan.createdAt " + sortType;
                     break;
-                case "updated-date", "updated_date", "updated_at","updatedat":
+                case "updated-date", "updated_date", "updated_at", "updatedat":
                     hql += "plan.updatedAt " + sortType;
                     break;
                 case "accountant":
@@ -159,4 +158,5 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
     }
+
 }
