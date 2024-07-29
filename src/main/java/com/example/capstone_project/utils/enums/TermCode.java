@@ -3,7 +3,7 @@ package com.example.capstone_project.utils.enums;
 public enum TermCode {
 
     IN_PROGRESS("IN PROGRESS"),
-    NOT_STARTED("NOT STARTED"),
+    NEW("NEW"),
     CLOSED("CLOSED");
 
     private String value;

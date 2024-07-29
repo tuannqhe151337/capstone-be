@@ -43,6 +43,14 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
+    public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+    }
+
+    @Override
     public List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception {
         // Get userId
         long userId = UserHelper.getUserId();
@@ -63,9 +71,9 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
-        }else{
+        } else {
             return term;
         }
 
@@ -102,4 +110,21 @@ public class TermServiceImpl implements TermService {
 
     }
 
+    @Override
+    public List<Term> getListTermPaging(String query, Pageable pageable) {
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
+            return termRepository.getListTermPaging(query, pageable);
+
+        }
+
+        return null;
+    }
+
+    @Override
+    public long countDistinctListTermPaging(String query) {
+        return termRepository.countDistinctListTermPaging(query);
+    }
 }

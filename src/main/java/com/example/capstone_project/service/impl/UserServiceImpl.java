@@ -3,13 +3,19 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.repository.impl.MailRepository;
+import com.example.capstone_project.repository.redis.OTPTokenRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
@@ -18,9 +24,11 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.passay.CharacterData;
@@ -35,6 +43,7 @@ import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.Duration;
@@ -53,9 +62,19 @@ public class UserServiceImpl implements UserService {
     private final PositionRepository positionRepository;
     private final AuthorityRepository authorityRepository;
     private final UserDetailRepository userDetailRepository;
+    private final OTPTokenRepository otpTokenRepository;
+    private final UserIdTokenRepository userIdTokenRepository;
+    private final JwtHelper jwtHelper;
 
     @Value("${application.security.access-token.expiration}")
     private long ACCESS_TOKEN_EXPIRATION;
+
+    @Value("${application.security.blank-token-email.expiration}")
+    private String BLANK_TOKEN_EMAIL_EXPIRATION;
+
+    @Value("${application.security.blank-token-otp.expiration}")
+    private String BLANK_TOKEN_OTP_EXPIRATION;
+
 
     @Override
     public List<User> getAllUsers(
@@ -171,7 +190,98 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(ChangePasswordBody changePasswordBody) {
+        String oldPassword = changePasswordBody.getOldPassword();
+        String newPassword = changePasswordBody.getNewPassword();
+        long userId = UserHelper.getUserId();
+        User user = userRepository.getReferenceById(userId);
+        if (this.passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(this.passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new IllegalArgumentException("Password does not match");
+        }
 
+    }
+
+    @Override
+    public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
+        //get token from redis by id from header
+        if (authHeaderToken == null) {
+            throw new DataIntegrityViolationException("Invalid token");
+        }
+        //compare otp
+        //get userid
+        String userId = otpTokenRepository.getUserID(authHeaderToken);
+
+        if (userId == null) {
+            throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
+        }
+        //get otp
+        String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, Long.parseLong(userId));
+        //compare
+        if (!savedOtp.equals(otp.getOtp())) {
+            throw new UnauthorizedException("Invalid OTP");
+        }
+        //gen new token
+        String newTokenForUserId = jwtHelper.genBlankTokenOtp();
+
+        //save token with id
+        userIdTokenRepository.save(newTokenForUserId, Long.parseLong(userId), Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
+
+        //return token
+        return newTokenForUserId;
+    }
+
+    @Override
+    public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
+        //email
+        String email = forgetPasswordEmailBody.getEmail();
+        //get user by email
+        Optional<User> user = userRepository.findUserByEmail(email);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("Email does not exist");
+        }
+        //generate blank token
+        String token = jwtHelper.genBlankTokenEmail();
+
+        //CHECK OTP EXIST to delete
+        otpTokenRepository.deleteOtpCodeExists(user.get().getId());
+
+        //generate otp
+        String otp = String.valueOf(generateOTP());
+
+        //save token with otp to redis  Duration.ofMillis(ACCESS_TOKEN_EXPIRATION)
+        int expire = Integer.parseInt(BLANK_TOKEN_EMAIL_EXPIRATION);
+        otpTokenRepository.save(user.get().getId(), token, otp, Duration.ofMillis(expire));
+
+        //send token to email
+        mailRepository.sendOTP(user.get().getEmail(), user.get().getUsername(), otp);
+
+        //return token to front end
+        return token;
+    }
+
+
+    private int generateOTP() {
+        Random random = new Random();
+        int OTP = 100000 + random.nextInt(900000);
+        return OTP;
+    }
+
+    @Override
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
+        //get new password
+        String newPassword = resetPasswordBody.getNewPassword();
+        //get id from header to find that user
+        String userId = userIdTokenRepository.find(authHeader);
+        Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User does not exist");
+        } else {
+            //update new password encoded
+            user.get().setPassword(this.passwordEncoder.encode(newPassword));
+        }
+        userRepository.save(user.get());
     }
 
     @Override

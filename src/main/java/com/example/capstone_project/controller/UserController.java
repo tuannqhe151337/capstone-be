@@ -4,6 +4,9 @@ import com.example.capstone_project.controller.body.user.activate.ActivateUserBo
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.create.CreateUserBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
@@ -12,8 +15,6 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
-import com.example.capstone_project.entity.UserSetting;
-import com.example.capstone_project.repository.UserSettingRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -29,13 +30,13 @@ import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMappe
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -44,7 +45,6 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
-    private final UserSettingRepository userSettingRepository;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -166,10 +166,10 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
-            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(e.getMessage());
         } catch (ResourceNotFoundException e) {
@@ -179,30 +179,81 @@ public class UserController {
 
     // build delete user REST API
     @PostMapping("/activate")
-    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
+        } catch (Exception s) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId() + " success");
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PostMapping("/change-password")
-
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
-        return ResponseEntity.status(HttpStatus.OK).body("Change password success");
+
+
+        try {
+            userService.changePassword(changePasswordBody);
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
+    }
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+        try {
+            userService.resetPassword(authHeader, resetPasswordBody);
+            return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PutMapping("/user-setting/update")
     public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
                 userService.updateUserSetting(updateUserSettingBody);
-        return ResponseEntity.status(HttpStatus.OK).body("Update user setting success");
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+        //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
+        String token = null;
+        try {
+            token = userService.forgetPassword(forgetPasswordEmailBody);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
 
     }
-}
+    @PostMapping("/auth/otp")
+    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("otp-token") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+            //return  Token  user:dnfpajsdfhp...:id, 6.
+        try {
+            String token = userService.otpValidate(otpBody, authHeader);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        }catch (DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+        }catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
+        }catch (InvalidDataAccessResourceUsageException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+    }
+    }
+
