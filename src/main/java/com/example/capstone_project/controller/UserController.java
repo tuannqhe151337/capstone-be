@@ -21,6 +21,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
 import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.create.CreateUserBodyMapperImpl;
 import com.example.capstone_project.utils.mapper.user.detail.DetailUserResponseMapperImpl;
@@ -37,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -45,6 +47,7 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
+    private final JwtHelper jwtHelper;
 
     @GetMapping
     public ResponseEntity<ListPaginationResponse<UserResponse>> getAllUsers(
@@ -198,13 +201,13 @@ public class UserController {
 
         try {
             userService.changePassword(changePasswordBody);
-
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
+
     }
     @PostMapping("/auth/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {

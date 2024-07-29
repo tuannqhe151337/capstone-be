@@ -22,6 +22,8 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +67,19 @@ public class TermServiceImpl implements TermService {
         }
 
         return null;
+    }
+
+    @Override
+    public void deleteTerm(Long id) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.DELETE_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        Term currentTerm = termRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
+        currentTerm.setDelete(true);
+        termRepository.save(currentTerm);
+
     }
 
     @Override
