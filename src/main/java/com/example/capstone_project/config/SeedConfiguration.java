@@ -67,19 +67,31 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
-            Department softwareDevelopmentDepartment = Department.builder()
-                    .name("Software development")
+            Department itDepartment = Department.builder()
+                    .name("IT")
                     .build();
 
-            Department accountingDepartment = Department.builder()
-                    .name("Accounting department")
+            Department hrDepartment = Department.builder()
+                    .name("HR")
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance department")
+                    .name("Finance")
                     .build();
 
-            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment));
+            Department communicationDepartment = Department.builder()
+                    .name("Communication")
+                    .build();
+
+            Department marketingDepartment = Department.builder()
+                    .name("Marketing")
+                    .build();
+
+            Department accountingDepartment = Department.builder()
+                    .name("Accounting")
+                    .build();
+
+            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -283,7 +295,7 @@ public class SeedConfiguration {
                     .fullName("Choi Woo-je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .isDelete(false)
@@ -298,7 +310,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
@@ -631,14 +643,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus2)
                     .build();
 
