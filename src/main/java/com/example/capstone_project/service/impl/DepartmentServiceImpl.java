@@ -5,8 +5,9 @@ import com.example.capstone_project.repository.DepartmentRepository;
 
 import com.example.capstone_project.service.DepartmentService;
 
-import com.example.capstone_project.utils.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.helper.UserHelper;
@@ -28,11 +29,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_PLAN.getValue())
-        || listAuthorities.contains(AuthorityCode.VIEW_LIST_USERS.getValue())
-        || listAuthorities.contains(AuthorityCode.CREATE_NEW_USER.getValue())
-        || listAuthorities.contains(AuthorityCode.EDIT_USER.getValue())
-        || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())
-        || listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+                || listAuthorities.contains(AuthorityCode.VIEW_LIST_USERS.getValue())
+                || listAuthorities.contains(AuthorityCode.CREATE_NEW_USER.getValue())
+                || listAuthorities.contains(AuthorityCode.EDIT_USER.getValue())
+                || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())
+                || listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
             return departmentRepository.getListDepartmentWithPagination(query, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view list department");
