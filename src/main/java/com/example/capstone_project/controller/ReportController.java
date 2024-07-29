@@ -1,22 +1,19 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.body.report.detail.ReportDetailBody;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
-import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -69,7 +66,7 @@ public class ReportController {
                         .notes("Approximate")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(2L)
@@ -84,7 +81,7 @@ public class ReportController {
                         .pic("HongHD9")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(2L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build(),
                 ExpenseResponse.builder()
                         .expenseId(3L)
@@ -99,7 +96,7 @@ public class ReportController {
                         .pic("TuanVV")
                         .status(com.example.capstone_project.controller.responses.expense.list.StatusResponse.builder()
                                 .statusId(1L)
-                                .name("Waiting for approval").build())
+                                .code("Waiting for approval").build())
                         .build()
         ));
 
@@ -117,8 +114,20 @@ public class ReportController {
     public ResponseEntity<String> deleteReport(
             @Valid @RequestBody DeleteReportBody reportBody
     ) {
-        System.out.println(reportBody.toString());
-        return null;
+        try {
+            FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
+
+            if (deletedReport == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete report");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        }
     }
 
     @GetMapping("/list")
@@ -132,48 +141,52 @@ public class ReportController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) throws Exception {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
+            // Handling query
+            if (query == null) {
+                query = "";
+            }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Get data
-        List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
+            // Get data
+            List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
 
-        // Response
-        ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
+            // Response
+            ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
 
-        long count = 0;
+            long count = 0;
 
-        if (reports != null) {
+            if (reports != null) {
 
-            // Count total record
-            count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+                // Count total record
+                count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
 
-            // Mapping to TermPaginateResponse
-            reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
+                // Mapping to TermPaginateResponse
+                reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
 
-        } else {
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/detail")
