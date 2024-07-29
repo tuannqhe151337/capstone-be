@@ -1,11 +1,9 @@
 package com.example.capstone_project.service;
 
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.entity.PlanStatus;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -28,5 +26,17 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
+
+    byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
+
+    String generateXLSXFileName(Long fileId);
+
+    String generateXLSFileName(Long fileId);
+
     void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+
+    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
+
+    long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
 }

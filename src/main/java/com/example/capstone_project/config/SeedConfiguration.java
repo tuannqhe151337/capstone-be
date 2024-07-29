@@ -74,29 +74,32 @@ public class SeedConfiguration {
             // Department
             Department itDepartment = Department.builder()
                     .name("IT")
+                    .code(DepartmentCode.IT)
                     .build();
 
             Department hrDepartment = Department.builder()
                     .name("HR")
+                    .code(DepartmentCode.HR)
                     .build();
 
             Department financeDepartment = Department.builder()
                     .name("Finance")
+                    .code(DepartmentCode.FINANCE)
                     .build();
 
             Department communicationDepartment = Department.builder()
                     .name("Communication")
+                    .code(DepartmentCode.COMMUNICATION)
                     .build();
 
             Department marketingDepartment = Department.builder()
                     .name("Marketing")
+                    .code(DepartmentCode.MARKETING)
                     .build();
 
             Department accountingDepartment = Department.builder()
                     .name("Accounting")
-                    .build();
-            Department softwareDevelopmentDepartment = Department.builder()
-                    .name("Software")
+                    .code(DepartmentCode.ACCOUNTING)
                     .build();
 
             departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
@@ -934,7 +937,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term1)
                     .user(user1)
                     .build();
@@ -964,7 +967,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term2)
                     .user(user1)
                     .build();
@@ -1102,7 +1105,7 @@ public class SeedConfiguration {
                 Department randomDepartment = switch (randomDepartmentIndex) {
                     case 1 -> accountingDepartment;
                     case 2 -> financeDepartment;
-                    case 3 -> softwareDevelopmentDepartment;
+                    case 3 -> itDepartment;
                     default -> accountingDepartment; // Default case, should never be reached
                 };
 

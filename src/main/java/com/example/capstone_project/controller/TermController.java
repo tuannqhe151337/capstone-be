@@ -356,4 +356,18 @@ public class TermController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/start/{id}")
+    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+        try {
+            termService.startTermManually(termId);
+            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
