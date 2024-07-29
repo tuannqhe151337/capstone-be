@@ -191,23 +191,29 @@ public class ReportController {
 
     @GetMapping("/detail")
     public ResponseEntity<ReportDetailResponse> getReportDetail(
-            @RequestBody ReportDetailBody reportDetailBody
+            @RequestParam Long reportId
     ) throws Exception {
+        try {
+            // Get data
+            ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
 
-        // Get data
-        ReportDetailResult report = reportService.getReportDetailByReportId(reportDetailBody.getReportId());
+            // Response
+            ReportDetailResponse response;
 
-        // Response
-        ReportDetailResponse response;
+            if (report != null) {
+                // Mapping to PlanDetail Response
+                response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
 
-        if (report != null) {
-            // Mapping to PlanDetail Response
-            response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
 
-        } else {
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        return ResponseEntity.ok(response);
     }
 }
