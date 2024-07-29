@@ -167,7 +167,6 @@ public class UserServiceTest {
 
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.getPrincipal()).thenReturn(actorId.toString());
-
             SecurityContextHolder.setContext(securityContext);
         }
 
@@ -491,6 +490,34 @@ public class UserServiceTest {
             verify(userRepository, times(1)).save(user);
         }
         //list
+        @Test
+        void testGetUserById_IdNull() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+
+            // Expect IllegalArgumentException or other appropriate exception when ID is null
+            assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.getUserById(null);
+            });
+
+            // Verify repository method is not called
+            verify(userRepository, never()).findUserDetailedById(anyLong());
+        }
+        @Test
+        void testGetUserById_LargeId_UserNotFound() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+
+            // Expect ResourceNotFoundException
+            ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.getUserById(Long.MAX_VALUE);
+            });
+
+            // Assert exception message
+            assertEquals("User not found", exception.getMessage());
+        }
 
 
 
@@ -498,10 +525,39 @@ public class UserServiceTest {
 
     @Nested
     class TestsWithCustomSetup {
+        private Method validateUserMethod;
         @BeforeEach
-        void setUp() {
+        void setUp() throws NoSuchMethodException {
             // Custom setup for this test group if needed
+            validateUserMethod = UserServiceImpl.class.getDeclaredMethod("validateUser", User.class);
+            validateUserMethod.setAccessible(true);
         }
+
+        @Test
+        void testValidateUser_ValidUser() throws Exception {
+            User user = User.builder()
+                    .fullName("John Doe")
+                    .email("john.doe@example.com")
+                    .phoneNumber("1234567890")
+                    .dob(LocalDateTime.of(2000, 1, 1, 0, 0)) // Ngày sinh hợp lệ
+                    .build();
+
+            // Không mong đợi ngoại lệ
+            assertDoesNotThrow(() -> validateUserMethod.invoke(userServiceImpl, user));
+        }
+
+        @Test
+        void testGetUserById_InvalidId() {
+            // Check for invalid Long ID
+            assertThrows(NumberFormatException.class, () -> {
+                // Simulate the call with invalid ID
+                userServiceImpl.getUserById(Long.valueOf("abczzhdssfdsdgfhthtz"));
+            });
+
+            // Verify repository method is not called
+            verify(userRepository, never()).findUserDetailedById(anyLong());
+        }
+
 
         @Test
         void testGenerateUsernameFromFullName_NoExistingUsernames() throws Exception {
