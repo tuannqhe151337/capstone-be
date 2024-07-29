@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class NewPlanBody {
     @NotNull(message = "Term Id can not be null")
     private Long termId;
