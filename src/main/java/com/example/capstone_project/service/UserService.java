@@ -29,7 +29,7 @@ public interface UserService {
     void activateUser(ActivateUserBody activateUserBody);
     void deactivateUser(DeactiveUserBody deactiveUserBody);
     void changePassword(ChangePasswordBody changePasswordBody);
-    void resetPassword(ResetPasswordBody resetPasswordBody);
+    void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
     String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
 }
