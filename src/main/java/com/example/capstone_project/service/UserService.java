@@ -3,8 +3,11 @@ package com.example.capstone_project.service;
 import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
 import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -29,6 +32,8 @@ public interface UserService {
     void deactivateUser(DeactiveUserBody deactiveUserBody);
 
     void changePassword(ChangePasswordBody changePasswordBody);
-    void resetPassword(ResetPasswordBody resetPasswordBody);
-    String otpValidate(String otp) throws Exception;
+    void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
+    String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
+    String otpValidate(OTPBody otp, String authHeader) throws Exception;
+    void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
 }
