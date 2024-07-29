@@ -29,7 +29,7 @@ public class OTPTokenRepository {
     public void save(long userId, String tokenString,  String otpCode, Duration expiredTime) {
         HashMap<String, String> userAndOtp = new HashMap<>();
         userAndOtp.put("userId", String.valueOf(userId));
-        userAndOtp.put("optCode", otpCode);
+        userAndOtp.put("otpCode", otpCode);
 
         this.template.opsForHash().putAll(
                 this.generateKey(tokenString, userId),
@@ -42,7 +42,7 @@ public class OTPTokenRepository {
     public String getOtpCode(String tokenString, long userId) {
         Map<Object, Object> userAndOtp = this.template.opsForHash().entries(this.generateKey(tokenString, userId));
         for (Object key : userAndOtp.keySet()) {
-            if (key.toString().equals(Fields.OTP_CODE.getValue())) {
+            if (key.toString().equals("otpCode") ){
                 return (String) userAndOtp.get(key);
             }
         }
@@ -56,6 +56,21 @@ public class OTPTokenRepository {
                 return (String) userAndOtp.get(key);
             }
         }
+        return null;
+    }
+    //get user id
+    public String getUserID(String tokenString) {
+        Set<String> keys =  this.template.keys("*");
+        if ( keys!= null) {
+            for (String key : keys) {
+                if (key.contains(tokenString)) {
+                    String[] parts = key.split(":");
+                    String userId = parts[1];
+                  return userId;
+                }
+            }
+        }
+
         return null;
     }
     public void deleteOtpCodeExists(long userId) {

@@ -30,6 +30,7 @@ import com.example.capstone_project.utils.mapper.user.list.ListUserResponseMappe
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -187,7 +188,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
+        } catch (Exception s) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
@@ -227,9 +228,21 @@ public class UserController {
 
     }
     @PostMapping("/auth/otp")
-    public ResponseEntity<String> OTPValidate(@Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("otp-token") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
             //return  Token  user:dnfpajsdfhp...:id, 6.
-        String token = jwtHelper.genBlankTokenOtp();
-        return ResponseEntity.status(HttpStatus.OK).body(token);
+        try {
+            String token = userService.otpValidate(otpBody, authHeader);
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        }catch (DataIntegrityViolationException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+        }catch (UnauthorizedException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
+        }catch (InvalidDataAccessResourceUsageException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+
     }
 }
