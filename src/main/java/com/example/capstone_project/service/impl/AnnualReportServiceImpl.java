@@ -80,8 +80,8 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            if (annualReportRepository.existsById(annualReportId)) {
-                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            if (!annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any annual report have id = " + annualReportId);
             }
             return annualReportRepository.getAnnualReportCostTypeDiagram(annualReportId);
         } else {
@@ -94,7 +94,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            if (annualReportRepository.existsById(annualReportId)) {
+            if (!annualReportRepository.existsById(annualReportId)) {
                 throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
             }
             return annualReportRepository.getReferenceById(annualReportId);

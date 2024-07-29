@@ -190,11 +190,11 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @Valid @RequestBody PlanDetailBody planDetailBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             // Get data
-            PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
+            PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
 
             // Response
             PlanDetailResponse response;
@@ -202,7 +202,7 @@ public class FinancialPlanController {
             if (plan != null) {
                 // Mapping to PlanDetail Response
                 response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
+                response.setVersion(planService.getPlanVersionById(planId));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
@@ -373,7 +373,11 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            System.out.println(e);
         }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 
     @PostMapping("/create")
@@ -404,16 +408,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/last-version-xls")
+    @GetMapping("/download/last-version-xls")
     public ResponseEntity<byte[]> generateLastVersionXlsReport(
-            @Valid @RequestBody PlanBody planBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
+                String outFileName = planService.generateXLSFileNameByPlanId(planId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
@@ -427,16 +431,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/last-version-xlsx")
+    @GetMapping("/download/last-version-xlsx")
     public ResponseEntity<byte[]> generateLastVersionXlsxReport(
-            @Valid @RequestBody PlanBody planBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
+                String outFileName = planService.generateXLSXFileNameByPlanId(planId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
