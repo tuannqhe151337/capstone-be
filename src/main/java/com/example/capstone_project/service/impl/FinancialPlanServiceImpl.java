@@ -104,10 +104,18 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 }
             } else {
                 // Sort by request
-                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                        CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
-                        CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-                ));
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
+                    ));
+                }
             }
 
             List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable, statusCode);
