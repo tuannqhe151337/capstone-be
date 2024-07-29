@@ -179,7 +179,7 @@ public class UserController {
     public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
-            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(e.getMessage());
         } catch (ResourceNotFoundException e) {
@@ -223,7 +223,7 @@ public class UserController {
     public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
-            return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         } catch (Exception e) {
