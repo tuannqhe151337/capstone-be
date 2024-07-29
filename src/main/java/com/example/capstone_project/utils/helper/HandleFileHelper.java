@@ -21,7 +21,7 @@ public class HandleFileHelper {
         for (int i = 0; i < expenses.size(); i++) {
             ExpenseResult expense = expenses.get(i);
             tableData[i][0] = expense.getExpenseCode();
-            tableData[i][1] = expense.getDate().toString();
+            tableData[i][1] = expense.getDate().toLocalDate().toString();
             tableData[i][2] = expense.getTerm();
             tableData[i][3] = expense.getDepartment();
             tableData[i][4] = expense.getExpense();
