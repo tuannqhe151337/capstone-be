@@ -2,9 +2,7 @@ package com.example.capstone_project.utils.mapper.plan.create;
 
 import com.example.capstone_project.controller.body.plan.create.ExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.entity.CostType;
-import com.example.capstone_project.entity.ExpenseStatus;
-import com.example.capstone_project.entity.FinancialPlanExpense;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import org.mapstruct.Mapper;
 
@@ -28,7 +26,6 @@ public interface CreatePlanExpenseMapper {
                             .pic(expenseBody.getPic())
                             .note(expenseBody.getNotes())
                             .status(ExpenseStatus.builder()
-//                                    .id(1L)
                                     .code(ExpenseStatusCode.NEW)
                                     .build())
                             .costType(CostType.builder()

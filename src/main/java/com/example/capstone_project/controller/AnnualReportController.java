@@ -1,17 +1,14 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
-import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
-import com.example.capstone_project.controller.responses.annualReport.expenses.CostTypeResponse;
 import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.service.AnnualReportService;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
@@ -19,11 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -84,54 +78,58 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<AnnualReportResponse>> getListAnnualReport(
+            @RequestParam(required = false) String year,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+            // Get data
+            List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable, year);
 
-        // Get data
-        List<AnnualReport> annualReports = annualReportService.getListAnnualReportPaging(pageable);
+            // Response
+            ListPaginationResponse<AnnualReportResponse> response = new ListPaginationResponse<>();
 
-        // Response
-        ListPaginationResponse<AnnualReportResponse> response = new ListPaginationResponse<>();
+            long count = 0;
 
-        long count = 0;
+            if (annualReports != null) {
 
-        if (annualReports != null) {
+                // Count total record
+                count = annualReportService.countDistinctListAnnualReportPaging(year);
 
-            // Count total record
-            count = annualReportService.countDistinctListAnnualReportPaging();
+                // Mapping to TermPaginateResponse
+                annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
 
-            // Mapping to TermPaginateResponse
-            annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
 
-        } else {
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 }
