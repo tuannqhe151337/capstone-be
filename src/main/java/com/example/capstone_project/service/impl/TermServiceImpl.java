@@ -133,21 +133,6 @@ public class TermServiceImpl implements TermService {
         }
 
     }
-    @Override
-    public void startTermManually(Long termId) throws Exception {
-        long userId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.START_TERM.getValue())) {
-            throw new UnauthorizedException("Unauthorized to start term");
-        }
-        Term term = termRepository.findTermById(termId);
-        if(term == null){
-            throw new ResourceNotFoundException("Term not found");
-        }
-        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
-        term.setStatus(termStatus);
-        term.setStartDate(LocalDateTime.now());
-        termRepository.save(term);
-    }
 
     @Override
     public void updateTermStatus(Term term, Long statusId) throws Exception {
