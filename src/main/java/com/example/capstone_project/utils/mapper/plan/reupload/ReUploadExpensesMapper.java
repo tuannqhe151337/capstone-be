@@ -58,7 +58,7 @@ public interface ReUploadExpensesMapper {
 
         FinancialPlanFile file = FinancialPlanFile.builder()
                 .plan(plan)
-                .name(planVersionResult.getTermName() + "_" + planVersionResult.getDepartmentCode() + "_v" + planVersionResult.getVersion())
+                .name(planVersionResult.getTermName() + "_" + planVersionResult.getDepartmentName() + "_v" + planVersionResult.getVersion())
                 .user(User.builder().id(userId).build())
                 .planFileExpenses(expenseFile)
                 .build();

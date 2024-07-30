@@ -13,4 +13,10 @@ public interface DepartmentService {
     List<Department> getListDepartmentPaging(String query, Pageable pageable);
 
     long countDistinctListDepartmentPaging(String query);
+
+    void createDepartment(String departmentName) throws Exception;
+
+    void deleteDepartment(Long departmentId) throws Exception;
+
+    void updateDepartment(Department department) throws Exception;
 }

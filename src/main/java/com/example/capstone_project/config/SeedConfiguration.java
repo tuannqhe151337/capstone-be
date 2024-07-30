@@ -74,32 +74,26 @@ public class SeedConfiguration {
             // Department
             Department itDepartment = Department.builder()
                     .name("IT")
-                    .code(DepartmentCode.IT)
                     .build();
 
             Department hrDepartment = Department.builder()
                     .name("HR")
-                    .code(DepartmentCode.HR)
                     .build();
 
             Department financeDepartment = Department.builder()
                     .name("Finance")
-                    .code(DepartmentCode.FINANCE)
                     .build();
 
             Department communicationDepartment = Department.builder()
                     .name("Communication")
-                    .code(DepartmentCode.COMMUNICATION)
                     .build();
 
             Department marketingDepartment = Department.builder()
                     .name("Marketing")
-                    .code(DepartmentCode.MARKETING)
                     .build();
 
             Department accountingDepartment = Department.builder()
                     .name("Accounting")
-                    .code(DepartmentCode.ACCOUNTING)
                     .build();
 
             departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
@@ -240,7 +234,22 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport));
+            Authority createNewDepartment = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_DEPARTMENT)
+                    .name("Create new department")
+                    .build();
+
+            Authority updateDepartment = Authority.builder()
+                    .code(AuthorityCode.UPDATE_DEPARTMENT)
+                    .name("Update department")
+                    .build();
+
+            Authority deleteDepartment = Authority.builder()
+                    .code(AuthorityCode.DELETE_DEPARTMENT)
+                    .name("Delete department")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment));
 
             // Role
             Role admin = Role.builder()
@@ -412,6 +421,21 @@ public class SeedConfiguration {
                     .authority(viewUserDetail)
                     .build();
 
+            RoleAuthority adminAuthority8 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(deleteDepartment)
+                    .build();
+
+            RoleAuthority adminAuthority9 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(createNewDepartment)
+                    .build();
+
+            RoleAuthority adminAuthority10 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(updateDepartment)
+                    .build();
+
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(createTerm)
@@ -577,7 +601,7 @@ public class SeedConfiguration {
                     .authority(deleteReport)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));

@@ -34,7 +34,7 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " report.createdAt, department.id, department.name, user.id, user.username ")
     ReportDetailResult getFinancialReportById(Long reportId);
 
-    @Query(value = " SELECT term.name AS termName, department.code AS departmentCode FROM FinancialReport report " +
+    @Query(value = " SELECT term.name AS termName, department.name AS departmentCode FROM FinancialReport report " +
             " JOIN report.department department " +
             " JOIN report.term term " +
             " WHERE report.id = :reportId AND " +
