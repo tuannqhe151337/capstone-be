@@ -224,17 +224,19 @@ public class TermController {
     public ResponseEntity<TermDetailResponse> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
 
         try {
-            Term term = new UpdateTermBodyToTermDetailResponseMapperImpl().mapTermBodyToTermEntity(updateTermBody);
+//            Term term = new UpdateTermBodyToTermDetailResponseMapperImpl().mapTermBodyToTermEntity(updateTermBody);
+//
+//            TermDetailResponse termDetailResponse =
+//                    new UpdateTermBodyToTermDetailResponseMapperImpl()
+//                            .mapTermToTermDetailResponse(termService.updateTerm(term));
 
-            TermDetailResponse termDetailResponse =
-                    new UpdateTermBodyToTermDetailResponseMapperImpl()
-                            .mapTermToTermDetailResponse(termService.updateTerm(term));
+//            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
 
-            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        } catch (InvalidDateException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

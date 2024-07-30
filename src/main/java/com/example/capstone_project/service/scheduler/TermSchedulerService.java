@@ -97,7 +97,8 @@ public class TermSchedulerService {
                                 .note(planExpense.getNote())
                                 .financialReport(report)
                                 .costType(planExpense.getCostType())
-                                .status(planExpense.getStatus()).build());
+//                                .status(planExpense.getStatus())
+                                .build());
                     });
 
                     // Generate report

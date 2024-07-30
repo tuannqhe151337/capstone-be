@@ -1372,7 +1372,7 @@ public class SeedConfiguration {
                         .supplierName("Supplier name " + supplierNameChar++)
                         .pic(pics[randomPicIndex])
                         .costType(randomCostType)
-                        .status(randomExpenseStatus)
+//                        .status(randomExpenseStatus)
                         .build();
 
                 reportExpenseList.add(expense);

@@ -13,7 +13,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
+//import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -154,7 +154,7 @@ public class ReportController {
                 count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
 
                 // Mapping to TermPaginateResponse
-                reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
+//                reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));
 
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

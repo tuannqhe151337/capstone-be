@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -50,7 +51,8 @@ public class DepartmentController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+//            List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+            List<Department> departments = new ArrayList<>();
 
             // Response
             ListPaginationResponse<DepartmentPaginateResponse> response = new ListPaginationResponse<>();
@@ -60,7 +62,7 @@ public class DepartmentController {
             if (departments != null) {
 
                 // Count total record
-                count = departmentService.countDistinctListDepartmentPaging(query);
+//                count = departmentService.countDistinctListDepartmentPaging(query);
 
                 // Mapping to TermPaginateResponse
                 departments.forEach(department -> response.getData().add(new DepartmentPaginateResponseMapperImpl().mapToDepartmentPaginateResponseMapping(department)));
@@ -105,7 +107,8 @@ public class DepartmentController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+//        List<Department> departments = departmentService.getListDepartmentPaging(query, pageable);
+        List<Department> departments = new ArrayList<>();
 
         //map
         List<DepartmentResponse> departmentResponses =
