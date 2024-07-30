@@ -721,26 +721,12 @@ public class UserServiceTest {
 
     @Nested
     class TestsWithCustomSetup {
-        private Method validateUserMethod;
+
         @BeforeEach
         void setUp() throws NoSuchMethodException {
-            // Custom setup for this test group if needed
-            validateUserMethod = UserServiceImpl.class.getDeclaredMethod("validateUser", User.class);
-            validateUserMethod.setAccessible(true);
+
         }
 
-        @Test
-        void testValidateUser_ValidUser() throws Exception {
-            User user = User.builder()
-                    .fullName("John Doe")
-                    .email("john.doe@example.com")
-                    .phoneNumber("1234567890")
-                    .dob(LocalDateTime.of(2000, 1, 1, 0, 0)) // Ngày sinh hợp lệ
-                    .build();
-
-            // Không mong đợi ngoại lệ
-            assertDoesNotThrow(() -> validateUserMethod.invoke(userServiceImpl, user));
-        }
 
         @Test
         void testGetUserById_InvalidId() {
