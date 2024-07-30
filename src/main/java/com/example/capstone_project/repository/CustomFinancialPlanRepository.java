@@ -10,5 +10,6 @@ import java.util.List;
 public interface CustomFinancialPlanRepository {
 
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable);
+
     List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable, PlanStatusCode statusCode);
 }
