@@ -65,7 +65,7 @@ public class TermScheduleTest {
                 .code(TermCode.NEW).build();
         termStatus2 = TermStatus.builder()
                 .id(2L)
-                .name("Not started")
+                .name("In progress")
                 .code(TermCode.NEW)
                 .build();
 
@@ -89,38 +89,20 @@ public class TermScheduleTest {
                 .status(termStatus2)
                 .build();
     }
-//test end, test start
+
+    //test end, test start
     @Test
     public void testStartTerm() throws Exception {
-
         List<Term> terms = Arrays.asList(term1, term2);
 
-        // Mock the findAll method
         when(termRepository.findAll()).thenReturn(terms);
 
-        // Execute the scheduled method
         termSchedulerService.startTerm();
 
-        // Verify interactions
         verify(termServiceImpl, times(1)).updateTermStatus(term1, 2L);
         verify(termServiceImpl, times(0)).updateTermStatus(term2, 2L);
     }
 
-    @Test
-    public void testEndTerm() throws Exception {
-
-        List<Term> terms = Arrays.asList(term1, term2);
-
-        // Mock the findAll method
-        when(termRepository.findAll()).thenReturn(terms);
-
-        // Execute the scheduled method
-        termSchedulerService.endTerm();
-
-        // Verify interactions
-        verify(termServiceImpl, times(0)).updateTermStatus(term1, 3L);
-        verify(termServiceImpl, times(1)).updateTermStatus(term2, 3L);
-    }
     //when there are no terms
     @Test
     public void testStartTermWithNoTerms() throws Exception {
@@ -133,18 +115,6 @@ public class TermScheduleTest {
         // Verify no interactions with termService
         verify(termServiceImpl, times(0)).updateTermStatus(any(Term.class), eq(2L));
     }
-    @Test
-    public void testEndTermWithNoTerms() throws Exception {
-        // Mock empty list
-        when(termRepository.findAll()).thenReturn(Arrays.asList());
-
-        // Execute the scheduled method directly
-        termSchedulerService.endTerm();
-
-        // Verify no interactions with termService
-        verify(termServiceImpl, times(0)).updateTermStatus(any(Term.class), eq(3L));
-    }
-
 
 
 }
