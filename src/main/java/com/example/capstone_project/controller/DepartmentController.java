@@ -35,10 +35,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/department")
@@ -152,6 +154,15 @@ public class DepartmentController {
     @PostMapping("/create")
     public ResponseEntity<ExceptionResponse> createDepartment(
             @Valid @RequestBody NewDepartmentBody newDepartmentBody, BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
 
             // Save plan
@@ -173,7 +184,7 @@ public class DepartmentController {
             // Delete plan
             departmentService.deleteDepartment(deleteDepartmentBody.getDepartmentId());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
         } catch (DuplicateKeyException | ResourceNotFoundException e) {
@@ -184,17 +195,28 @@ public class DepartmentController {
     @PutMapping("/update")
     public ResponseEntity<ExceptionResponse> deleteDepartment(
             @Valid @RequestBody UpdateDepartmentBody updateDepartmentBody, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
 
             // Update plan
             departmentService.updateDepartment(Department.builder().id(updateDepartmentBody.getDepartmentId()).name(updateDepartmentBody.getDepartmentName()).build());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
-        } catch (DuplicateKeyException | ResourceNotFoundException e) {
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Duplicate name department").build());
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any department have id = " + updateDepartmentBody.getDepartmentId()).build());
         }
     }
-
 }

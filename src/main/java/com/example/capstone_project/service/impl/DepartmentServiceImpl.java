@@ -28,7 +28,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
-    private final UserDetailRepository userDetailRepository;
     private final UserAuthorityRepository userAuthorityRepository;
 
 
@@ -83,7 +82,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             departmentRepository.deleteById(departmentId);
         } else {
-            throw new UnauthorizedException("Unauthorized to create new department");
+            throw new UnauthorizedException("Unauthorized to delete department");
         }
     }
 
@@ -91,15 +90,20 @@ public class DepartmentServiceImpl implements DepartmentService {
     public void updateDepartment(Department department) throws Exception {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
-        // Check authority or role
-        if (listAuthorities.contains(AuthorityCode.UPDATE_DEPARTMENT.getValue())) {
-            if (!departmentRepository.existsById(department.getId())) {
-                throw new ResourceNotFoundException("Not found any department have Id = " + department.getId());
-            }
+        try {
+            // Check authority or role
+            if (listAuthorities.contains(AuthorityCode.UPDATE_DEPARTMENT.getValue())) {
+                if (!departmentRepository.existsById(department.getId())) {
+                    throw new ResourceNotFoundException("Not found any department have Id = " + department.getId());
+                }
 
-            departmentRepository.save(department);
-        } else {
-            throw new UnauthorizedException("Unauthorized to create new department");
+                departmentRepository.save(department);
+            } else {
+                throw new UnauthorizedException("Unauthorized to update department");
+            }
+        } catch (Exception e) {
+
+            throw new DuplicateKeyException("Duplicate name department");
         }
     }
 
