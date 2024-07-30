@@ -51,7 +51,7 @@ public class FinancialReportExpense extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
-    private FinancialReportStatus status;
+    private ExpenseStatus status;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
