@@ -59,4 +59,6 @@ public interface FinancialPlanService {
     String generateXLSXFileNameByPlanId(Long planId);
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+
+    void approvalAllExpenses(Long planId) throws Exception;
 }

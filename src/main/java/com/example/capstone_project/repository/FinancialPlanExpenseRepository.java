@@ -5,11 +5,11 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.utils.enums.TermCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.repository.query.Param;
 
 public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialPlanExpense, Long>, CustomFinancialPlanExpenseRepository {
     @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
@@ -58,4 +58,17 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " expense.isDelete = false " +
             " ORDER BY expense.id DESC LIMIT 1")
     String getLastExpenseCode(Long planId);
+
+    @Query(" SELECT expense FROM FinancialPlanExpense expense " +
+            " JOIN expense.files fileExpense " +
+            " JOIN fileExpense.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN term.status status " +
+            " WHERE plan.id = :planId AND " +
+            " status.code = :inProgress AND " +
+            " term.planDueDate >= :now AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " expense.isDelete = false ")
+    List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
 }
