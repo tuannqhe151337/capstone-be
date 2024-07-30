@@ -36,6 +36,7 @@ public class TermScheduleTest {
 
     private Term term1;
     private Term term2;
+    private Term term3;
 
     private TermStatus termStatus;
     private TermStatus termStatus2;
@@ -69,6 +70,7 @@ public class TermScheduleTest {
                 .code(TermCode.NEW)
                 .build();
 
+
         term1 = Term.builder()
                 .id(4L)
                 .name("Winterrrr 2024")
@@ -88,12 +90,21 @@ public class TermScheduleTest {
                 .user(user)
                 .status(termStatus2)
                 .build();
+        term3 = Term.builder()
+                .id(5L)
+                .name("Winnn 2024")
+                .duration(TermDuration.HALF_YEARLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())
+                .user(user)
+                .status(termStatus2)
+                .build();
     }
 
     //test end, test start
     @Test
     public void testStartTerm() throws Exception {
-        List<Term> terms = Arrays.asList(term1, term2);
+        List<Term> terms = Arrays.asList(term1, term2, term3);
 
         when(termRepository.findAll()).thenReturn(terms);
 
