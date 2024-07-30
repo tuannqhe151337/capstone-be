@@ -57,4 +57,6 @@ public interface FinancialPlanService {
     byte[] getLastVersionBodyFileExcelXLSX(Long planId) throws Exception;
 
     String generateXLSXFileNameByPlanId(Long planId);
+
+    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 }

@@ -359,6 +359,49 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 plan.setStatus(planStatusRepository.getReferenceById(3L));
 
                 planRepository.save(plan);
+
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
+    }
+
+    @Override
+    public void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countTotalExpenseInPlanLastVersion(planId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenseId.size() == totalExpense) {
+
+                listExpenseId.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(4L));
+                        expenses.add(updateExpense);
+                    }
+
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+                expenseRepository.saveAll(expenses);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
