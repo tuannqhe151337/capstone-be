@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.AnnualReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -57,5 +58,19 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     @Override
     public long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId) {
         return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
+    }
+
+    @Override
+    public List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId) {
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            }
+            return annualReportRepository.getAnnualReportCostTypeDiagram(annualReportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
+        }
     }
 }

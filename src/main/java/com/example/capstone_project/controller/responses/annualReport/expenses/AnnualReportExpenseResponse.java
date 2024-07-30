@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.responses.annualReport.expenses;
 
+import com.example.capstone_project.controller.responses.annualReport.CostTypeResponse;
 import lombok.Builder;
 import lombok.Data;
 

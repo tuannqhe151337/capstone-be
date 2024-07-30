@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -53,4 +54,11 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " (:costTypeId IS NULL OR report.costType = :costTypeId) AND " +
             " report.isDelete = false OR report.isDelete is null ")
     long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId);
+
+    @Query(value = " SELECT report.costType.id AS costTypeId, report.costType.name AS costTypeName, sum(report.totalExpense) AS totalCost FROM AnnualReport annualReport " +
+            " JOIN annualReport.reports report " +
+            " WHERE annualReport.id = :annualReportId AND " +
+            " annualReport.isDelete = false AND report.isDelete = false " +
+            " GROUP BY costTypeId, costTypeName ")
+    List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
 }

@@ -1,17 +1,21 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
+import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
 import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -130,6 +134,33 @@ public class AnnualReportController {
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    @GetMapping("/diagram")
+    public ResponseEntity<ListResponse<CostTypeDiagramResponse>> getAnnualReportDiagram(
+            @RequestParam(required = true) Long annualReportId
+    ) {
+        try {
+            // Get data
+            List<CostTypeDiagramResult> costTypeDiagrams = annualReportService.getAnnualReportCostTypeDiagram(annualReportId);
+
+            // Response
+            ListResponse<CostTypeDiagramResponse> response = new ListResponse<>();
+
+            if (costTypeDiagrams != null) {
+
+                costTypeDiagrams.forEach(costTypeDiagram -> response.getData().add(new CostTypeDiagramMapperImpl().mapToCostTypeDiagramResponseMapping(costTypeDiagram)));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }
