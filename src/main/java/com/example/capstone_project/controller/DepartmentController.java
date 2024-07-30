@@ -3,26 +3,20 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.department.DeleteDepartmentBody;
 import com.example.capstone_project.controller.body.department.NewDepartmentBody;
 import com.example.capstone_project.controller.body.department.UpdateDepartmentBody;
-import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import com.example.capstone_project.controller.responses.user.DepartmentResponse;
-import com.example.capstone_project.entity.*;
 import com.example.capstone_project.service.DepartmentService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 
 import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapperImpl;
 import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.service.DepartmentService;
-import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 
 import jakarta.validation.Valid;
@@ -32,10 +26,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/department")
@@ -149,6 +145,15 @@ public class DepartmentController {
     @PostMapping("/create")
     public ResponseEntity<ExceptionResponse> createDepartment(
             @Valid @RequestBody NewDepartmentBody newDepartmentBody, BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
 
             // Save plan
@@ -170,7 +175,7 @@ public class DepartmentController {
             // Delete plan
             departmentService.deleteDepartment(deleteDepartmentBody.getDepartmentId());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
         } catch (DuplicateKeyException | ResourceNotFoundException e) {
@@ -181,17 +186,28 @@ public class DepartmentController {
     @PutMapping("/update")
     public ResponseEntity<ExceptionResponse> deleteDepartment(
             @Valid @RequestBody UpdateDepartmentBody updateDepartmentBody, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
 
             // Update plan
             departmentService.updateDepartment(Department.builder().id(updateDepartmentBody.getDepartmentId()).name(updateDepartmentBody.getDepartmentName()).build());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
-        } catch (DuplicateKeyException | ResourceNotFoundException e) {
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Duplicate name department").build());
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any department have id = " + updateDepartmentBody.getDepartmentId()).build());
         }
     }
-
 }
