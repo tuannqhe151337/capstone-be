@@ -3,6 +3,7 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,8 +21,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
             " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
+            " (:statusCode IS NULL OR plan.status.code != :statusCode) AND " +
             " plan.isDelete = false ")
-    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId, PlanStatusCode statusCode);
 
     @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +

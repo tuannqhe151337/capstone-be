@@ -63,14 +63,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
-
+        PlanStatusCode statusCode = PlanStatusCode.NEW;
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+            statusCode = null;
         }
 
-        return planRepository.countDistinct(query, termId, departmentId, statusId);
+        return planRepository.countDistinct(query, termId, departmentId, statusId, statusCode);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             throw new UnauthorizedException("Unauthorized to view plan");
         } else {
-
+            PlanStatusCode statusCode = null;
             // Handling pagination
             Pageable pageable = null;
             if (sortBy == null || sortBy.isEmpty()) {
@@ -96,6 +97,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                             CustomSort.builder().sortBy(FinancialPlan_.UPDATED_AT).sortType("desc").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
                     ));
+
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
                 } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                     // Default sort of financial staff role
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
@@ -108,14 +112,29 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     departmentId = userDetail.getDepartmentId();
                 }
             } else {
+                if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
+                } else {
+                    // Financial staff only see list-plan of their department
+                    departmentId = userDetail.getDepartmentId();
+                }
                 // Sort by request
-                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                        CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
-                        CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-                ));
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
+                    ));
+                }
             }
 
-            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable);
+            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable, statusCode);
             List<PlanVersionResult> listVersions = planRepository.getListPlanVersion(query, termId, departmentId, statusId);
 
             listResult.forEach(plan ->
