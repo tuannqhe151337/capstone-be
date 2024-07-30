@@ -5,27 +5,20 @@ import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.responses.*;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
-import com.example.capstone_project.controller.responses.user.DepartmentResponse;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
-import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.exception.InvalidInputException;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -40,6 +33,8 @@ import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImp
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +44,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.util.List;
 
 @RestController
@@ -211,7 +208,7 @@ public class FinancialPlanController {
                 // Create file name for file Excel
                 String outFileName = planService.generateXLSXFileName(planBody.getFileId());
 
-                return createResponseEntity(report, outFileName);
+                return createExcelFileResponseEntity(report, outFileName);
 
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -234,14 +231,14 @@ public class FinancialPlanController {
             // Create file name for file Excel
             String outFileName = planService.generateXLSFileName(planBody.getFileId());
 
-            return createResponseEntity(report, outFileName);
+            return createExcelFileResponseEntity(report, outFileName);
 
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
 
-    private ResponseEntity<byte[]> createResponseEntity(
+    private ResponseEntity<byte[]> createExcelFileResponseEntity(
             byte[] report, String fileName) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -404,5 +401,34 @@ public class FinancialPlanController {
         } catch (InvalidInputException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+    }
+
+    @PostMapping("/download/template/xlsx")
+    public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+        FileInputStream file = new FileInputStream(fileLocation);
+        XSSFWorkbook wb = new XSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
+    }
+
+
+    @PostMapping("/download/template/xls")
+    public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+        FileInputStream file = new FileInputStream(fileLocation);
+        HSSFWorkbook wb = new HSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
     }
 }
