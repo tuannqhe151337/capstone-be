@@ -1,13 +1,11 @@
 package com.example.capstone_project.service;
 
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
-import com.example.capstone_project.entity.*;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.entity.FinancialPlan;
+import com.example.capstone_project.entity.*;
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.repository.result.PlanVersionResult;
-import com.example.capstone_project.repository.result.VersionResult;
 import org.springframework.data.domain.Pageable;
+import com.example.capstone_project.repository.result.VersionResult;
 
 import java.util.List;
 
@@ -30,23 +28,27 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
-    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
+    List<ExpenseStatus> getListExpenseStatus();
 
     byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
-
-    List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
-
-    long countDistinctListPlanVersionPaging(Long planId);
-
-    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
-
-    long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
 
     byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
 
     String generateXLSXFileName(Long fileId);
 
     String generateXLSFileName(Long fileId);
+
+    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+
+    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
+
+    long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
+
+    List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
+
+    long countDistinctListPlanVersionPaging(Long planId);
+
+    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
 
     void reUploadPlan(FinancialPlan plan);
 
@@ -58,5 +60,9 @@ public interface FinancialPlanService {
 
     String generateXLSXFileNameByPlanId(Long planId);
 
-    void approvalExpenses(List<Long> listExpenses) throws Exception;
+    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+
+    void approvalAllExpenses(Long planId) throws Exception;
+
+    void submitPlanForReview(Long planId) throws Exception;
 }

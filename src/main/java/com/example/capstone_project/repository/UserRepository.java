@@ -56,6 +56,8 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
                        @Param("positionId") Long positionId,
                        @Param("query") String query);
 
+
+
     @Query(value = "select user from User user " +
             "join fetch user.role " +
             "join fetch user.department " +

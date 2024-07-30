@@ -1,6 +1,6 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
+import com.example.capstone_project.controller.body.annual.AnnualReportDownloadBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -11,17 +11,19 @@ import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -84,7 +86,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -121,7 +123,7 @@ public class AnnualReportController {
                 annualReports.forEach(annualReport -> response.getData().add(new AnnualReportPaginateResponseMapperImpl().mapToAnnualReportResponseMapping(annualReport)));
 
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             }
 
             long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
@@ -191,5 +193,59 @@ public class AnnualReportController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @PostMapping("/download-xlsx")
+    public ResponseEntity<byte[]> generateXlsxReport(
+            @Valid @RequestBody AnnualReportDownloadBody annualReportBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = annualReportService.getBodyFileExcelXLSX(annualReportBody.getAnnualReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = annualReportService.generateXLSXFileName(annualReportBody.getAnnualReportId());
+
+                return createExcelFileResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/download-xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody AnnualReportDownloadBody annualReportBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = annualReportService.getBodyFileExcelXLS(annualReportBody.getAnnualReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = annualReportService.generateXLSFileName(annualReportBody.getAnnualReportId());
+
+                return createExcelFileResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    private ResponseEntity<byte[]> createExcelFileResponseEntity(
+            byte[] report, String fileName) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .body(report);
     }
 }

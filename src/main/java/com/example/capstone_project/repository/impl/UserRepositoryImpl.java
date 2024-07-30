@@ -26,9 +26,9 @@ public class UserRepositoryImpl implements CustomUserRepository {
     public List<User> getUserWithPagination(Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
         // HQL query
         String hql = "select user from User user " +
-                "left join user.role " +
-                "left join user.department " +
-                "left join user.position " +
+                " join user.role " +
+                " join user.department " +
+                " join user.position " +
                 "where user.username like :query AND" +
                 " (:roleId IS NULL OR user.role.id = :roleId) AND " +
                 " (:departmentId IS NULL OR user.department.id = :departmentId) AND " +
@@ -48,7 +48,13 @@ public class UserRepositoryImpl implements CustomUserRepository {
                     hql += "user.username " + sortType;
                     break;
                 case "role":
-                    hql += "user.role " + sortType;
+                    hql += "user.role.id " + sortType;
+                    break;
+                case "department":
+                    hql += "user.department.id " + sortType;
+                    break;
+                case "position":
+                    hql += "user.position.id " + sortType;
                     break;
                 default:
                     hql += "user.id " + sortType;

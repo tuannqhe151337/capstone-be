@@ -1,6 +1,5 @@
 package com.example.capstone_project.controller.body.user.updateUserSetting;
 
-
 import com.example.capstone_project.entity.User;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

@@ -81,11 +81,12 @@ public class TermRepositoryImpl implements CustomTermRepository {
     }
 
     @Override
-    public List<Term> getListTermPaging(String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
         // HQL query
         String hql = " SELECT term FROM Term term " +
                 " LEFT JOIN term.status " +
                 " WHERE term.name LIKE :query AND " +
+                ":statusId IS NULL OR term.status.id = :statusId AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
 
@@ -100,7 +101,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
                     hql += "term.name " + sortType;
                     break;
                 case "status", "term_status":
-                    hql += "term.status " + sortType;
+                    hql += "term.status.id " + sortType;
                     break;
                 case "duration", "term_duration":
                     hql += "term.duration " + sortType;
@@ -129,6 +130,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
         // Run query
         return entityManager.createQuery(hql, Term.class)
                 .setParameter("query", "%" + query + "%")
+                .setParameter("statusId", statusId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)

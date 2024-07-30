@@ -7,8 +7,6 @@ import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBo
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
-import com.example.capstone_project.controller.body.user.otp.OTPBody;
-import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
@@ -17,8 +15,6 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
-import com.example.capstone_project.entity.UserSetting;
-import com.example.capstone_project.repository.UserSettingRepository;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -51,7 +47,6 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserService userService;
-    private final UserSettingRepository userSettingRepository;
     private final JwtHelper jwtHelper;
 
     @GetMapping
@@ -65,42 +60,47 @@ public class UserController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortType
     ) {
-        // Handling page and pageSize
-        Integer pageInt = PaginationHelper.convertPageToInteger(page);
-        Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+        try {
+            // Handling page and pageSize
+            Integer pageInt = PaginationHelper.convertPageToInteger(page);
+            Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
-        // Handling query
-        if (query == null) {
-            query = "";
-        }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
-        // Get data
-        List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
-        long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
-
-        // Response
-        ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
-
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                //mapperToUserResponse
-                response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+            // Handling query
+            if (query == null) {
+                query = "";
             }
+
+            // Handling pagination
+            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
+
+            // Get data
+            List<User> users = userService.getAllUsers(roleId, departmentId, positionId, query, pageable);
+            long count = this.userService.countDistinct(query, roleId, departmentId, positionId);
+
+            // Response
+            ListPaginationResponse<UserResponse> response = new ListPaginationResponse<>();
+
+            if (users != null && !users.isEmpty()) {
+                for (User user : users) {
+                    //mapperToUserResponse
+                    response.getData().add(new ListUserResponseMapperImpl().mapToUserResponse(user));
+                }
+            }
+
+            long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
+
+            response.setPagination(Pagination.builder()
+                    .totalRecords(count)
+                    .page(pageInt)
+                    .limitRecordsPerPage(sizeInt)
+                    .numPages(numPages)
+                    .build());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
-        long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
-
-        response.setPagination(Pagination.builder()
-                .totalRecords(count)
-                .page(pageInt)
-                .limitRecordsPerPage(sizeInt)
-                .numPages(numPages)
-                .build());
-
-        return ResponseEntity.ok(response);
     }
 
     // build create user REST API
@@ -119,10 +119,10 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositionIdException e) {
+        } catch (InvalidPositionIdException e){
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidRoleIdException e) {
+        } catch(InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
@@ -138,11 +138,11 @@ public class UserController {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
-        } catch (UnauthorizedException e) {
+        } catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e) {
+        } catch (Exception e ){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -152,7 +152,7 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         try {
             userService.updateUser(
-                    new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
             );
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (UnauthorizedException ex) {
@@ -176,10 +176,10 @@ public class UserController {
 
     // build delete user REST API
     @DeleteMapping()
-    public ResponseEntity<Object> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
+    public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(e.getMessage());
         } catch (ResourceNotFoundException e) {
@@ -189,31 +189,33 @@ public class UserController {
 
     // build delete user REST API
     @PostMapping("/activate")
-    public ResponseEntity<Object> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
-        } catch (UnauthorizedException e) {
+        } catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
+        } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
     }
 
     @PostMapping("/change-password")
+
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
 
         try {
             userService.changePassword(changePasswordBody);
-            return ResponseEntity.status(HttpStatus.OK).body("Change password success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
-        } catch (Exception e) {
+        }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
+
     }
 
     @PostMapping("/auth/reset-password")
@@ -226,11 +228,16 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
 
+    @PutMapping("/user-setting/update")
+    public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
+                userService.updateUserSetting(updateUserSettingBody);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PostMapping("/auth/forgot-password")
-    public ResponseEntity<String> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+    public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         String token = null;
         try {
@@ -243,28 +250,22 @@ public class UserController {
         }
 
     }
-
     @PostMapping("/auth/otp")
     public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("otp-token") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
-        //return  Token  user:dnfpajsdfhp...:id, 6.
+            //return  Token  user:dnfpajsdfhp...:id, 6.
         try {
             String token = userService.otpValidate(otpBody, authHeader);
             return ResponseEntity.status(HttpStatus.OK).body(token);
-        } catch (DataIntegrityViolationException e) {
+        }catch (DataIntegrityViolationException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
-        } catch (UnauthorizedException e) {
+        }catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
-        } catch (InvalidDataAccessResourceUsageException e) {
+        }catch (InvalidDataAccessResourceUsageException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
     }
-
-    @PutMapping("/user-setting/update")
-    public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
-        userService.updateUserSetting(updateUserSettingBody);
-        return ResponseEntity.status(HttpStatus.OK).body("Update user setting success");
     }
-}
+

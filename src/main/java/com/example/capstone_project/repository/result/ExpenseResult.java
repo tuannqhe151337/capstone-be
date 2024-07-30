@@ -5,8 +5,6 @@ import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import java.time.LocalDateTime;
 
 public interface ExpenseResult {
-    Long getExpenseId();
-
     String getExpenseCode();
 
     LocalDateTime getDate();
@@ -34,6 +32,8 @@ public interface ExpenseResult {
     String getNote();
 
     String getStatus();
+
+    Long getExpenseId();
 
     ExpenseStatusCode getStatusCode();
 }

@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class ApprovalExpenseBody {
+public class ApprovalAllExpenseBody {
     @NotNull(message = "Plan id can not be null")
     private Long planId;
-    @NotNull(message = "List expense id can not be null")
-    private List<Long> listExpenseId;
 }

@@ -1,6 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-
 import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserDetail;
@@ -17,11 +16,19 @@ import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -119,12 +126,19 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if (term == null) {
+        if(term == null){
             throw new ResourceNotFoundException("Term not found");
-        } else {
+        }else{
             return term;
         }
 
+    }
+
+    @Override
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
+        term.setStatus(termStatus);
+        termRepository.save(term);
     }
 
     @Override
@@ -143,12 +157,6 @@ public class TermServiceImpl implements TermService {
         termRepository.save(term);
     }
 
-    @Override
-    public void updateTermStatus(Term term, Long statusId) throws Exception {
-        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
-        term.setStatus(termStatus);
-        termRepository.save(term);
-    }
 
     @Override
     public void createTerm(Term term) throws Exception {
@@ -178,15 +186,16 @@ public class TermServiceImpl implements TermService {
         term.setEndDate(endTime);
 
         termRepository.save(term);
+
     }
 
     @Override
-    public List<Term> getListTermPaging(String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
-            return termRepository.getListTermPaging(query, pageable);
+            return termRepository.getListTermPaging(statusId, query, pageable);
 
         }
 
@@ -194,7 +203,10 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public long countDistinctListTermPaging(String query) {
-        return termRepository.countDistinctListTermPaging(query);
+    public long countDistinctListTermPaging(Long statusId, String query) {
+        return termRepository.countDistinctListTermPaging(statusId, query);
     }
+    //start term change status of this term
+
+
 }

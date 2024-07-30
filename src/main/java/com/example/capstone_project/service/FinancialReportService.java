@@ -1,6 +1,5 @@
 package com.example.capstone_project.service;
 
-import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.entity.FinancialReportExpense;
