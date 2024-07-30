@@ -249,7 +249,27 @@ public class SeedConfiguration {
                     .name("Delete department")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment));
+            Authority createNewPosition = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_POSITION)
+                    .name("Create new position")
+                    .build();
+
+            Authority updatePosition = Authority.builder()
+                    .code(AuthorityCode.UPDATE_POSITION)
+                    .name("Update position")
+                    .build();
+
+            Authority deletePosition = Authority.builder()
+                    .code(AuthorityCode.DELETE_POSITION)
+                    .name("Delete position")
+                    .build();
+
+            Authority viewPosition = Authority.builder()
+                    .code(AuthorityCode.VIEW_POSITION)
+                    .name("View position")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, viewPosition, createNewPosition, updatePosition, deletePosition));
 
             // Role
             Role admin = Role.builder()
@@ -436,6 +456,27 @@ public class SeedConfiguration {
                     .authority(updateDepartment)
                     .build();
 
+
+            RoleAuthority adminAuthority14 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(viewPosition)
+                    .build();
+
+            RoleAuthority adminAuthority15 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(createNewPosition)
+                    .build();
+
+            RoleAuthority adminAuthority16 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(updatePosition)
+                    .build();
+
+            RoleAuthority adminAuthority17 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(deletePosition)
+                    .build();
+
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(createTerm)
@@ -601,7 +642,7 @@ public class SeedConfiguration {
                     .authority(deleteReport)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
