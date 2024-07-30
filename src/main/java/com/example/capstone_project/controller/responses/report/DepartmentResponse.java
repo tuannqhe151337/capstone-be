@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.report.list;
+package com.example.capstone_project.controller.responses.report;
 
 import lombok.Builder;
 import lombok.Data;
@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class DepartmentResponse {
-    private long departmentId;
+    private Long departmentId;
     private String name;
 }

@@ -13,9 +13,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ReUploadExpensesMapper {
-    @Mapping(expression = "java(expenseResult.getExpenseId())", target = "id")
-    @Mapping(constant = "null", target = ".updatedAt")
-    FinancialPlanExpense mapApprovedExpenseToPlanExpense(ExpenseResult expenseResult);
 
     @Mapping(source = "expenseCode", target = "planExpenseKey")
     @Mapping(source = "expenseName", target = "name")
