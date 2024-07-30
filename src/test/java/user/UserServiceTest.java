@@ -1,15 +1,23 @@
 package user;
 
-import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.Position;
-import com.example.capstone_project.entity.Role;
-import com.example.capstone_project.entity.User;
+
+import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
+import com.example.capstone_project.controller.body.user.changePassword.ChangePasswordBody;
+import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.impl.MailRepository;
+import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
+import com.example.capstone_project.utils.exception.position.InvalidPositionIdException;
+import com.example.capstone_project.utils.exception.role.InvalidRoleIdException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -18,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.passay.PasswordGenerator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -30,6 +40,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -67,6 +78,15 @@ public class UserServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private AuthorityRepository authorityRepository;
+
+    @Mock
+    private UserDetailRepository userDetailRepository;
+
+    @Mock
+    private PasswordGenerator mockPasswordGenerator;
+
     private Long userId;
     private Long actorId;
     private Position position;
@@ -76,6 +96,10 @@ public class UserServiceTest {
     private User user2;
     private User oldUser;
     private Pageable pageable;
+    private UserSetting userSetting;
+    private final String oldPassword = "oldPassword";
+    private final String newPassword = "newPassword";
+
 
     @Nested
     class TestsWithCommonSetup {
@@ -143,6 +167,14 @@ public class UserServiceTest {
                     .phoneNumber("0999988877")
                     .build();
             pageable = PageRequest.of(0, 10);
+            userSetting = UserSetting.builder()
+                    .id(1L)
+                    .user(user)
+                    .language("en")
+                    .theme("light")
+                    .darkMode(false)
+                    .build();
+
 
             // Mock the SecurityContextHolder to return a valid user ID
             SecurityContext securityContext = mock(SecurityContext.class);
@@ -150,7 +182,6 @@ public class UserServiceTest {
 
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.getPrincipal()).thenReturn(actorId.toString());
-
             SecurityContextHolder.setContext(securityContext);
         }
 
@@ -210,14 +241,517 @@ public class UserServiceTest {
             // Assert the result
             assertTrue(actualUsers.isEmpty());
         }
+        @Test
+        void testGetUserById_Unauthorized() {
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of());
+
+            Exception exception = assertThrows(UnauthorizedException.class, () -> {
+                userServiceImpl.getUserById(userId);
+            });
+
+            assertEquals("Unauthorized to view user details", exception.getMessage());
+        }
+
+        @Test
+        void testGetUserById_UserNotFound() {
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+            when(userRepository.findUserDetailedById(userId)).thenReturn(Optional.empty());
+
+            Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.getUserById(userId);
+            });
+
+            assertEquals("User not found", exception.getMessage());
+        }
+
+        @Test
+        void testGetUserById_Success() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+            when(userRepository.findUserDetailedById(userId)).thenReturn(Optional.of(user));
+
+            User foundUser = userServiceImpl.getUserById(userId);
+
+            assertEquals(userId, foundUser.getId());
+            assertEquals("Nutalomlok Nunu", foundUser.getFullName());
+            assertEquals("username1", foundUser.getUsername());
+            assertEquals("password", foundUser.getPassword());
+            assertEquals("mailho21@gmail.com", foundUser.getEmail());
+            assertEquals(LocalDateTime.of(2002, 11, 11, 0, 0, 0), foundUser.getDob());
+            assertEquals("Ha Noi", foundUser.getAddress());
+            assertEquals("0999988877", foundUser.getPhoneNumber());
+            assertEquals(position.getId(), foundUser.getPosition().getId());
+            assertEquals(position.getName(), foundUser.getPosition().getName());
+            assertEquals(department.getId(), foundUser.getDepartment().getId());
+            assertEquals(department.getName(), foundUser.getDepartment().getName());
+            assertEquals(role.getId(), foundUser.getRole().getId());
+            assertEquals(role.getName(), foundUser.getRole().getName());
+        }
+
+        @Test
+        public void testGetUserById_InternalServerError() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+            when(userRepository.findUserDetailedById(userId)).thenThrow(new RuntimeException("Database error"));
+
+            Exception exception = assertThrows(Exception.class, () -> {
+                userServiceImpl.getUserById(userId);
+            });
+
+            assertEquals("Database error", exception.getMessage());
+            verify(userRepository, times(1)).findUserDetailedById(userId);
+        }
+
+
+        @Test
+        public void testGetUserById_BoundaryValue() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+            when(userRepository.findUserDetailedById(userId)).thenReturn(Optional.of(user));
+
+            User result = userServiceImpl.getUserById(userId);
+
+            assertNotNull(result);
+            assertEquals(userId, result.getId());
+            verify(userRepository, times(1)).findUserDetailedById(userId);
+        }
+
+        //create user test
+        @Test
+        public void testCreateUser_Unauthorized() {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn(Set.of());
+
+            Exception exception = assertThrows(UnauthorizedException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Unauthorized to create new user", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_EmailAlreadyExists() {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn(Set.of(AuthorityCode.CREATE_NEW_USER.getValue()));
+            when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
+
+            Exception exception = assertThrows(DataIntegrityViolationException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Email already exists", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_Success() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+            when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+            when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+
+            when(departmentRepository.existsById(anyLong())).thenReturn(true);
+            when(positionRepository.existsById(anyLong())).thenReturn(true);
+            when(roleRepository.existsById(anyLong())).thenReturn(true);
+
+            userServiceImpl.createUser(user);
+
+            verify(userRepository, times(1)).save(user);
+            verify(userSettingRepository, times(1)).save(any(UserSetting.class));
+            verify(mailRepository, times(1)).sendEmail(eq("mailho21@gmail.com"), eq(user.getFullName()), eq(user.getUsername()), anyString());
+        }
+
+        @Test
+        public void testUpdateUser_Success() throws Exception {
+            // Mock the necessary methods
+            //authority ok
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.EDIT_USER.getValue())));
+
+            //user exists
+            when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+            //exist
+            when(departmentRepository.existsById(user.getDepartment().getId())).thenReturn(true);
+            when(positionRepository.existsById(user.getDepartment().getId())).thenReturn(true);
+            when(roleRepository.findById(user.getRole().getId())).thenReturn(Optional.of(role));
+
+
+            // Initialize authority objects and set their codes
+            Authority authority1 = new Authority();
+            authority1.setCode(AuthorityCode.EDIT_USER);  // Ensure code is set
+            Authority authority2 = new Authority();
+            authority2.setCode(AuthorityCode.VIEW_USER_DETAILS);  // Ensure code is set
+
+            when(authorityRepository.findAuthoritiesOfRole(anyLong())).thenReturn(List.of(authority1, authority2));
+
+            // Perform the update
+            userServiceImpl.updateUser(user);
+
+            // Verify interactions and assert results
+            verify(userRepository, times(1)).findById(user.getId());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(userRepository, times(1)).saveUserData(eq(user), any(UpdateUserDataOption.class));
+            verify(userAuthorityRepository, times(1)).save(anyLong(), anyList(), any());
+            verify(userDetailRepository, times(1)).save(anyLong(), any(UserDetail.class), any());
+        }
+
+        @Test
+        public void testCreateUser_DepartmentNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+
+            when(departmentRepository.existsById(anyLong())).thenReturn(false);
+            Exception exception = assertThrows(InvalidDepartmentIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Department does not exist", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_PositionNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+
+            when(positionRepository.existsById(anyLong())).thenReturn(false);
+            when(departmentRepository.existsById(anyLong())).thenReturn(true);
+            Exception exception = assertThrows(InvalidPositionIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Position does not exist", exception.getMessage());
+        }
+
+        @Test
+        public void testCreateUser_RoleNotExist() throws Exception {
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of(AuthorityCode.CREATE_NEW_USER.getValue())));
+            when(positionRepository.existsById(anyLong())).thenReturn(true);
+            when(departmentRepository.existsById(anyLong())).thenReturn(true);
+            when(roleRepository.existsById(anyLong())).thenReturn(false);
+            Exception exception = assertThrows(InvalidRoleIdException.class, () -> {
+                userServiceImpl.createUser(user);
+            });
+
+            assertEquals("Role does not exist", exception.getMessage());
+        }
+        @Test
+        void testActivateUser_Unauthorized() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of()));
+
+            assertThrows(UnauthorizedException.class, () -> userServiceImpl.activateUser(activateUserBody));
+        }
+
+        @Test
+        void testActivateUser_UserNotFound() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.ACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.activateUser(activateUserBody));
+        }
+
+        @Test
+        void testActivateUser_Success() {
+            ActivateUserBody activateUserBody = ActivateUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.ACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+            userServiceImpl.activateUser(activateUserBody);
+
+            assertFalse(user.getIsDelete());
+
+            verify(userRepository, times(1)).save(user);
+        }
+        @Test
+        void testDeactivateUser_Unauthorized() {
+            DeactiveUserBody deactivateUserBody =   DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(1);
+            when(userAuthorityRepository.get(1L)).thenReturn((Set.of()));
+            assertThrows(UnauthorizedException.class, () -> userServiceImpl.deactivateUser(deactivateUserBody));
+        }
+
+        @Test
+        void testDeactivateUser_UserNotFound() {
+            DeactiveUserBody deactiveUserBody = DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.DEACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.deactivateUser(deactiveUserBody));
+        }
+
+        @Test
+        void testDeactivateUser_Success() {
+            DeactiveUserBody deactivateUserBody = DeactiveUserBody.builder().id(1L).build();
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.DEACTIVATE_USER.getValue()));
+
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+            userServiceImpl.deactivateUser(deactivateUserBody);
+
+            assertTrue(user.getIsDelete());
+
+            verify(userRepository, times(1)).save(user);
+        }
+        //list
+        @Test
+        void testGetUserById_IdNull() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+
+            // Expect IllegalArgumentException or other appropriate exception when ID is null
+            assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.getUserById(null);
+            });
+
+            // Verify repository method is not called
+            verify(userRepository, never()).findUserDetailedById(anyLong());
+        }
+        @Test
+        void testGetUserById_LargeId_UserNotFound() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_USER_DETAILS.getValue()));
+
+            // Expect ResourceNotFoundException
+            ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.getUserById(Long.MAX_VALUE);
+            });
+
+            // Assert exception message
+            assertEquals("User not found", exception.getMessage());
+        }
+        //GET LIST USER
+
+        @Test
+        void testGetAllUsers_WithInvalidParameters() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock repository response
+            List<User> expectedUsers = Arrays.asList();
+
+            // Test getAllUsers method with invalid parameters
+            List<User> actualUsers = userServiceImpl.getAllUsers(-1L, -1L, -1L, "", pageable);
+
+            // Verify repository method call
+            verify(userRepository).getUserWithPagination(-1L, -1L, -1L, "", pageable);
+
+            // Assert the result
+            assertEquals(expectedUsers, actualUsers);
+        }
+
+        @Test
+        void testGetAllUsers_WithStringParameters() {
+            // Mock user authority check
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock repository response
+            List<User> expectedUsers = Arrays.asList(user, user2);
+            when(userRepository.getUserWithPagination(anyLong(), anyLong(), anyLong(), anyString(), any(Pageable.class)))
+                    .thenReturn(expectedUsers);
+
+            // Test getAllUsers method with string parameters
+            List<User> actualUsers = userServiceImpl.getAllUsers(1L, 1L, 1L, "", pageable);
+
+            // Verify repository method call
+            verify(userRepository).getUserWithPagination(1L, 1L, 1L, "", pageable);
+
+            // Assert the result
+            assertEquals(expectedUsers, actualUsers);
+        }
+        @Test
+        void testUpdateUserSetting_Success() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user and user setting retrieval
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+            when(userSettingRepository.findByUserId(actorId)).thenReturn(Optional.of(userSetting));
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Call updateUserSetting method
+            userServiceImpl.updateUserSetting(updateUserSettingBody);
+
+            // Verify updates and repository save call
+            assertEquals("fr", userSetting.getLanguage());
+            assertEquals("dark", userSetting.getTheme());
+            assertTrue(userSetting.isDarkMode());
+            verify(userSettingRepository).save(userSetting);
+        }
+
+        @Test
+        void testUpdateUserSetting_UserSettingNotFound() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user retrieval
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock user setting retrieval to return empty
+            when(userSettingRepository.findByUserId(actorId)).thenReturn(Optional.empty());
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Verify that the method throws an exception
+            assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.updateUserSetting(updateUserSettingBody);
+            });
+
+            // Verify that the save method was never called
+            verify(userSettingRepository, never()).save(any(UserSetting.class));
+        }
+
+        @Test
+        void testUpdateUserSetting_UserNotFound() {
+            // Mock user ID retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user retrieval to throw an exception
+            when(userRepository.getReferenceById(actorId)).thenThrow(new RuntimeException("User not found"));
+
+            // Create update body
+            UpdateUserSettingBody updateUserSettingBody = new UpdateUserSettingBody();
+            updateUserSettingBody.setLanguage("fr");
+            updateUserSettingBody.setTheme("dark");
+            updateUserSettingBody.setDarkMode(true);
+
+            // Verify that the method throws an exception
+            assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.updateUserSetting(updateUserSettingBody);
+            });
+
+            // Verify that the save method was never called
+            verify(userSettingRepository, never()).save(any(UserSetting.class));
+        }
+        @Test
+        void testChangePassword_Success() throws Exception {
+            // Mock user ID retrieval and user retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock password matching and encoding
+            when(passwordEncoder.matches(oldPassword, user.getPassword())).thenReturn(true);
+            when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+            // Call changePassword method
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+            userServiceImpl.changePassword(changePasswordBody);
+
+            // Verify user password was updated and saved
+            assertEquals("encodedNewPassword", user.getPassword());
+            verify(userRepository).save(user);
+        }
+
+        @Test
+        void testChangePassword_OldPasswordIncorrect() {
+            // Mock user ID retrieval and user retrieval
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+            when(userRepository.getReferenceById(actorId)).thenReturn(user);
+
+            // Mock password matching to return false
+            when(passwordEncoder.matches(oldPassword, user.getPassword())).thenReturn(false);
+
+            // Create change password body
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+
+            // Verify that an exception is thrown
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+                userServiceImpl.changePassword(changePasswordBody);
+            });
+            assertEquals("Password does not match", thrown.getMessage());
+
+            // Verify that save was not called
+            verify(userRepository, never()).save(user);
+        }
+
+        @Test
+        void testChangePassword_UserNotFound() {
+            // Mock user ID retrieval to return validUserId
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock user repository to throw an exception
+            when(userRepository.getReferenceById(actorId)).thenThrow(new RuntimeException("User not found"));
+
+            // Create change password body
+            ChangePasswordBody changePasswordBody = new ChangePasswordBody();
+            changePasswordBody.setOldPassword(oldPassword);
+            changePasswordBody.setNewPassword(newPassword);
+
+            // Verify that an exception is thrown
+            RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.changePassword(changePasswordBody);
+            });
+            assertEquals("User not found", thrown.getMessage());
+
+            // Verify that save was not called
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+
 
     }
 
     @Nested
     class TestsWithCustomSetup {
+        private Method validateUserMethod;
         @BeforeEach
-        void setUp() {
+        void setUp() throws NoSuchMethodException {
             // Custom setup for this test group if needed
+            validateUserMethod = UserServiceImpl.class.getDeclaredMethod("validateUser", User.class);
+            validateUserMethod.setAccessible(true);
+        }
+
+        @Test
+        void testValidateUser_ValidUser() throws Exception {
+            User user = User.builder()
+                    .fullName("John Doe")
+                    .email("john.doe@example.com")
+                    .phoneNumber("1234567890")
+                    .dob(LocalDateTime.of(2000, 1, 1, 0, 0)) // Ngày sinh hợp lệ
+                    .build();
+
+            // Không mong đợi ngoại lệ
+            assertDoesNotThrow(() -> validateUserMethod.invoke(userServiceImpl, user));
+        }
+
+        @Test
+        void testGetUserById_InvalidId() {
+            // Check for invalid Long ID
+            assertThrows(NumberFormatException.class, () -> {
+                // Simulate the call with invalid ID
+                userServiceImpl.getUserById(Long.valueOf("abczzhdssfdsdgfhthtz"));
+            });
+
+            // Verify repository method is not called
+            verify(userRepository, never()).findUserDetailedById(anyLong());
         }
 
         @Test
@@ -282,7 +816,6 @@ public class UserServiceTest {
                     .count();
             assertTrue(specialCharCount >= 2, "Password should have at least 2 special characters");
         }
-
 
     }
 }
