@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialPlanExpense, Long>, CustomFinancialPlanExpenseRepository {
     @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +
@@ -71,4 +70,13 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
+
+    @Query(value = "SELECT expenses FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " WHERE plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.isDelete = false AND expenses.isDelete = false ")
+    List<FinancialPlanExpense> getListExpenseNewInLastVersion(Long planId);
 }

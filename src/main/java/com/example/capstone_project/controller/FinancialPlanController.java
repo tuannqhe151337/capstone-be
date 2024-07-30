@@ -13,6 +13,7 @@ import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
@@ -537,5 +538,21 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
+    }
+
+    @PutMapping("/submit-for-review")
+    private ResponseEntity<String> submitPlanForReview(
+            @Valid @RequestBody SubmitPlanBody submitPlanBody, BindingResult bindingResult
+    ) {
+        try {
+            planService.submitPlanForReview(submitPlanBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }
