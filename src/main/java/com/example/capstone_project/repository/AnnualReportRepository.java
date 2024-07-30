@@ -43,4 +43,14 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " expense.isDelete = false " +
             " GROUP BY departmentId, costTypeId")
     List<ReportResult> getListReports(LocalDate now, ExpenseStatusCode approved);
+
+    @Query(value = " SELECT count (distinct (report.id)) FROM Report report " +
+            " JOIN report.annualReport annualReport " +
+            " JOIN report.costType costType " +
+            " JOIN report.department department " +
+            " WHERE annualReport.id = :annualReportId AND " +
+            " (:departmentId IS NULL OR report.department.id = :departmentId) AND " +
+            " (:costTypeId IS NULL OR report.costType = :costTypeId) AND " +
+            " report.isDelete = false OR report.isDelete is null ")
+    long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId);
 }
