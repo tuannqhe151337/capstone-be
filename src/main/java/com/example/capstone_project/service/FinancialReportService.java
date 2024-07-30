@@ -19,4 +19,12 @@ public interface FinancialReportService {
     ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception;
 
     FinancialReport deleteReport(Long reportId);
+
+    byte[] getBodyFileExcelXLSX(Long reportId) throws Exception;
+
+    String generateXLSXFileName(Long reportId);
+
+    byte[] getBodyFileExcelXLS(Long reportId) throws Exception;
+
+    String generateXLSFileName(Long reportId);
 }

@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
+import com.example.capstone_project.controller.body.report.download.ReportDownloadBody;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.entity.FinancialReport;
@@ -10,8 +11,6 @@ import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
@@ -19,12 +18,9 @@ import com.example.capstone_project.utils.mapper.report.list.ReportPaginateRespo
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -205,5 +201,60 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
+    }
+
+    @PostMapping("/download/xlsx")
+    public ResponseEntity<byte[]> generateXlsxReport(
+            @Valid @RequestBody ReportDownloadBody reportBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = reportService.getBodyFileExcelXLSX(reportBody.getReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = reportService.generateXLSXFileName(reportBody.getReportId());
+
+                return createFileReportResponseEntity(report, outFileName);
+
+            } else {
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/download/xls")
+    public ResponseEntity<byte[]> generateXlsReport(
+            @Valid @RequestBody ReportDownloadBody reportBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = reportService.getBodyFileExcelXLS(reportBody.getReportId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = reportService.generateXLSFileName(reportBody.getReportId());
+
+                return createFileReportResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    private ResponseEntity<byte[]> createFileReportResponseEntity(
+            byte[] report, String fileName) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .body(report);
     }
 }
