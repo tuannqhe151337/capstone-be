@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class TermResponse {
-    private Long termId;
+    private long termId;
     private String name;
 }

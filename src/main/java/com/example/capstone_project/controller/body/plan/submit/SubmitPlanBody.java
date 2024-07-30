@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.plan.expenses;
+package com.example.capstone_project.controller.body.plan.submit;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PlanExpensesBody {
-    @NotNull(message = "Plan Id need to see list expenses can't be empty")
+public class SubmitPlanBody {
+    @NotNull(message = "Plan id need to submit can't be null")
     private Long planId;
 }

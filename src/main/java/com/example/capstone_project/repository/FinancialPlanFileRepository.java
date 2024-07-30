@@ -14,7 +14,6 @@ public interface FinancialPlanFileRepository extends JpaRepository<FinancialPlan
             " LEFT JOIN plan.planFiles files " +
             " WHERE plan.id = :planId ")
     List<FileNameResult> generateFileName(int planId);
-
     @Query(value = " SELECT files.id AS fileId, term.name AS termName, department.code AS departmentCode, RANK() OVER(PARTITION BY plan.id ORDER BY files.createdAt ASC) AS version FROM Term term " +
             " LEFT JOIN term.financialPlans plan " +
             " LEFT JOIN plan.department department " +
@@ -23,11 +22,4 @@ public interface FinancialPlanFileRepository extends JpaRepository<FinancialPlan
             " ORDER BY version desc " +
             " LIMIT 1 ")
     FileNameResult getLastVersionFileName(Long planId);
-
-    @Query(" SELECT file FROM FinancialPlanFile file " +
-            " JOIN file.planFileExpenses fileExpense " +
-            " JOIN fileExpense.planExpense expense " +
-            " WHERE expense.id IN (:listExpenses) AND " +
-            " file.isDelete = false ")
-    List<FinancialPlanFile> getFileOfListExpense(List<Long> listExpenses);
 }

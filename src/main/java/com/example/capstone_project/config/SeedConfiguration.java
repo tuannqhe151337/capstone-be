@@ -309,7 +309,7 @@ public class SeedConfiguration {
 
             User user4 = User.builder()
                     .username("username4")
-                    .fullName("Choi Woo-je")
+                    .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(softwareDevelopmentDepartment)
@@ -738,21 +738,25 @@ public class SeedConfiguration {
 
             ExpenseStatus expenseStatus1 = ExpenseStatus.builder()
                     .id(1L)
+                    .name("New")
                     .code(ExpenseStatusCode.NEW)
                     .build();
 
             ExpenseStatus expenseStatus2 = ExpenseStatus.builder()
                     .id(2L)
+                    .name("Waiting for approval")
                     .code(ExpenseStatusCode.WAITING_FOR_APPROVAL)
                     .build();
 
             ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
                     .id(3L)
+                    .name("Approved")
                     .code(ExpenseStatusCode.APPROVED)
                     .build();
 
             ExpenseStatus expenseStatus4 = ExpenseStatus.builder()
                     .id(4L)
+                    .name("Denied")
                     .code(ExpenseStatusCode.DENIED)
                     .build();
 

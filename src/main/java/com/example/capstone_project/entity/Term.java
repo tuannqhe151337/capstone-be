@@ -52,7 +52,7 @@ public class Term extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
-    private TermStatus status;
+    private TermStatus status; //trong day da co isDelete roi
 
     @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialPlan> financialPlans;

@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.report.detail;
+package com.example.capstone_project.controller.body.annual;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReportDetailBody {
-    @NotNull(message = "Plan Id need to delete can't be empty")
-    private Long reportId;
+public class AnnualReportDownloadBody {
+    @NotNull(message = "Annual report id can't be empty")
+    private Long annualReportId;
 }

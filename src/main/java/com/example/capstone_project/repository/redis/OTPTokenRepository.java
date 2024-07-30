@@ -103,4 +103,3 @@ enum Fields {
         this.value = value;
     }
 }
-
