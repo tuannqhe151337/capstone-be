@@ -17,4 +17,6 @@ public interface AnnualReportService {
     long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId);
 
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
+
+    AnnualReport getAnnualReportDetail(Long annualReportId);
 }
