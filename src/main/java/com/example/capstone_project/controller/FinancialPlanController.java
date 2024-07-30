@@ -181,18 +181,18 @@ public class FinancialPlanController {
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @Valid @RequestBody PlanDetailBody planDetailBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             // Get data
-            PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
+            PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
 
             // Response
             PlanDetailResponse response;
 
             // Mapping to PlanDetail Response
             response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-            response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
+            response.setVersion(planService.getPlanVersionById(planId));
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
