@@ -2,6 +2,7 @@ package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
@@ -44,4 +45,9 @@ public interface FinancialPlanService {
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
 
     long countDistinctListPlanVersionPaging(Long planId);
+
+    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
+
+    void reUploadPlan(FinancialPlan plan);
+
 }

@@ -832,7 +832,7 @@ public class SeedConfiguration {
                 };
 
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
-                        .planExpenseKey(financialPlanFile1_2.getName() + "_EXPENSE_CODE_" + i)
+                        .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
                         .name("Expense " + projectNameChar)
                         .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
                         .amount(random.nextInt(10) + 1)
