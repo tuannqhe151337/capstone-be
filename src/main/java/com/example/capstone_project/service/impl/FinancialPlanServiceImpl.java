@@ -1,11 +1,9 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.*;
@@ -19,6 +17,7 @@ import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -28,32 +27,19 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -65,9 +51,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final TermRepository termRepository;
     private final FinancialPlanFileRepository financialPlanFileRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
     private final DepartmentRepository departmentRepository;
     private final HandleFileHelper handleFileHelper;
-    private final ExpenseStatusRepository expenseStatusRepository;
 
 
     @Override
@@ -77,14 +63,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(userId);
-
+        PlanStatusCode statusCode = PlanStatusCode.NEW;
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+            statusCode = null;
         }
 
-        return planRepository.countDistinct(query, termId, departmentId, statusId);
+        return planRepository.countDistinct(query, termId, departmentId, statusId, statusCode);
     }
 
     @Override
@@ -100,7 +87,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
             throw new UnauthorizedException("Unauthorized to view plan");
         } else {
-
+            PlanStatusCode statusCode = null;
             // Handling pagination
             Pageable pageable = null;
             if (sortBy == null || sortBy.isEmpty()) {
@@ -110,6 +97,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                             CustomSort.builder().sortBy(FinancialPlan_.UPDATED_AT).sortType("desc").build(),
                             CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
                     ));
+
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
                 } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                     // Default sort of financial staff role
                     pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
@@ -122,14 +112,29 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     departmentId = userDetail.getDepartmentId();
                 }
             } else {
+                if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                    // Remove plan have status new in list plan of accountant
+                    statusCode = PlanStatusCode.NEW;
+                } else {
+                    // Financial staff only see list-plan of their department
+                    departmentId = userDetail.getDepartmentId();
+                }
                 // Sort by request
-                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
-                        CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
-                        CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
-                ));
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(FinancialPlan_.ID).sortType("desc").build()
+                    ));
+                }
             }
 
-            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable);
+            List<FinancialPlan> listResult = planRepository.getPlanWithPagination(query, termId, departmentId, statusId, pageable, statusCode);
             List<PlanVersionResult> listVersions = planRepository.getListPlanVersion(query, termId, departmentId, statusId);
 
             listResult.forEach(plan ->
@@ -334,10 +339,92 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         throw new UnauthorizedException("Unauthorized to view plan");
     }
 
-
     @Override
     public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
         return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+    }
+
+    @Override
+    @Transactional
+    public void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countTotalExpenseInPlanLastVersion(planId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenses.size() == totalExpense) {
+
+                listExpenses.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                        expenses.add(updateExpense);
+                    }
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
+    }
+
+    @Override
+    public void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countTotalExpenseInPlanLastVersion(planId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenseId.size() == totalExpense) {
+
+                listExpenseId.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(4L));
+                        expenses.add(updateExpense);
+                    }
+
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialPlan plan = planRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                plan.setStatus(planStatusRepository.getReferenceById(3L));
+
+                planRepository.save(plan);
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
     }
 
     @Override
@@ -439,7 +526,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
         return null;
     }
-
 
     @Override
     public FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception {
@@ -550,9 +636,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses);
-        } else {
-            throw new ResourceNotFoundException("Not exist file = " + planId + " or list expenses is empty");
         }
+
+        return null;
     }
 
     private List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception {
@@ -611,9 +697,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses);
-        } else {
-            throw new ResourceNotFoundException("Not exist file = " + planId + " or list expenses is empty");
         }
+
+        return null;
     }
 
     @Override
@@ -628,8 +714,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    @Transactional
-    public void approvalExpenses(List<Long> listExpenses) throws Exception {
+    public void approvalAllExpenses(Long planId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -638,26 +723,70 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            List<FinancialPlanFile> files = financialPlanFileRepository.getFileOfListExpense(listExpenses);
-            if (files.size() == 1) {
-                // Check term status and plan due date
-                Term termInfo = termRepository.getTermByFileId(files.get(0).getId());
-                if (!termInfo.getPlanDueDate().isAfter(LocalDateTime.now())) {
-                    throw new InvalidInputException("Can't not approval expenses because plan due date is: " + termInfo.getPlanDueDate());
-                }
-                if (!termInfo.getStatus().getCode().equals(TermCode.IN_PROGRESS)) {
-                    throw new InvalidInputException("Term not start (In progress)");
-                }
-                listExpenses.forEach(expense -> {
-                    FinancialPlanExpense updateExpense = expenseRepository.findById(expense).orElseThrow(() -> new ResourceNotFoundException("Not found expense have id = " + expense));
-                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
-                    expenses.add(updateExpense);
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseByPlanId(planId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expense is empty");
+            }
+            expenses.forEach(expense -> {
+                expense.setStatus(expenseStatusRepository.getReferenceById(3L));
+            });
+
+            expenseRepository.saveAll(expenses);
+            // Get plan of this list expense
+            FinancialPlan plan = planRepository.getReferenceById(planId);
+            // Change status to Approved
+            plan.setStatus(planStatusRepository.getReferenceById(4L));
+
+            planRepository.save(plan);
+
+            expenseRepository.saveAll(expenses);
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval plan");
+        }
+    }
+
+
+    @Override
+    public List<ExpenseStatus> getListExpenseStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            return expenseStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
+
+    @Override
+    public void submitPlanForReview(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.SUBMIT_PLAN_FOR_REVIEW.getValue())) {
+            // Check exist
+            FinancialPlan plan = planRepository.findById(planId).orElseThrow(() -> new ResourceNotFoundException("Not found any plan have id = " + planId));
+            // Check department
+            if (plan.getDepartment().getId() == userDetail.getDepartmentId() &&
+                    plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
+                List<FinancialPlanExpense> listExpenseNeedToSubmit = new ArrayList<>();
+                expenseRepository.getListExpenseNewInLastVersion(planId).forEach(expense -> {
+                    // Change expense status from new to waiting for approval - 2L
+                    expense.setStatus(expenseStatusRepository.getReferenceById(2L));
+                    listExpenseNeedToSubmit.add(expense);
                 });
-                expenseRepository.saveAll(expenses);
+                expenseRepository.saveAll(listExpenseNeedToSubmit);
+                // Change plan status
+                plan.setStatus(planStatusRepository.getReferenceById(2L));
+                planRepository.save(plan);
             } else {
-                throw new InvalidInputException("List expense not in same file");
+                throw new UnauthorizedException("User can't submit this plan because departmentId of plan not equal with departmentId of user");
             }
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");

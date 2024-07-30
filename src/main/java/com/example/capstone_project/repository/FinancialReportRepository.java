@@ -5,14 +5,13 @@ import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
 import io.lettuce.core.dynamic.annotation.Param;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
 public interface FinancialReportRepository extends JpaRepository<FinancialReport, Long>, CustomFinancialReportRepository {
-    @Query(value = " SELECT count(distinct (report.id)) FROM FinancialReport report " +
+    @Query(value = " SELECT DISTINCT count(report.id) FROM FinancialReport report " +
             " WHERE report.name like %:query% AND " +
             " (:termId IS NULL OR report.term.id = :termId) AND " +
             " (:departmentId IS NULL OR report.department.id = :departmentId) AND " +

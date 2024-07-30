@@ -1,35 +1,28 @@
 package com.example.capstone_project.controller;
 
+
+import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
+import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
-import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.download.PlanBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
-import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
-import com.example.capstone_project.controller.body.plan.expenses.PlanExpensesBody;
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
+import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
-import com.example.capstone_project.controller.body.user.create.CreateUserBody;
-import com.example.capstone_project.controller.responses.*;
-import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
+import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
-import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -37,36 +30,27 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
-import com.example.capstone_project.utils.mapper.expense.CostTypeMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapper;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -191,32 +175,30 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
     @GetMapping("/detail")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(
-            @Valid @RequestBody PlanDetailBody planDetailBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             // Get data
-            PlanDetailResult plan = planService.getPlanDetailByPlanId(planDetailBody.getPlanId());
+            PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
 
             // Response
             PlanDetailResponse response;
 
-            if (plan != null) {
-                // Mapping to PlanDetail Response
-                response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
-                response.setVersion(planService.getPlanVersionById(planDetailBody.getPlanId()));
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
+            // Mapping to PlanDetail Response
+            response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
+            response.setVersion(planService.getPlanVersionById(planId));
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -357,11 +339,11 @@ public class FinancialPlanController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            return ResponseEntity.ok(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
     }
@@ -379,13 +361,13 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Object> confirmExpenses(
-            @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<String> confirmExpenses(
+            @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         try {
             // Get user detail
             UserDetail userDetail = planService.getUserDetail();
@@ -411,6 +393,80 @@ public class FinancialPlanController {
         }
     }
 
+    @PutMapping("/expense-approval")
+    public ResponseEntity<String> approvalExpenses(
+            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+        try {
+
+            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PutMapping("/expense-deny")
+    public ResponseEntity<String> denyExpenses(
+            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
+        try {
+
+            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PutMapping("/expense-approval-all")
+    public ResponseEntity<String> approvalAllExpenses(
+            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
+        try {
+
+            planService.approvalAllExpenses(body.getPlanId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PostMapping("/download/template/xlsx")
+    public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+        FileInputStream file = new FileInputStream(fileLocation);
+        XSSFWorkbook wb = new XSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
+    }
+
+
+    @PostMapping("/download/template/xls")
+    public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+        FileInputStream file = new FileInputStream(fileLocation);
+        HSSFWorkbook wb = new HSSFWorkbook(file);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
+    }
+
     @PostMapping("/download/last-version-xls")
     public ResponseEntity<byte[]> generateLastVersionXlsReport(
             @Valid @RequestBody PlanBody planBody
@@ -430,7 +486,7 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -453,20 +509,49 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
-    @PutMapping("/expense-approval")
-    public ResponseEntity<String> approvalExpenses(
-            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+    @GetMapping("/expense-status")
+    public ResponseEntity<ListResponse<StatusResponse>> getListExpenseStatus() {
         try {
-            planService.approvalExpenses(body.getListExpenseId());
+            // Get data
+            List<ExpenseStatus> costTypes = planService.getListExpenseStatus();
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+            // Response
+            ListResponse<StatusResponse> responses = new ListResponse<>();
+
+            if (costTypes != null) {
+
+                // Mapping to CostTypeResponse
+                responses.setData(costTypes.stream().map(status -> {
+                    return new PlanStatusMapperImpl().mapExpenseStatusToStatusResponseMapping(status);
+                }).toList());
+            } else {
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(responses);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
+        }
+
+    }
+
+    @PutMapping("/submit-for-review")
+    private ResponseEntity<String> submitPlanForReview(
+            @Valid @RequestBody SubmitPlanBody submitPlanBody, BindingResult bindingResult
+    ) {
+        try {
+            planService.submitPlanForReview(submitPlanBody.getPlanId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }

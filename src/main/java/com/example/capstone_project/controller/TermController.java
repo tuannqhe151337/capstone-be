@@ -14,6 +14,10 @@ import com.example.capstone_project.controller.responses.term.selectWhenCreatePl
 import com.example.capstone_project.entity.Term;
 
 import com.example.capstone_project.service.TermService;
+import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
+
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
@@ -24,6 +28,8 @@ import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTer
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
+
+import com.example.capstone_project.utils.helper.PaginationHelper;
 
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
@@ -53,6 +59,127 @@ import java.util.*;
 @Validated
 public class TermController {
     private final TermService termService;
+
+
+    @GetMapping("/report")
+    public ResponseEntity<ListPaginationResponse<TermReportResponse>> getReportListByTerm
+            (@RequestParam(name = "termId") Long termId,
+             @RequestParam(defaultValue = "1") int page,
+             @RequestParam(defaultValue = "10") int size,
+             @RequestParam(required = false) String sortBy,
+             @RequestParam(required = false) String sortType) {
+        TermReportResponse rp1 = TermReportResponse.builder()
+                .id(1L).createdAt(LocalDateTime.now()).name("REPORT 1 TERM SPRING").build();
+        TermReportResponse rp2 = TermReportResponse.builder()
+                .id(2L).createdAt(LocalDateTime.now()).name("REPORT 2 TERM WINTER").build();
+        TermReportResponse rp3 = TermReportResponse.builder()
+                .id(3L).createdAt(LocalDateTime.now()).name("REPORT 3 TERM FALL").build();
+        List<TermReportResponse> rps = new ArrayList<>();
+        rps.add(rp1);
+        rps.add(rp2);
+        rps.add(rp3);
+        // Sort the list by updatedAt, from newest to oldest
+        Collections.sort(rps, new Comparator<TermReportResponse>() {
+            @Override
+            public int compare(TermReportResponse o1, TermReportResponse o2) {
+                return o2.getCreatedAt().compareTo(o1.getCreatedAt());
+            }
+        });
+
+        PageRequest pageRequest = (PageRequest) PaginationHelper.handlingPagination(page, size, sortBy, sortType);
+
+        //Tao Page tu list
+        Page<TermReportResponse> listTermReport = PaginationHelper.createPage(rps, pageRequest);
+
+        //Build response
+        Pagination pagination = Pagination
+                .builder()
+                .page(pageRequest.getPageNumber())
+                .limitRecordsPerPage(pageRequest.getPageSize())
+                .totalRecords((long) listTermReport.getNumberOfElements())
+                .numPages(PaginationHelper.
+                        calculateNumPages((long) listTermReport.getNumberOfElements(),
+                                pageRequest.getPageSize())).build();
+
+        ListPaginationResponse<TermReportResponse> response = new ListPaginationResponse<>();
+        response.setData(rps);
+        response.setPagination(pagination);
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @GetMapping("/plan")
+    public ResponseEntity<ListPaginationResponse<TermPlanDetailResponse>> getPlanListByTerm
+            (@RequestParam(name = "termId") Long termId,
+             @RequestParam(defaultValue = "1") int page,
+             @RequestParam(defaultValue = "10") int size,
+             @RequestParam(required = false) String sortBy,
+             @RequestParam(required = false) String sortType) {
+
+        TermPlanDetailResponse termplan =
+                TermPlanDetailResponse.builder()
+                        .id(1L)
+                        .name("PLAN 1")
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
+                        .build();
+        termplan.setCreatedAt(LocalDateTime.now());
+        termplan.setUpdatedAt(LocalDateTime.now());
+
+        TermPlanDetailResponse termplan2 =
+                TermPlanDetailResponse.builder()
+                        .id(1L)
+                        .name("PLAN 2")
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
+                        .build();
+        termplan2.setCreatedAt(LocalDateTime.now());
+        termplan2.setUpdatedAt(LocalDateTime.of(2025, 11, 6, 0, 0, 0));
+
+        TermPlanDetailResponse termplan3 =
+                TermPlanDetailResponse.builder()
+                        .id(1L)
+                        .name("PLAN 3")
+                        .planStatus(PlanStatusResponse.builder().id(1L).code("REVIEWED").name("REVIEWED").build())
+                        .build();
+        termplan3.setCreatedAt(LocalDateTime.now());
+        termplan3.setUpdatedAt(LocalDateTime.of(2026, 11, 6, 0, 0, 0));
+
+        List<TermPlanDetailResponse> list = new ArrayList<>();
+        list.add(termplan);
+        list.add(termplan2);
+        list.add(termplan3);
+
+        // Sort the list by updatedAt, from newest to oldest
+        Collections.sort(list, new Comparator<TermPlanDetailResponse>() {
+            @Override
+            public int compare(TermPlanDetailResponse o1, TermPlanDetailResponse o2) {
+                return o2.getUpdatedAt().compareTo(o1.getUpdatedAt());
+            }
+        });
+
+        PageRequest pageRequest = (PageRequest) PaginationHelper.handlingPagination(page, size, sortBy, sortType);
+
+        //Tao Page tu list
+        Page<TermPlanDetailResponse> listTermPlan = PaginationHelper.createPage(list, pageRequest);
+
+
+        //Build response
+        Pagination pagination = Pagination
+                .builder()
+                .page(pageRequest.getPageNumber())
+                .limitRecordsPerPage(pageRequest.getPageSize())
+                .totalRecords((long) listTermPlan.getNumberOfElements())
+                .numPages(PaginationHelper.
+                        calculateNumPages((long) listTermPlan.getNumberOfElements(),
+                                pageRequest.getPageSize())).build();
+
+        ListPaginationResponse<TermPlanDetailResponse> response = new ListPaginationResponse<>();
+        response.setData(list);
+        response.setPagination(pagination);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 
     @GetMapping("/{id}")

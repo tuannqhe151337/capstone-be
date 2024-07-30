@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ApprovalExpenseBody {
+public class DenyExpenseBody {
     @NotNull(message = "Plan id can not be null")
     private Long planId;
     @NotNull(message = "List expense id can not be null")

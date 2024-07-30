@@ -1,6 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.entity.UserDetail;
@@ -14,8 +13,8 @@ import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +45,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 // Financial staff only see list-plan of their department
                 departmentId = userDetail.getDepartmentId();
@@ -54,7 +53,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             return financialReportRepository.getReportWithPagination(query, termId, departmentId, statusId, pageable);
         } else {
-            throw new UnauthorizedException("Unauthorized to create plan");
+            throw new UnauthorizedException("Unauthorized to view report");
         }
 
     }
@@ -68,14 +67,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority or role
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())
-                && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-            departmentId = userDetail.getDepartmentId();
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                departmentId = userDetail.getDepartmentId();
+            }
+            return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
         } else {
             throw new UnauthorizedException("Unauthorized to create plan");
         }
 
-        return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
     }
 
     @Override
@@ -172,7 +172,6 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         return expenseRepository.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
     }
 
-
     @Override
     public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
@@ -185,9 +184,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses);
-        } else {
-            throw new ResourceNotFoundException("Not exist file = " + reportId + " or list expenses is empty");
         }
+
+        return null;
     }
 
     @Override
@@ -211,9 +210,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses);
-        } else {
-            throw new ResourceNotFoundException("Not exist file = " + reportId + " or list expenses is empty");
         }
+
+        return null;
     }
 
     @Override
@@ -261,6 +260,4 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
 
     }
-
-
 }

@@ -29,4 +29,3 @@ public class UserIdTokenRepository {
         this.template.opsForValue().getAndDelete(this.USER_ID + accessToken);
     }
 }
-

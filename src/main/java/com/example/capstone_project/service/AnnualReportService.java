@@ -5,6 +5,8 @@ import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.domain.Pageable;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public interface AnnualReportService {
@@ -19,4 +21,12 @@ public interface AnnualReportService {
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
 
     AnnualReport getAnnualReportDetail(Long annualReportId);
+
+    byte[] getBodyFileExcelXLSX(Long annualReportId) throws IOException;
+
+    String generateXLSXFileName(Long annualReportId);
+
+    byte[] getBodyFileExcelXLS(Long annualReportId) throws IOException;
+
+    String generateXLSFileName(Long annualReportId);
 }

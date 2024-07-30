@@ -1,11 +1,7 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
-import com.example.capstone_project.controller.body.report.detail.ReportDetailBody;
-import com.example.capstone_project.controller.body.report.expenses.ReportExpensesBody;
 import com.example.capstone_project.controller.body.report.download.ReportDownloadBody;
-import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.entity.FinancialReport;
@@ -14,27 +10,16 @@ import com.example.capstone_project.entity.FinancialReportExpense;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -107,7 +92,7 @@ public class ReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -124,13 +109,12 @@ public class ReportController {
 
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized to delete report");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         }
     }
-
 
     @GetMapping("/list")
     public ResponseEntity<ListPaginationResponse<ReportResponse>> getListReport(
@@ -214,7 +198,7 @@ public class ReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
     }
