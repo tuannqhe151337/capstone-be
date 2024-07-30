@@ -1,4 +1,4 @@
-package com.example.capstone_project.utils.mapper.report;
+package com.example.capstone_project.utils.mapper.report.list;
 
 import com.example.capstone_project.controller.responses.report.list.ReportResponse;
 import com.example.capstone_project.entity.FinancialReport;

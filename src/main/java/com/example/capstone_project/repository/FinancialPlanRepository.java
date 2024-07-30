@@ -70,9 +70,37 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE file.id = :fileId AND " +
             " files.isDelete = false AND expenses.isDelete = false ")
     List<ExpenseResult> getListExpenseByFileId(@Param("fileId") Long fileId);
+
     @Query(value = " SELECT plan.id FROM FinancialPlan plan " +
             " JOIN plan.planFiles files " +
             " WHERE files.id = :fileId AND " +
             " plan.isDelete = false ")
     int getPlanIdByFileId(@Param("fileId") Long fileId);
+
+    @Query(value = " SELECT plan.department.id FROM FinancialPlan plan " +
+            " WHERE plan.id = :planId AND " +
+            " plan.isDelete = false ")
+    long getDepartmentIdByPlanId(Long planId);
+
+    @Query(value = " SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version, file.plan.term.name AS termName, file.plan.department.code AS departmentCode FROM FinancialPlanFile file " +
+            " WHERE file.plan.id = :planId AND " +
+            " file.isDelete = false " +
+            " GROUP BY file.plan.id, file.plan.term.name, file.plan.department.code ")
+    PlanVersionResult getCurrentVersionByPlanId(Long planId);
+
+    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +
+            " costTypes.name AS costType, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
+            " expenses.projectName AS projectName, expenses.supplierName AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " statuses.code AS status  FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term terms " +
+            " LEFT JOIN plan.department departments " +
+            " LEFT JOIN expenses.costType costTypes " +
+            " LEFT JOIN expenses.status statuses  " +
+            " WHERE plan.id = :planId AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.isDelete = false AND expenses.isDelete = false ")
+    List<ExpenseResult> getListExpenseByPlanId(Long planId);
 }
