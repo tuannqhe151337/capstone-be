@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.DepartmentCode;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,10 @@ public class Department extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "code")
+    @Enumerated(EnumType.STRING)
+    private DepartmentCode code;
 
     @Column(name = "name")
     private String name;
