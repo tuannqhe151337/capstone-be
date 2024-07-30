@@ -2,21 +2,18 @@ package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(schema = "capstone_v2",name = "financial_plan_expenses")
+@Table(schema = "capstone_v2", name = "financial_plan_expenses")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
-public class FinancialPlanExpense extends BaseEntity{
+public class FinancialPlanExpense extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,7 +42,7 @@ public class FinancialPlanExpense extends BaseEntity{
     @Column(name = "note")
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     @JoinColumn(name = "status_id")
     private ExpenseStatus status;
 
@@ -58,4 +55,5 @@ public class FinancialPlanExpense extends BaseEntity{
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
+
 }

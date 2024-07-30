@@ -2,6 +2,7 @@ package com.example.capstone_project.controller.body.plan.create;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,12 +11,18 @@ import java.util.List;
 @Data
 @Builder
 public class NewPlanBody {
-    @NotEmpty(message = "Term Id, can not be empty")
-    private long termId;
-    @NotEmpty(message = "Plan name, can not be empty")
+    @NotNull(message = "Term Id can not be null")
+    private Long termId;
+
+    @NotEmpty(message = "Plan name can not be empty")
+    @Size(max = 100, message = "Plan name must be less than 100 characters")
     private String planName;
-    @NotEmpty(message = "File name, can not be empty")
+
+    @NotEmpty(message = "File name can not be empty")
+    @Size(max = 100, message = "File name must be less than 100 characters")
     private String fileName;
-    @NotNull(message = "Expenses, can not be null")
+
+    @NotNull(message = "List expense can not be null")
+    @NotEmpty(message = "List expense can not be empty")
     private List<ExpenseBody> expenses;
 }

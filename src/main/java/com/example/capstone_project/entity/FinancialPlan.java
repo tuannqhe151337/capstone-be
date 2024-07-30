@@ -1,7 +1,6 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.util.List;
@@ -21,24 +20,24 @@ public class FinancialPlan extends BaseEntity{
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.PLAN)
+    @Transient
+    private Integer version;
+
+    @OneToMany(mappedBy = FinancialPlanFile_.PLAN, cascade=CascadeType.ALL)
     private List<FinancialPlanFile> planFiles;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
     @JoinColumn(name = "term_id")
     private Term term;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private PlanStatus status;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
-
-    @NotEmpty(message = "Code cannot be empty")
-    private String code;
 }

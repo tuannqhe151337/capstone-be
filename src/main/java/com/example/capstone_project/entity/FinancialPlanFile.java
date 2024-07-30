@@ -6,9 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -25,13 +24,10 @@ public class FinancialPlanFile {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "version")
-    private String version;
+    @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE, cascade = CascadeType.ALL)
+    private List<FinancialPlanFileExpense> planFileExpenses;
 
-    @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE)
-    private List<FinancialPlanFileExpense> planExpenses;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "financial_plan_id")
     private FinancialPlan plan;
 
@@ -41,7 +37,7 @@ public class FinancialPlanFile {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
