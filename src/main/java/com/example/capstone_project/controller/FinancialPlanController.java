@@ -213,16 +213,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/xlsx")
+    @GetMapping("/download/xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @Valid @RequestBody PlanDownloadBody planBody
+            @RequestParam(required = true) Long fileId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+            byte[] report = planService.getBodyFileExcelXLSX(fileId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSXFileName(planBody.getFileId());
+                String outFileName = planService.generateXLSXFileName(fileId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
