@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.plan.start.StartTermBody;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
@@ -19,6 +20,7 @@ import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -28,6 +30,7 @@ import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateRespo
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 
 import com.example.capstone_project.utils.helper.PaginationHelper;
+
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermDetailResponseMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -200,7 +203,7 @@ public class TermController {
         Term term = new CreateTermBodyToTermEntityMapperImpl().mapCreateTermBodyToTermEntity(createTermBody);
         try {
             termService.createTerm(term);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Create successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (UnauthorizedException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
                     .builder().field("Authorization").message(e.getMessage())
@@ -221,17 +224,19 @@ public class TermController {
     public ResponseEntity<TermDetailResponse> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
 
         try {
-            Term term = new UpdateTermBodyToTermDetailResponseMapperImpl().mapTermBodyToTermEntity(updateTermBody);
+//            Term term = new UpdateTermBodyToTermDetailResponseMapperImpl().mapTermBodyToTermEntity(updateTermBody);
+//
+//            TermDetailResponse termDetailResponse =
+//                    new UpdateTermBodyToTermDetailResponseMapperImpl()
+//                            .mapTermToTermDetailResponse(termService.updateTerm(term));
 
-            TermDetailResponse termDetailResponse =
-                    new UpdateTermBodyToTermDetailResponseMapperImpl()
-                            .mapTermToTermDetailResponse(termService.updateTerm(term));
+//            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
 
-            return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        } catch (InvalidDateException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -242,7 +247,7 @@ public class TermController {
     public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
         try {
             termService.deleteTerm(deleteTermBody.getId());
-            return ResponseEntity.status(HttpStatus.OK).body("Deleted successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
@@ -254,6 +259,7 @@ public class TermController {
 
     @GetMapping("/plan-paging-term")
     public ResponseEntity<ListPaginationResponse<TermPaginateResponse>> getListTermPaging(
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -273,7 +279,7 @@ public class TermController {
         Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
         // Get data
-        List<Term> terms = termService.getListTermPaging(query, pageable);
+        List<Term> terms = termService.getListTermPaging(statusId, query, pageable);
 
         // Response
         ListPaginationResponse<TermPaginateResponse> response = new ListPaginationResponse<>();
@@ -283,7 +289,7 @@ public class TermController {
         if (terms != null) {
 
             // Count total record
-            count = termService.countDistinctListTermPaging(query);
+            count = termService.countDistinctListTermPaging(statusId, query);
 
             // Mapping to TermPaginateResponse
             terms.forEach(term -> response.getData().add( new TermPaginateResponseMapperImpl().mapToTermPaginateResponseMapper(term)));
@@ -307,6 +313,7 @@ public class TermController {
 
     @GetMapping("/plan-create-select-term")
     public ResponseEntity<ListPaginationResponse<TermWhenCreatePlanResponse>> getListTermWhenCreatePlan(
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -357,11 +364,11 @@ public class TermController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/start/{id}")
-    public ResponseEntity<Object> startTermManually(@Valid @PathVariable("id") Long termId) {
+    @PostMapping("/start")
+    public ResponseEntity<Object> startTermManually(@Valid @RequestBody StartTermBody startTermBody, BindingResult result) {
         try {
-            termService.startTermManually(termId);
-            return ResponseEntity.status(HttpStatus.OK).body("Start term successfully");
+            termService.startTermManually(startTermBody.getTermId());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {

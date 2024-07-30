@@ -1,26 +1,21 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.DepartmentRepository;
 
-import com.example.capstone_project.repository.redis.UserDetailRepository;
+import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.DepartmentService;
 
-import com.example.capstone_project.utils.enums.PlanStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +37,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 || listAuthorities.contains(AuthorityCode.EDIT_USER.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            return departmentRepository.getListDepartmentWithPagination(query, pageable);
+            return departmentRepository.getDepartmentWithPagination(query, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view list department");
         }
@@ -113,4 +108,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         String queryPattern = "%" + query + "%";
         return departmentRepository.countDistinct(queryPattern);
     }
+
+
 }

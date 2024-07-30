@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 public interface ReportPaginateResponseMapper {
     @Mapping(source = "id", target = "reportId")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "month", target = "month")
-    @Mapping(source = "version", target = "version")
+//    @Mapping(source = "month", target = "month")
+//    @Mapping(source = "version", target = "version")
     @Mapping(source = "status.id", target = "status.statusId")
     @Mapping(source = "status.name", target = "status.name")
     @Mapping(source = "term.id", target = "term.termId")

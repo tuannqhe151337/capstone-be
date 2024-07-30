@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.report.detail;
+package com.example.capstone_project.controller.body.plan.start;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -6,11 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ReportDetailBody {
-    @NotNull(message = "Plan Id need to delete can't be empty")
-    private Long reportId;
+public class StartTermBody {
+    @NotNull(message = "Term Id can not be null")
+    private Long termId;
 }

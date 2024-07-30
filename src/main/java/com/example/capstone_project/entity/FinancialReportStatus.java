@@ -1,5 +1,7 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
 import jakarta.persistence.*;
 import lombok.*;
 

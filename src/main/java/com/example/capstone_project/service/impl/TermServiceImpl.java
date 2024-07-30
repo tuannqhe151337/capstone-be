@@ -1,9 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-
-import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
-import com.example.capstone_project.entity.TermStatus;
-import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserDetail;
@@ -46,6 +42,13 @@ public class TermServiceImpl implements TermService {
     private final UserRepository userRepository;
     private final TermStatusRepository termStatusRepository;
 
+    @Override
+    public long countDistinct(String query) throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+    }
 
     @Override
     public long countDistinctListTermWhenCreatePlan(String query) throws Exception {
@@ -70,19 +73,6 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public void deleteTerm(Long id) throws Exception {
-        long userId = UserHelper.getUserId();
-        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.DELETE_TERM.getValue())) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-        Term currentTerm = termRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
-        currentTerm.setDelete(true);
-        termRepository.save(currentTerm);
-
-    }
-
-    @Override
 
     public Term updateTerm(Term term) throws Exception {
 
@@ -95,10 +85,10 @@ public class TermServiceImpl implements TermService {
         Term currentterm = termRepository.findById(term.getId()).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + term.getId()));
         LocalDateTime startDate = term.getStartDate();
-        if(!currentterm.getStartDate().equals(startDate)) {
+        if (!currentterm.getStartDate().equals(startDate)) {
             //generate new end date from new startdate
             LocalDateTime endDate = term.getDuration().calculateEndDate(startDate);
-             term.setEndDate(endDate);
+            term.setEndDate(endDate);
         }
 
         //check plan due date
@@ -113,7 +103,20 @@ public class TermServiceImpl implements TermService {
         User userby = userRepository.findUserById(userId).get();
         term.setUser(userby);
 
-        return  termRepository.save(term);
+        return termRepository.save(term);
+    }
+
+    @Override
+    public void deleteTerm(Long id) throws Exception {
+        long userId = UserHelper.getUserId();
+        if (!userAuthorityRepository.get(userId).contains(AuthorityCode.DELETE_TERM.getValue())) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        Term currentTerm = termRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
+        currentTerm.setDelete(true);
+        termRepository.save(currentTerm);
+
     }
 
     @Override
@@ -123,13 +126,21 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if (term == null) {
+        if(term == null){
             throw new ResourceNotFoundException("Term not found");
-        } else {
+        }else{
             return term;
         }
 
     }
+
+    @Override
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
+        term.setStatus(termStatus);
+        termRepository.save(term);
+    }
+
     @Override
     public void startTermManually(Long termId) throws Exception {
         long userId = UserHelper.getUserId();
@@ -137,7 +148,7 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to start term");
         }
         Term term = termRepository.findTermById(termId);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
         }
         TermStatus termStatus = termStatusRepository.getReferenceById(2L);
@@ -145,6 +156,7 @@ public class TermServiceImpl implements TermService {
         term.setStartDate(LocalDateTime.now());
         termRepository.save(term);
     }
+
 
     @Override
     public void createTerm(Term term) throws Exception {
@@ -178,12 +190,12 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public List<Term> getListTermPaging(String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
-            return termRepository.getListTermPaging(query, pageable);
+            return termRepository.getListTermPaging(statusId, query, pageable);
 
         }
 
@@ -191,8 +203,8 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public long countDistinctListTermPaging(String query) {
-        return termRepository.countDistinctListTermPaging(query);
+    public long countDistinctListTermPaging(Long statusId, String query) {
+        return termRepository.countDistinctListTermPaging(statusId, query);
     }
     //start term change status of this term
 

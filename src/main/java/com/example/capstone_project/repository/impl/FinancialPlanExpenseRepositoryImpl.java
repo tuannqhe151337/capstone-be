@@ -22,11 +22,11 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     @Override
     @Transactional
     public void saveListExpenses(List<FinancialPlanExpense> expenses) {
-            for (FinancialPlanExpense expense : expenses) {
-                entityManager.persist(expense);
-            }
-            entityManager.flush(); // Ensure all changes are synchronized with the database
-            entityManager.clear(); // Clear the persistence context to avoid memory issues
+        for (FinancialPlanExpense expense : expenses) {
+            entityManager.persist(expense);
+        }
+        entityManager.flush(); // Ensure all changes are synchronized with the database
+        entityManager.clear(); // Clear the persistence context to avoid memory issues
     }
 
     @Override
