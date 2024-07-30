@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBo
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
+import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -77,15 +79,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers(
-            String query,
-            Pageable pageable) {
+            Long roleId, Long departmentId, Long positionId, String query, Pageable pageable) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
-            return userRepository.getUserWithPagination(query, pageable);
+            return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
+        }else{
+            throw new UnauthorizedException("Unauthorized to view all users");
         }
-
-        return null;
     }
 
     @Override
@@ -96,6 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long userId) throws Exception {
+        //ADD CHECK
         long actorId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())) {
             throw new UnauthorizedException("Unauthorized to view user details");
@@ -275,6 +277,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public long countDistinct(String query, Long roleId, Long departmentId, Long positionId) {
+        return userRepository.countDistinct(roleId, departmentId, positionId, query);
+    }
+
+    @Override
     public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
         //get new password
         String newPassword = resetPasswordBody.getNewPassword();
@@ -291,6 +298,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUserSetting(UpdateUserSettingBody updateUserSettingBody) {
+        long userId = UserHelper.getUserId();
+        User user = userRepository.getReferenceById(userId);
+        UserSetting userSetting = userSettingRepository.findByUserId(userId).get();
+        userSetting.setLanguage(updateUserSettingBody.getLanguage());
+        userSetting.setTheme(updateUserSettingBody.getTheme());
+        userSetting.setDarkMode(updateUserSettingBody.isDarkMode());
+        userSetting.setUser(user);
+        userSettingRepository.save(userSetting);
+
+    }
+
+    @Override
     public void createUser(User user) throws Exception {
         //check authority
         long userId = UserHelper.getUserId();
@@ -300,6 +320,7 @@ public class UserServiceImpl implements UserService {
         } else {
             // Check email exist
             String email = user.getEmail();
+
 
             if (userRepository.existsByEmail(email)) {
                 throw new DataIntegrityViolationException("Email already exists");
@@ -334,6 +355,7 @@ public class UserServiceImpl implements UserService {
             mailRepository.sendEmail(user.getEmail(), user.getFullName(), user.getUsername(), password);
         }
     }
+
 
     private CheckDepartmentRolePositionExistsResult checkDepartmentRolePositionExists(long departmentId, long roleId, long positionId, CheckDepartmentRolePositionExistsOption option)
             throws InvalidDepartmentIdException, InvalidPositionIdException, InvalidRoleIdException {
