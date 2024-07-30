@@ -9,6 +9,7 @@ public interface ReportExpenseResponseMapper {
     @Mapping(source = "id", target = "expenseId")
     @Mapping(source = "costType.id", target = "costType.costTypeId")
     @Mapping(source = "status.id", target = "status.statusId")
+    @Mapping(source = "status.code", target = "status.code")
     @Mapping(source = "status.name", target = "status.name")
     ExpenseResponse mapToExpenseResponseMapping(FinancialReportExpense financialPlanExpense);
 }
