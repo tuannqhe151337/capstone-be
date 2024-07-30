@@ -12,6 +12,7 @@ public enum DepartmentCode {
     ACCOUNTING("accounting");
 
     private final String value;
+
     DepartmentCode(String value) {
         this.value = value;
     }

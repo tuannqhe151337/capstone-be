@@ -1,9 +1,9 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.utils.enums.PlanStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,8 +21,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
             " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
+            " (:statusCode IS NULL OR plan.status.code != :statusCode) AND " +
             " plan.isDelete = false ")
-    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId, PlanStatusCode statusCode);
 
     @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
@@ -77,6 +78,17 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE files.id = :fileId AND " +
             " plan.isDelete = false ")
     int getPlanIdByFileId(@Param("fileId") Long fileId);
+
+    @Query(value = " SELECT plan.department.id FROM FinancialPlan plan " +
+            " WHERE plan.id = :planId AND " +
+            " plan.isDelete = false ")
+    long getDepartmentIdByPlanId(Long planId);
+
+    @Query(value = " SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version, file.plan.term.name AS termName, file.plan.department.code AS departmentCode FROM FinancialPlanFile file " +
+            " WHERE file.plan.id = :planId AND " +
+            " file.isDelete = false " +
+            " GROUP BY file.plan.id, file.plan.term.name, file.plan.department.code ")
+    PlanVersionResult getCurrentVersionByPlanId(Long planId);
 
     @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +
             " costTypes.name AS costType, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +

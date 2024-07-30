@@ -5,10 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class VersionResponse {
-    private String version;
-    private LocalDate publishedDate;
+    private Long planFileId;
+    private Integer version;
+    private LocalDateTime publishedDate;
     private UserResponse uploadedBy;
 }
