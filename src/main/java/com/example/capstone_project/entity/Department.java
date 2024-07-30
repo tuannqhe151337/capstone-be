@@ -22,11 +22,7 @@ public class Department extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code")
-    @Enumerated(EnumType.STRING)
-    private DepartmentCode code;
-
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
 
     @OneToMany(mappedBy = User_.DEPARTMENT)

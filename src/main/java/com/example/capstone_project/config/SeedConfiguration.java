@@ -38,11 +38,11 @@ public class SeedConfiguration {
             ExpenseStatusRepository expenseStatusRepository,
             FinancialPlanFileRepository financialPlanFileRepository,
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
-            AnnualReportRepository annualReportRepository,
-            ReportRepository reportRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
-            FinancialReportExpenseRepository financialReportExpenseRepository
+            FinancialReportExpenseRepository financialReportExpenseRepository,
+            AnnualReportRepository annualReportRepository,
+            ReportRepository reportRepository
     ) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
@@ -72,38 +72,31 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
-            Department softwareDevelopmentDepartment = Department.builder()
-                    .name("Software development")
-                    .code(DepartmentCode.IT)
+            Department itDepartment = Department.builder()
+                    .name("IT")
                     .build();
 
-            Department accountingDepartment = Department.builder()
-                    .name("Accounting department")
-                    .code(DepartmentCode.ACCOUNTING)
+            Department hrDepartment = Department.builder()
+                    .name("HR")
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance department")
-                    .code(DepartmentCode.FINANCE)
-                    .build();
-
-            Department hireDepartment = Department.builder()
-                    .name("Hire department")
-                    .code(DepartmentCode.HR)
+                    .name("Finance")
                     .build();
 
             Department communicationDepartment = Department.builder()
-                    .name("Finance department")
-                    .code(DepartmentCode.COMMUNICATION)
+                    .name("Communication")
                     .build();
 
             Department marketingDepartment = Department.builder()
-                    .name("Finance department")
-                    .code(DepartmentCode.MARKETING)
+                    .name("Marketing")
                     .build();
 
+            Department accountingDepartment = Department.builder()
+                    .name("Accounting")
+                    .build();
 
-            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment, hireDepartment, communicationDepartment, marketingDepartment));
+            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -241,7 +234,22 @@ public class SeedConfiguration {
                     .name("Download annual report")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport));
+            Authority createNewDepartment = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_DEPARTMENT)
+                    .name("Create new department")
+                    .build();
+
+            Authority updateDepartment = Authority.builder()
+                    .code(AuthorityCode.UPDATE_DEPARTMENT)
+                    .name("Update department")
+                    .build();
+
+            Authority deleteDepartment = Authority.builder()
+                    .code(AuthorityCode.DELETE_DEPARTMENT)
+                    .name("Delete department")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment));
 
             // Role
             Role admin = Role.builder()
@@ -312,7 +320,7 @@ public class SeedConfiguration {
                     .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .isDelete(false)
@@ -327,7 +335,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
@@ -411,6 +419,21 @@ public class SeedConfiguration {
             RoleAuthority adminAuthority7 = RoleAuthority.builder()
                     .role(admin)
                     .authority(viewUserDetail)
+                    .build();
+
+            RoleAuthority adminAuthority8 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(deleteDepartment)
+                    .build();
+
+            RoleAuthority adminAuthority9 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(createNewDepartment)
+                    .build();
+
+            RoleAuthority adminAuthority10 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(updateDepartment)
                     .build();
 
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
@@ -578,7 +601,7 @@ public class SeedConfiguration {
                     .authority(deleteReport)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
@@ -614,7 +637,7 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 7, 2, 0, 0))
+                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
                     .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
@@ -626,7 +649,7 @@ public class SeedConfiguration {
                     .name("Summer 2024")
                     .duration(TermDuration.QUARTERLY)
                     .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
+                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
                     .user(user1)
                     .status(termStatus2)
@@ -637,17 +660,17 @@ public class SeedConfiguration {
                     .name("Fall 2024")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
+                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
                     .user(user2)
-                    .status(termStatus2)
+                    .status(termStatus3)
                     .build();
 
             Term term4 = Term.builder()
                     .id(4L)
                     .name("Winter 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.of(2025, 7, 2, 0, 0))
+                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
                     .user(user3)
@@ -670,14 +693,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .status(planStatus2)
                     .build();
 
@@ -1289,7 +1312,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus1)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term1)
                     .user(user1)
                     .build();
@@ -1319,7 +1342,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus2)
-                    .department(softwareDevelopmentDepartment)
+                    .department(itDepartment)
                     .term(term2)
                     .user(user1)
                     .build();
@@ -1372,7 +1395,7 @@ public class SeedConfiguration {
                         .supplierName("Supplier name " + supplierNameChar++)
                         .pic(pics[randomPicIndex])
                         .costType(randomCostType)
-//                        .status(randomExpenseStatus)
+                        .status(randomExpenseStatus)
                         .build();
 
                 reportExpenseList.add(expense);
@@ -1457,7 +1480,7 @@ public class SeedConfiguration {
                 Department randomDepartment = switch (randomDepartmentIndex) {
                     case 1 -> accountingDepartment;
                     case 2 -> financeDepartment;
-                    case 3 -> softwareDevelopmentDepartment;
+                    case 3 -> itDepartment;
                     default -> accountingDepartment; // Default case, should never be reached
                 };
 

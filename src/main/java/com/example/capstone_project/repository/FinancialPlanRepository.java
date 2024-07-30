@@ -84,10 +84,10 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.isDelete = false ")
     long getDepartmentIdByPlanId(Long planId);
 
-    @Query(value = " SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version, file.plan.term.name AS termName, file.plan.department.code AS departmentCode FROM FinancialPlanFile file " +
+    @Query(value = " SELECT DISTINCT file.plan.id AS planId ,count(file.plan.id) AS version, file.plan.term.name AS termName, file.plan.department.name AS departmentName FROM FinancialPlanFile file " +
             " WHERE file.plan.id = :planId AND " +
             " file.isDelete = false " +
-            " GROUP BY file.plan.id, file.plan.term.name, file.plan.department.code ")
+            " GROUP BY file.plan.id, file.plan.term.name, file.plan.department.name ")
     PlanVersionResult getCurrentVersionByPlanId(Long planId);
 
     @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS term, departments.name AS department, expenses.name AS expense, " +

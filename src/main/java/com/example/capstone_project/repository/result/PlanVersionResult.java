@@ -8,5 +8,5 @@ public interface PlanVersionResult {
     Long getPlanId();
     Integer getVersion();
     String getTermName();
-    DepartmentCode getDepartmentCode();
+    DepartmentCode getDepartmentName();
 }
