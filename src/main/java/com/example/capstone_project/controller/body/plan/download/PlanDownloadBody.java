@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class PlanDownloadBody {
-    @NotNull(message = "Plan Id can't be empty")
+    @NotNull(message = "File Id can't be empty")
     private Long fileId;
 }
 
