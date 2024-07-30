@@ -4,7 +4,6 @@ import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpens
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.FinancialPlan;
-import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.*;
@@ -38,8 +37,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -618,4 +615,93 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         planRepository.save(plan);
     }
 
+
+    @Override
+    public byte[] getLastVersionBodyFileExcelXLS(Long planId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+            FileInputStream file = new FileInputStream(fileLocation);
+            HSSFWorkbook wb = new HSSFWorkbook(file);
+
+            return fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
+
+    private List<ExpenseResult> getListExpenseByPlanId(Long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            if (!planRepository.existsById(planId)) {
+                throw new ResourceNotFoundException("Not found any plan have id = " + planId);
+            }
+
+            // Accountant role can view all plan
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                return planRepository.getListExpenseByPlanId(planId);
+
+                // Financial staff can only view plan of their department
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
+
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    return planRepository.getListExpenseByPlanId(planId);
+                } else {
+                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+                }
+            }
+        }
+        throw new UnauthorizedException("Unauthorized to download plan");
+    }
+
+    @Override
+    public String generateXLSFileNameByPlanId(Long planId) {
+        FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
+
+        if (fileNameResult != null) {
+            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xls";
+        } else {
+            throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
+        }
+    }
+
+    @Override
+    public byte[] getLastVersionBodyFileExcelXLSX(Long planId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+            FileInputStream file = new FileInputStream(fileLocation);
+            XSSFWorkbook wb = new XSSFWorkbook(file);
+
+            return fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
+
+    @Override
+    public String generateXLSXFileNameByPlanId(Long planId) {
+        FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
+
+        if (fileNameResult != null) {
+            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xlsx";
+        } else {
+            throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
+        }
+    }
 }

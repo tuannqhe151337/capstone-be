@@ -50,4 +50,11 @@ public interface FinancialPlanService {
 
     void reUploadPlan(FinancialPlan plan);
 
+    byte[] getLastVersionBodyFileExcelXLS(Long planId) throws Exception;
+
+    String generateXLSFileNameByPlanId(Long planId);
+
+    byte[] getLastVersionBodyFileExcelXLSX(Long planId) throws Exception;
+
+    String generateXLSXFileNameByPlanId(Long planId);
 }

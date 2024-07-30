@@ -3,6 +3,7 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
+import com.example.capstone_project.controller.body.plan.download.PlanBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
@@ -356,7 +357,7 @@ public class FinancialPlanController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -430,5 +431,51 @@ public class FinancialPlanController {
         out.close();
 
         return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
+    }
+
+    @PostMapping("/download/last-version-xls")
+    public ResponseEntity<byte[]> generateLastVersionXlsReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
+
+                return createExcelFileResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PostMapping("/download/last-version-xlsx")
+    public ResponseEntity<byte[]> generateLastVersionXlsxReport(
+            @Valid @RequestBody PlanBody planBody
+    ) throws Exception {
+        try {
+            /// Get data for file Excel
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            if (report != null) {
+                // Create file name for file Excel
+                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
+
+                return createExcelFileResponseEntity(report, outFileName);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }
