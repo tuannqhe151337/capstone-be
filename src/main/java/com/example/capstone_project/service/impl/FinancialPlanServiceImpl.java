@@ -58,6 +58,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final DepartmentRepository departmentRepository;
     private final HandleFileHelper handleFileHelper;
 
+
     @Override
     public long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception {
         // Get userId from token
@@ -728,4 +729,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
     }
 
+
+    @Override
+    public List<ExpenseStatus> getListExpenseStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            return expenseStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
 }

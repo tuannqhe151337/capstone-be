@@ -28,6 +28,8 @@ public interface FinancialPlanService {
 
     int getPlanVersionById(Long planId);
 
+    List<ExpenseStatus> getListExpenseStatus();
+
     byte[] getBodyFileExcelXLS(Long fileId) throws Exception;
 
     byte[] getBodyFileExcelXLSX(Long fileId) throws Exception;
