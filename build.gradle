@@ -71,13 +71,13 @@ dependencies {
     testImplementation('org.mockito:mockito-core:3.7.7')
 
 
-        // If using JUnit Jupiter
-        testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // If using JUnit Jupiter
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 
-        // If using JUnit 4
-        testImplementation 'junit:junit:4.13.2'
+    // If using JUnit 4
+    testImplementation 'junit:junit:4.13.2'
 
 
     // Spring Boot Test Dependencies
@@ -89,6 +89,26 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0' // Cập nhật phiên bản Mockito mới nhất
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+
+    //TEST JUNIT MOCKITO
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation('org.mockito:mockito-core:3.7.7')
+
+
+    // Spring Boot Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+    // Mockito Dependencies
+    testImplementation 'org.mockito:mockito-core:4.0.0' // Cập nhật phiên bản Mockito mới nhất
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0' // Cập nhật phiên bản Mockito mới nhất
 
     compileOnly 'org.projectlombok:lombok'
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen

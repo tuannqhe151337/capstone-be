@@ -6,7 +6,6 @@ import com.example.capstone_project.controller.body.user.activate.ActivateUserBo
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
-import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +28,14 @@ public interface UserService {
     void deactivateUser(DeactiveUserBody deactiveUserBody);
 
     void changePassword(ChangePasswordBody changePasswordBody);
-    void resetPassword(ResetPasswordBody resetPasswordBody);
-    String otpValidate(String otp) throws Exception;
-    long countDistinct(String query, Long roleId, Long departmentId, Long positionId);
-    void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
-    String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
-    String otpValidate(OTPBody otp, String authHeader) throws Exception;
+
     void updateUserSetting(UpdateUserSettingBody updateUserSettingBody);
+
+    void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody);
+
+    String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception;
+
+    String otpValidate(OTPBody otp, String authHeader) throws Exception;
+
+    long countDistinct(String query, Long roleId, Long departmentId, Long positionId);
 }

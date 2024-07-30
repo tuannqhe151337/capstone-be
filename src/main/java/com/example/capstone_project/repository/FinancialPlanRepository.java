@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Long>, CustomFinancialPlanRepository {
 
-    List<FinancialPlan> findFinancialPlansByTermId(Long termId);
+    List<FinancialPlan> findAllByTermId(Long termId);
 
     @Query(value = "SELECT count(distinct (plan.id)) FROM FinancialPlan plan " +
             " WHERE plan.name like %:query% AND " +

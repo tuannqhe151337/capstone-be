@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class DepartmentResponse {
-    private Long departmentId;
+    private long departmentId;
     private String name;
 }

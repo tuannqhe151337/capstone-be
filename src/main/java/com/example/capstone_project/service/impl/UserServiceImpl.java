@@ -5,8 +5,8 @@ import com.example.capstone_project.controller.body.user.deactive.DeactiveUserBo
 import com.example.capstone_project.controller.body.user.activate.ActivateUserBody;
 import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPasswordEmailBody;
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
-import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
+import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -86,7 +87,6 @@ public class UserServiceImpl implements UserService {
         }else{
             throw new UnauthorizedException("Unauthorized to view all users");
         }
-
     }
 
     @Override
@@ -97,6 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long userId) throws Exception {
+        //ADD CHECK
         long actorId = UserHelper.getUserId();
         if (!userAuthorityRepository.get(actorId).contains(AuthorityCode.VIEW_USER_DETAILS.getValue())) {
             throw new UnauthorizedException("Unauthorized to view user details");
@@ -204,20 +205,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordBody resetPasswordBody) {
-
-    }
-
-    @Override
-    public String otpValidate(String otp) throws Exception {
-        return "";
-    }
-
-    @Override
     public String otpValidate(OTPBody otp, String authHeaderToken) throws Exception {
         //get token from redis by id from header
         if (authHeaderToken == null) {
-            throw new DataIntegrityViolationException("Invalid token");
+            throw new DataIntegrityViolationException("Bearer token does not exist");
         }
         //compare otp
         //get userid
@@ -225,6 +216,11 @@ public class UserServiceImpl implements UserService {
 
         if (userId == null) {
             throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
+        }
+        //Check user id existed
+        Optional<User> user = userRepository.findById(Long.parseLong(userId));
+        if(user.isEmpty() || user.get().getIsDelete() == false) {
+            throw new ResourceNotFoundException("User not found");
         }
         //get otp
         String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, Long.parseLong(userId));
@@ -241,6 +237,8 @@ public class UserServiceImpl implements UserService {
         //return token
         return newTokenForUserId;
     }
+
+
 
     @Override
     public String forgetPassword(ForgetPasswordEmailBody forgetPasswordEmailBody) throws Exception {
@@ -323,6 +321,7 @@ public class UserServiceImpl implements UserService {
             // Check email exist
             String email = user.getEmail();
 
+
             if (userRepository.existsByEmail(email)) {
                 throw new DataIntegrityViolationException("Email already exists");
             }
@@ -356,6 +355,7 @@ public class UserServiceImpl implements UserService {
             mailRepository.sendEmail(user.getEmail(), user.getFullName(), user.getUsername(), password);
         }
     }
+
 
     private CheckDepartmentRolePositionExistsResult checkDepartmentRolePositionExists(long departmentId, long roleId, long positionId, CheckDepartmentRolePositionExistsOption option)
             throws InvalidDepartmentIdException, InvalidPositionIdException, InvalidRoleIdException {

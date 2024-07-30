@@ -83,7 +83,6 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-
     public Term updateTerm(Term term) throws Exception {
 
         long userId = UserHelper.getUserId();
@@ -143,6 +142,13 @@ public class TermServiceImpl implements TermService {
         TermStatus termStatus = termStatusRepository.getReferenceById(2L);
         term.setStatus(termStatus);
         term.setStartDate(LocalDateTime.now());
+        termRepository.save(term);
+    }
+
+    @Override
+    public void updateTermStatus(Term term, Long statusId) throws Exception {
+        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
+        term.setStatus(termStatus);
         termRepository.save(term);
     }
 

@@ -38,11 +38,11 @@ public class SeedConfiguration {
             ExpenseStatusRepository expenseStatusRepository,
             FinancialPlanFileRepository financialPlanFileRepository,
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
+            AnnualReportRepository annualReportRepository,
+            ReportRepository reportRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
-            FinancialReportExpenseRepository financialReportExpenseRepository,
-            AnnualReportRepository annualReportRepository,
-            ReportRepository reportRepository
+            FinancialReportExpenseRepository financialReportExpenseRepository
     ) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
@@ -72,37 +72,38 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
-            Department itDepartment = Department.builder()
-                    .name("IT")
+            Department softwareDevelopmentDepartment = Department.builder()
+                    .name("Software development")
                     .code(DepartmentCode.IT)
                     .build();
 
-            Department hrDepartment = Department.builder()
-                    .name("HR")
-                    .code(DepartmentCode.HR)
+            Department accountingDepartment = Department.builder()
+                    .name("Accounting department")
+                    .code(DepartmentCode.ACCOUNTING)
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance")
+                    .name("Finance department")
                     .code(DepartmentCode.FINANCE)
                     .build();
 
+            Department hireDepartment = Department.builder()
+                    .name("Hire department")
+                    .code(DepartmentCode.HR)
+                    .build();
+
             Department communicationDepartment = Department.builder()
-                    .name("Communication")
+                    .name("Finance department")
                     .code(DepartmentCode.COMMUNICATION)
                     .build();
 
             Department marketingDepartment = Department.builder()
-                    .name("Marketing")
+                    .name("Finance department")
                     .code(DepartmentCode.MARKETING)
                     .build();
 
-            Department accountingDepartment = Department.builder()
-                    .name("Accounting")
-                    .code(DepartmentCode.ACCOUNTING)
-                    .build();
 
-            departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
+            departmentRepository.saveAll(List.of(softwareDevelopmentDepartment, accountingDepartment, financeDepartment, hireDepartment, communicationDepartment, marketingDepartment));
 
             // Position
             Position techlead = Position.builder()
@@ -308,10 +309,10 @@ public class SeedConfiguration {
 
             User user4 = User.builder()
                     .username("username4")
-                    .fullName("Choi Woo-je")
+                    .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .position(juniorDev)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .isDelete(false)
@@ -326,7 +327,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("Email23u@gmail.com")
@@ -613,7 +614,7 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
+                    .startDate(LocalDateTime.of(2024, 7, 2, 0, 0))
                     .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
                     .user(user1)
@@ -625,7 +626,7 @@ public class SeedConfiguration {
                     .name("Summer 2024")
                     .duration(TermDuration.QUARTERLY)
                     .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
+                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
                     .user(user1)
                     .status(termStatus2)
@@ -636,17 +637,17 @@ public class SeedConfiguration {
                     .name("Fall 2024")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
+                    .endDate(LocalDateTime.of(2025, 7, 2, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
                     .user(user2)
-                    .status(termStatus3)
+                    .status(termStatus2)
                     .build();
 
             Term term4 = Term.builder()
                     .id(4L)
                     .name("Winter 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
+                    .startDate(LocalDateTime.of(2025, 7, 2, 0, 0))
                     .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
                     .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
                     .user(user3)
@@ -669,14 +670,14 @@ public class SeedConfiguration {
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
                     .term(term1)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .status(planStatus2)
                     .build();
 
@@ -803,16 +804,198 @@ public class SeedConfiguration {
                     .user(user3)
                     .build();
 
-            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2));
+            FinancialPlanFile financialPlanFile4_1 = FinancialPlanFile.builder()
+                    .id(7L)
+                    .name("TERM-NAME3_PLAN-NAME4")
+                    .plan(financialPlan4)
+                    .user(user4)
+                    .build();
 
-            // Get 15 random expense
+            FinancialPlanFile financialPlanFile4_2 = FinancialPlanFile.builder()
+                    .id(8L)
+                    .name("TERM-NAME3_PLAN-NAME3")
+                    .plan(financialPlan4)
+                    .user(user4)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_1 = FinancialPlanFile.builder()
+                    .id(9L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user4)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_2 = FinancialPlanFile.builder()
+                    .id(10L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_3 = FinancialPlanFile.builder()
+                    .id(11L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_4 = FinancialPlanFile.builder()
+                    .id(12L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_5 = FinancialPlanFile.builder()
+                    .id(13L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_6 = FinancialPlanFile.builder()
+                    .id(14L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_7 = FinancialPlanFile.builder()
+                    .id(15L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_8 = FinancialPlanFile.builder()
+                    .id(16L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_9 = FinancialPlanFile.builder()
+                    .id(17L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_10 = FinancialPlanFile.builder()
+                    .id(18L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_11 = FinancialPlanFile.builder()
+                    .id(19L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_12 = FinancialPlanFile.builder()
+                    .id(20L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_13 = FinancialPlanFile.builder()
+                    .id(21L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_14 = FinancialPlanFile.builder()
+                    .id(22L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_15 = FinancialPlanFile.builder()
+                    .id(23L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_16 = FinancialPlanFile.builder()
+                    .id(24L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_17 = FinancialPlanFile.builder()
+                    .id(25L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_18 = FinancialPlanFile.builder()
+                    .id(26L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_19 = FinancialPlanFile.builder()
+                    .id(27L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_20 = FinancialPlanFile.builder()
+                    .id(28L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_21 = FinancialPlanFile.builder()
+                    .id(29L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_22 = FinancialPlanFile.builder()
+                    .id(30L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_23 = FinancialPlanFile.builder()
+                    .id(31L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile5_24 = FinancialPlanFile.builder()
+                    .id(32L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan5)
+                    .user(user3)
+                    .build();
+
+            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24));
+
+            // Get 45 random expense
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
             Random random = new Random();
             String[] pics = {"TuNM", "AnhPTH", "HuyHT", "VyNN"};
             char projectNameChar = 'A';
             char supplierNameChar = 'A';
 
-            for (int i = 1; i <= 15; i++) {
+            for (int i = 1; i <= 45; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomCostTypeIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(pics.length);
@@ -928,8 +1111,158 @@ public class SeedConfiguration {
                     .file(financialPlanFile3_2)
                     .planExpense(expenseList.get(14))
                     .build();
+            FinancialPlanFileExpense fileExpense16 = FinancialPlanFileExpense.builder()
+                    .id(16L)
+                    .file(financialPlanFile4_2)
+                    .planExpense(expenseList.get(11))
+                    .build();
+            FinancialPlanFileExpense fileExpense17 = FinancialPlanFileExpense.builder()
+                    .id(17L)
+                    .file(financialPlanFile4_2)
+                    .planExpense(expenseList.get(12))
+                    .build();
+            FinancialPlanFileExpense fileExpense18 = FinancialPlanFileExpense.builder()
+                    .id(18L)
+                    .file(financialPlanFile4_2)
+                    .planExpense(expenseList.get(13))
+                    .build();
+            FinancialPlanFileExpense fileExpense19 = FinancialPlanFileExpense.builder()
+                    .id(19L)
+                    .file(financialPlanFile4_2)
+                    .planExpense(expenseList.get(14))
+                    .build();
+            FinancialPlanFileExpense fileExpense20 = FinancialPlanFileExpense.builder()
+                    .id(20L)
+                    .file(financialPlanFile5_2)
+                    .planExpense(expenseList.get(11))
+                    .build();
+            FinancialPlanFileExpense fileExpense21 = FinancialPlanFileExpense.builder()
+                    .id(21L)
+                    .file(financialPlanFile5_2)
+                    .planExpense(expenseList.get(12))
+                    .build();
+            FinancialPlanFileExpense fileExpense22 = FinancialPlanFileExpense.builder()
+                    .id(22L)
+                    .file(financialPlanFile5_2)
+                    .planExpense(expenseList.get(13))
+                    .build();
+            FinancialPlanFileExpense fileExpense23 = FinancialPlanFileExpense.builder()
+                    .id(23L)
+                    .file(financialPlanFile5_2)
+                    .planExpense(expenseList.get(14))
+                    .build();
+            FinancialPlanFileExpense fileExpense24 = FinancialPlanFileExpense.builder()
+                    .id(24L)
+                    .file(financialPlanFile5_3)
+                    .planExpense(expenseList.get(15))
+                    .build();
+            FinancialPlanFileExpense fileExpense25 = FinancialPlanFileExpense.builder()
+                    .id(25L)
+                    .file(financialPlanFile5_4)
+                    .planExpense(expenseList.get(16))
+                    .build();
+            FinancialPlanFileExpense fileExpense26 = FinancialPlanFileExpense.builder()
+                    .id(26L)
+                    .file(financialPlanFile5_5)
+                    .planExpense(expenseList.get(17))
+                    .build();
+            FinancialPlanFileExpense fileExpense27 = FinancialPlanFileExpense.builder()
+                    .id(27L)
+                    .file(financialPlanFile5_6)
+                    .planExpense(expenseList.get(18))
+                    .build();
+            FinancialPlanFileExpense fileExpense28 = FinancialPlanFileExpense.builder()
+                    .id(28L)
+                    .file(financialPlanFile5_7)
+                    .planExpense(expenseList.get(19))
+                    .build();
+            FinancialPlanFileExpense fileExpense29 = FinancialPlanFileExpense.builder()
+                    .id(29L)
+                    .file(financialPlanFile5_8)
+                    .planExpense(expenseList.get(20))
+                    .build();
+            FinancialPlanFileExpense fileExpense30 = FinancialPlanFileExpense.builder()
+                    .id(30L)
+                    .file(financialPlanFile5_9)
+                    .planExpense(expenseList.get(21))
+                    .build();
+            FinancialPlanFileExpense fileExpense31 = FinancialPlanFileExpense.builder()
+                    .id(31L)
+                    .file(financialPlanFile5_10)
+                    .planExpense(expenseList.get(22))
+                    .build();
+            FinancialPlanFileExpense fileExpense32 = FinancialPlanFileExpense.builder()
+                    .id(32L)
+                    .file(financialPlanFile5_11)
+                    .planExpense(expenseList.get(23))
+                    .build();
+            FinancialPlanFileExpense fileExpense33 = FinancialPlanFileExpense.builder()
+                    .id(33L)
+                    .file(financialPlanFile5_12)
+                    .planExpense(expenseList.get(24))
+                    .build();
+            FinancialPlanFileExpense fileExpense34 = FinancialPlanFileExpense.builder()
+                    .id(34L)
+                    .file(financialPlanFile5_13)
+                    .planExpense(expenseList.get(25))
+                    .build();
+            FinancialPlanFileExpense fileExpense35 = FinancialPlanFileExpense.builder()
+                    .id(35L)
+                    .file(financialPlanFile5_14)
+                    .planExpense(expenseList.get(26))
+                    .build();
+            FinancialPlanFileExpense fileExpense36 = FinancialPlanFileExpense.builder()
+                    .id(36L)
+                    .file(financialPlanFile5_15)
+                    .planExpense(expenseList.get(27))
+                    .build();
+            FinancialPlanFileExpense fileExpense37 = FinancialPlanFileExpense.builder()
+                    .id(37L)
+                    .file(financialPlanFile5_16)
+                    .planExpense(expenseList.get(28))
+                    .build();
+            FinancialPlanFileExpense fileExpense38 = FinancialPlanFileExpense.builder()
+                    .id(38L)
+                    .file(financialPlanFile5_17)
+                    .planExpense(expenseList.get(29))
+                    .build();
+            FinancialPlanFileExpense fileExpense39 = FinancialPlanFileExpense.builder()
+                    .id(39L)
+                    .file(financialPlanFile5_18)
+                    .planExpense(expenseList.get(30))
+                    .build();
+            FinancialPlanFileExpense fileExpense40 = FinancialPlanFileExpense.builder()
+                    .id(40L)
+                    .file(financialPlanFile5_19)
+                    .planExpense(expenseList.get(31))
+                    .build();
+            FinancialPlanFileExpense fileExpense41 = FinancialPlanFileExpense.builder()
+                    .id(41L)
+                    .file(financialPlanFile5_20)
+                    .planExpense(expenseList.get(32))
+                    .build();
+            FinancialPlanFileExpense fileExpense42 = FinancialPlanFileExpense.builder()
+                    .id(42L)
+                    .file(financialPlanFile5_21)
+                    .planExpense(expenseList.get(33))
+                    .build();
+            FinancialPlanFileExpense fileExpense43 = FinancialPlanFileExpense.builder()
+                    .id(43L)
+                    .file(financialPlanFile5_22)
+                    .planExpense(expenseList.get(34))
+                    .build();
+            FinancialPlanFileExpense fileExpense44 = FinancialPlanFileExpense.builder()
+                    .id(44L)
+                    .file(financialPlanFile5_23)
+                    .planExpense(expenseList.get(35))
+                    .build();
+            FinancialPlanFileExpense fileExpense45 = FinancialPlanFileExpense.builder()
+                    .id(45L)
+                    .file(financialPlanFile5_24)
+                    .planExpense(expenseList.get(36))
+                    .build();
 
-            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15));
+            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense16, fileExpense17, fileExpense18, fileExpense19, fileExpense20, fileExpense21, fileExpense22, fileExpense23, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45));
 
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")
@@ -956,7 +1289,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus1)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .term(term1)
                     .user(user1)
                     .build();
@@ -986,7 +1319,7 @@ public class SeedConfiguration {
                     .month(LocalDate.now())
                     .version("v3")
                     .status(planStatus2)
-                    .department(itDepartment)
+                    .department(softwareDevelopmentDepartment)
                     .term(term2)
                     .user(user1)
                     .build();
@@ -1124,7 +1457,7 @@ public class SeedConfiguration {
                 Department randomDepartment = switch (randomDepartmentIndex) {
                     case 1 -> accountingDepartment;
                     case 2 -> financeDepartment;
-                    case 3 -> itDepartment;
+                    case 3 -> softwareDevelopmentDepartment;
                     default -> accountingDepartment; // Default case, should never be reached
                 };
 
