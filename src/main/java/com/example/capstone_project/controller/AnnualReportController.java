@@ -1,8 +1,6 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.annual.AnnualReportDownloadBody;
-import com.example.capstone_project.controller.body.annual.AnnualReportExpenseBody;
-import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -26,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -89,7 +86,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
