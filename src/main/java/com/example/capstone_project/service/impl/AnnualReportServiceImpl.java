@@ -5,6 +5,7 @@ import com.example.capstone_project.repository.AnnualReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,18 +21,19 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     private final AnnualReportRepository annualReportRepository;
 
     @Override
-    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable) {
+    public List<AnnualReport> getListAnnualReportPaging(Pageable pageable, String year) {
         // Get list authorities of this user
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            return annualReportRepository.getListAnnualReportPaging(pageable);
+            return annualReportRepository.getListAnnualReportPaging(pageable, year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
         }
-        return null;
     }
 
     @Override
-    public long countDistinctListAnnualReportPaging() {
-        return annualReportRepository.countDistinctListAnnualReportPaging();
+    public long countDistinctListAnnualReportPaging(String year) {
+        return annualReportRepository.countDistinctListAnnualReportPaging(year);
     }
 }

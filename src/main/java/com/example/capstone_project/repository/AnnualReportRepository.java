@@ -1,12 +1,9 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.ExpenseStatus;
-import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -15,8 +12,9 @@ import java.util.List;
 
 public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long>, CustomAnnualReportRepository {
     @Query(value = "SELECT count( distinct(annualReport)) FROM AnnualReport annualReport " +
-            " WHERE annualReport.isDelete = false ")
-    long countDistinctListAnnualReportPaging();
+            " WHERE (annualReport.year = :year OR :year IS NULL) AND " +
+            " annualReport.isDelete = false ")
+    long countDistinctListAnnualReportPaging(String year);
 
     @Query(value = " SELECT year (term.planDueDate) AS year, count (term.id) AS totalTerm, " +
             " sum (expense.amount*expense.unitPrice) AS totalExpense, count (department.id) AS totalDepartment FROM Term term " +

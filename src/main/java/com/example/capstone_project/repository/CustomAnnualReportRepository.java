@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CustomAnnualReportRepository {
-    List<AnnualReport> getListAnnualReportPaging(Pageable pageable);
+    List<AnnualReport> getListAnnualReportPaging(Pageable pageable, String year);
 }
