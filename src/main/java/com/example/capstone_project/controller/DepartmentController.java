@@ -14,6 +14,7 @@ import com.example.capstone_project.utils.mapper.department.paginate.DepartmentP
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,7 +94,7 @@ public class DepartmentController {
             @RequestParam(required = false) String sortType
     ) {
 
-        int pageInt = PaginationHelper.convertPageToInteger(page) ;
+        int pageInt = PaginationHelper.convertPageToInteger(page);
         int sizeInt = PaginationHelper.convertPageSizeToInteger(size);
 
         // Handling query
@@ -109,7 +110,7 @@ public class DepartmentController {
 
         //map
         List<DepartmentResponse> departmentResponses =
-               new DepartToDepartResponseMapperImpl()
+                new DepartToDepartResponseMapperImpl()
                         .mapDepartmentsToDepartmentResponses(departments);
         //count, totalrecords
         long totalRecords = departmentService.countDistinct(query);

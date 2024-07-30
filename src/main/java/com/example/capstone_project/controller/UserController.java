@@ -226,7 +226,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("user-token") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
             return ResponseEntity.status(HttpStatus.OK).body("reset password success");
@@ -254,7 +254,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/otp")
-    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("otp-token") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
         //return  Token  user:dnfpajsdfhp...:id, 6.
         try {
             String token = userService.otpValidate(otpBody, authHeader);
