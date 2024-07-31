@@ -1,6 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.repository.PositionRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
@@ -68,7 +67,11 @@ public class PositionServiceImpl implements PositionService {
                 throw new ResourceNotFoundException("Not found any position have Id = " + positionId);
             }
 
-            positionRepository.deleteById(positionId);
+            Position position = positionRepository.getReferenceById(positionId);
+
+            position.setDelete(true);
+
+            positionRepository.save(position);
         } else {
             throw new UnauthorizedException("Unauthorized to delete position");
         }
@@ -80,7 +83,7 @@ public class PositionServiceImpl implements PositionService {
 
         try {
             // Check authority or role
-            if (listAuthorities.contains(AuthorityCode.UPDATE_DEPARTMENT.getValue())) {
+            if (listAuthorities.contains(AuthorityCode.UPDATE_POSITION.getValue())) {
                 if (!positionRepository.existsById(position.getId())) {
                     throw new ResourceNotFoundException("Not found any position have Id = " + position.getId());
                 }
