@@ -40,7 +40,6 @@ public class SeedConfiguration {
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
-            FinancialReportExpenseRepository financialReportExpenseRepository,
             AnnualReportRepository annualReportRepository,
             ReportRepository reportRepository
     ) {
@@ -797,26 +796,32 @@ public class SeedConfiguration {
             planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
 
             CostType costType1 = CostType.builder()
+                    .id(1L)
                     .name("Administration cost")
                     .build();
 
             CostType costType2 = CostType.builder()
+                    .id(2L)
                     .name("Direct costs")
                     .build();
 
             CostType costType3 = CostType.builder()
+                    .id(3L)
                     .name("Indirect cost")
                     .build();
 
             CostType costType4 = CostType.builder()
+                    .id(4L)
                     .name("Operating costs")
                     .build();
 
             CostType costType5 = CostType.builder()
+                    .id(5L)
                     .name("Maintenance costs")
                     .build();
 
             CostType costType6 = CostType.builder()
+                    .id(6L)
                     .name("Manufacturing costs")
                     .build();
 
@@ -1413,58 +1418,58 @@ public class SeedConfiguration {
             financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
 
             // Get 15 random expense
-            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
-            projectNameChar = 'A';
-            supplierNameChar = 'A';
-
-            for (int i = 1; i <= 15; i++) {
-                int randomStatusIndex = random.nextInt(4) + 1;
-                int randomCostTypeIndex = random.nextInt(6) + 1;
-                int randomReportIndex = random.nextInt(6) + 1;
-                int randomPicIndex = random.nextInt(pics.length);
-
-                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
-                    case 3 -> expenseStatus3;
-                    case 4 -> expenseStatus4;
-                    default -> expenseStatus3; // Default case, should never be reached
-                };
-
-                CostType randomCostType = switch (randomCostTypeIndex) {
-                    case 1 -> costType1;
-                    case 2 -> costType2;
-                    case 3 -> costType3;
-                    case 4 -> costType4;
-                    case 5 -> costType5;
-                    case 6 -> costType6;
-                    default -> costType1; // Default case, should never be reached
-                };
-
-                FinancialReport randomReport = switch (randomReportIndex) {
-                    case 1 -> report1;
-                    case 2 -> report2;
-                    case 3 -> report3;
-                    case 4 -> report4;
-                    case 5 -> report5;
-                    case 6 -> report6;
-                    default -> report1; // Default case, should never be reached
-                };
-
-                FinancialReportExpense expense = FinancialReportExpense.builder()
-                        .name("Expense " + projectNameChar)
-                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
-                        .amount(random.nextInt(10) + 1)
-                        .financialReport(randomReport)
-                        .projectName("Project name " + projectNameChar++)
-                        .supplierName("Supplier name " + supplierNameChar++)
-                        .pic(pics[randomPicIndex])
-                        .costType(randomCostType)
-                        .status(randomExpenseStatus)
-                        .build();
-
-                reportExpenseList.add(expense);
-            }
-
-            financialReportExpenseRepository.saveAll(reportExpenseList);
+//            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
+//            projectNameChar = 'A';
+//            supplierNameChar = 'A';
+//
+//            for (int i = 1; i <= 15; i++) {
+//                int randomStatusIndex = random.nextInt(4) + 1;
+//                int randomCostTypeIndex = random.nextInt(6) + 1;
+//                int randomReportIndex = random.nextInt(6) + 1;
+//                int randomPicIndex = random.nextInt(pics.length);
+//
+//                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+//                    case 3 -> expenseStatus3;
+//                    case 4 -> expenseStatus4;
+//                    default -> expenseStatus3; // Default case, should never be reached
+//                };
+//
+//                CostType randomCostType = switch (randomCostTypeIndex) {
+//                    case 1 -> costType1;
+//                    case 2 -> costType2;
+//                    case 3 -> costType3;
+//                    case 4 -> costType4;
+//                    case 5 -> costType5;
+//                    case 6 -> costType6;
+//                    default -> costType1; // Default case, should never be reached
+//                };
+//
+//                FinancialReport randomReport = switch (randomReportIndex) {
+//                    case 1 -> report1;
+//                    case 2 -> report2;
+//                    case 3 -> report3;
+//                    case 4 -> report4;
+//                    case 5 -> report5;
+//                    case 6 -> report6;
+//                    default -> report1; // Default case, should never be reached
+//                };
+//
+//                FinancialReportExpense expense = FinancialReportExpense.builder()
+//                        .name("Expense " + projectNameChar)
+//                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
+//                        .amount(random.nextInt(10) + 1)
+//                        .financialReport(randomReport)
+//                        .projectName("Project name " + projectNameChar++)
+//                        .supplierName("Supplier name " + supplierNameChar++)
+//                        .pic(pics[randomPicIndex])
+//                        .costType(randomCostType)
+//                        .status(randomExpenseStatus)
+//                        .build();
+//
+//                reportExpenseList.add(expense);
+//            }
+//
+//            financialReportExpenseRepository.saveAll(reportExpenseList);
 
 
             AnnualReport annualReport1 = AnnualReport.builder()
