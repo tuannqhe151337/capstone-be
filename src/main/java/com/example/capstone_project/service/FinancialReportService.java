@@ -12,7 +12,7 @@ import java.util.List;
 public interface FinancialReportService {
     List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception;
 
-    long countDistinctListReportPaginate(String query, Long termId, Long departmentId, Long statusId) throws Exception;
+    long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception;
 
 //    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer statusId, Integer costTypeId);
 //

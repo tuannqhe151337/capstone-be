@@ -70,6 +70,7 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+
             // Department
             Department itDepartment = Department.builder()
                     .name("IT Department")

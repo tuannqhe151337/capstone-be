@@ -153,7 +153,7 @@ public class ReportController {
             if (reports != null) {
 
                 // Count total record
-                count = reportService.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+                count = reportService.countDistinctListReportPaginate(query, termId, statusId);
 
                 // Mapping to TermPaginateResponse
                 reports.forEach(report -> response.getData().add(new ReportPaginateResponseMapperImpl().mapToReportResponseMapping(report)));

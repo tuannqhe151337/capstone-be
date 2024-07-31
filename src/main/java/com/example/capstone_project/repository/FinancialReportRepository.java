@@ -14,10 +14,9 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
     @Query(value = " SELECT DISTINCT count(report.id) FROM FinancialReport report " +
             " WHERE report.name like %:query% AND " +
             " (:termId IS NULL OR report.term.id = :termId) AND " +
-            " (:departmentId IS NULL OR report.department.id = :departmentId) AND " +
             " (:statusId IS NULL OR report.status.id = :statusId) AND " +
             " report.isDelete = false ")
-    long countDistinctListReportPaginate(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+    long countDistinctListReportPaginate(@Param("query") String query, @Param("termId") Long termId, @Param("statusId") Long statusId);
 
 //    @Query(" SELECT report.id AS reportId, report.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
 //            " SUM(expense.unitPrice * expense.amount) AS totalCost, term.id AS termId, term.name AS termName, " +
@@ -34,11 +33,10 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
 //            " report.createdAt, department.id, department.name, user.id, user.username ")
 //    ReportDetailResult getFinancialReportById(Long reportId);
 
-    @Query(value = " SELECT term.name AS termName, department.name AS departmentCode FROM FinancialReport report " +
-            " JOIN report.department department " +
+    @Query(value = " SELECT term.name AS termName FROM FinancialReport report " +
             " JOIN report.term term " +
             " WHERE report.id = :reportId AND " +
-            " report.isDelete = false AND department.isDelete = false AND term.isDelete = false ")
+            " report.isDelete = false AND term.isDelete = false ")
     FileNameResult generateFileName(Long reportId);
 
 //    @Query(value = " SELECT expenses FROM FinancialReportExpense expenses " +
@@ -47,8 +45,8 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
 //            " expenses.isDelete = false AND report.isDelete = false ")
 //    List<ExpenseResult> getListExpenseByReportId(Long reportId);
 
-    @Query(value = " SELECT report.department.id FROM FinancialReport report " +
-            " WHERE report.id = :reportId AND " +
-            " report.isDelete = false ")
-    long getDepartmentId(Long reportId);
+//    @Query(value = " SELECT report.department.id FROM FinancialReport report " +
+//            " WHERE report.id = :reportId AND " +
+//            " report.isDelete = false ")
+//    long getDepartmentId(Long reportId);
 }

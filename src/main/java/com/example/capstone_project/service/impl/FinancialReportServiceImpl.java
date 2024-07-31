@@ -60,7 +60,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public long countDistinctListReportPaginate(String query, Long termId, Long departmentId, Long statusId) throws Exception {
+    public long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -69,10 +69,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                departmentId = userDetail.getDepartmentId();
-            }
-            return financialReportRepository.countDistinctListReportPaginate(query, termId, departmentId, statusId);
+            return financialReportRepository.countDistinctListReportPaginate(query, termId, statusId);
         } else {
             throw new UnauthorizedException("Unauthorized to create plan");
         }
@@ -194,7 +191,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public String generateXLSXFileName(Long reportId) {
         FileNameResult fileNameResult = financialReportRepository.generateFileName(reportId);
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_Report.xlsx";
+            return fileNameResult.getTermName() + "_Report.xlsx";
         }
         return null;
     }
@@ -222,7 +219,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_Report.xls";
+            return fileNameResult.getTermName() + "_Report.xls";
         }
 
         return null;
