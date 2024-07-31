@@ -1,15 +1,19 @@
 package user;
 
+import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.entity.Department;
 import com.example.capstone_project.entity.Position;
 import com.example.capstone_project.entity.Role;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.repository.*;
+import com.example.capstone_project.repository.redis.OTPTokenRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.impl.MailRepository;
+import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -27,9 +32,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -55,9 +62,6 @@ public class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private UserServiceImpl userServiceImpl;
-
     @Mock
     private DepartmentRepository departmentRepository;
 
@@ -66,6 +70,14 @@ public class UserServiceTest {
 
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private OTPTokenRepository otpTokenRepository ;
+    @Mock
+    private UserIdTokenRepository userIdTokenRepository;
+    @Mock
+    private JwtHelper jwtHelper;
+    @InjectMocks
+    private UserServiceImpl userServiceImpl;
 
     private Long userId;
     private Long actorId;
@@ -210,6 +222,52 @@ public class UserServiceTest {
             // Assert the result
             assertTrue(actualUsers.isEmpty());
         }
+        //reset password
+
+                    //OTP
+        @Test
+        void testOtpValidate_Success() throws Exception {
+            String authHeaderToken = "validToken";
+            OTPBody otpBody = new OTPBody();
+            otpBody.setOtp("123456");
+
+            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(String.valueOf(1));
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+            when(otpTokenRepository.getOtpCode(authHeaderToken, 1L)).thenReturn("123456");
+            when(jwtHelper.genBlankTokenOtp()).thenReturn("newToken");
+
+            String result = userServiceImpl.otpValidate(otpBody, authHeaderToken);
+
+            verify(userIdTokenRepository).save(eq("newToken"), eq(1L), any(Duration.class));
+            assertEquals("newToken", result);
+        }
+
+        @Test
+        void testOtpValidate_InvalidOtp() {
+            String authHeaderToken = "validToken";
+            OTPBody otpBody = new OTPBody();
+            otpBody.setOtp("123456");
+
+            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn("1");
+            User user = new User();
+            user.setId(1L);
+            user.setIsDelete(false);
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+            when(otpTokenRepository.getOtpCode(authHeaderToken, 1L)).thenReturn("654321");
+
+            assertThrows(UnauthorizedException.class, () -> userServiceImpl.otpValidate(otpBody, authHeaderToken));
+        }
+
+        @Test
+        void testOtpValidate_InvalidToken() {
+            String authHeaderToken = "invalidToken";
+
+            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(null);
+
+            assertThrows(InvalidDataAccessResourceUsageException.class, () -> userServiceImpl.otpValidate(new OTPBody(), authHeaderToken));
+        }
+
+
 
     }
 

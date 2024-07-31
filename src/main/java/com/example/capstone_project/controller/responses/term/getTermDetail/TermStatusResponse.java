@@ -14,5 +14,5 @@ public class TermStatusResponse {
     @Enumerated(EnumType.STRING)
     private TermCode code;
 
-    private Boolean isDelete;
+    private boolean isDelete;
 }

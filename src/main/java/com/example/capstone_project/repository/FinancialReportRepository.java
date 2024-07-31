@@ -21,7 +21,7 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
 
     @Query(" SELECT report.id AS reportId, report.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
             " SUM(expense.unitPrice * expense.amount) AS totalCost, term.id AS termId, term.name AS termName, " +
-            " term.planDueDate AS planDueDate, report.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
+            " term.endDate AS planDueDate, report.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialReport report " +
             " JOIN report.term term " +
@@ -30,7 +30,7 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " JOIN report.user user" +
             " WHERE report.id = :reportId AND " +
             " report.isDelete = false AND expense.isDelete = false " +
-            " GROUP BY report.id, report.name, term.id, term.name, term.planDueDate, " +
+            " GROUP BY report.id, report.name, term.id, term.name, term.endDate, " +
             " report.createdAt, department.id, department.name, user.id, user.username ")
     ReportDetailResult getFinancialReportById(Long reportId);
 

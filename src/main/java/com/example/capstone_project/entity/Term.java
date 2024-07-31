@@ -41,10 +41,21 @@ public class Term extends BaseEntity{
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @NotNull(message = "Plan due date cannot be null")
-    @Future(message = "Plan due date must be in the future")
-    @Column(name = "plan_due_date")
-    private LocalDateTime planDueDate;
+    @NotNull(message = "Re-upload start date cannot be null")
+    @Future(message = "Re-upload start date must be in the future")
+    @Column(name = "start_reupload_date")
+    private LocalDateTime reuploadStartDate;
+
+
+    @NotNull(message = "Re-upload end date cannot be null")
+    @Future(message = "Re-upload end date must be in the future")
+    @Column(name = "end_reupload_date")
+    private LocalDateTime reuploadEndDate;
+
+    @NotNull(message = "Final end date cannot be null")
+    @Future(message = "Final end date must be in the future")
+    @Column(name = "final_end_term")
+    private LocalDateTime finalEndTermDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")

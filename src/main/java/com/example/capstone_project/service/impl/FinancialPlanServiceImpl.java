@@ -186,7 +186,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
             throw new DuplicateKeyException("This term already have plan of department id = " + userDetail.getDepartmentId());
         }
-        if (!LocalDateTime.now().isBefore(term.getPlanDueDate())) {
+        if (!LocalDateTime.now().isBefore(term.getEndDate())) {
             throw new InvalidDateException("Plan due date of this term was expired");
         }
         return planRepository.save(plan);
