@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class CostTypeResponse {
     private long costTypeId;
     private String name;
-    private String code;
 }

@@ -8,6 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CostTypeMapper {
     @Mapping(source = "id", target = "costTypeId")
-    @Mapping(source = "code.value", target = "code")
+    @Mapping(source = "name", target = "name")
     CostTypeResponse mapToCostTypeResponse (CostType costType);
 }
