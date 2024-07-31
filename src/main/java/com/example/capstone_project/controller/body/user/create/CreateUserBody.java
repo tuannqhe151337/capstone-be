@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class CreateUserBody {
     @NotEmpty(message = "Fullname cannot be empty")
     @Size(max = 100, message = "Fullname must be less than 100 characters")
+    @Pattern(regexp = "^[A-Za-z]+(?: [A-Za-z]+)*$", message = "Full name must contain only letters and spaces")
     private String fullName;
 
     @NotEmpty(message = "Email cannot be empty")
@@ -37,6 +38,7 @@ public class CreateUserBody {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     @Past(message = "DOB must be in the past")
+    @NotNull(message = "Date of birth cannot be null")
     private LocalDateTime dob;
 
     @NotEmpty(message = "Address cannot be empty")
