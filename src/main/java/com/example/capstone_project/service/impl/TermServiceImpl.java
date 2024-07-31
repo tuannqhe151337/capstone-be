@@ -175,6 +175,9 @@ public class TermServiceImpl implements TermService {
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
         term.setFinalEndTermDate(finalEndTermDate);
 
+        if(finalEndTermDate.isBefore(LocalDateTime.now())){
+            throw new InvalidEndDateException("Final end date must be in the future");
+        }
 
         //throw exception if end date is before start date ,
         if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
