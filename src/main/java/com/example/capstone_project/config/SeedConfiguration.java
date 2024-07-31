@@ -73,27 +73,27 @@ public class SeedConfiguration {
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
             // Department
             Department itDepartment = Department.builder()
-                    .name("IT")
+                    .name("IT Department")
                     .build();
 
             Department hrDepartment = Department.builder()
-                    .name("HR")
+                    .name("HR Department")
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance")
+                    .name("Finance Department")
                     .build();
 
             Department communicationDepartment = Department.builder()
-                    .name("Communication")
+                    .name("Communication Department")
                     .build();
 
             Department marketingDepartment = Department.builder()
-                    .name("Marketing")
+                    .name("Marketing Department")
                     .build();
 
             Department accountingDepartment = Department.builder()
-                    .name("Accounting")
+                    .name("Accounting Department")
                     .build();
 
             departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
