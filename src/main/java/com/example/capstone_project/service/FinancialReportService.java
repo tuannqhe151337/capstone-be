@@ -1,7 +1,10 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
+import com.example.capstone_project.repository.result.ReportExpenseResult;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -24,4 +27,8 @@ public interface FinancialReportService {
 //    byte[] getBodyFileExcelXLS(Long reportId) throws Exception;
 
     String generateXLSFileName(Long reportId);
+
+    List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable);
+
+    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
 }

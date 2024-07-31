@@ -23,9 +23,9 @@ public class HandleFileHelper {
             tableData[i][0] = expense.getExpenseCode();
             tableData[i][1] = expense.getDate().toString();
             tableData[i][2] = expense.getTerm();
-            tableData[i][3] = expense.getDepartment();
+            tableData[i][3] = expense.getDepartmentName();
             tableData[i][4] = expense.getExpense();
-            tableData[i][5] = expense.getCostType();
+            tableData[i][5] = expense.getCostTypeName();
             tableData[i][6] = expense.getUnitPrice();
             tableData[i][7] = expense.getAmount();
             tableData[i][8] = expense.getTotal();
@@ -33,7 +33,7 @@ public class HandleFileHelper {
             tableData[i][10] = expense.getSupplierName();
             tableData[i][11] = expense.getPic();
             tableData[i][12] = expense.getNote();
-            tableData[i][13] = expense.getStatus();
+            tableData[i][13] = expense.getStatusName();
         }
 
         Row row = null;

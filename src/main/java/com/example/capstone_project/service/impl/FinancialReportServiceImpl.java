@@ -1,13 +1,16 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.entity.UserDetail;
+import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
 import com.example.capstone_project.repository.FinancialReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
+import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.RoleCode;
@@ -31,6 +34,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserDetailRepository userDetailRepository;
     private final FinancialReportRepository financialReportRepository;
+    private final FinancialPlanExpenseRepository expenseRepository;
     private final HandleFileHelper handleFileHelper;
 
     @Override
@@ -222,6 +226,39 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
 
         return null;
+    }
+
+    @Override
+    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, pageable);
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    @Override
+    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
     }
 
 //    private List<ExpenseResult> getListExpenseByReportId(Long reportId) throws Exception {
