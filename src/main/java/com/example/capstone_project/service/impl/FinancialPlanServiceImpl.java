@@ -65,10 +65,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         UserDetail userDetail = userDetailRepository.get(userId);
         PlanStatusCode statusCode = PlanStatusCode.NEW;
         // Check authority or role
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
-                && userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-            departmentId = userDetail.getDepartmentId();
-            statusCode = null;
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())){
+            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                departmentId = userDetail.getDepartmentId();
+                statusCode = null;
+            }
+        } else {
+            throw new UnauthorizedException("User unauthorized to view plan");
         }
 
         return planRepository.countDistinct(query, termId, departmentId, statusId, statusCode);
