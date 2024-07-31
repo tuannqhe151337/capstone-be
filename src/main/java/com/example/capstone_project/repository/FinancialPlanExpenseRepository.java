@@ -20,7 +20,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN term.status status " +
             " WHERE expense.id IN (:listExpenses) AND " +
             " status.code = :inProgress AND " +
-            " term.planDueDate >= :now AND " +
+            " term.endDate >= :now AND " +
             " plan.id = :planId AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
@@ -67,7 +67,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN term.status status " +
             " WHERE plan.id = :planId AND " +
             " status.code = :inProgress AND " +
-            " term.planDueDate >= :now AND " +
+            " term.endDate >= :now AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);

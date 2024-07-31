@@ -133,23 +133,7 @@ public class TermServiceTest {
         assertEquals("Unauthorized to create term", exception.getMessage());
     }
 
-    @Test
-    public void testCreateTerm_InvalidPlanDueDate() {
-        // Mock the necessary methods
-        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
-        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
-
-        term.setEndDate(term.getStartDate().plusDays(1)); // Ensure endDate is set to a valid value
-        term.setPlanDueDate(term.getStartDate().plusDays(10)); // Set an invalid plan due date
-
-        // Perform the create term action and expect an InvalidDateException
-        InvalidDateException exception = assertThrows(InvalidDateException.class, () -> {
-            termServiceImpl.createTerm(term);
-        });
-
-        assertEquals("Plan due date must be within 5 days after end date.", exception.getMessage());
-        verify(termRepository, never()).save(any(Term.class));
-    }
+  //create term
 
     @Test
     public void testCreateTerm_Success() throws Exception {
@@ -169,7 +153,7 @@ public class TermServiceTest {
         verify(termRepository, times(1)).save(term);
     }
     //list term management
-
+ //
 
 
 

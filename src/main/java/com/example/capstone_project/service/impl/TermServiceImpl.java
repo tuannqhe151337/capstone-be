@@ -14,7 +14,7 @@ import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -80,25 +80,32 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to update term");
         }
+        LocalDateTime startDate = term.getStartDate();
         //get current term to extract its status
 
         Term currentterm = termRepository.findById(term.getId()).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + term.getId()));
-        LocalDateTime startDate = term.getStartDate();
-        if (!currentterm.getStartDate().equals(startDate)) {
-            //generate new end date from new startdate
-            LocalDateTime endDate = term.getDuration().calculateEndDate(startDate);
-            term.setEndDate(endDate);
-        }
 
-        //check plan due date
-        if (term.getPlanDueDate() != null && term.getEndDate() != null &&
-                ChronoUnit.DAYS.between(term.getEndDate(), term.getPlanDueDate()) > 5) {
-            throw new InvalidDateException("Plan due date must be within 5 days after end date.");
+        LocalDateTime finalEndTermDate ;
+        finalEndTermDate = term.getDuration().calculateEndDate(startDate);
+        term.setFinalEndTermDate(finalEndTermDate);
+
+        //throw exception if end date is before start date ,
+        if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
+            throw new InvalidEndDateException("End date must be in the future and after start date");
+        }
+        //throw exception if start reup date is before end date
+        if (term.getReuploadStartDate().isBefore(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)) {
+            throw new InvalidStartReupDateException("Re-upload start date must be in the future and after end date");
+        }
+        //throw ex if end reup date is before start reup date
+        if (term.getReuploadEndDate().isBefore(term.getReuploadStartDate()) || term.getReuploadEndDate().isAfter(finalEndTermDate)) {
+            throw new InvalidEndReupDateException("Re-upload end date must be in the future and after re-up start date");
         }
 
         //status
         term.setStatus(currentterm.getStatus());
+
         //create-by
         User userby = userRepository.findUserById(userId).get();
         term.setUser(userby);
@@ -126,9 +133,9 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to access this resource");
         }
         Term term = termRepository.findTermById(id);
-        if(term == null){
+        if (term == null) {
             throw new ResourceNotFoundException("Term not found");
-        }else{
+        } else {
             return term;
         }
 
@@ -164,16 +171,22 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to create term");
         }
-        //check date
-        LocalDateTime startDate = term.getStartDate();
+        LocalDateTime finalEndTermDate ;
+        finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
+        term.setFinalEndTermDate(finalEndTermDate);
 
-        //generate end date from start date
-        LocalDateTime endTime = term.getDuration().calculateEndDate(startDate);
 
-        //check plan due date
-        if (term.getPlanDueDate() != null && term.getEndDate() != null &&
-                ChronoUnit.DAYS.between(term.getEndDate(), term.getPlanDueDate()) > 5) {
-            throw new InvalidDateException("Plan due date must be within 5 days after end date.");
+        //throw exception if end date is before start date ,
+        if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
+            throw new InvalidEndDateException("End date must be in the future and after start date");
+        }
+        //throw exception if start reup date is before end date
+        if (term.getReuploadStartDate().isBefore(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)) {
+            throw new InvalidStartReupDateException("Re-upload start date must be in the future and after end date");
+        }
+        //throw ex if end reup date is before start reup date
+        if (term.getReuploadEndDate().isBefore(term.getReuploadStartDate()) || term.getReuploadEndDate().isAfter(finalEndTermDate)) {
+            throw new InvalidEndReupDateException("Re-upload end date must be in the future and after re-up start date");
         }
 
         //status-id , create-by
@@ -183,7 +196,6 @@ public class TermServiceImpl implements TermService {
         User user = userRepository.getReferenceById(userId);
         term.setUser(user);
 
-        term.setEndDate(endTime);
 
         termRepository.save(term);
 
