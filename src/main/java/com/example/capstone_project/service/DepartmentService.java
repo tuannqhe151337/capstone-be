@@ -1,4 +1,5 @@
 package com.example.capstone_project.service;
+
 import com.example.capstone_project.entity.Department;
 import org.springframework.data.domain.Pageable;
 

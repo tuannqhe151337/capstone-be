@@ -14,8 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateDepartmentBody {
     @NotEmpty(message = "Department name can't be empty")
-    @Pattern(regexp = "^[a-zA-Z]{1,50}$", message = "Department name must only contain letters and be up to 50 characters long")
+    @Pattern(regexp = "^[a-zA-Z ]{1,50}$", message = "Department name must only contain letters and be up to 50 characters long")
     private String departmentName;
+
     @NotNull(message = "Department id can't be empty")
     private Long departmentId;
 }
