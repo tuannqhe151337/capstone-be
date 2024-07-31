@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -12,4 +14,6 @@ import lombok.NoArgsConstructor;
 public class CostTypeResponse {
     private long costTypeId;
     private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
