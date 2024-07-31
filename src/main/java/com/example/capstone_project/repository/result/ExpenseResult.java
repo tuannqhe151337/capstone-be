@@ -11,11 +11,9 @@ public interface ExpenseResult {
 
     LocalDateTime getDate();
 
-    String getTerm();
+    String getTermName();
 
     String getDepartmentName();
-
-    String getExpense();
 
     String getCostTypeName();
 

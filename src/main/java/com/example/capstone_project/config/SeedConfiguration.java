@@ -305,6 +305,7 @@ public class SeedConfiguration {
 
             // User
             User user1 = User.builder()
+                    .id(1L)
                     .username("Anurakk")
                     .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
@@ -320,6 +321,7 @@ public class SeedConfiguration {
                     .build();
 
             User user2 = User.builder()
+                    .id(2L)
                     .username("username2")
                     .fullName("Sitchana Jaejan")
                     .password(this.passwordEncoder.encode("password"))
@@ -335,6 +337,7 @@ public class SeedConfiguration {
                     .build();
 
             User user3 = User.builder()
+                    .id(3L)
                     .username("username3")
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
@@ -350,6 +353,7 @@ public class SeedConfiguration {
                     .build();
 
             User user4 = User.builder()
+                    .id(4L)
                     .username("username4")
                     .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
@@ -365,6 +369,7 @@ public class SeedConfiguration {
                     .build();
 
             User user5 = User.builder()
+                    .id(5L)
                     .username("username5")
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
