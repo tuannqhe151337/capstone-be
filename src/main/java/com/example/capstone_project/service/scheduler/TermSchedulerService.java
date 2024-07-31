@@ -35,10 +35,13 @@ public class TermSchedulerService {
     @Async
     public void startTerm() throws Exception {
         //START TERM
-        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NEW, LocalDateTime.now());
+        List<Term> terms = termRepository.findAll();
         //change status to 2 (IN_PROGRESS)
-        if (terms != null) {
-            for (Term term : terms) {
+        for (Term term : terms) {
+            //check term status not started (id 1) - turn to in progress (id 2)
+            if (term.getStatus().getId() == 1 &&
+                    //date-month-year equals today, now
+                    term.getStartDate().toLocalDate().isEqual(LocalDate.now())) {
                 termService.updateTermStatus(term, 2L);
             }
         }
