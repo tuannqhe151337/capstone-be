@@ -86,7 +86,7 @@ public class TermServiceImpl implements TermService {
         Term currentterm = termRepository.findById(term.getId()).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + term.getId()));
 
-        LocalDateTime finalEndTermDate ;
+        LocalDateTime finalEndTermDate;
         finalEndTermDate = term.getDuration().calculateEndDate(startDate);
         term.setFinalEndTermDate(finalEndTermDate);
 
@@ -171,10 +171,13 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to create term");
         }
-        LocalDateTime finalEndTermDate ;
+        LocalDateTime finalEndTermDate;
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
         term.setFinalEndTermDate(finalEndTermDate);
 
+        if (finalEndTermDate.isBefore(LocalDateTime.now())) {
+            throw new InvalidEndDateException("Final end date must be in the future");
+        }
 
         //throw exception if end date is before start date ,
         if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
