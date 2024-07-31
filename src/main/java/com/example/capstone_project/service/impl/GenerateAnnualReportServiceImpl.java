@@ -25,24 +25,29 @@ import java.util.List;
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
     private final AnnualReportRepository annualReportRepository;
 
-    @Scheduled(cron = "0 0 0 5 1 ?")
-    @Transactional
+    @Override
     public void generateAnnualReport() {
-        // Generate annual report
-        AnnualReportResult annualReportResult = annualReportRepository.getAnnualReport(LocalDate.now(), ExpenseStatusCode.APPROVED);
-        System.out.println(annualReportResult);
-        AnnualReport annualReport = new AnnualReportMapperImpl().mapToAnnualReportMapping(annualReportResult);
 
-        // Generate annual list reports
-        List<ReportResult> reportResults = annualReportRepository.getListReports(LocalDate.now(), ExpenseStatusCode.APPROVED);
-        List<Report> reports = new ArrayList<>();
-        reportResults.forEach(reportResult -> {
-            Report report = new AnnualReportMapperImpl().mapToReportMapping(reportResult);
-            report.setAnnualReport(annualReport);
-            reports.add(report);
-        });
-
-        annualReport.setReports(reports);
-        annualReportRepository.save(annualReport);
     }
+
+//    @Scheduled(cron = "0 0 0 5 1 ?")
+//    @Transactional
+//    public void generateAnnualReport() {
+//        // Generate annual report
+//        AnnualReportResult annualReportResult = annualReportRepository.getAnnualReport(LocalDate.now(), ExpenseStatusCode.APPROVED);
+//
+//        AnnualReport annualReport = new AnnualReportMapperImpl().mapToAnnualReportMapping(annualReportResult);
+//
+//        // Generate annual list reports
+//        List<ReportResult> reportResults = annualReportRepository.getListReports(LocalDate.now(), ExpenseStatusCode.APPROVED);
+//        List<Report> reports = new ArrayList<>();
+//        reportResults.forEach(reportResult -> {
+//            Report report = new AnnualReportMapperImpl().mapToReportMapping(reportResult);
+//            report.setAnnualReport(annualReport);
+//            reports.add(report);
+//        });
+//
+//        annualReport.setReports(reports);
+//        annualReportRepository.save(annualReport);
+//    }
 }

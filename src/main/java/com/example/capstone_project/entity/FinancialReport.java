@@ -43,9 +43,6 @@ public class FinancialReport extends BaseEntity {
     @JoinColumn(name = "uploaded_by")
     private User user;
 
-    @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
-    private List<FinancialReportExpense> reportExpenses;
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 }
