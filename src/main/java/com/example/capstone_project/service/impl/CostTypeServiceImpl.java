@@ -84,14 +84,17 @@ public class CostTypeServiceImpl implements CostTypeService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
-        if (listAuthorities.contains(AuthorityCode.DELETE_DEPARTMENT.getValue())) {
+        if (listAuthorities.contains(AuthorityCode.DELETE_COST_TYPE.getValue())) {
             if (!costTypeRepository.existsById(costTypeId)) {
                 throw new ResourceNotFoundException("Not found any cost type have Id = " + costTypeId);
             }
+            CostType costType = costTypeRepository.getReferenceById(costTypeId);
 
-            costTypeRepository.deleteById(costTypeId);
+            costType.setDelete(true);
+
+            costTypeRepository.save(costType);
         } else {
-            throw new UnauthorizedException("Unauthorized to delete department");
+            throw new UnauthorizedException("Unauthorized to delete cost type");
         }
     }
 }
