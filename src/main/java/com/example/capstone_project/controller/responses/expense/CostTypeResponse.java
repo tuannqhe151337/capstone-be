@@ -1,12 +1,19 @@
 package com.example.capstone_project.controller.responses.expense;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CostTypeResponse {
     private long costTypeId;
     private String name;
-    private String code;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

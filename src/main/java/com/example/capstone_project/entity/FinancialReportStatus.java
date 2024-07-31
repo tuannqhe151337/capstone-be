@@ -1,5 +1,7 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +21,8 @@ public class FinancialReportStatus extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialReportExpense_.STATUS)
-    private List<FinancialReportExpense> reportExpenses;
+//    @OneToMany(mappedBy = FinancialReportExpense_.STATUS)
+//    private List<FinancialReportExpense> reportExpenses;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private boolean isDelete;

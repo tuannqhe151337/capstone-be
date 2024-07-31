@@ -18,18 +18,11 @@ public class CostType extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
-
-    @Column(name = "code", unique = true)
-    @Enumerated(EnumType.STRING)
-    private CostTypeCode code;
 
     @OneToMany(mappedBy = Report_.COST_TYPE)
     private List<Report> reports;
-
-    @OneToMany(mappedBy = FinancialReportExpense_.COST_TYPE)
-    private List<FinancialReportExpense> reportExpenses;
 
     @OneToMany(mappedBy = FinancialPlanExpense_.COST_TYPE)
     private List<FinancialPlanExpense> planExpenses;

@@ -22,10 +22,6 @@ public class Department extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code")
-    @Enumerated(EnumType.STRING)
-    private DepartmentCode code;
-
     @Column(name = "name")
     private String name;
 

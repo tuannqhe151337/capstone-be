@@ -27,7 +27,6 @@ public class TermSchedulerService {
     private final PlanStatusRepository planStatusRepository;
     private final FinancialPlanExpenseRepository planExpenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
-    private final FinancialReportExpenseRepository reportExpenseRepository;
     private final FinancialReportRepository reportRepository;
 
 
@@ -77,33 +76,34 @@ public class TermSchedulerService {
                         planExpenseRepository.saveAll(listExpenseNeedToClose);
                     }
 
-                    // Create new report
-                    FinancialReport report = FinancialReport.builder()
-                            .name(term.getName() + "_" + plan.getDepartment().getCode() + "_" + "Report")
-                            .month(LocalDate.now())
-                            .term(term)
-                            .build();
+//                    // Create new report
+//                    FinancialReport report = FinancialReport.builder()
+//                            .name(term.getName() + "_" + plan.getDepartment().getName() + "_" + "Report")
+//                            .month(LocalDate.now())
+//                            .term(term)
+//                            .build();
 
-                    List<FinancialReportExpense> reportExpenses = new ArrayList<>();
-                    // Convert planExpense to reportExpense
-                    planExpenseRepository.getListExpenseLastVersionByPlanId(plan.getId()).forEach(planExpense -> {
-                        reportExpenses.add(FinancialReportExpense.builder()
-                                .name(planExpense.getName())
-                                .unitPrice(planExpense.getUnitPrice())
-                                .amount(planExpense.getAmount())
-                                .projectName(planExpense.getProjectName())
-                                .supplierName(planExpense.getSupplierName())
-                                .pic(planExpense.getPic())
-                                .note(planExpense.getNote())
-                                .financialReport(report)
-                                .costType(planExpense.getCostType())
-                                .status(planExpense.getStatus()).build());
-                    });
-
-                    // Generate report
-                    reportRepository.save(report);
-                    // Generate expense of report
-                    reportExpenseRepository.saveAll(reportExpenses);
+//                    List<FinancialReportExpense> reportExpenses = new ArrayList<>();
+//                    // Convert planExpense to reportExpense
+//                    planExpenseRepository.getListExpenseLastVersionByPlanId(plan.getId()).forEach(planExpense -> {
+//                        reportExpenses.add(FinancialReportExpense.builder()
+//                                .name(planExpense.getName())
+//                                .unitPrice(planExpense.getUnitPrice())
+//                                .amount(planExpense.getAmount())
+//                                .projectName(planExpense.getProjectName())
+//                                .supplierName(planExpense.getSupplierName())
+//                                .pic(planExpense.getPic())
+//                                .note(planExpense.getNote())
+//                                .financialReport(report)
+//                                .costType(planExpense.getCostType())
+//                                .status(planExpense.getStatus())
+//                                .build());
+//                    });
+//
+//                    // Generate report
+//                    reportRepository.save(report);
+//                    // Generate expense of report
+//                    reportExpenseRepository.saveAll(reportExpenses);
                 });
                 // Change status waiting and new to close
                 planRepository.saveAll(listPlanNeedToClose);

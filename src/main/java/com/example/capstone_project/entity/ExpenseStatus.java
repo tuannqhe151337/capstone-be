@@ -25,9 +25,6 @@ public class ExpenseStatus extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ExpenseStatusCode code;
 
-    @OneToMany(mappedBy = FinancialPlanExpense_.STATUS)
-    private List<FinancialPlanExpense> planExpenses;
-
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private boolean isDelete;
 }
