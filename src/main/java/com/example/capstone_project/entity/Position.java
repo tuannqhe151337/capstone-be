@@ -1,28 +1,26 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(schema = "capstone_v2", name = "positions")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class Position {
+public class Position extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
 
     @OneToMany(mappedBy = "position")

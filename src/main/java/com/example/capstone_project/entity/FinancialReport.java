@@ -24,27 +24,13 @@ public class FinancialReport extends BaseEntity {
     @Column(name = "month")
     private LocalDate month;
 
-    @Column(name = "version")
-    private String version;
-
     @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private PlanStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
-    @JoinColumn(name = "department_id")
-    private Department department;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")
     private Term term;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uploaded_by")
-    private User user;
-
-    @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
-    private List<FinancialReportExpense> reportExpenses;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;

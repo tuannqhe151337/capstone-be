@@ -186,7 +186,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
             throw new DuplicateKeyException("This term already have plan of department id = " + userDetail.getDepartmentId());
         }
-        if (!LocalDateTime.now().isBefore(term.getPlanDueDate())) {
+        if (!LocalDateTime.now().isBefore(term.getEndDate())) {
             throw new InvalidDateException("Plan due date of this term was expired");
         }
         return planRepository.save(plan);
@@ -503,7 +503,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
-                return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xlsx";
+                return fileName.getTermName() + "_v" + fileName.getVersion() + ".xlsx";
             }
         }
 
@@ -521,7 +521,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
-                return fileName.getTermName() + "_" + fileName.getDepartmentCode() + "_v" + fileName.getVersion() + ".xls";
+                return fileName.getTermName() + "_v" + fileName.getVersion() + ".xls";
             }
         }
         return null;
@@ -679,7 +679,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xls";
+            return fileNameResult.getTermName()  + "_v" + fileNameResult.getVersion() + ".xls";
         } else {
             throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }
@@ -707,7 +707,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_" + fileNameResult.getDepartmentCode() + "_v" + fileNameResult.getVersion() + ".xlsx";
+            return fileNameResult.getTermName() + "_v" + fileNameResult.getVersion() + ".xlsx";
         } else {
             throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }

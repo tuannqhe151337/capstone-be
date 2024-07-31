@@ -36,7 +36,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
 
     @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
             " SUM(expense.unitPrice * expense.amount) AS totalPlan, term.id AS termId, term.name AS termName, status.id AS statusId, status.name AS statusName, " +
-            " status.code AS statusCode, term.planDueDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
+            " status.code AS statusCode, term.endDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialPlan plan " +
             " JOIN plan.term term " +
@@ -49,7 +49,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE plan.id = :planId AND " +
             " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " plan.isDelete = false AND expense.isDelete = false " +
-            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.name, status.code, term.planDueDate, " +
+            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.name, status.code, term.endDate, " +
             " plan.createdAt, department.id, department.name, user.id, user.username " )
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
 

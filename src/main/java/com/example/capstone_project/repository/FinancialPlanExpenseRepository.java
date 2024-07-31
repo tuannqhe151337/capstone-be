@@ -20,7 +20,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN term.status status " +
             " WHERE expense.id IN (:listExpenses) AND " +
             " status.code = :inProgress AND " +
-            " term.planDueDate >= :now AND " +
+            " term.endDate >= :now AND " +
             " plan.id = :planId AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
@@ -67,7 +67,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN term.status status " +
             " WHERE plan.id = :planId AND " +
             " status.code = :inProgress AND " +
-            " term.planDueDate >= :now AND " +
+            " term.endDate >= :now AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
@@ -102,4 +102,23 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
     List<FinancialPlanExpense> getListExpenseLastVersionByPlanId(Long planId);
+
+    @Query(" SELECT count(distinct(expense.id)) FROM FinancialPlanExpense expense " +
+            " LEFT JOIN expense.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.department department " +
+            " LEFT JOIN expense.status status " +
+            " LEFT JOIN expense.costType costType " +
+            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId) AND " +
+            " expense.name like %:query% AND " +
+            " (:departmentId IS NULL OR department.id = :departmentId) AND " +
+            " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
+            " (:statusId IS NULL OR status.id = :statusId) AND " +
+            " (expense.isDelete = false OR expense.isDelete is null) ")
+    long countDistinctListExpenseForReport(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
 }

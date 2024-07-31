@@ -40,7 +40,6 @@ public class SeedConfiguration {
             FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository,
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
-            FinancialReportExpenseRepository financialReportExpenseRepository,
             AnnualReportRepository annualReportRepository,
             ReportRepository reportRepository
     ) {
@@ -71,29 +70,30 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+
             // Department
             Department itDepartment = Department.builder()
-                    .name("IT")
+                    .name("IT Department")
                     .build();
 
             Department hrDepartment = Department.builder()
-                    .name("HR")
+                    .name("HR Department")
                     .build();
 
             Department financeDepartment = Department.builder()
-                    .name("Finance")
+                    .name("Finance Department")
                     .build();
 
             Department communicationDepartment = Department.builder()
-                    .name("Communication")
+                    .name("Communication Department")
                     .build();
 
             Department marketingDepartment = Department.builder()
-                    .name("Marketing")
+                    .name("Marketing Department")
                     .build();
 
             Department accountingDepartment = Department.builder()
-                    .name("Accounting")
+                    .name("Accounting Department")
                     .build();
 
             departmentRepository.saveAll(List.of(itDepartment, hrDepartment, financeDepartment, communicationDepartment, marketingDepartment, accountingDepartment));
@@ -263,8 +263,27 @@ public class SeedConfiguration {
                     .code(AuthorityCode.DELETE_COST_TYPE)
                     .name("Delete cost type")
                     .build();
+            Authority createNewPosition = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_POSITION)
+                    .name("Create new position")
+                    .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, createNewCostType, deleteCostType, updateCostType));
+            Authority updatePosition = Authority.builder()
+                    .code(AuthorityCode.UPDATE_POSITION)
+                    .name("Update position")
+                    .build();
+
+            Authority deletePosition = Authority.builder()
+                    .code(AuthorityCode.DELETE_POSITION)
+                    .name("Delete position")
+                    .build();
+
+            Authority viewPosition = Authority.builder()
+                    .code(AuthorityCode.VIEW_POSITION)
+                    .name("View position")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, createNewCostType, deleteCostType, updateCostType, viewPosition, createNewPosition, updatePosition, deletePosition));
 
             // Role
             Role admin = Role.builder()
@@ -466,6 +485,26 @@ public class SeedConfiguration {
                     .authority(updateCostType)
                     .build();
 
+            RoleAuthority adminAuthority14 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(viewPosition)
+                    .build();
+
+            RoleAuthority adminAuthority15 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(createNewPosition)
+                    .build();
+
+            RoleAuthority adminAuthority16 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(updatePosition)
+                    .build();
+
+            RoleAuthority adminAuthority17 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(deletePosition)
+                    .build();
+
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(createTerm)
@@ -631,7 +670,7 @@ public class SeedConfiguration {
                     .authority(deleteReport)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority11, adminAuthority12, adminAuthority13,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority11, adminAuthority12, adminAuthority13, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
@@ -667,9 +706,11 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 12, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 12, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2024, 12, 10, 17, 0))
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user1)
                     .status(termStatus2)
                     .build();
@@ -678,9 +719,11 @@ public class SeedConfiguration {
                     .id(2L)
                     .name("Summer 2024")
                     .duration(TermDuration.QUARTERLY)
-                    .startDate(LocalDateTime.of(2025, 6, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 6, 30, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 6, 10, 17, 0))
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user1)
                     .status(termStatus2)
                     .build();
@@ -689,9 +732,11 @@ public class SeedConfiguration {
                     .id(3L)
                     .name("Fall 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2025, 9, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 9, 30, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 9, 10, 17, 0))
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user2)
                     .status(termStatus3)
                     .build();
@@ -700,9 +745,11 @@ public class SeedConfiguration {
                     .id(4L)
                     .name("Winter 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 12, 10, 17, 0))
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user3)
                     .status(termStatus)
                     .build();
@@ -711,9 +758,11 @@ public class SeedConfiguration {
                     .id(5L)
                     .name("Spring 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2025, 1, 1, 0, 0))
-                    .endDate(LocalDateTime.of(2025, 1, 31, 23, 59))
-                    .planDueDate(LocalDateTime.of(2025, 1, 10, 17, 0))
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user4)
                     .status(termStatus2)
                     .build();
@@ -758,26 +807,32 @@ public class SeedConfiguration {
             planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
 
             CostType costType1 = CostType.builder()
+                    .id(1L)
                     .name("Administration cost")
                     .build();
 
             CostType costType2 = CostType.builder()
+                    .id(2L)
                     .name("Direct costs")
                     .build();
 
             CostType costType3 = CostType.builder()
+                    .id(3L)
                     .name("Indirect cost")
                     .build();
 
             CostType costType4 = CostType.builder()
+                    .id(4L)
                     .name("Operating costs")
                     .build();
 
             CostType costType5 = CostType.builder()
+                    .id(5L)
                     .name("Maintenance costs")
                     .build();
 
             CostType costType6 = CostType.builder()
+                    .id(6L)
                     .name("Manufacturing costs")
                     .build();
 
@@ -1314,118 +1369,118 @@ public class SeedConfiguration {
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")
                     .month(LocalDate.now())
-                    .version("v3")
+//                    .version("v3")
                     .status(planStatus1)
-                    .department(accountingDepartment)
+//                    .department(accountingDepartment)
                     .term(term1)
-                    .user(user1)
+//                    .user(user1)
                     .build();
 
             FinancialReport report2 = FinancialReport.builder()
                     .name("Report Name 2")
                     .month(LocalDate.now())
-                    .version("v2")
+//                    .version("v2")
                     .status(planStatus2)
-                    .department(accountingDepartment)
+//                    .department(accountingDepartment)
                     .term(term2)
-                    .user(user2)
+//                    .user(user2)
                     .build();
 
             FinancialReport report3 = FinancialReport.builder()
                     .name("Report Name 3")
                     .month(LocalDate.now())
-                    .version("v3")
+//                    .version("v3")
                     .status(planStatus1)
-                    .department(itDepartment)
+//                    .department(itDepartment)
                     .term(term1)
-                    .user(user1)
+//                    .user(user1)
                     .build();
 
             FinancialReport report4 = FinancialReport.builder()
                     .name("Report Name 4")
                     .month(LocalDate.now())
-                    .version("v3")
+//                    .version("v3")
                     .status(planStatus4)
-                    .department(accountingDepartment)
+//                    .department(accountingDepartment)
                     .term(term1)
-                    .user(user3)
+//                    .user(user3)
                     .build();
 
             FinancialReport report5 = FinancialReport.builder()
                     .name("Report Name 5")
                     .month(LocalDate.now())
-                    .version("v1")
+//                    .version("v1")
                     .status(planStatus2)
-                    .department(accountingDepartment)
+//                    .department(accountingDepartment)
                     .term(term3)
-                    .user(user4)
+//                    .user(user4)
                     .build();
 
             FinancialReport report6 = FinancialReport.builder()
                     .name("Report Name 6")
                     .month(LocalDate.now())
-                    .version("v3")
+//                    .version("v3")
                     .status(planStatus2)
-                    .department(itDepartment)
+//                    .department(itDepartment)
                     .term(term2)
-                    .user(user1)
+//                    .user(user1)
                     .build();
 
             financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
 
             // Get 15 random expense
-            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
-            projectNameChar = 'A';
-            supplierNameChar = 'A';
-
-            for (int i = 1; i <= 15; i++) {
-                int randomStatusIndex = random.nextInt(4) + 1;
-                int randomCostTypeIndex = random.nextInt(6) + 1;
-                int randomReportIndex = random.nextInt(6) + 1;
-                int randomPicIndex = random.nextInt(pics.length);
-
-                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
-                    case 3 -> expenseStatus3;
-                    case 4 -> expenseStatus4;
-                    default -> expenseStatus3; // Default case, should never be reached
-                };
-
-                CostType randomCostType = switch (randomCostTypeIndex) {
-                    case 1 -> costType1;
-                    case 2 -> costType2;
-                    case 3 -> costType3;
-                    case 4 -> costType4;
-                    case 5 -> costType5;
-                    case 6 -> costType6;
-                    default -> costType1; // Default case, should never be reached
-                };
-
-                FinancialReport randomReport = switch (randomReportIndex) {
-                    case 1 -> report1;
-                    case 2 -> report2;
-                    case 3 -> report3;
-                    case 4 -> report4;
-                    case 5 -> report5;
-                    case 6 -> report6;
-                    default -> report1; // Default case, should never be reached
-                };
-
-                FinancialReportExpense expense = FinancialReportExpense.builder()
-                        .name("Expense " + projectNameChar)
-                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
-                        .amount(random.nextInt(10) + 1)
-                        .financialReport(randomReport)
-                        .projectName("Project name " + projectNameChar++)
-                        .supplierName("Supplier name " + supplierNameChar++)
-                        .pic(pics[randomPicIndex])
-                        .costType(randomCostType)
-                        .status(randomExpenseStatus)
-                        .build();
-
-                reportExpenseList.add(expense);
-            }
-
-            financialReportExpenseRepository.saveAll(reportExpenseList);
+//            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
+//            projectNameChar = 'A';
+//            supplierNameChar = 'A';
+//
+//            for (int i = 1; i <= 15; i++) {
+//                int randomStatusIndex = random.nextInt(4) + 1;
+//                int randomCostTypeIndex = random.nextInt(6) + 1;
+//                int randomReportIndex = random.nextInt(6) + 1;
+//                int randomPicIndex = random.nextInt(pics.length);
+//
+//                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+//                    case 3 -> expenseStatus3;
+//                    case 4 -> expenseStatus4;
+//                    default -> expenseStatus3; // Default case, should never be reached
+//                };
+//
+//                CostType randomCostType = switch (randomCostTypeIndex) {
+//                    case 1 -> costType1;
+//                    case 2 -> costType2;
+//                    case 3 -> costType3;
+//                    case 4 -> costType4;
+//                    case 5 -> costType5;
+//                    case 6 -> costType6;
+//                    default -> costType1; // Default case, should never be reached
+//                };
+//
+//                FinancialReport randomReport = switch (randomReportIndex) {
+//                    case 1 -> report1;
+//                    case 2 -> report2;
+//                    case 3 -> report3;
+//                    case 4 -> report4;
+//                    case 5 -> report5;
+//                    case 6 -> report6;
+//                    default -> report1; // Default case, should never be reached
+//                };
+//
+//                FinancialReportExpense expense = FinancialReportExpense.builder()
+//                        .name("Expense " + projectNameChar)
+//                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 1000000))
+//                        .amount(random.nextInt(10) + 1)
+//                        .financialReport(randomReport)
+//                        .projectName("Project name " + projectNameChar++)
+//                        .supplierName("Supplier name " + supplierNameChar++)
+//                        .pic(pics[randomPicIndex])
+//                        .costType(randomCostType)
+//                        .status(randomExpenseStatus)
+//                        .build();
+//
+//                reportExpenseList.add(expense);
+//            }
+//
+//            financialReportExpenseRepository.saveAll(reportExpenseList);
 
 
             AnnualReport annualReport1 = AnnualReport.builder()

@@ -7,15 +7,17 @@ import java.time.LocalDateTime;
 public interface ExpenseResult {
     String getExpenseCode();
 
+    String getExpenseName();
+
     LocalDateTime getDate();
 
     String getTerm();
 
-    String getDepartment();
+    String getDepartmentName();
 
     String getExpense();
 
-    String getCostType();
+    String getCostTypeName();
 
     String getUnitPrice();
 
@@ -31,9 +33,15 @@ public interface ExpenseResult {
 
     String getNote();
 
-    String getStatus();
+    String getStatusName();
 
     Long getExpenseId();
 
     ExpenseStatusCode getStatusCode();
+
+    Long getDepartmentId();
+
+    Long getCostTypeId();
+
+    Long getStatusId();
 }

@@ -32,19 +32,25 @@ public class UpdateTermBody {
     private LocalDateTime startDate;
 
     @NotNull(message = "End date cannot be null")
-    @Future(message = "End due date must be in the future")
+    @Future(message = "End date must be in the future")
+    @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @NotNull(message = "Plan due date cannot be null")
-    @Future(message = "Plan due date must be in the future")
-    private LocalDateTime planDueDate;
+    @NotNull(message = "Re-upload start date cannot be null")
+    @Future(message = "Re-upload start date must be in the future")
+    @Column(name = "start_reupload_date")
+    private LocalDateTime reuploadStartDate;
 
 
-    @AssertTrue(message = "Plan due date must be before end date")
-    private boolean isPlanDueDateBeforeEndDate() {
-        if (planDueDate == null || endDate == null) {
-            return true; // Để @NotNull xử lý null check
-        }
-        return planDueDate.isBefore(endDate);
-    }
+    @NotNull(message = "Re-upload end date cannot be null")
+    @Future(message = "Re-upload end date must be in the future")
+    @Column(name = "end_reupload_date")
+    private LocalDateTime reuploadEndDate;
+
+    //end term date will calculate depending on start date [MONTHLY]
+    @Future(message = "Final end term date must be in the future")
+    @Column(name = "final_end_term")
+    private LocalDateTime finalEndTermDate;
+
+
 }

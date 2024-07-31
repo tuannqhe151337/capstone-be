@@ -24,9 +24,6 @@ public class CostType extends BaseEntity {
     @OneToMany(mappedBy = Report_.COST_TYPE)
     private List<Report> reports;
 
-    @OneToMany(mappedBy = FinancialReportExpense_.COST_TYPE)
-    private List<FinancialReportExpense> reportExpenses;
-
     @OneToMany(mappedBy = FinancialPlanExpense_.COST_TYPE)
     private List<FinancialPlanExpense> planExpenses;
 
