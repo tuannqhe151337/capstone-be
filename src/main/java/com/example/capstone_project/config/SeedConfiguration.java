@@ -249,7 +249,22 @@ public class SeedConfiguration {
                     .name("Delete department")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment));
+            Authority createNewCostType = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_COST_TYPE)
+                    .name("Create new cost type")
+                    .build();
+
+            Authority updateCostType = Authority.builder()
+                    .code(AuthorityCode.UPDATE_COST_TYPE)
+                    .name("Update cost type")
+                    .build();
+
+            Authority deleteCostType = Authority.builder()
+                    .code(AuthorityCode.DELETE_COST_TYPE)
+                    .name("Delete cost type")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, createNewCostType, deleteCostType, updateCostType));
 
             // Role
             Role admin = Role.builder()
@@ -436,6 +451,21 @@ public class SeedConfiguration {
                     .authority(updateDepartment)
                     .build();
 
+            RoleAuthority adminAuthority11 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(createNewCostType)
+                    .build();
+
+            RoleAuthority adminAuthority12 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(deleteCostType)
+                    .build();
+
+            RoleAuthority adminAuthority13 = RoleAuthority.builder()
+                    .role(admin)
+                    .authority(updateCostType)
+                    .build();
+
             RoleAuthority accountantAuthority1 = RoleAuthority.builder()
                     .role(accountant)
                     .authority(createTerm)
@@ -601,7 +631,7 @@ public class SeedConfiguration {
                     .authority(deleteReport)
                     .build();
 
-            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10,
+            roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority11, adminAuthority12, adminAuthority13,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
@@ -729,32 +759,26 @@ public class SeedConfiguration {
 
             CostType costType1 = CostType.builder()
                     .name("Administration cost")
-                    .code(CostTypeCode.ADMINISTRATION_COSTS)
                     .build();
 
             CostType costType2 = CostType.builder()
                     .name("Direct costs")
-                    .code(CostTypeCode.DIRECT_COSTS)
                     .build();
 
             CostType costType3 = CostType.builder()
                     .name("Indirect cost")
-                    .code(CostTypeCode.INDIRECT_COSTS)
                     .build();
 
             CostType costType4 = CostType.builder()
                     .name("Operating costs")
-                    .code(CostTypeCode.OPERATING_COSTS)
                     .build();
 
             CostType costType5 = CostType.builder()
                     .name("Maintenance costs")
-                    .code(CostTypeCode.MAINTENANCE_COSTS)
                     .build();
 
             CostType costType6 = CostType.builder()
                     .name("Manufacturing costs")
-                    .code(CostTypeCode.MANUFACTURING_COSTS)
                     .build();
 
             costTypeRepository.saveAll(List.of(costType1, costType2, costType3, costType4, costType5, costType6));

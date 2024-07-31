@@ -102,12 +102,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
     }
 
-
     @Override
     public long countDistinct(String query) {
         String queryPattern = "%" + query + "%";
         return departmentRepository.countDistinct(queryPattern);
     }
-
-
 }

@@ -79,7 +79,7 @@ public class TermSchedulerService {
 
                     // Create new report
                     FinancialReport report = FinancialReport.builder()
-                            .name(term.getName() + "_" + plan.getDepartment().getCode() + "_" + "Report")
+                            .name(term.getName() + "_" + plan.getDepartment().getName() + "_" + "Report")
                             .month(LocalDate.now())
                             .term(term)
                             .build();

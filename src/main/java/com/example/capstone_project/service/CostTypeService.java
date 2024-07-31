@@ -6,4 +6,10 @@ import java.util.List;
 
 public interface CostTypeService {
     List<CostType> getListCostType();
+
+    void createCostType(String costTypeName);
+
+    void updateCostType(CostType costType);
+
+    void deleteCostType(Long costTypeId);
 }
