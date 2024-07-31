@@ -72,7 +72,7 @@ public class FinancialReportRepositoryImpl implements CustomFinancialReportRepos
         // Handling join
         EntityGraph<FinancialReport> entityGraph = entityManager.createEntityGraph(FinancialReport.class);
         entityGraph.addAttributeNodes(FinancialReport_.TERM);
-        entityGraph.addAttributeNodes(FinancialReport_.DEPARTMENT);
+//        entityGraph.addAttributeNodes(FinancialReport_.DEPARTMENT);
         entityGraph.addAttributeNodes(FinancialReport_.STATUS);
 
         // Run query

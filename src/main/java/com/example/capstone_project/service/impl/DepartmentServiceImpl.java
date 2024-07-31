@@ -75,7 +75,11 @@ public class DepartmentServiceImpl implements DepartmentService {
                 throw new ResourceNotFoundException("Not found any department have Id = " + departmentId);
             }
 
-            departmentRepository.deleteById(departmentId);
+            Department department = departmentRepository.getReferenceById(departmentId);
+
+            department.setDelete(true);
+
+            departmentRepository.save(department);
         } else {
             throw new UnauthorizedException("Unauthorized to delete department");
         }

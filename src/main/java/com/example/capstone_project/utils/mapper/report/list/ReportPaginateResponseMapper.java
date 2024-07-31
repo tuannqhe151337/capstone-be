@@ -15,7 +15,7 @@ public interface ReportPaginateResponseMapper {
     @Mapping(source = "status.name", target = "status.name")
     @Mapping(source = "term.id", target = "term.termId")
     @Mapping(source = "term.name", target = "term.name")
-    @Mapping(source = "department.id", target = "department.departmentId")
-    @Mapping(source = "department.name", target = "department.name")
+//    @Mapping(source = "department.id", target = "department.departmentId")
+//    @Mapping(source = "department.name", target = "department.name")
     ReportResponse mapToReportResponseMapping(FinancialReport financialReport);
 }
