@@ -8,4 +8,10 @@ import java.util.List;
 public interface PositionService {
     List<Position> getPositions(String query, Pageable pageable);
     long countDistinct(String query);
+
+    void createPosition(String positionName);
+
+    void deletePosition(Long positionId);
+
+    void updatePosition(Position position);
 }
