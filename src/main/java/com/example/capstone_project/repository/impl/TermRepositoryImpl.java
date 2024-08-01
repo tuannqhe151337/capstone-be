@@ -27,7 +27,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
                 " LEFT JOIN term.financialPlans plan " +
                 " WHERE term.name LIKE :query AND " +
                 " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
-                " term.status.name != :close AND " +
+                " term.status.code != :close AND " +
                 " term.startDate <= :now AND term.endDate >= :now AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
@@ -71,7 +71,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
         // Run query
         return entityManager.createQuery(hql, Term.class)
                 .setParameter("query", "%" + query + "%")
-                .setParameter("close", TermCode.CLOSED.getValue())
+                .setParameter("close", TermCode.CLOSED)
                 .setParameter("now", LocalDateTime.now())
                 .setParameter("departmentId", departmentId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
