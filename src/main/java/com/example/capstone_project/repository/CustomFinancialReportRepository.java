@@ -6,6 +6,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CustomFinancialReportRepository {
-    List<FinancialReport> getReportWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable);
+    List<FinancialReport> getReportWithPagination(String query, Long termId, Long statusId, Pageable pageable);
 
 }
