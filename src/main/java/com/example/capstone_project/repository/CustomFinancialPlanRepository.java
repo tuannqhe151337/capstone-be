@@ -11,5 +11,5 @@ public interface CustomFinancialPlanRepository {
 
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable);
 
-    List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable, PlanStatusCode statusCode);
+    List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Pageable pageable);
 }

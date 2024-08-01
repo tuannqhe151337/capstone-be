@@ -5,7 +5,6 @@ import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBo
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.controller.body.plan.detail.PlanDetailBody;
 import com.example.capstone_project.controller.body.plan.download.PlanBody;
 import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
@@ -33,7 +32,6 @@ import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImp
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
@@ -64,7 +62,6 @@ public class FinancialPlanController {
     public ResponseEntity<ListPaginationResponse<PlanResponse>> getListPlan(
             @RequestParam(required = false) Long termId,
             @RequestParam(required = false) Long departmentId,
-            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -83,7 +80,7 @@ public class FinancialPlanController {
             }
 
             // Get data
-            List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
+            List<FinancialPlan> plans = planService.getPlanWithPagination(query, termId, departmentId, pageInt, sizeInt, sortBy, sortType);
 
             // Response
             ListPaginationResponse<PlanResponse> response = new ListPaginationResponse<>();
@@ -92,7 +89,7 @@ public class FinancialPlanController {
 
             if (plans != null) {
                 // Count total record
-                count = planService.countDistinct(query, termId, departmentId, statusId);
+                count = planService.countDistinct(query, termId, departmentId);
 
                 for (FinancialPlan plan : plans) {
                     //mapperToPlanResponse
@@ -199,6 +196,8 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -255,7 +254,7 @@ public class FinancialPlanController {
     public ResponseEntity<ListResponse<StatusResponse>> getListStatus() {
         try {
             // Get data
-            List<PlanStatus> costTypes = planService.getListPlanStatus();
+            List<ReportStatus> costTypes = planService.getListPlanStatus();
 
             // Response
             ListResponse<StatusResponse> responses = new ListResponse<>();
