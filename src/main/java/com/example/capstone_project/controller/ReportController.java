@@ -177,33 +177,33 @@ public class ReportController {
         }
     }
 
-//    @GetMapping("/detail")
-//    public ResponseEntity<ReportDetailResponse> getReportDetail(
-//            @RequestParam Long reportId
-//    ) throws Exception {
-//        try {
-//            // Get data
-//            ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
-//
-//            // Response
-//            ReportDetailResponse response;
-//
-//            if (report != null) {
-//                // Mapping to PlanDetail Response
-//                response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
-//
-//            } else {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-//            }
-//
-//            return ResponseEntity.ok(response);
-//        } catch (UnauthorizedException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//        } catch (ResourceNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-//        }
-//
-//    }
+    @GetMapping("/detail")
+    public ResponseEntity<ReportDetailResponse> getReportDetail(
+            @RequestParam Long reportId
+    ) throws Exception {
+        try {
+            // Get data
+            ReportDetailResult report = reportService.getReportDetailByReportId(reportId);
+
+            // Response
+            ReportDetailResponse response;
+
+            if (report != null) {
+                // Mapping to PlanDetail Response
+                response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+    }
 
 //    @PostMapping("/download/xlsx")
 //    public ResponseEntity<byte[]> generateXlsxReport(

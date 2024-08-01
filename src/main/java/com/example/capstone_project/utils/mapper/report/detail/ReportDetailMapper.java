@@ -7,19 +7,16 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ReportDetailMapper {
-    @Mapping(expression = "java(reportDetailResult.getReportId())", target = "id")
+    @Mapping(expression = "java(reportDetailResult.getReportId())", target = "reportId")
     @Mapping(expression = "java(reportDetailResult.getName())", target = "name")
-    @Mapping(expression = "java(reportDetailResult.getBiggestExpenditure())", target = "biggestExpenditure")
-    @Mapping(expression = "java(reportDetailResult.getTotalCost())", target = "totalCost")
     @Mapping(expression = "java(reportDetailResult.getTermId())", target = "term.termId")
     @Mapping(expression = "java(reportDetailResult.getTermName())", target = "term.name")
     @Mapping(expression = "java(reportDetailResult.getStatusId())", target = "status.statusId")
     @Mapping(expression = "java(reportDetailResult.getStatusName())", target = "status.name")
-    @Mapping(expression = "java(reportDetailResult.getPlanDueDate())", target = "planDueDate")
     @Mapping(expression = "java(reportDetailResult.getCreatedAt())", target = "createdAt")
-    @Mapping(expression = "java(reportDetailResult.getDepartmentId())", target = "department.departmentId")
-    @Mapping(expression = "java(reportDetailResult.getDepartmentName())", target = "department.name")
-    @Mapping(expression = "java(reportDetailResult.getUserId())", target = "user.userId")
-    @Mapping(expression = "java(reportDetailResult.getUsername())", target = "user.username")
+    @Mapping(expression = "java(reportDetailResult.getEndDate())", target = "endDate")
+    @Mapping(expression = "java(reportDetailResult.getReuploadStartDate())", target = "reuploadStartDate")
+    @Mapping(expression = "java(reportDetailResult.getReuploadEndDate())", target = "reuploadEndDate")
+    @Mapping(expression = "java(reportDetailResult.getFinalEndTermDate())", target = "finalEndTermDate")
     ReportDetailResponse mapToReportDetailResponseMapping(ReportDetailResult reportDetailResult);
 }
