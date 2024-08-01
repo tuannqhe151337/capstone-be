@@ -30,6 +30,8 @@ import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +39,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -53,6 +57,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final FinancialPlanExpenseRepository expenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
     private final DepartmentRepository departmentRepository;
+    private final CostTypeRepository costTypeRepository;
     private final HandleFileHelper handleFileHelper;
 
 
@@ -431,14 +436,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getBodyFileExcelXLS(Long fileId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
-
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
         if (expenses != null && !expenses.isEmpty()) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -448,6 +454,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getBodyFileExcelXLSX(Long fileId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
 
         if (expenses != null && !expenses.isEmpty()) {
 
@@ -455,7 +463,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -470,22 +478,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.DOWNLOAD_PLAN.getValue())) {
-            // Accountant role can view all plan
-            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
+
+            // Check department
+            if (departmentId == userDetail.getDepartmentId()) {
                 return planRepository.getListExpenseByFileId(fileId);
-
-                // Financial staff can only view plan of their department
-            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
-
-                // Check department
-                if (departmentId == userDetail.getDepartmentId()) {
-                    return planRepository.getListExpenseByFileId(fileId);
-                } else {
-                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
-                }
             } else {
-                throw new UnauthorizedException("Unauthorized to download plan");
+                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
             }
         } else {
             throw new UnauthorizedException("Unauthorized to download plan");
@@ -628,6 +627,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getLastVersionBodyFileExcelXLS(Long planId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
 
         if (expenses != null) {
 
@@ -635,7 +636,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
         }
 
         return null;
@@ -683,6 +684,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getLastVersionBodyFileExcelXLSX(Long planId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
 
         if (expenses != null) {
 
@@ -690,7 +693,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
         }
 
         return null;
@@ -785,5 +788,75 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");
         }
+    }
+
+    @Override
+    public byte[] getTemplateData() throws IOException {
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
+
+        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+        FileInputStream file = new FileInputStream(fileLocation);
+        XSSFWorkbook wb = new XSSFWorkbook(file);
+
+
+        Sheet sheet = wb.getSheet("List");
+
+        Row row = null;
+        // Write department
+        int rowPosition = 2;
+        int colPosition;
+
+        for (Department department : departments) {
+            colPosition = 0;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+
+            row.createCell(colPosition++).setCellValue(department.getId());
+            row.createCell(colPosition).setCellValue(department.getName());
+        }
+
+        // Write cost type
+        rowPosition = 2;
+
+        for (CostType costType : costTypes) {
+            colPosition = 3;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(costType.getId());
+            row.createCell(colPosition).setCellValue(costType.getName());
+        }
+
+        // Add validation
+        sheet = wb.getSheet("Expense");
+        // Add validation for department
+
+        DataValidationHelper validationHelper = sheet.getDataValidationHelper();
+        DataValidationConstraint constraint = validationHelper.createFormulaListConstraint("List!$B$3:$B$" + (departments.size() + 2));
+
+        CellRangeAddressList addressList = new CellRangeAddressList(2, 100, 3, 3);
+        DataValidation dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for department
+
+        constraint = validationHelper.createFormulaListConstraint("List!$E$3:$E$" + (costTypes.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 5, 5);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+        out.close();
+
+        return out.toByteArray();
     }
 }

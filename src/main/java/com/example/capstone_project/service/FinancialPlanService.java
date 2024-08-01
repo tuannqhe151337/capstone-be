@@ -7,6 +7,7 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface FinancialPlanService {
@@ -65,4 +66,7 @@ public interface FinancialPlanService {
     void approvalAllExpenses(Long planId) throws Exception;
 
     void submitPlanForReview(Long planId) throws Exception;
+
+    byte[] getTemplateData() throws IOException;
+
 }

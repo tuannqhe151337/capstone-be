@@ -34,8 +34,6 @@ public interface ExpenseResult {
 
     String getNote();
 
-    String getStatusName();
-
     Long getExpenseId();
 
     ExpenseStatusCode getStatusCode();
