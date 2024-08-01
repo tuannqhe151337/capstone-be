@@ -12,6 +12,7 @@ public interface ReportDetailMapper {
     @Mapping(expression = "java(reportDetailResult.getTermId())", target = "term.termId")
     @Mapping(expression = "java(reportDetailResult.getTermName())", target = "term.name")
     @Mapping(expression = "java(reportDetailResult.getStatusId())", target = "status.statusId")
+    @Mapping(expression = "java(reportDetailResult.getStatusCode())", target = "status.code")
     @Mapping(expression = "java(reportDetailResult.getStatusName())", target = "status.name")
     @Mapping(expression = "java(reportDetailResult.getCreatedAt())", target = "createdAt")
     @Mapping(expression = "java(reportDetailResult.getEndDate())", target = "endDate")
