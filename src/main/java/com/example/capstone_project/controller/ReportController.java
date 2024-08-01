@@ -2,6 +2,8 @@ package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.body.report.download.ReportDownloadBody;
+import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
+import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
 import com.example.capstone_project.entity.FinancialPlanExpense;
@@ -311,6 +313,60 @@ public class ReportController {
                     .limitRecordsPerPage(sizeInt)
                     .numPages(numPages)
                     .build());
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/actual-cost")
+    public ResponseEntity<ReportActualCostResponse> calculateActualCost(
+            @RequestParam Long reportId
+    ) throws Exception {
+        try {
+            // Get data
+            BigDecimal actualCost = reportService.calculateActualCostByReportId(reportId);
+
+            // Response
+            ReportActualCostResponse response = new ReportActualCostResponse();
+
+            if (actualCost != null) {
+                // Mapping to PlanDetail Response
+                response.setActualCost(actualCost);
+
+            } else {
+                response.setActualCost(BigDecimal.valueOf(0L));
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/expected-cost")
+    public ResponseEntity<ReportExpectedCostResponse> calculateExpectedCost(
+            @RequestParam Long reportId
+    ) throws Exception {
+        try {
+            // Get data
+            BigDecimal expectedCost = reportService.calculateExpectedCostByReportId(reportId);
+
+            // Response
+            ReportExpectedCostResponse response = new ReportExpectedCostResponse();
+
+            if (expectedCost != null) {
+                // Mapping to PlanDetail Response
+                response.setExpectedCost(expectedCost);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
