@@ -28,7 +28,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
                 " WHERE term.name LIKE :query AND " +
                 " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
                 " term.status.name != :close AND " +
-                " term.planDueDate >= :now AND " +
+                " term.startDate <= :now AND term.endDate >= :now AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
 
