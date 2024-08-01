@@ -649,29 +649,23 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.DOWNLOAD_PLAN.getValue())) {
 
             if (!planRepository.existsById(planId)) {
                 throw new ResourceNotFoundException("Not found any plan have id = " + planId);
             }
 
-            // Accountant role can view all plan
-            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
+
+            // Check department
+            if (departmentId == userDetail.getDepartmentId()) {
                 return planRepository.getListExpenseByPlanId(planId);
-
-                // Financial staff can only view plan of their department
-            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
-
-                // Check department
-                if (departmentId == userDetail.getDepartmentId()) {
-                    return planRepository.getListExpenseByPlanId(planId);
-                } else {
-                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
-                }
+            } else {
+                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
             }
+        } else {
+            throw new UnauthorizedException("Unauthorized to download plan");
         }
-        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
@@ -679,7 +673,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName()  + "_v" + fileNameResult.getVersion() + ".xls";
+            return fileNameResult.getTermName() + "_v" + fileNameResult.getVersion() + ".xls";
         } else {
             throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }

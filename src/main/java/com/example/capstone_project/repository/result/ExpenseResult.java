@@ -2,6 +2,7 @@ package com.example.capstone_project.repository.result;
 
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface ExpenseResult {
@@ -11,7 +12,7 @@ public interface ExpenseResult {
 
     LocalDateTime getDate();
 
-    String getTerm();
+    String getTermName();
 
     String getDepartmentName();
 
@@ -19,11 +20,11 @@ public interface ExpenseResult {
 
     String getCostTypeName();
 
-    String getUnitPrice();
+    BigDecimal getUnitPrice();
 
-    String getAmount();
+    Integer getAmount();
 
-    String getTotal();
+    BigDecimal getTotal();
 
     String getProjectName();
 
