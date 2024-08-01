@@ -3,8 +3,6 @@ package com.example.capstone_project.service.scheduler;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.PlanStatusCode;
 import com.example.capstone_project.utils.enums.TermCode;
 import lombok.RequiredArgsConstructor;
 
@@ -13,9 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,7 +20,7 @@ public class TermSchedulerService {
     private final TermService termService;
     private final TermRepository termRepository;
     private final FinancialPlanRepository planRepository;
-    private final PlanStatusRepository planStatusRepository;
+    private final ReportStatusRepository reportStatusRepository;
     private final FinancialPlanExpenseRepository planExpenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
     private final FinancialReportRepository reportRepository;
@@ -55,26 +51,26 @@ public class TermSchedulerService {
             for (Term term : terms) {
                 termService.updateTermStatus(term, 3L);
 
-                List<FinancialPlan> listPlanNeedToClose = new ArrayList<>();
-                List<FinancialPlanExpense> listExpenseNeedToClose = new ArrayList<>();
-                planRepository.findAllByTermId(term.getId()).forEach(plan -> {
-                    if (plan.getStatus().getCode().equals(PlanStatusCode.WAITING_FOR_REVIEWED)
-                            || plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
-
-                        // 3L - Reviewed
-                        plan.setStatus(planStatusRepository.getReferenceById(3L));
-
-                        // Get list expense have status waiting
-                        planExpenseRepository.getListExpenseNeedToCloseByPlanId(plan.getId(), ExpenseStatusCode.WAITING_FOR_APPROVAL).forEach(expense -> {
-                            // Change expense status from waiting to deny
-                            expense.setStatus(expenseStatusRepository.getReferenceById(4L));
-                            listExpenseNeedToClose.add(expense);
-                        });
-
-                        listPlanNeedToClose.add(plan);
-                        // Change expense status
-                        planExpenseRepository.saveAll(listExpenseNeedToClose);
-                    }
+//                List<FinancialPlan> listPlanNeedToClose = new ArrayList<>();
+//                List<FinancialPlanExpense> listExpenseNeedToClose = new ArrayList<>();
+//                planRepository.findAllByTermId(term.getId()).forEach(plan -> {
+//                    if (plan.getStatus().getCode().equals(PlanStatusCode.WAITING_FOR_REVIEWED)
+//                            || plan.getStatus().getCode().equals(PlanStatusCode.NEW)) {
+//
+//                        // 3L - Reviewed
+//                        plan.setStatus(planStatusRepository.getReferenceById(3L));
+//
+//                        // Get list expense have status waiting
+//                        planExpenseRepository.getListExpenseNeedToCloseByPlanId(plan.getId(), ExpenseStatusCode.WAITING_FOR_APPROVAL).forEach(expense -> {
+//                            // Change expense status from waiting to deny
+//                            expense.setStatus(expenseStatusRepository.getReferenceById(4L));
+//                            listExpenseNeedToClose.add(expense);
+//                        });
+//
+//                        listPlanNeedToClose.add(plan);
+//                        // Change expense status
+//                        planExpenseRepository.saveAll(listExpenseNeedToClose);
+//                    }
 
 //                    // Create new report
 //                    FinancialReport report = FinancialReport.builder()
@@ -104,9 +100,9 @@ public class TermSchedulerService {
 //                    reportRepository.save(report);
 //                    // Generate expense of report
 //                    reportExpenseRepository.saveAll(reportExpenses);
-                });
+//                });
                 // Change status waiting and new to close
-                planRepository.saveAll(listPlanNeedToClose);
+//                planRepository.saveAll(listPlanNeedToClose);
             }
         }
     }
