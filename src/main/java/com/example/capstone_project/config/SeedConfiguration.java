@@ -694,7 +694,13 @@ public class SeedConfiguration {
                     .code(ReportStatusCode.REVIEWED)
                     .build();
 
-            reportStatusRepository.saveAll(List.of(approvedReportStatus, waitingForApprovalReportStatus, reviewedReportStatus));
+            ReportStatus closedReportStatus = ReportStatus.builder()
+                    .id(4L)
+                    .name(ReportStatusCode.CLOSED.getValue())
+                    .code(ReportStatusCode.CLOSED)
+                    .build();
+
+            reportStatusRepository.saveAll(List.of(approvedReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, closedReportStatus));
 
             Term term1 = Term.builder()
                     .id(1L)
@@ -1409,7 +1415,7 @@ public class SeedConfiguration {
                     .name("Report Name 6")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(waitingForApprovalReportStatus)
+                    .status(closedReportStatus)
 //                    .department(itDepartment)
                     .term(term2)
 //                    .user(user1)
