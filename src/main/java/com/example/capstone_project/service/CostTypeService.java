@@ -15,4 +15,7 @@ public interface CostTypeService {
     void deleteCostType(Long costTypeId);
 
     long countDistinctListCostType(String query);
+
+    List<CostType> getListCostType();
+
 }
