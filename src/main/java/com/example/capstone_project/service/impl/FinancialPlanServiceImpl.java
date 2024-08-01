@@ -438,13 +438,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
         if (expenses != null && !expenses.isEmpty()) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -456,14 +457,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<ExpenseResult> expenses = getListExpenseByFileId(fileId);
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
-
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
         if (expenses != null && !expenses.isEmpty()) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -629,6 +630,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
 
         if (expenses != null) {
 
@@ -636,7 +638,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         }
 
         return null;
@@ -686,6 +688,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<ExpenseResult> expenses = getListExpenseByPlanId(planId);
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
 
         if (expenses != null) {
 
@@ -693,7 +696,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         }
 
         return null;
@@ -794,6 +797,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     public byte[] getTemplateData() throws IOException {
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
 
         String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
         FileInputStream file = new FileInputStream(fileLocation);
@@ -829,6 +833,18 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             row.createCell(colPosition).setCellValue(costType.getName());
         }
 
+        // Write expense status
+        rowPosition = 2;
+
+        for (ExpenseStatus status : expenseStatuses) {
+            colPosition = 6;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(status.getId());
+            row.createCell(colPosition).setCellValue(status.getCode().toString());
+        }
+
         // Add validation
         sheet = wb.getSheet("Expense");
         // Add validation for department
@@ -847,6 +863,16 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         constraint = validationHelper.createFormulaListConstraint("List!$E$3:$E$" + (costTypes.size() + 2));
 
         addressList = new CellRangeAddressList(2, 100, 5, 5);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for expense status
+
+        constraint = validationHelper.createFormulaListConstraint("List!$H$3:$H$" + (expenseStatuses.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 13, 13);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 

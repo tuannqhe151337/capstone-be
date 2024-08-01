@@ -2,6 +2,7 @@ package com.example.capstone_project.utils.helper;
 
 import com.example.capstone_project.entity.CostType;
 import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Component
 public class HandleFileHelper {
-    public byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses, List<Department> departments, List<CostType> costTypes) throws IOException {
+    public byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses, List<Department> departments, List<CostType> costTypes, List<ExpenseStatus> expenseStatuses) throws IOException {
         Sheet sheet = wb.getSheet("Expense");
 
         Row row = null;
@@ -70,6 +71,18 @@ public class HandleFileHelper {
             row.createCell(colPosition).setCellValue(costType.getName());
         }
 
+        // Write expense status
+        rowPosition = 2;
+
+        for (ExpenseStatus status  : expenseStatuses) {
+            colPosition = 6;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(status.getId());
+            row.createCell(colPosition).setCellValue(status.getCode().toString());
+        }
+
         // Add validation
         sheet = wb.getSheet("Expense");
         // Add validation for department
@@ -93,10 +106,21 @@ public class HandleFileHelper {
 
         sheet.addValidationData(dataValidation);
 
+        // Add validation for expense status
+
+        constraint = validationHelper.createFormulaListConstraint("List!$H$3:$H$" + (expenseStatuses.size() + 2));
+
+        addressList = new CellRangeAddressList(2, expenses.size() + 2, 13, 13);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
         wb.close();
         out.close();
+
         return out.toByteArray();
     }
 
