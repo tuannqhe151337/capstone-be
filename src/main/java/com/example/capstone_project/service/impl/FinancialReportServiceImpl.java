@@ -269,7 +269,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             }
             return expenseRepository.getListExpenseByReportId(reportId);
         } else {
-            throw new UnauthorizedException("Unauthorized to view report");
+            throw new UnauthorizedException("Unauthorized to download report");
         }
 
     }
