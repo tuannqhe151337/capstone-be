@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StatusResponse {
     private long statusId;
+    private String code;
     private String name;
 }

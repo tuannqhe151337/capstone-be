@@ -20,27 +20,24 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE plan.name like %:query% AND " +
             " (:termId IS NULL OR plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR plan.department.id = :departmentId) AND " +
-            " (:statusId IS NULL OR plan.status.id = :statusId) AND " +
-            " (:statusCode IS NULL OR plan.status.code != :statusCode) AND " +
             " plan.isDelete = false ")
-    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId, PlanStatusCode statusCode);
+    long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
     @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
-            " (:statusId IS NULL OR file.plan.status.id = :statusId) AND" +
             " file.isDelete = false " +
             " GROUP BY file.plan.id ")
-    List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId, @Param("statusId") Long statusId);
+    List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
-    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
-            " SUM(expense.unitPrice * expense.amount) AS totalPlan, term.id AS termId, term.name AS termName, status.id AS statusId, status.name AS statusName, " +
-            " status.code AS statusCode, term.endDate AS planDueDate, plan.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
+    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, plan.createdAt AS createdAt, " +
+            " SUM(expense.unitPrice * expense.amount) AS totalPlan," +
+            " term.id AS termId, term.name AS termName, term.startDate AS termStartDate, term.endDate AS termEndDate, term.reuploadStartDate AS termReuploadStartDate, term.reuploadEndDate AS termReuploadEndDate, term.finalEndTermDate AS termFinalEndTermDate, " +
+            " department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialPlan plan " +
             " JOIN plan.term term " +
-            " JOIN plan.status status " +
             " JOIN plan.department department " +
             " JOIN plan.planFiles files" +
             " JOIN files.planFileExpenses fileExpense " +
@@ -49,7 +46,8 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " WHERE plan.id = :planId AND " +
             " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " plan.isDelete = false AND expense.isDelete = false " +
-            " GROUP BY plan.id, plan.name, term.id, term.name, status.id, status.name, status.code, term.endDate, " +
+            " GROUP BY plan.id, plan.name," +
+            " term.id, term.name, term.startDate, term.endDate, term.reuploadStartDate, term.reuploadEndDate, term.finalEndTermDate," +
             " plan.createdAt, department.id, department.name, user.id, user.username " )
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
 

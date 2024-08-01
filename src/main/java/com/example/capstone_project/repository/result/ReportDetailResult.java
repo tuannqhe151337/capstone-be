@@ -5,18 +5,26 @@ import java.time.LocalDateTime;
 
 public interface ReportDetailResult {
     Long getReportId();
+
     String getName();
-    BigDecimal getBiggestExpenditure();
-    BigDecimal getTotalCost();
+
     Long getTermId();
+
     String getTermName();
+
     Long getStatusId();
-    String getStatusName();
+
     String getStatusCode();
-    LocalDateTime getPlanDueDate();
+
+    String getStatusName();
+
     LocalDateTime getCreatedAt();
-    Long getDepartmentId();
-    String getDepartmentName();
-    Long getUserId();
-    String getUsername();
+
+    LocalDateTime getEndDate();
+
+    LocalDateTime getReuploadStartDate();
+
+    LocalDateTime getReuploadEndDate();
+
+    LocalDateTime getFinalEndTermDate();
 }

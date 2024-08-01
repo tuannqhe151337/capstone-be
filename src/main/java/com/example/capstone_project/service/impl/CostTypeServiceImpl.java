@@ -116,4 +116,20 @@ public class CostTypeServiceImpl implements CostTypeService {
             throw new UnauthorizedException("User unauthorized");
         }
     }
+
+    @Override
+    public List<CostType> getListCostType() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.IMPORT_PLAN.getValue())
+                || authorities.contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
+                || authorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+
+            return costTypeRepository.findAll(Sort.by(CostType_.ID).ascending());
+        } else {
+            throw new UnauthorizedException("User unauthorized");
+        }
+    }
 }
