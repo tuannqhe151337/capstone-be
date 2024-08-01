@@ -1,6 +1,7 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.Department;
+import com.example.capstone_project.entity.Department_;
 import com.example.capstone_project.repository.DepartmentRepository;
 
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
@@ -14,6 +15,7 @@ import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -103,6 +105,24 @@ public class DepartmentServiceImpl implements DepartmentService {
         } catch (Exception e) {
 
             throw new DuplicateKeyException("Duplicate name department");
+        }
+    }
+
+    @Override
+    public List<Department> getListDepartment() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_PLAN.getValue())
+                || authorities.contains(AuthorityCode.VIEW_LIST_USERS.getValue())
+                || authorities.contains(AuthorityCode.CREATE_NEW_USER.getValue())
+                || authorities.contains(AuthorityCode.EDIT_USER.getValue())
+                || authorities.contains(AuthorityCode.VIEW_REPORT.getValue())
+                || authorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            return departmentRepository.findAll(Sort.by(Department_.ID).ascending());
+        } else {
+            throw new UnauthorizedException("Unauthorized to view list department");
         }
     }
 
