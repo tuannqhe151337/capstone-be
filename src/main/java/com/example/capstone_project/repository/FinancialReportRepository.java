@@ -18,20 +18,13 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " report.isDelete = false ")
     long countDistinctListReportPaginate(@Param("query") String query, @Param("termId") Long termId, @Param("statusId") Long statusId);
 
-//    @Query(" SELECT report.id AS reportId, report.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
-//            " SUM(expense.unitPrice * expense.amount) AS totalCost, term.id AS termId, term.name AS termName, " +
-//            " term.planDueDate AS planDueDate, report.createdAt AS createdAt, department.id AS departmentId, department.name AS departmentName, " +
-//            " user.id AS userId , user.username AS username" +
-//            " FROM FinancialReport report " +
-//            " JOIN report.term term " +
-//            " JOIN report.department department " +
-//            " JOIN report.reportExpenses expense " +
-//            " JOIN report.user user" +
-//            " WHERE report.id = :reportId AND " +
-//            " report.isDelete = false AND expense.isDelete = false " +
-//            " GROUP BY report.id, report.name, term.id, term.name, term.planDueDate, " +
-//            " report.createdAt, department.id, department.name, user.id, user.username ")
-//    ReportDetailResult getFinancialReportById(Long reportId);
+    @Query(" SELECT report.id AS reportId, report.name AS name, term.id AS termId, term.name AS termName, status.id AS statusId, status.name AS statusName, " +
+            " report.createdAt AS createdAt, term.endDate AS endDate, term.reuploadStartDate AS reuploadStartDate, term.reuploadEndDate AS reuploadEndDate, term.finalEndTermDate AS finalEndTermDate FROM FinancialReport report " +
+            " JOIN report.term term " +
+            " JOIN report.status status " +
+            " WHERE report.id = :reportId AND " +
+            " report.isDelete = false OR report.isDelete is null ")
+    ReportDetailResult getFinancialReportById(Long reportId);
 
     @Query(value = " SELECT term.name AS termName FROM FinancialReport report " +
             " JOIN report.term term " +

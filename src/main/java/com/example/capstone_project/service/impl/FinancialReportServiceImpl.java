@@ -68,39 +68,24 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
     }
 
-//    @Override
-//    public ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception {
-//        // Get userId from token
-//        long userId = UserHelper.getUserId();
-//
-//        // Get user detail
-//        UserDetail userDetail = userDetailRepository.get(userId);
-//
-//        // Check authority
-//        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-//            // Accountant role can view all plan
-//            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-//                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
-//                if (planResult == null) {
-//                    throw new ResourceNotFoundException("Not found any report have id = " + reportId);
-//                }
-//                return planResult;
-//                // Financial staff can only view plan of their department
-//            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-//                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
-//
-//                // Check department
-//                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
-//                    return planResult;
-//                } else {
-//                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
-//                }
-//            }
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        } else {
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        }
-//    }
+    @Override
+    public ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+
+            return financialReportRepository.getFinancialReportById(reportId);
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
 
     @Override
     @Transactional
