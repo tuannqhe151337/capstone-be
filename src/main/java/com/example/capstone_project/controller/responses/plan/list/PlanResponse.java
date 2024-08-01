@@ -18,7 +18,6 @@ public class PlanResponse {
     private Long planId;
     private String name;
     private TermResponse term;
-    private StatusResponse status;
     private DepartmentResponse department;
     private String version;
     private LocalDateTime createdAt;

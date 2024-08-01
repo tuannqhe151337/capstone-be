@@ -23,8 +23,6 @@ public class PlanDetailResponse {
     private BigDecimal biggestExpenditure;
     private BigDecimal totalPlan;
     private TermResponse term;
-    private StatusResponse status;
-    private LocalDateTime planDueDate;
     private LocalDateTime createdAt;
     private DepartmentResponse department;
     private UserResponse user;

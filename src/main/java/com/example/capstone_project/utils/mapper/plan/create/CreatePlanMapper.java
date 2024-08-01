@@ -25,10 +25,6 @@ public interface CreatePlanMapper {
 
         plan.setDepartment(Department.builder().id(departmentId).build());
 
-        plan.setStatus(PlanStatus.builder()
-                .id(1L)
-                .build());
-
         List<FinancialPlanExpense> expenses = mapExpenseBodyToExpense(newPlanBody.getExpenses(), newPlanBody, termName);
 
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();

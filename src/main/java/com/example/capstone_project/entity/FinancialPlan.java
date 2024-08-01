@@ -34,10 +34,6 @@ public class FinancialPlan extends BaseEntity{
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
-    @JoinColumn(name = "status_id")
-    private PlanStatus status;
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 }
