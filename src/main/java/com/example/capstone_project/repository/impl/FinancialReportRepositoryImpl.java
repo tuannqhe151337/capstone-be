@@ -19,16 +19,14 @@ public class FinancialReportRepositoryImpl implements CustomFinancialReportRepos
     @PersistenceContext
     private EntityManager entityManager;
     @Override
-    public List<FinancialReport> getReportWithPagination(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) {
+    public List<FinancialReport> getReportWithPagination(String query, Long termId, Long statusId, Pageable pageable) {
 
         // HQL query
         String hql = "SELECT report FROM FinancialReport report " +
                 " LEFT JOIN report.term term " +
-                " LEFT JOIN report.department department " +
                 " LEFT JOIN report.status status" +
                 " WHERE report.name like :query AND " +
                 " (:termId IS NULL OR report.term.id = :termId) AND " +
-                " (:departmentId IS NULL OR report.department.id = :departmentId) AND " +
                 " (:statusId IS NULL OR report.status.id = :statusId) AND " +
                 " (report.isDelete = false OR report.isDelete is null) " +
                 " ORDER BY ";
@@ -45,9 +43,6 @@ public class FinancialReportRepositoryImpl implements CustomFinancialReportRepos
                     break;
                 case "status", "status_id", "status.id":
                     hql += "status.id " + sortType;
-                    break;
-                case "department.id", "department_id", "department":
-                    hql += "department.id " + sortType;
                     break;
                 case "term.id", "term_id", "term":
                     hql += "term.id " + sortType;
@@ -72,14 +67,12 @@ public class FinancialReportRepositoryImpl implements CustomFinancialReportRepos
         // Handling join
         EntityGraph<FinancialReport> entityGraph = entityManager.createEntityGraph(FinancialReport.class);
         entityGraph.addAttributeNodes(FinancialReport_.TERM);
-//        entityGraph.addAttributeNodes(FinancialReport_.DEPARTMENT);
         entityGraph.addAttributeNodes(FinancialReport_.STATUS);
 
         // Run query
         return entityManager.createQuery(hql, FinancialReport.class)
                 .setParameter("query", "%" + query + "%")
                 .setParameter("termId", termId)
-                .setParameter("departmentId", departmentId)
                 .setParameter("statusId", statusId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
