@@ -42,17 +42,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
-        // Get user detail
-        UserDetail userDetail = userDetailRepository.get(userId);
-
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                // Financial staff only see list-plan of their department
-                departmentId = userDetail.getDepartmentId();
-            }
-
-            return financialReportRepository.getReportWithPagination(query, termId, departmentId, statusId, pageable);
+            return financialReportRepository.getReportWithPagination(query, termId, statusId, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
