@@ -547,7 +547,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             Term term = termRepository.getTermByPlanId(planId);
 
-            if (LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate())
+            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))
                     || (LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
                 long departmentId = planRepository.getDepartmentIdByPlanId(planId);
                 // Check department
@@ -615,7 +615,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     throw new UnauthorizedException("User can't upload this plan because departmentId of plan not equal with departmentId of user");
                 }
             } else {
-                throw new InvalidDateException("Now allow to re-upload plan");
+                throw new InvalidDateException("Can not re-upload plan in this time period");
             }
 
         } else {
