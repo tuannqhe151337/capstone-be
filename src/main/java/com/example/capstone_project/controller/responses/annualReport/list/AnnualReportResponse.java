@@ -13,5 +13,5 @@ public class AnnualReportResponse {
     private Integer totalTerm;
     private BigDecimal totalExpense;
     private Integer totalDepartment;
-    private LocalDateTime createDate;
+    private LocalDateTime createdAt;
 }
