@@ -13,6 +13,7 @@ import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -230,6 +232,38 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
             return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    @Override
+    public BigDecimal calculateActualCostByReportId(Long reportId) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return financialReportRepository.calculateActualCostByReportId(reportId, ExpenseStatusCode.APPROVED);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    @Override
+    public BigDecimal calculateExpectedCostByReportId(Long reportId) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return financialReportRepository.calculateExpectedCostByReportId(reportId);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
