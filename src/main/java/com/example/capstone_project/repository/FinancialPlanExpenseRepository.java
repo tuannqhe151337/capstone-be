@@ -18,7 +18,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN file.plan plan " +
             " JOIN plan.term term " +
             " JOIN term.status status " +
-            " WHERE expense.id IN (:listExpenses) AND " +
+            " WHERE expense.id IN (:listExpensesId) AND " +
             " file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
@@ -30,7 +30,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (status.code = :inProgress) AND " +
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
-    long countListExpenseInReport(Long reportId, List<Long> listExpenses, TermCode inProgress, LocalDateTime now);
+    long countListExpenseInReport(Long reportId, List<Long> listExpensesId, TermCode inProgress, LocalDateTime now);
 
     @Query(" SELECT count(distinct (expense.id)) FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
@@ -168,7 +168,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             "                       GROUP BY plan_2.id) " +
             " AND " +
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
-            " (OR term.status.code = :termCode) AND " +
+            " (term.status.code = :termCode) AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermCode termCode, LocalDateTime now);
 }

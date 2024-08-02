@@ -17,6 +17,7 @@ import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
+import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -337,6 +338,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            listExpenses = RemoveDuplicateHelper.removeDuplicates(listExpenses);
+
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense in one file
             long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
@@ -378,6 +381,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+
+            listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
+
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense in one file
             long totalExpense = expenseRepository.countListExpenseInReport(planId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
