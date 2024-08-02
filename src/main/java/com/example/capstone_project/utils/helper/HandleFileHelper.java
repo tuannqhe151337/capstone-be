@@ -21,10 +21,10 @@ public class HandleFileHelper {
         for (int i = 0; i < expenses.size(); i++) {
             ExpenseResult expense = expenses.get(i);
             tableData[i][0] = expense.getExpenseCode();
-            tableData[i][1] = expense.getDate().toString();
-            tableData[i][2] = expense.getTerm();
+            tableData[i][1] = expense.getDate().toLocalDate().toString();
+            tableData[i][2] = expense.getTermName();
             tableData[i][3] = expense.getDepartmentName();
-            tableData[i][4] = expense.getExpense();
+            tableData[i][4] = expense.getExpenseName();
             tableData[i][5] = expense.getCostTypeName();
             tableData[i][6] = expense.getUnitPrice();
             tableData[i][7] = expense.getAmount();
