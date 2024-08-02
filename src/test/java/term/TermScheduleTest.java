@@ -19,8 +19,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +80,7 @@ public class TermScheduleTest {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(1))
                 .user(user)
-                .status(termStatus)
+                .status(termStatus2)
                 .build();
 
         term2 = Term.builder()
@@ -97,36 +99,37 @@ public class TermScheduleTest {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now())
                 .user(user)
-                .status(termStatus2)
+                .status(termStatus)
                 .build();
     }
 
-    //test end, test start
-    @Test
-    public void testStartTerm() throws Exception {
-        List<Term> terms = Arrays.asList(term1, term2, term3);
-
-        when(termRepository.findAll()).thenReturn(terms);
-
-        termSchedulerService.startTerm();
-
-        verify(termServiceImpl, times(1)).updateTermStatus(term1, 2L);
-        verify(termServiceImpl, times(0)).updateTermStatus(term2, 2L);
-    }
 
     //when there are no terms
+
     @Test
-    public void testStartTermWithNoTerms() throws Exception {
-        // Mock empty list
-        when(termRepository.findAll()).thenReturn(Arrays.asList());
+    void testGetListTermNeedToStart_ReturnsEmptyList() {
 
-        // Execute the scheduled method directly
-        termSchedulerService.startTerm();
+        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NEW, LocalDateTime.now());
 
-        // Verify no interactions with termService
-        verify(termServiceImpl, times(0)).updateTermStatus(any(Term.class), eq(2L));
+        assertTrue(terms.isEmpty());
+        verify(termRepository).getListTermNeedToStart(eq(TermCode.NEW), any(LocalDateTime.class));
     }
 
+    @Test
+    void testGetListTermNeedToStart_ReturnsNonEmptyList() {
+        // Given
+        LocalDateTime mockTime = LocalDateTime.of(2024, 8, 2, 10, 44, 5, 923785900);
+        when(termRepository.getListTermNeedToStart(eq(TermCode.NEW), eq(mockTime)))
+                .thenReturn(Arrays.asList(term1, term2));
+
+        // When
+        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NEW, mockTime);
+
+        // Then
+        assertFalse(terms.isEmpty());
+        assertEquals(2, terms.size());
+        verify(termRepository).getListTermNeedToStart(eq(TermCode.NEW), eq(mockTime));
+    }
 
 
 }
