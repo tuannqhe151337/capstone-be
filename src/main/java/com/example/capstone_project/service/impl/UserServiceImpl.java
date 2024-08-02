@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
         }
         //Check user id existed
         Optional<User> user = userRepository.findById(Long.parseLong(userId));
-        if(user.isEmpty() || user.get().getIsDelete() == false) {
+        if(user.isEmpty() || user.get().getIsDelete() == true) {
             throw new ResourceNotFoundException("User not found");
         }
         //get otp

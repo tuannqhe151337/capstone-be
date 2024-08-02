@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,7 +72,7 @@ public class UserServiceTest {
     @Mock
     private RoleRepository roleRepository;
     @Mock
-    private OTPTokenRepository otpTokenRepository ;
+    private OTPTokenRepository otpTokenRepository;
     @Mock
     private UserIdTokenRepository userIdTokenRepository;
     @Mock
@@ -88,6 +89,8 @@ public class UserServiceTest {
     private User user2;
     private User oldUser;
     private Pageable pageable;
+    @Value("${application.security.blank-token-otp.expiration}")
+    private String BLANK_TOKEN_OTP_EXPIRATION;
 
     @Nested
     class TestsWithCommonSetup {
@@ -222,26 +225,51 @@ public class UserServiceTest {
             // Assert the result
             assertTrue(actualUsers.isEmpty());
         }
-        //reset password
 
-                    //OTP
         @Test
-        void testOtpValidate_Success() throws Exception {
+        public void testOtpValidate_Success() throws Exception {
+            // Arrange
             String authHeaderToken = "validToken";
-            OTPBody otpBody = new OTPBody();
-            otpBody.setOtp("123456");
+            OTPBody otp = new OTPBody("123456");
+            String userId = "1"; // Ensure this is non-null
+            User user = new User();
+            user.setIsDelete(false);
+            String savedOtp = "123456";
+            String newToken = "newToken";
 
-            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(String.valueOf(1));
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-            when(otpTokenRepository.getOtpCode(authHeaderToken, 1L)).thenReturn("123456");
-            when(jwtHelper.genBlankTokenOtp()).thenReturn("newToken");
+            // Mock behaviors
+            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(userId);
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+            when(otpTokenRepository.getOtpCode(authHeaderToken, anyLong())).thenReturn(savedOtp);
+            when(jwtHelper.genBlankTokenOtp()).thenReturn(newToken);
 
-            String result = userServiceImpl.otpValidate(otpBody, authHeaderToken);
+            // Act
+            String result = userServiceImpl.otpValidate(otp, authHeaderToken);
 
-            verify(userIdTokenRepository).save(eq("newToken"), eq(1L), any(Duration.class));
-            assertEquals("newToken", result);
+            // Assert
+            assertEquals(newToken, result);
+
+            // Verify
+            verify(userIdTokenRepository).save(eq(newToken), eq(Long.parseLong(userId)), any());
         }
 
+
+    }
+
+    @Nested
+    class TestsWithCustomSetup {
+        @BeforeEach
+        void setUp() {
+            // Custom setup for this test group if needed
+        }
+        @Test
+        void testOtpValidate_InvalidToken() {
+            String authHeaderToken = "invalidToken";
+
+            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(null);
+
+            assertThrows(InvalidDataAccessResourceUsageException.class, () -> userServiceImpl.otpValidate(new OTPBody(), authHeaderToken));
+        }
         @Test
         void testOtpValidate_InvalidOtp() {
             String authHeaderToken = "validToken";
@@ -258,25 +286,6 @@ public class UserServiceTest {
             assertThrows(UnauthorizedException.class, () -> userServiceImpl.otpValidate(otpBody, authHeaderToken));
         }
 
-        @Test
-        void testOtpValidate_InvalidToken() {
-            String authHeaderToken = "invalidToken";
-
-            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(null);
-
-            assertThrows(InvalidDataAccessResourceUsageException.class, () -> userServiceImpl.otpValidate(new OTPBody(), authHeaderToken));
-        }
-
-
-
-    }
-
-    @Nested
-    class TestsWithCustomSetup {
-        @BeforeEach
-        void setUp() {
-            // Custom setup for this test group if needed
-        }
 
         @Test
         void testGenerateUsernameFromFullName_NoExistingUsernames() throws Exception {
