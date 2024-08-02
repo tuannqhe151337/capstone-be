@@ -898,12 +898,12 @@ public class SeedConfiguration {
             FinancialPlan financialPlan4 = FinancialPlan.builder()
                     .name("Financial Plan 4")
                     .department(financeDepartment)
-                    .term(term1)
+                    .term(term4)
                     .build();
 
             FinancialPlan financialPlan5 = FinancialPlan.builder()
                     .name("Financial Plan 5")
-                    .term(term2)
+                    .term(term3)
                     .department(accountingDepartment)
                     .build();
 
