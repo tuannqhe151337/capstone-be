@@ -106,7 +106,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         // HQL query
         String hql = " SELECT new com.example.capstone_project.repository.result.ReportExpenseResult " +
                 " (expense.id AS expenseId, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.projectName AS projectName, " +
-                " expense.supplierName AS supplierName, expense.pic AS pic, expense.note AS note, status.id AS statusId, status.name AS statusName, department.id AS departmentId, department.name AS departmentName) FROM FinancialPlanExpense expense " +
+                " expense.supplierName AS supplierName, expense.pic AS pic, expense.note AS note, status.id AS statusId, cast(status.code AS string) AS statusCode ,status.name AS statusName, department.id AS departmentId, department.name AS departmentName) FROM FinancialPlanExpense expense " +
                 " LEFT JOIN expense.files files " +
                 " LEFT JOIN files.file file " +
                 " LEFT JOIN file.plan plan " +
