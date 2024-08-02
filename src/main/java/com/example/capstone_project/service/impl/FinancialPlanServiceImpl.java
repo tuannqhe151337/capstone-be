@@ -572,8 +572,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                         if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
 
-                            // Add old expenses had approved in ol
-                            // d version
+                            // Add old expenses had approved in old version
                             listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
