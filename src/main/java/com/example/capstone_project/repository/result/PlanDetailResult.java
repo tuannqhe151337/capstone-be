@@ -11,10 +11,11 @@ public interface PlanDetailResult {
      BigDecimal getTotalPlan();
      Long getTermId();
      String getTermName();
-     Long getStatusId();
-     String getStatusName();
-     String getStatusCode();
-     LocalDateTime getPlanDueDate();
+     LocalDateTime getTermStartDate();
+     LocalDateTime getTermEndDate();
+     LocalDateTime getTermReuploadStartDate();
+     LocalDateTime getTermReuploadEndDate();
+     LocalDateTime getTermFinalEndTermDate();
      LocalDateTime getCreatedAt();
      Long getDepartmentId();
      String getDepartmentName();

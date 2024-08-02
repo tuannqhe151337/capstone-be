@@ -33,7 +33,7 @@ public class SeedConfiguration {
             FinancialPlanRepository planRepository,
             TermRepository termRepository,
             TermStatusRepository termStatusRepository,
-            PlanStatusRepository planStatusRepository,
+            ReportStatusRepository reportStatusRepository,
             CostTypeRepository costTypeRepository,
             ExpenseStatusRepository expenseStatusRepository,
             FinancialPlanFileRepository financialPlanFileRepository,
@@ -686,32 +686,38 @@ public class SeedConfiguration {
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
 
-            // Plan status
-            PlanStatus planStatus1 = PlanStatus.builder()
+            // Report status
+            ReportStatus newReportStatus = ReportStatus.builder()
                     .id(1L)
-                    .name("New")
-                    .code(PlanStatusCode.NEW)
+                    .name(ReportStatusCode.NEW.getValue())
+                    .code(ReportStatusCode.NEW)
                     .build();
 
-            PlanStatus planStatus2 = PlanStatus.builder()
+            ReportStatus waitingForApprovalReportStatus = ReportStatus.builder()
                     .id(2L)
-                    .name("Waiting for reviewed")
-                    .code(PlanStatusCode.WAITING_FOR_REVIEWED)
+                    .name(ReportStatusCode.WAITING_FOR_APPROVAL.getValue())
+                    .code(ReportStatusCode.WAITING_FOR_APPROVAL)
                     .build();
 
-            PlanStatus planStatus3 = PlanStatus.builder()
+            ReportStatus reviewedReportStatus = ReportStatus.builder()
                     .id(3L)
-                    .name("Reviewed")
-                    .code(PlanStatusCode.REVIEWED)
+                    .name(ReportStatusCode.REVIEWED.getValue())
+                    .code(ReportStatusCode.REVIEWED)
                     .build();
 
-            PlanStatus planStatus4 = PlanStatus.builder()
+            ReportStatus approvedReportStatus = ReportStatus.builder()
                     .id(4L)
-                    .name("Approved")
-                    .code(PlanStatusCode.APPROVED)
+                    .name(ReportStatusCode.APPROVED.getValue())
+                    .code(ReportStatusCode.APPROVED)
                     .build();
 
-            planStatusRepository.saveAll(List.of(planStatus1, planStatus2, planStatus3, planStatus4));
+            ReportStatus closedReportStatus = ReportStatus.builder()
+                    .id(5L)
+                    .name(ReportStatusCode.CLOSED.getValue())
+                    .code(ReportStatusCode.CLOSED)
+                    .build();
+
+            reportStatusRepository.saveAll(List.of(newReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, approvedReportStatus, closedReportStatus));
 
             Term term1 = Term.builder()
                     .id(1L)
@@ -784,35 +790,30 @@ public class SeedConfiguration {
                     .name("Financial Plan 1")
                     .term(term1)
                     .department(itDepartment)
-                    .status(planStatus1)
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
                     .department(itDepartment)
-                    .status(planStatus2)
                     .build();
 
             FinancialPlan financialPlan3 = FinancialPlan.builder()
                     .name("Financial Plan 3")
                     .term(term1)
                     .department(accountingDepartment)
-                    .status(planStatus3)
                     .build();
 
             FinancialPlan financialPlan4 = FinancialPlan.builder()
                     .name("Financial Plan 4")
                     .department(financeDepartment)
                     .term(term1)
-                    .status(planStatus4)
                     .build();
 
             FinancialPlan financialPlan5 = FinancialPlan.builder()
                     .name("Financial Plan 5")
                     .term(term2)
                     .department(accountingDepartment)
-                    .status(planStatus1)
                     .build();
 
             planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
@@ -1381,7 +1382,7 @@ public class SeedConfiguration {
                     .name("Report Name 1")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(planStatus1)
+                    .status(newReportStatus)
 //                    .department(accountingDepartment)
                     .term(term1)
 //                    .user(user1)
@@ -1391,7 +1392,7 @@ public class SeedConfiguration {
                     .name("Report Name 2")
                     .month(LocalDate.now())
 //                    .version("v2")
-                    .status(planStatus2)
+                    .status(waitingForApprovalReportStatus)
 //                    .department(accountingDepartment)
                     .term(term2)
 //                    .user(user2)
@@ -1401,7 +1402,7 @@ public class SeedConfiguration {
                     .name("Report Name 3")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(planStatus1)
+                    .status(approvedReportStatus)
 //                    .department(itDepartment)
                     .term(term1)
 //                    .user(user1)
@@ -1411,7 +1412,7 @@ public class SeedConfiguration {
                     .name("Report Name 4")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(planStatus4)
+                    .status(reviewedReportStatus)
 //                    .department(accountingDepartment)
                     .term(term1)
 //                    .user(user3)
@@ -1421,7 +1422,7 @@ public class SeedConfiguration {
                     .name("Report Name 5")
                     .month(LocalDate.now())
 //                    .version("v1")
-                    .status(planStatus2)
+                    .status(reviewedReportStatus)
 //                    .department(accountingDepartment)
                     .term(term3)
 //                    .user(user4)
@@ -1431,13 +1432,73 @@ public class SeedConfiguration {
                     .name("Report Name 6")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(planStatus2)
+                    .status(closedReportStatus)
 //                    .department(itDepartment)
                     .term(term2)
 //                    .user(user1)
                     .build();
 
-            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
+            FinancialReport report7 = FinancialReport.builder()
+                    .name("Report Name 7")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(newReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report8 = FinancialReport.builder()
+                    .name("Report Name 8")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(approvedReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report9 = FinancialReport.builder()
+                    .name("Report Name 9")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(waitingForApprovalReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report10 = FinancialReport.builder()
+                    .name("Report Name 10")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(newReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report11 = FinancialReport.builder()
+                    .name("Report Name 11")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(approvedReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report12 = FinancialReport.builder()
+                    .name("Report Name 12")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(waitingForApprovalReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6, report7, report8, report9, report10, report11, report12));
 
             // Get 15 random expense
 //            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();

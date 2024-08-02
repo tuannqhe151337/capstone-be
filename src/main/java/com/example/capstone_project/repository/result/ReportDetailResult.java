@@ -14,9 +14,13 @@ public interface ReportDetailResult {
 
     Long getStatusId();
 
+    String getStatusCode();
+
     String getStatusName();
 
     LocalDateTime getCreatedAt();
+
+    LocalDateTime getStartDate();
 
     LocalDateTime getEndDate();
 

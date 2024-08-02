@@ -17,5 +17,4 @@ public class ReportResponse {
     private String name;
     private StatusResponse status;
     private TermResponse term;
-    private DepartmentResponse department;
 }

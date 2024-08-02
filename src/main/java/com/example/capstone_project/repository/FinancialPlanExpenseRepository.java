@@ -121,4 +121,22 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (:statusId IS NULL OR status.id = :statusId) AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     long countDistinctListExpenseForReport(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
+
+    @Query(" SELECT expense.planExpenseKey AS expenseCode, expense.createdAt AS date, term.name AS termName, department.name AS departmentName, expense.name AS expenseName," +
+            " costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount,(expense.unitPrice*expense.amount) AS total ,expense.projectName AS projectName, expense.supplierName AS supplierName, expense.pic AS pic," +
+            " expense.note AS note, status.code AS statusCode FROM FinancialPlanExpense expense " +
+            " LEFT JOIN expense.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term term " +
+            " LEFT JOIN plan.department department " +
+            " LEFT JOIN expense.status status " +
+            " LEFT JOIN expense.costType costType " +
+            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId) AND " +
+            " (expense.isDelete = false OR expense.isDelete is null) ")
+    List<ExpenseResult> getListExpenseByReportId(Long reportId);
 }

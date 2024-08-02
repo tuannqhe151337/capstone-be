@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -20,12 +21,16 @@ import com.example.capstone_project.utils.enums.TermDuration;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.exception.term.InvalidEndDateException;
+import com.example.capstone_project.utils.exception.term.InvalidEndReupDateException;
+import com.example.capstone_project.utils.exception.term.InvalidStartReupDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -101,15 +106,13 @@ public class TermServiceTest {
                 .id(1L).
                 name("Not started")
                 .code(TermCode.NEW).build();
-       term = Term.builder()
-                .id(4L)
-                .name("Winter 2024")
-                .duration(TermDuration.HALF_YEARLY)
-                .startDate(LocalDateTime.of(2025, 12, 1, 0, 0))
-                .endDate(LocalDateTime.of(2025, 12, 31, 23, 59))
-                .user(user)
-                .status(termStatus)
-                .build();
+        Term term = new Term();
+        term.setStartDate(LocalDateTime.now().minusDays(10)); // Start date 10 days ago
+        term.setEndDate(LocalDateTime.now().plusDays(5)); // End date in 5 days
+        term.setReuploadStartDate(LocalDateTime.now().plusDays(6)); // Re-upload start date in 6 days
+        term.setReuploadEndDate(LocalDateTime.now().plusDays(7)); // Re-upload end date in 7 days
+        term.setDuration(TermDuration.MONTHLY);
+        term.setFinalEndTermDate(LocalDateTime.now().minusDays(1)); // F
 
         // Mock the SecurityContextHolder to return a valid user ID
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -135,25 +138,211 @@ public class TermServiceTest {
 
   //create term
 
+//Final end date is in the past
     @Test
-    public void testCreateTerm_Success() throws Exception {
-        // Mock the necessary methods
+    void testFinalEndDateInThePast() {
+        // Mock user authority check
         when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
         when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
-        when(termStatusRepository.getReferenceById(termStatus.getId())).thenReturn(termStatus);
-        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
 
-        // Perform the create term action
-        termServiceImpl.createTerm(term);
 
-        // Verify interactions and assert results
-        verify(userAuthorityRepository, times(1)).get(actorId);
-        verify(termStatusRepository, times(1)).getReferenceById(termStatus.getId());
-        verify(userRepository, times(1)).getReferenceById(user.getId()); // Use user.getId() instead of userId
-        verify(termRepository, times(1)).save(term);
+        Term term1 = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now().minusDays(35))   //start date too long time ago , final date is in the past
+                .endDate(LocalDateTime.now().plusDays(5))
+                .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+        assertThrows(InvalidEndDateException.class, () -> {
+            termServiceImpl.createTerm(term1);
+        });
+
     }
-    //list term management
- //
+
+    // Test case for end date before start date
+    @Test
+    void testEndDateBeforeStartDate() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().minusDays(10)) // // Test case for end date before start date
+                .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+
+        // Expect InvalidEndDateException
+        assertThrows(InvalidEndDateException.class, () -> {
+            termServiceImpl.createTerm(mockTerm);
+        });
+    }
+    // Test case for reupload start date before end date
+    @Test
+    void testReuploadStartDateBeforeEndDate() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(5))
+                .reuploadStartDate(LocalDateTime.now().plusDays(3))// Reupload start date before end date
+                .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+
+        assertThrows(InvalidStartReupDateException.class, () -> {
+            termServiceImpl.createTerm(mockTerm);
+        });
+    }
+
+    // Test case for reupload end date before reupload start date
+    @Test
+    void testReuploadEndDateBeforeReuploadStartDate() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(2))
+                .reuploadStartDate(LocalDateTime.now().plusDays(3))
+                .reuploadEndDate(LocalDateTime.now().plusDays(2))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+
+        assertThrows(InvalidEndReupDateException.class, () -> {
+            termServiceImpl.createTerm(mockTerm);
+        });
+
+    }
+//end date after final end term date
+@Test
+void  testEndDateGreaterThanFinalEndTermDate() {
+    // Mock user authority check
+    when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+    when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+    Term mockTerm = Term.builder()
+            .id(1L)
+            .name("Spring 2024")
+            .duration(TermDuration.MONTHLY)
+            .startDate(LocalDateTime.now())
+            .endDate(LocalDateTime.now().plusDays(35))  ////end date after final end term date
+            .reuploadStartDate(LocalDateTime.now().plusDays(3))
+            .reuploadEndDate(LocalDateTime.now().plusDays(2))
+            .user(user)
+            .status(termStatus)
+            .build();// Properly set the mocked duration
+
+
+    InvalidEndDateException thrown =  assertThrows(InvalidEndDateException.class, () -> {
+        termServiceImpl.createTerm(mockTerm);
+    });
+    assertEquals("End date must be in the future and after start date", thrown.getMessage());
+}
+    @Test
+    void testReuploadStartDateGreaterThanFinalEndTermDate() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(5))  ////end date after final end term date
+                .reuploadStartDate(LocalDateTime.now().plusDays(35))
+                .reuploadEndDate(LocalDateTime.now().plusDays(2))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+        // Mong đợi InvalidStartReupDateException
+        InvalidStartReupDateException thrown = assertThrows(InvalidStartReupDateException.class, () -> {
+            termServiceImpl.createTerm(mockTerm);
+        });
+        assertEquals("Re-upload start date must be in the future and after end date", thrown.getMessage());
+    }
+
+    @Test
+    void testReuploadEndDateGreaterThanFinalEndTermDate() {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(5))  ////end date after final end term date
+                .reuploadStartDate(LocalDateTime.now().plusDays(6))
+                .reuploadEndDate(LocalDateTime.now().plusDays(100))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked dura
+
+
+        // Mong đợi InvalidEndReupDateException
+        InvalidEndReupDateException thrown = assertThrows(InvalidEndReupDateException.class, () -> {
+            termServiceImpl.createTerm(mockTerm);
+        });
+        assertEquals("Re-upload end date must be in the future and after re-up start date", thrown.getMessage());
+    }
+
+
+    // Test case for successful term creation
+    @Test
+    void testCreateTermSuccess() throws Exception {
+        // Mock user authority check
+        when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+        when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.CREATE_TERM.getValue()));
+
+        Term mockTerm = Term.builder()
+                .id(1L)
+                .name("Spring 2024")
+                .duration(TermDuration.MONTHLY)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(5))
+                .reuploadStartDate(LocalDateTime.now().plusDays(10))
+                .reuploadEndDate(LocalDateTime.now().plusDays(15))
+                .user(user)
+                .status(termStatus)
+                .build();// Properly set the mocked duration
+
+        termServiceImpl.createTerm(mockTerm);
+
+        // Verify that the term is saved
+        Mockito.verify(termRepository).save(mockTerm);
+    }
+
 
 
 

@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FinancialPlanService {
-    long countDistinct(String query, Long termId, Long departmentId, Long statusId) throws Exception;
+    long countDistinct(String query, Long termId, Long departmentId) throws Exception;
 
-    List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Long statusId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
+    List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
 
     FinancialPlan creatPlan(FinancialPlan plan, Term term) throws Exception;
 
@@ -21,7 +21,7 @@ public interface FinancialPlanService {
 
     Term getTermById(Long termId);
 
-    List<PlanStatus> getListPlanStatus();
+    List<ReportStatus> getListPlanStatus();
 
     FinancialPlan deletePlan(long planId);
 

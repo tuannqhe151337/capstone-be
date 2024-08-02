@@ -16,8 +16,6 @@ public interface ExpenseResult {
 
     String getDepartmentName();
 
-    String getExpense();
-
     String getCostTypeName();
 
     BigDecimal getUnitPrice();
