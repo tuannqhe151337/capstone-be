@@ -736,7 +736,7 @@ public class SeedConfiguration {
                     .id(2L)
                     .name("Summer 2024")
                     .duration(TermDuration.QUARTERLY)
-                    .startDate(LocalDateTime.now())
+                    .startDate(LocalDateTime.now().minusDays(15))
                     .endDate(LocalDateTime.now().minusDays(15).plusDays(5))
                     .reuploadStartDate(LocalDateTime.now().minusDays(15).plusDays(20))
                     .reuploadEndDate(LocalDateTime.now().minusDays(15).plusDays(21))
