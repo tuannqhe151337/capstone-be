@@ -1,5 +1,6 @@
 package com.example.capstone_project.repository.result;
 
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class ReportExpenseResult {
     String pic;
     String note;
     long statusId;
+    String statusCode;
     String statusName;
     long departmentId;
     String departmentName;

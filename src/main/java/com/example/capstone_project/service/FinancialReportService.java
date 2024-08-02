@@ -36,4 +36,10 @@ public interface FinancialReportService {
     BigDecimal calculateActualCostByReportId(Long reportId);
 
     BigDecimal calculateExpectedCostByReportId(Long reportId);
+
+    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+
+    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+
+    void approvalAllExpenses(Long reportId) throws Exception;
 }

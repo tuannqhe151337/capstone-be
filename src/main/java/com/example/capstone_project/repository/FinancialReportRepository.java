@@ -46,7 +46,10 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
             "                       JOIN term_2.financialReports report_2 " +
-            "                       WHERE report_2.id = :reportId) AND " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null )" +
+            "                       GROUP BY file_2.id) " +
+            " AND " +
             " expense.status.code = :approved AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     BigDecimal calculateActualCostByReportId(Long reportId, ExpenseStatusCode approved);
@@ -62,7 +65,10 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
             "                       JOIN term_2.financialReports report_2 " +
-            "                       WHERE report_2.id = :reportId) AND " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
+            "                       GROUP BY file_2.id)" +
+            " AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     BigDecimal calculateExpectedCostByReportId(Long reportId);
 

@@ -12,9 +12,12 @@ import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
+import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
+import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -25,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,6 +42,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final DepartmentRepository departmentRepository;
     private final CostTypeRepository costTypeRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
+    private final ReportStatusRepository reportStatusRepository;
     private final HandleFileHelper handleFileHelper;
 
     @Override
@@ -285,6 +291,127 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             return expenseRepository.getListExpenseByReportId(reportId);
         } else {
             throw new UnauthorizedException("Unauthorized to download report");
+        }
+    }
+
+
+    @Override
+    public void approvalAllExpenses(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseToApprovedByReportId(reportId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException("Not exist report id = " + reportId + " or list expense is empty");
+            }
+            expenses.forEach(expense -> {
+                expense.setStatus(expenseStatusRepository.getReferenceById(3L));
+            });
+
+            expenseRepository.saveAll(expenses);
+            // Get plan of this list expense
+            FinancialReport report = financialReportRepository.getReferenceById(reportId);
+            // Change status to Approved
+            report.setStatus(reportStatusRepository.getReferenceById(4L));
+
+            financialReportRepository.save(report);
+
+            expenseRepository.saveAll(expenses);
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval expense");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void approvalExpenses(Long reportId, List<Long> listExpenses) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            listExpenses = RemoveDuplicateHelper.removeDuplicates(listExpenses);
+
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenses.size() == totalExpense) {
+
+                listExpenses.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                        expenses.add(updateExpense);
+                    }
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialReport report = financialReportRepository.getReferenceById(reportId);
+                // Change status to Reviewed
+                report.setStatus(reportStatusRepository.getReferenceById(3L));
+
+                financialReportRepository.save(report);
+
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval expense");
+        }
+    }
+
+    @Override
+    public void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+
+            listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
+
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            // Check list expense in one file
+            long totalExpense = expenseRepository.countListExpenseInReport(planId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenseId.size() == totalExpense) {
+
+                listExpenseId.forEach(expense -> {
+                    if (!expenseRepository.existsById(expense)) {
+                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
+                    } else {
+                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(4L));
+                        expenses.add(updateExpense);
+                    }
+
+                });
+                expenseRepository.saveAll(expenses);
+                // Get plan of this list expense
+                FinancialReport report = financialReportRepository.getReferenceById(planId);
+                // Change status to Reviewed
+                report.setStatus(reportStatusRepository.getReferenceById(3L));
+
+                financialReportRepository.save(report);
+                expenseRepository.saveAll(expenses);
+            } else {
+                throw new InvalidInputException("List expense Id invalid ");
+            }
+        } else {
+            throw new UnauthorizedException("Unauthorized to approval expense");
         }
     }
 }
