@@ -536,73 +536,79 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 throw new ResourceNotFoundException("Not found any plan have id = " + planId);
             }
 
-            long departmentId = planRepository.getDepartmentIdByPlanId(planId);
-            // Check department
-            if (departmentId == userDetail.getDepartmentId()) {
-                List<ExpenseResult> listExpenseCreate = expenseRepository.getListExpenseByPlanId(planId);
+            Term term = termRepository.getTermByPlanId(planId);
 
-                // Check null and empty
-                if (listExpenseCreate == null || listExpenseCreate.isEmpty()) {
-                    throw new ResourceNotFoundException("List expense is empty");
-                }
+            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))
+                    || (LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
+                long departmentId = planRepository.getDepartmentIdByPlanId(planId);
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    List<ExpenseResult> listExpenseCreate = expenseRepository.getListExpenseByPlanId(planId);
 
-                // Handle list expense
-                HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
-                List<FinancialPlanExpense> listExpense = new ArrayList<>();
-
-                // Get last code of expense by plan Id
-                String lastExpenseCode = expenseRepository.getLastExpenseCode(planId);
-                String[] parts = lastExpenseCode.split("_");
-
-                // Create prefix expense code
-                StringBuilder prefixExpenseKey = new StringBuilder();
-                for (int i = 0; i < parts.length - 2; i++) {
-                    prefixExpenseKey.append(parts[i] + "_");
-                }
-
-                int lastIndexCode = Integer.parseInt(parts[parts.length - 1]);
-
-                // Get current version by plan Id
-                PlanVersionResult version = planRepository.getCurrentVersionByPlanId(planId);
-
-                // Split list expense depend on status code
-                for (ExpenseResult expenseResult : listExpenseCreate) {
-                    if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
-                        hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
-
-                        // Add old expenses had approved in old version
-                        listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
-                    } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
-                        hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
-                    } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {
-                        hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.WAITING_FOR_APPROVAL);
-                    } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
-                        hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
+                    // Check null and empty
+                    if (listExpenseCreate == null || listExpenseCreate.isEmpty()) {
+                        throw new ResourceNotFoundException("List expense is empty");
                     }
-                }
 
-                // Handle new expenses need to re-upload
-                for (ReUploadExpenseBody expenseBody : expenseBodies) {
+                    // Handle list expense
+                    HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
+                    List<FinancialPlanExpense> listExpense = new ArrayList<>();
 
-                    // If exist expense code and status not approve, update expense
-                    if (hashMapExpense.containsKey(expenseBody.getExpenseCode()) &&
-                            !hashMapExpense.get(expenseBody.getExpenseCode()).getValue().equals(ExpenseStatusCode.APPROVED.getValue())
-                    ) {
-                        listExpense.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(expenseBody));
+                    // Get last code of expense by plan Id
+                    String lastExpenseCode = expenseRepository.getLastExpenseCode(planId);
+                    String[] parts = lastExpenseCode.split("_");
 
-                        // If not exist expense code, create new expense
-                    } else if (!hashMapExpense.containsKey(expenseBody.getExpenseCode())) {
-                        listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), ++lastIndexCode));
+                    // Create prefix expense code
+                    StringBuilder prefixExpenseKey = new StringBuilder();
+                    for (int i = 0; i < parts.length - 2; i++) {
+                        prefixExpenseKey.append(parts[i] + "_");
                     }
+
+                    int lastIndexCode = Integer.parseInt(parts[parts.length - 1]);
+
+                    // Get current version by plan Id
+                    PlanVersionResult version = planRepository.getCurrentVersionByPlanId(planId);
+
+                    // Split list expense depend on status code
+                    for (ExpenseResult expenseResult : listExpenseCreate) {
+                        if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
+
+                            // Add old expenses had approved in old version
+                            listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
+                        } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
+                        } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.WAITING_FOR_APPROVAL);
+                        } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
+                        }
+                    }
+
+                    // Handle new expenses need to re-upload
+                    for (ReUploadExpenseBody expenseBody : expenseBodies) {
+
+                        // If exist expense code and status not approve, update expense
+                        if (hashMapExpense.containsKey(expenseBody.getExpenseCode()) &&
+                                !hashMapExpense.get(expenseBody.getExpenseCode()).getValue().equals(ExpenseStatusCode.APPROVED.getValue())
+                        ) {
+                            listExpense.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(expenseBody));
+
+                            // If not exist expense code, create new expense
+                        } else if (!hashMapExpense.containsKey(expenseBody.getExpenseCode())) {
+                            listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), ++lastIndexCode));
+                        }
+                    }
+
+                    // Map to plan
+                    return new ReUploadExpensesMapperImpl().mapToPlanMapping(planId, (long) UserHelper.getUserId(), version, listExpense);
+                } else {
+                    throw new UnauthorizedException("User can't upload this plan because departmentId of plan not equal with departmentId of user");
                 }
-
-                // Map to plan
-                FinancialPlan plan = new ReUploadExpensesMapperImpl().mapToPlanMapping(planId, (long) UserHelper.getUserId(), version, listExpense);
-
-                return plan;
             } else {
-                throw new UnauthorizedException("User can't upload this plan because departmentId of plan not equal with departmentId of user");
+                throw new InvalidDateException("Can not re-upload plan in this time period");
             }
+
         } else {
             throw new UnauthorizedException("Unauthorized to re-upload plan");
         }
