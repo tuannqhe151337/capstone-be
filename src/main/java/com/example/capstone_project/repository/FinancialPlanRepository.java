@@ -51,9 +51,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.createdAt, department.id, department.name, user.id, user.username " )
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
 
-    @Query(value = " SELECT count(distinct (file.plan.id)) FROM FinancialPlanFile file " +
-            " WHERE file.plan.id = :planId" +
-            " GROUP BY file.plan.id ")
+    @Query(value = " SELECT count(distinct (file.id)) FROM FinancialPlanFile file " +
+            " WHERE file.plan.id = :planId AND " +
+            " (file.isDelete = false OR file.isDelete is null) " )
     int getPlanVersionByPlanId(@Param("planId") Long planId);
 
     @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +

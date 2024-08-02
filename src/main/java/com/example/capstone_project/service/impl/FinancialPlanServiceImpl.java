@@ -229,31 +229,17 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
-            // Accountant role can view all plan
-            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
+            PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
 
-                if (planResult == null) {
-                    throw new ResourceNotFoundException("Not found plan id = " + planId);
-                }
+            if (planResult == null) {
+                throw new ResourceNotFoundException("Not found plan id = " + planId);
+            }
 
+            // Check department
+            if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
                 return planResult;
-                // Financial staff can only view plan of their department
-            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                PlanDetailResult planResult = planRepository.getFinancialPlanById(planId);
-
-                if (planResult == null) {
-                    throw new ResourceNotFoundException("Not found plan id = " + planId);
-                }
-
-                // Check department
-                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
-                    return planResult;
-                } else {
-                    throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
-                }
             } else {
-                throw new UnauthorizedException("Unauthorized to view plan");
+                throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
             }
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");
@@ -262,7 +248,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     public int getPlanVersionById(Long planId) {
-        return planRepository.getPlanVersionByPlanId(planId);
+        long userId = UserHelper.getUserId();
+
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
+
+            if (!planRepository.existsById(planId)) {
+                throw new ResourceNotFoundException("Not found plan id = " + planId);
+            }
+
+            return planRepository.getPlanVersionByPlanId(planId);
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
     }
 
     @Override
@@ -578,8 +576,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                             listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
-                        } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {
-                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.WAITING_FOR_APPROVAL);
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
                         }
