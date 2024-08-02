@@ -226,8 +226,7 @@ public class UserController {
     public ResponseEntity<Object> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Reset password success").build();
-            return ResponseEntity.status(HttpStatus.OK).body(exceptionResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (ResourceNotFoundException e) {
             ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
