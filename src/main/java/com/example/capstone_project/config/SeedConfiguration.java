@@ -676,10 +676,10 @@ public class SeedConfiguration {
             ));
 
             // Report status
-            ReportStatus approvedReportStatus = ReportStatus.builder()
+            ReportStatus newReportStatus = ReportStatus.builder()
                     .id(1L)
-                    .name(ReportStatusCode.APPROVED.getValue())
-                    .code(ReportStatusCode.APPROVED)
+                    .name(ReportStatusCode.NEW.getValue())
+                    .code(ReportStatusCode.NEW)
                     .build();
 
             ReportStatus waitingForApprovalReportStatus = ReportStatus.builder()
@@ -694,13 +694,19 @@ public class SeedConfiguration {
                     .code(ReportStatusCode.REVIEWED)
                     .build();
 
-            ReportStatus closedReportStatus = ReportStatus.builder()
+            ReportStatus approvedReportStatus = ReportStatus.builder()
                     .id(4L)
+                    .name(ReportStatusCode.APPROVED.getValue())
+                    .code(ReportStatusCode.APPROVED)
+                    .build();
+
+            ReportStatus closedReportStatus = ReportStatus.builder()
+                    .id(5L)
                     .name(ReportStatusCode.CLOSED.getValue())
                     .code(ReportStatusCode.CLOSED)
                     .build();
 
-            reportStatusRepository.saveAll(List.of(approvedReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, closedReportStatus));
+            reportStatusRepository.saveAll(List.of(newReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, approvedReportStatus, closedReportStatus));
 
             Term term1 = Term.builder()
                     .id(1L)
@@ -1365,7 +1371,7 @@ public class SeedConfiguration {
                     .name("Report Name 1")
                     .month(LocalDate.now())
 //                    .version("v3")
-                    .status(approvedReportStatus)
+                    .status(newReportStatus)
 //                    .department(accountingDepartment)
                     .term(term1)
 //                    .user(user1)
@@ -1421,7 +1427,67 @@ public class SeedConfiguration {
 //                    .user(user1)
                     .build();
 
-            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6));
+            FinancialReport report7 = FinancialReport.builder()
+                    .name("Report Name 7")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(newReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report8 = FinancialReport.builder()
+                    .name("Report Name 8")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(approvedReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report9 = FinancialReport.builder()
+                    .name("Report Name 9")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(waitingForApprovalReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report10 = FinancialReport.builder()
+                    .name("Report Name 10")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(newReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report11 = FinancialReport.builder()
+                    .name("Report Name 11")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(approvedReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            FinancialReport report12 = FinancialReport.builder()
+                    .name("Report Name 12")
+                    .month(LocalDate.now())
+//                    .version("v3")
+                    .status(waitingForApprovalReportStatus)
+//                    .department(itDepartment)
+                    .term(term2)
+//                    .user(user1)
+                    .build();
+
+            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6, report7, report8, report9, report10, report11, report12));
 
             // Get 15 random expense
 //            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();

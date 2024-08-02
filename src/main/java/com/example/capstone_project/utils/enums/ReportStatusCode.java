@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ReportStatusCode {
+    NEW("New"),
     WAITING_FOR_APPROVAL("Waiting for approval"),
     APPROVED("Approved"),
     REVIEWED("Reviewed"),

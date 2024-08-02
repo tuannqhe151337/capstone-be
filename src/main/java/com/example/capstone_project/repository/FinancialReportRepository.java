@@ -21,7 +21,8 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
     long countDistinctListReportPaginate(@Param("query") String query, @Param("termId") Long termId, @Param("statusId") Long statusId);
 
     @Query(" SELECT report.id AS reportId, report.name AS name, term.id AS termId, term.name AS termName, status.id AS statusId, status.code AS statusCode, status.name AS statusName, " +
-            " report.createdAt AS createdAt, term.endDate AS endDate, term.reuploadStartDate AS reuploadStartDate, term.reuploadEndDate AS reuploadEndDate, term.finalEndTermDate AS finalEndTermDate FROM FinancialReport report " +
+            " report.createdAt AS createdAt, term.startDate AS startDate, term.endDate AS endDate, term.reuploadStartDate AS reuploadStartDate, term.reuploadEndDate AS reuploadEndDate, term.finalEndTermDate AS finalEndTermDate " +
+            " FROM FinancialReport report " +
             " JOIN report.term term " +
             " JOIN report.status status " +
             " WHERE report.id = :reportId AND " +

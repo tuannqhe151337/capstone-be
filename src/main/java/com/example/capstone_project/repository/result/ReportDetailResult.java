@@ -20,6 +20,8 @@ public interface ReportDetailResult {
 
     LocalDateTime getCreatedAt();
 
+    LocalDateTime getStartDate();
+
     LocalDateTime getEndDate();
 
     LocalDateTime getReuploadStartDate();

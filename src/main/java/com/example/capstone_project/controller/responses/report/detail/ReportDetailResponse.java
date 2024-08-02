@@ -20,8 +20,4 @@ public class ReportDetailResponse {
     private TermResponse term;
     private StatusResponse status;
     private LocalDateTime createdAt;
-    private LocalDateTime endDate;
-    private LocalDateTime reuploadStartDate;
-    private LocalDateTime reuploadEndDate;
-    private LocalDateTime finalEndTermDate;
 }
