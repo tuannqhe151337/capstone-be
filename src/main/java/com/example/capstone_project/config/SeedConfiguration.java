@@ -858,23 +858,17 @@ public class SeedConfiguration {
 
             ExpenseStatus expenseStatus2 = ExpenseStatus.builder()
                     .id(2L)
-                    .name("Waiting for approval")
-                    .code(ExpenseStatusCode.WAITING_FOR_APPROVAL)
-                    .build();
-
-            ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
-                    .id(3L)
                     .name("Approved")
                     .code(ExpenseStatusCode.APPROVED)
                     .build();
 
-            ExpenseStatus expenseStatus4 = ExpenseStatus.builder()
-                    .id(4L)
+            ExpenseStatus expenseStatus3 = ExpenseStatus.builder()
+                    .id(3L)
                     .name("Denied")
                     .code(ExpenseStatusCode.DENIED)
                     .build();
 
-            expenseStatusRepository.saveAll(List.of(expenseStatus1, expenseStatus2, expenseStatus3, expenseStatus4));
+            expenseStatusRepository.saveAll(List.of(expenseStatus1, expenseStatus2, expenseStatus3));
 
             FinancialPlanFile financialPlanFile1_1 = FinancialPlanFile.builder()
                     .id(1L)
@@ -1118,7 +1112,6 @@ public class SeedConfiguration {
                     case 1 -> expenseStatus1;
                     case 2 -> expenseStatus2;
                     case 3 -> expenseStatus3;
-                    case 4 -> expenseStatus4;
                     default -> expenseStatus1; // Default case, should never be reached
                 };
 

@@ -572,12 +572,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                         if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
 
-                            // Add old expenses had approved in old version
+                            // Add old expenses had approved in ol
+                            // d version
                             listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
-                        } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.WAITING_FOR_APPROVAL)) {
-                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.WAITING_FOR_APPROVAL);
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
                         }
