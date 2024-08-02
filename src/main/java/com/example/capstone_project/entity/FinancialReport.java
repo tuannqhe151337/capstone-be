@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(schema = "capstone_v2", name = "financial_reports")
@@ -26,7 +25,7 @@ public class FinancialReport extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
     @JoinColumn(name = "status_id")
-    private PlanStatus status;
+    private ReportStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id")

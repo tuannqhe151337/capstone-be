@@ -63,4 +63,10 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
     List<Term> getListTermNeedToClose(TermCode termCode, LocalDateTime now);
+
+    @Query( " SELECT term FROM FinancialPlan plan " +
+            " JOIN plan.term term " +
+            " WHERE plan.id = :planId AND " +
+            " term.isDelete = false OR term.isDelete is null ")
+    Term getTermByPlanId(Long planId);
 }

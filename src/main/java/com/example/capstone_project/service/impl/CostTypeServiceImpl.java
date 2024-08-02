@@ -12,6 +12,7 @@ import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class CostTypeServiceImpl implements CostTypeService {
     private final UserAuthorityRepository userAuthorityRepository;
 
     @Override
-    public List<CostType> getListCostType() {
+    public List<CostType> getListCostType(String query, Pageable pageable) {
         // Get list authorities of user
         Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
 
@@ -36,7 +37,7 @@ public class CostTypeServiceImpl implements CostTypeService {
                 || authorities.contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
                 || authorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
 
-            return costTypeRepository.findAll(Sort.by(CostType_.ID).ascending());
+            return costTypeRepository.getListCostTypePaginate(query, pageable);
 
         } else {
             throw new UnauthorizedException("User unauthorized");
@@ -95,6 +96,40 @@ public class CostTypeServiceImpl implements CostTypeService {
             costTypeRepository.save(costType);
         } else {
             throw new UnauthorizedException("Unauthorized to delete cost type");
+        }
+    }
+
+    @Override
+    public long countDistinctListCostType(String query) {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.CREATE_NEW_COST_TYPE.getValue())
+                || authorities.contains(AuthorityCode.IMPORT_PLAN.getValue())
+                || authorities.contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
+                || authorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+
+            return costTypeRepository.countDistinctListCostType(query);
+
+        } else {
+            throw new UnauthorizedException("User unauthorized");
+        }
+    }
+
+    @Override
+    public List<CostType> getListCostType() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.IMPORT_PLAN.getValue())
+                || authorities.contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
+                || authorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+
+            return costTypeRepository.findAll(Sort.by(CostType_.ID).ascending());
+        } else {
+            throw new UnauthorizedException("User unauthorized");
         }
     }
 }

@@ -7,6 +7,7 @@ import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface FinancialReportService {
@@ -15,20 +16,24 @@ public interface FinancialReportService {
     long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception;
 
 //    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer statusId, Integer costTypeId);
-//
-//    ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception;
+
+    ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception;
 
     FinancialReport deleteReport(Long reportId);
 
-//    byte[] getBodyFileExcelXLSX(Long reportId) throws Exception;
+    byte[] getBodyFileExcelXLSX(Long reportId) throws Exception;
 
     String generateXLSXFileName(Long reportId);
 
-//    byte[] getBodyFileExcelXLS(Long reportId) throws Exception;
+    byte[] getBodyFileExcelXLS(Long reportId) throws Exception;
 
     String generateXLSFileName(Long reportId);
 
     List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable);
 
     long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
+
+    BigDecimal calculateActualCostByReportId(Long reportId);
+
+    BigDecimal calculateExpectedCostByReportId(Long reportId);
 }

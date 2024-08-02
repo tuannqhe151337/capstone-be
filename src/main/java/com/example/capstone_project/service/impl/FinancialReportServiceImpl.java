@@ -13,6 +13,7 @@ import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -42,17 +44,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
-        // Get user detail
-        UserDetail userDetail = userDetailRepository.get(userId);
-
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-                // Financial staff only see list-plan of their department
-                departmentId = userDetail.getDepartmentId();
-            }
-
-            return financialReportRepository.getReportWithPagination(query, termId, departmentId, statusId, pageable);
+            return financialReportRepository.getReportWithPagination(query, termId, statusId, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
@@ -76,39 +70,24 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
     }
 
-//    @Override
-//    public ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception {
-//        // Get userId from token
-//        long userId = UserHelper.getUserId();
-//
-//        // Get user detail
-//        UserDetail userDetail = userDetailRepository.get(userId);
-//
-//        // Check authority
-//        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-//            // Accountant role can view all plan
-//            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-//                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
-//                if (planResult == null) {
-//                    throw new ResourceNotFoundException("Not found any report have id = " + reportId);
-//                }
-//                return planResult;
-//                // Financial staff can only view plan of their department
-//            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-//                ReportDetailResult planResult = financialReportRepository.getFinancialReportById(reportId);
-//
-//                // Check department
-//                if (planResult.getDepartmentId() == userDetail.getDepartmentId()) {
-//                    return planResult;
-//                } else {
-//                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
-//                }
-//            }
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        } else {
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        }
-//    }
+    @Override
+    public ReportDetailResult getReportDetailByReportId(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+
+            return financialReportRepository.getFinancialReportById(reportId);
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
 
     @Override
     @Transactional
@@ -170,22 +149,22 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 //        return expenseRepository.countDistinctListExpenseWithPaginate(query, reportId, statusId, costTypeId);
 //    }
 
-//    @Override
-//    public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
-//        // Checkout authority and get list expenses by file id
-//        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-//
-//        if (expenses != null) {
-//
-//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-//            FileInputStream file = new FileInputStream(fileLocation);
-//            XSSFWorkbook wb = new XSSFWorkbook(file);
-//
-//            return handleFileHelper.fillDataToExcel(wb, expenses);
-//        }
-//
-//        return null;
-//    }
+    @Override
+    public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+            FileInputStream file = new FileInputStream(fileLocation);
+            XSSFWorkbook wb = new XSSFWorkbook(file);
+
+            return handleFileHelper.fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
 
     @Override
     public String generateXLSXFileName(Long reportId) {
@@ -196,22 +175,22 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         return null;
     }
 
-//    @Override
-//    public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
-//        // Checkout authority and get list expenses by file id
-//        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-//
-//        if (expenses != null) {
-//
-//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-//            FileInputStream file = new FileInputStream(fileLocation);
-//            HSSFWorkbook wb = new HSSFWorkbook(file);
-//
-//            return handleFileHelper.fillDataToExcel(wb, expenses);
-//        }
-//
-//        return null;
-//    }
+    @Override
+    public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
+        // Checkout authority and get list expenses by file id
+        List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
+
+        if (expenses != null) {
+
+            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+            FileInputStream file = new FileInputStream(fileLocation);
+            HSSFWorkbook wb = new HSSFWorkbook(file);
+
+            return handleFileHelper.fillDataToExcel(wb, expenses);
+        }
+
+        return null;
+    }
 
     @Override
     public String generateXLSFileName(Long reportId) {
@@ -258,37 +237,50 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
     }
 
-//    private List<ExpenseResult> getListExpenseByReportId(Long reportId) throws Exception {
-//        // Get userId from token
-//        long userId = UserHelper.getUserId();
-//
-//        // Get user detail
-//        UserDetail userDetail = userDetailRepository.get(userId);
-//
-//        // Check authority
-//        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-//            if (!financialReportRepository.existsById(reportId)) {
-//                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
-//            }
-//            // Accountant role can view all plan
-//            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-//                return financialReportRepository.getListExpenseByReportId(reportId);
-//
-//                // Financial staff can only view plan of their department
-//            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-//                long departmentId = financialReportRepository.getDepartmentId(reportId);
-//
-//                // Check department
-//                if (departmentId == userDetail.getDepartmentId()) {
-//                    return financialReportRepository.getListExpenseByReportId(reportId);
-//                } else {
-//                    throw new UnauthorizedException("User can't view this report because departmentId of plan not equal with departmentId of user");
-//                }
-//            }
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        } else {
-//            throw new UnauthorizedException("Unauthorized to view report");
-//        }
-//
-//    }
+    @Override
+    public BigDecimal calculateActualCostByReportId(Long reportId) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return financialReportRepository.calculateActualCostByReportId(reportId, ExpenseStatusCode.APPROVED);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    @Override
+    public BigDecimal calculateExpectedCostByReportId(Long reportId) {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return financialReportRepository.calculateExpectedCostByReportId(reportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    private List<ExpenseResult> getListExpenseByReportId(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.DOWNLOAD_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return expenseRepository.getListExpenseByReportId(reportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to download report");
+        }
+    }
 }

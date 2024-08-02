@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -12,4 +14,9 @@ import lombok.NoArgsConstructor;
 public class TermResponse {
     private long termId;
     private String name;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private LocalDateTime reuploadStartDate;
+    private LocalDateTime reuploadEndDate;
+    private LocalDateTime finalEndTermDate;
 }

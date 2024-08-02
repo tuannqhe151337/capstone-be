@@ -8,6 +8,5 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AnnualReportPaginateResponseMapper {
     @Mapping(source = "id", target = "annualReportId")
-    @Mapping(source = "createdAt", target = "createDate")
     AnnualReportResponse mapToAnnualReportResponseMapping(AnnualReport annualReport);
 }

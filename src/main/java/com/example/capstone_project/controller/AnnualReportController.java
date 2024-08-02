@@ -197,14 +197,14 @@ public class AnnualReportController {
 
     @PostMapping("/download-xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @Valid @RequestBody AnnualReportDownloadBody annualReportBody
+            @RequestParam(required = true) Long annualReportId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = annualReportService.getBodyFileExcelXLSX(annualReportBody.getAnnualReportId());
+            byte[] report = annualReportService.getBodyFileExcelXLSX(annualReportId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = annualReportService.generateXLSXFileName(annualReportBody.getAnnualReportId());
+                String outFileName = annualReportService.generateXLSXFileName(annualReportId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
@@ -218,16 +218,16 @@ public class AnnualReportController {
         }
     }
 
-    @PostMapping("/download-xls")
+    @GetMapping("/download-xls")
     public ResponseEntity<byte[]> generateXlsReport(
-            @Valid @RequestBody AnnualReportDownloadBody annualReportBody
+            @RequestParam(required = true) Long annualReportId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = annualReportService.getBodyFileExcelXLS(annualReportBody.getAnnualReportId());
+            byte[] report = annualReportService.getBodyFileExcelXLS(annualReportId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = annualReportService.generateXLSFileName(annualReportBody.getAnnualReportId());
+                String outFileName = annualReportService.generateXLSFileName(annualReportId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 

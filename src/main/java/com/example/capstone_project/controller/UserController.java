@@ -114,16 +114,16 @@ public class UserController {
         } catch (UnauthorizedException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (DataIntegrityViolationException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("emails already exists").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("Emails already exists").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidDepartmentIdException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("Department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidPositionIdException e){
-            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("Position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch(InvalidRoleIdException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("Role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
@@ -158,16 +158,16 @@ public class UserController {
         } catch (UnauthorizedException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (DataIntegrityViolationException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("email already exists").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("email").message("Email already exists").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidDepartmentIdException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("department does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("Department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidPositionIdException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("position does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("Position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (InvalidRoleIdException e) {
-            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("role does not exist").build();
+            ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("Role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -179,7 +179,7 @@ public class UserController {
     public ResponseEntity<String> deactivateUser(@Valid @RequestBody DeactiveUserBody deactiveUserBody, BindingResult bindingResult) {
         try {
             userService.deactivateUser(deactiveUserBody);
-            return ResponseEntity.status(HttpStatus.OK).body("Deactive user success");
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(e.getMessage());
         } catch (ResourceNotFoundException e) {
@@ -189,42 +189,47 @@ public class UserController {
 
     // build delete user REST API
     @PostMapping("/activate")
-    public ResponseEntity<String> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
         } catch (UnauthorizedException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+           ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body("Activate user " + activateUserBody.getId()+ " success");
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PostMapping("/change-password")
 
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> changePassword(@Valid @RequestBody ChangePasswordBody changePasswordBody, BindingResult bindingResult) {
 
         try {
             userService.changePassword(changePasswordBody);
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Old password does not match");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Old password does not match").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
 
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
-            return ResponseEntity.status(HttpStatus.OK).body("reset password success");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Reset password success").build();
+            return ResponseEntity.status(HttpStatus.OK).body(exceptionResponse);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -237,33 +242,37 @@ public class UserController {
     }
 
     @PostMapping("/auth/forgot-password")
-    public ResponseEntity<String> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         String token = null;
         try {
             token = userService.forgetPassword(forgetPasswordEmailBody);
             return ResponseEntity.status(HttpStatus.OK).body(token);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email not found");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Email not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
     @PostMapping("/auth/otp")
-    public ResponseEntity<String> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
             //return  Token  user:dnfpajsdfhp...:id, 6.
         try {
             String token = userService.otpValidate(otpBody, authHeader);
             return ResponseEntity.status(HttpStatus.OK).body(token);
         }catch (DataIntegrityViolationException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bearer token does not exist");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Bearer token does not exist").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         }catch (UnauthorizedException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid otp");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Invalid otp").build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
         }catch (InvalidDataAccessResourceUsageException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user id");
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Invalid user id").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
