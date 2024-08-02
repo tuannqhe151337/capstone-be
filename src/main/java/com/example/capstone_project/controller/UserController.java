@@ -215,8 +215,11 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Old password does not match").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch (Exception e){
-
+        }catch(ResourceNotFoundException e){
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        }
+        catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
