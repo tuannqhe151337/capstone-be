@@ -124,7 +124,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
 
     @Query(" SELECT expense.planExpenseKey AS expenseCode, expense.createdAt AS date, term.name AS termName, department.name AS departmentName, expense.name AS expenseName," +
             " costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount,(expense.unitPrice*expense.amount) AS total ,expense.projectName AS projectName, expense.supplierName AS supplierName, expense.pic AS pic," +
-            " expense.note AS note, status.name AS statusName FROM FinancialPlanExpense expense " +
+            " expense.note AS note, status.code AS statusCode FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +

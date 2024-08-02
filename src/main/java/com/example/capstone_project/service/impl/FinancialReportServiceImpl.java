@@ -1,10 +1,7 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.FinancialPlanExpense;
-import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.entity.UserDetail;
-import com.example.capstone_project.repository.FinancialPlanExpenseRepository;
-import com.example.capstone_project.repository.FinancialReportRepository;
+import com.example.capstone_project.entity.*;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.ReportDetailResult;
@@ -37,6 +34,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final UserDetailRepository userDetailRepository;
     private final FinancialReportRepository financialReportRepository;
     private final FinancialPlanExpenseRepository expenseRepository;
+    private final DepartmentRepository departmentRepository;
+    private final CostTypeRepository costTypeRepository;
+    private final ExpenseStatusRepository expenseStatusRepository;
     private final HandleFileHelper handleFileHelper;
 
     @Override
@@ -153,14 +153,16 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
         if (expenses != null) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         }
 
         return null;
@@ -179,14 +181,16 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-
+        List<Department> departments = departmentRepository.findAll();
+        List<CostType> costTypes = costTypeRepository.findAll();
+        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
         if (expenses != null) {
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
         }
 
         return null;

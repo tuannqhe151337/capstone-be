@@ -73,26 +73,32 @@ public class SeedConfiguration {
 
             // Department
             Department itDepartment = Department.builder()
+                    .id(1L)
                     .name("IT Department")
                     .build();
 
             Department hrDepartment = Department.builder()
+                    .id(2L)
                     .name("HR Department")
                     .build();
 
             Department financeDepartment = Department.builder()
+                    .id(3L)
                     .name("Finance Department")
                     .build();
 
             Department communicationDepartment = Department.builder()
+                    .id(4L)
                     .name("Communication Department")
                     .build();
 
             Department marketingDepartment = Department.builder()
+                    .id(5L)
                     .name("Marketing Department")
                     .build();
 
             Department accountingDepartment = Department.builder()
+                    .id(6L)
                     .name("Accounting Department")
                     .build();
 
