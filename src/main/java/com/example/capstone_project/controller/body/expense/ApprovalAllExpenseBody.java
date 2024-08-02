@@ -14,5 +14,5 @@ import java.util.List;
 @Builder
 public class ApprovalAllExpenseBody {
     @NotNull(message = "Plan id can not be null")
-    private Long planId;
+    private Long reportId;
 }

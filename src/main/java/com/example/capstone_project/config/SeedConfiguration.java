@@ -1225,46 +1225,6 @@ public class SeedConfiguration {
                     .file(financialPlanFile3_2)
                     .planExpense(expenseList.get(14))
                     .build();
-            FinancialPlanFileExpense fileExpense16 = FinancialPlanFileExpense.builder()
-                    .id(16L)
-                    .file(financialPlanFile4_2)
-                    .planExpense(expenseList.get(11))
-                    .build();
-            FinancialPlanFileExpense fileExpense17 = FinancialPlanFileExpense.builder()
-                    .id(17L)
-                    .file(financialPlanFile4_2)
-                    .planExpense(expenseList.get(12))
-                    .build();
-            FinancialPlanFileExpense fileExpense18 = FinancialPlanFileExpense.builder()
-                    .id(18L)
-                    .file(financialPlanFile4_2)
-                    .planExpense(expenseList.get(13))
-                    .build();
-            FinancialPlanFileExpense fileExpense19 = FinancialPlanFileExpense.builder()
-                    .id(19L)
-                    .file(financialPlanFile4_2)
-                    .planExpense(expenseList.get(14))
-                    .build();
-            FinancialPlanFileExpense fileExpense20 = FinancialPlanFileExpense.builder()
-                    .id(20L)
-                    .file(financialPlanFile5_2)
-                    .planExpense(expenseList.get(11))
-                    .build();
-            FinancialPlanFileExpense fileExpense21 = FinancialPlanFileExpense.builder()
-                    .id(21L)
-                    .file(financialPlanFile5_2)
-                    .planExpense(expenseList.get(12))
-                    .build();
-            FinancialPlanFileExpense fileExpense22 = FinancialPlanFileExpense.builder()
-                    .id(22L)
-                    .file(financialPlanFile5_2)
-                    .planExpense(expenseList.get(13))
-                    .build();
-            FinancialPlanFileExpense fileExpense23 = FinancialPlanFileExpense.builder()
-                    .id(23L)
-                    .file(financialPlanFile5_2)
-                    .planExpense(expenseList.get(14))
-                    .build();
             FinancialPlanFileExpense fileExpense24 = FinancialPlanFileExpense.builder()
                     .id(24L)
                     .file(financialPlanFile5_3)
@@ -1376,7 +1336,7 @@ public class SeedConfiguration {
                     .planExpense(expenseList.get(36))
                     .build();
 
-            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense16, fileExpense17, fileExpense18, fileExpense19, fileExpense20, fileExpense21, fileExpense22, fileExpense23, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45));
+            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45));
 
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")

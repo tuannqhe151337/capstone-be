@@ -117,7 +117,10 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 "                       JOIN file_2.plan plan_2 " +
                 "                       JOIN plan_2.term term_2 " +
                 "                       JOIN term_2.financialReports report_2 " +
-                "                       WHERE report_2.id = :reportId) AND " +
+                "                       WHERE report_2.id = :reportId AND " +
+                "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
+                "                       GROUP BY plan_2.id)" +
+                " AND " +
                 " expense.name like :query AND " +
                 " (:departmentId IS NULL OR department.id = :departmentId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +

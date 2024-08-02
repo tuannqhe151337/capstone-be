@@ -19,12 +19,18 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " JOIN plan.term term " +
             " JOIN term.status status " +
             " WHERE expense.id IN (:listExpenses) AND " +
-            " status.code = :inProgress AND " +
-            " term.endDate >= :now AND " +
-            " plan.id = :planId AND " +
-            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null ) " +
+            "                       GROUP BY plan_2.id) " +
+            " AND " +
+            " (status.code = :inProgress) AND " +
+            " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
-    long countTotalExpenseInPlanLastVersion(Long planId, List<Long> listExpenses, TermCode inProgress, LocalDateTime now);
+    long countListExpenseInReport(Long reportId, List<Long> listExpenses, TermCode inProgress, LocalDateTime now);
 
     @Query(" SELECT count(distinct (expense.id)) FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
@@ -114,7 +120,9 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
             "                       JOIN term_2.financialReports report_2 " +
-            "                       WHERE report_2.id = :reportId) AND " +
+            "                       WHERE report_2.id = :reportId" +
+            "                       GROUP BY plan_2.id ) " +
+            " AND " +
             " expense.name like %:query% AND " +
             " (:departmentId IS NULL OR department.id = :departmentId) AND " +
             " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
@@ -136,7 +144,31 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
             "                       JOIN term_2.financialReports report_2 " +
-            "                       WHERE report_2.id = :reportId) AND " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null) " +
+            "                       GROUP BY plan_2.id) " +
+            " AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     List<ExpenseResult> getListExpenseByReportId(Long reportId);
+
+    @Query(" SELECT expense FROM FinancialPlanExpense expense " +
+            " LEFT JOIN expense.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term term " +
+            " LEFT JOIN plan.department department " +
+            " LEFT JOIN expense.status status " +
+            " LEFT JOIN expense.costType costType " +
+            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId AND" +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
+            "                       GROUP BY plan_2.id) " +
+            " AND " +
+            " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
+            " (OR term.status.code = :termCode) AND " +
+            " (expense.isDelete = false OR expense.isDelete is null) ")
+    List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermCode termCode, LocalDateTime now);
 }
