@@ -16,6 +16,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -91,23 +93,40 @@ public class GlobalExceptionHandler {
 //            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
 //        }
 
-    private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
-        String[] errors = errorMessage.split(",");
-        List<ExceptionResponse> exceptionResponseList = new ArrayList<>();
-        for (String s : errors) {
-            String[] parts = s.trim().split(": ");
-            if (parts.length == 2) {
-                String fieldName = parts[0].substring(parts[0].lastIndexOf(".") + 1);
-                String errorMessageText = parts[1];
-                ExceptionResponse exception = ExceptionResponse.builder()
-                        .field(fieldName).message(errorMessageText)
-                        .build();
-                exceptionResponseList.add(exception);
-            }
-        }
+//    private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
+//        String[] errors = errorMessage.split(",");
+//        List<ExceptionResponse> exceptionResponseList = new ArrayList<>();
+//        for (String s : errors) {
+//            String[] parts = s.trim().split(": ");
+//            if (parts.length == 2) {
+//                String fieldName = parts[0].substring(parts[0].lastIndexOf(".") + 1);
+//                String errorMessageText = parts[1];
+//                ExceptionResponse exception = ExceptionResponse.builder()
+//                        .field(fieldName).message(errorMessageText)
+//                        .build();
+//                exceptionResponseList.add(exception);
+//            }
+//        }
+//
+//        return exceptionResponseList;
+//    }
+private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
+    List<ExceptionResponse> errorList = new ArrayList<>();
+    // Biểu thức chính quy để tìm field và message
+    Pattern pattern = Pattern.compile("(\\w+\\.\\w+\\.\\w+):\\s(.*?)(?=(?:\\w+\\.\\w+\\.\\w+:\\s|$))");
+    Matcher matcher = pattern.matcher(errorMessage);
 
-        return exceptionResponseList;
+    while (matcher.find()) {
+        String field = matcher.group(1).substring(matcher.group(1).lastIndexOf('.') + 1);
+        String message = matcher.group(2).trim(); // Loại bỏ khoảng trắng và dấu phẩy thừa
+        if (message.endsWith(",")) {
+            message = message.substring(0, message.length() - 1).trim(); // Loại bỏ dấu phẩy thừa nếu có
+        }
+        errorList.add(new ExceptionResponse(field, message));
     }
+
+    return errorList;
+}
 
 }
 
