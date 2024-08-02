@@ -907,7 +907,25 @@ public class SeedConfiguration {
                     .department(accountingDepartment)
                     .build();
 
-            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
+            FinancialPlan financialPlan6 = FinancialPlan.builder()
+                    .name("Financial Plan 6")
+                    .term(term3)
+                    .department(itDepartment)
+                    .build();
+
+            FinancialPlan financialPlan7 = FinancialPlan.builder()
+                    .name("Financial Plan 7")
+                    .term(term4)
+                    .department(itDepartment)
+                    .build();
+
+            FinancialPlan financialPlan8 = FinancialPlan.builder()
+                    .name("Financial Plan 8")
+                    .term(term5)
+                    .department(itDepartment)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5, financialPlan6, financialPlan7, financialPlan8));
 
             CostType costType1 = CostType.builder()
                     .id(1L)
@@ -1185,7 +1203,28 @@ public class SeedConfiguration {
                     .user(user3)
                     .build();
 
-            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24));
+            FinancialPlanFile financialPlanFile6_1 = FinancialPlanFile.builder()
+                    .id(33L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan6)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile7_1 = FinancialPlanFile.builder()
+                    .id(34L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan7)
+                    .user(user3)
+                    .build();
+
+            FinancialPlanFile financialPlanFile8_1 = FinancialPlanFile.builder()
+                    .id(35L)
+                    .name("TERM-NAME3_PLAN-NAME5")
+                    .plan(financialPlan8)
+                    .user(user3)
+                    .build();
+
+            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1));
 
             // Get 45 random expense
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
