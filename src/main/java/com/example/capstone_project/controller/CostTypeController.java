@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CostTypeController {
     private final CostTypeService costTypeService;
 
-    @GetMapping("/list")
+    @GetMapping("/list-paginate")
     public ResponseEntity<ListPaginationResponse<CostTypeResponse>> getListCostType(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
@@ -164,5 +164,28 @@ public class CostTypeController {
         } catch (DuplicateKeyException | ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any department have id = " + deleteCostTypeBody.getCostTypeId()).build());
         }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ListResponse<CostTypeResponse>> getListCostType() {
+
+        // Get data
+        List<CostType> costTypes = costTypeService.getListCostType();
+
+        // Response
+        ListResponse<CostTypeResponse> responses = new ListResponse<>();
+
+        if (costTypes != null) {
+
+            // Mapping to CostTypeResponse
+            responses.setData(costTypes.stream().map(x -> {
+                return new CostTypeMapperImpl().mapToCostTypeResponse(x);
+            }).toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok(responses);
     }
 }

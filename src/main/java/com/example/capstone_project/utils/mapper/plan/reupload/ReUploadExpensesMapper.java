@@ -1,9 +1,7 @@
 package com.example.capstone_project.utils.mapper.plan.reupload;
 
-import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -49,10 +47,6 @@ public interface ReUploadExpensesMapper {
         FinancialPlan plan = new FinancialPlan();
 
         plan.setId(planId);
-
-        plan.setStatus(PlanStatus.builder()
-                .id(1L)
-                .build());
 
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
 

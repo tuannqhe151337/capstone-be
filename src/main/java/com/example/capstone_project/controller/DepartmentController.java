@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.body.department.NewDepartmentBody
 import com.example.capstone_project.controller.body.department.UpdateDepartmentBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
+import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.department.paginate.DepartmentPaginateResponse;
 import com.example.capstone_project.controller.responses.user.DepartmentResponse;
@@ -17,7 +18,6 @@ import com.example.capstone_project.utils.mapper.user.department.DepartToDepartR
 
 import com.example.capstone_project.utils.mapper.department.paginate.DepartmentPaginateResponseMapperImpl;
 import com.example.capstone_project.entity.Department;
-import com.example.capstone_project.utils.mapper.user.department.DepartToDepartResponseMapperImpl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
 public class DepartmentController {
     private final DepartmentService departmentService;
 
-    @GetMapping("/list")
+    @GetMapping("/list-paginate")
     public ResponseEntity<ListPaginationResponse<DepartmentPaginateResponse>> getListDepartmentPaging(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
@@ -209,5 +208,28 @@ public class DepartmentController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any department have id = " + updateDepartmentBody.getDepartmentId()).build());
         }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ListResponse<DepartmentPaginateResponse>> getListDepartment() {
+
+        // Get data
+        List<Department> departments = departmentService.getListDepartment();
+
+        // Response
+        ListResponse<DepartmentPaginateResponse> responses = new ListResponse<>();
+
+        if (departments != null) {
+
+            // Mapping to CostTypeResponse
+            responses.setData(departments.stream().map(department -> {
+                return new DepartmentPaginateResponseMapperImpl().mapToDepartmentPaginateResponseMapping(department);
+            }).toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        return ResponseEntity.ok(responses);
     }
 }

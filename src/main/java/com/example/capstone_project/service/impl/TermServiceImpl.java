@@ -67,9 +67,9 @@ public class TermServiceImpl implements TermService {
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())) {
             return termRepository.getListTermWhenCreatePlan(query, pageable, userDetail.getDepartmentId());
+        } else {
+            throw new UnauthorizedException("User authority to create new plan");
         }
-
-        return null;
     }
 
     @Override

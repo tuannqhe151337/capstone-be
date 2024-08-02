@@ -1,6 +1,7 @@
 package com.example.capstone_project.entity;
 
 import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
-public class PlanStatus extends BaseEntity {
+public class ReportStatus extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,10 +24,10 @@ public class PlanStatus extends BaseEntity {
 
     @Column(name = "code", unique = true)
     @Enumerated(EnumType.STRING)
-    private PlanStatusCode code;
+    private ReportStatusCode code;
 
-    @OneToMany(mappedBy = FinancialPlan_.STATUS)
-    private List<FinancialPlan> financialPlans;
+    @OneToMany(mappedBy = FinancialReport_.STATUS)
+    private List<FinancialReport> financialPlans;
 
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private boolean isDelete;
