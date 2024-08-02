@@ -907,7 +907,13 @@ public class SeedConfiguration {
                     .department(accountingDepartment)
                     .build();
 
-            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5));
+            FinancialPlan financialPlan6 = FinancialPlan.builder()
+                    .name("Financial Plan 6")
+                    .term(term3)
+                    .department(itDepartment)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5, financialPlan6));
 
             CostType costType1 = CostType.builder()
                     .id(1L)
