@@ -28,7 +28,7 @@ public class FinancialReport extends BaseEntity {
     private ReportStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "term_id")
+    @JoinColumn(name = "term_id", unique = true)
     private Term term;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")

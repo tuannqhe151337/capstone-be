@@ -784,7 +784,98 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            termRepository.saveAll(List.of(term1, term2, term3, term4, term5));
+            Term term6 = Term.builder()
+                    .id(6L)
+                    .name("Summer 2025")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term7 = Term.builder()
+                    .id(7L)
+                    .name("Fall 2025")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term8 = Term.builder()
+                    .id(8L)
+                    .name("Winter 2025")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term9 = Term.builder()
+                    .id(9L)
+                    .name("Spring 2026")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term10 = Term.builder()
+                    .id(10L)
+                    .name("Summer 2026")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term11 = Term.builder()
+                    .id(11L)
+                    .name("Fall 2026")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            Term term12 = Term.builder()
+                    .id(12L)
+                    .name("Winter 2026")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
+            termRepository.saveAll(List.of(term1, term2, term3, term4, term5, term6, term7, term8, term9, term10, term11, term12));
 
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
@@ -1419,121 +1510,85 @@ public class SeedConfiguration {
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(newReportStatus)
-//                    .department(accountingDepartment)
                     .term(term1)
-//                    .user(user1)
                     .build();
 
             FinancialReport report2 = FinancialReport.builder()
                     .name("Report Name 2")
                     .month(LocalDate.now())
-//                    .version("v2")
                     .status(waitingForApprovalReportStatus)
-//                    .department(accountingDepartment)
                     .term(term2)
-//                    .user(user2)
                     .build();
 
             FinancialReport report3 = FinancialReport.builder()
                     .name("Report Name 3")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(approvedReportStatus)
-//                    .department(itDepartment)
-                    .term(term1)
-//                    .user(user1)
+                    .term(term3)
                     .build();
 
             FinancialReport report4 = FinancialReport.builder()
                     .name("Report Name 4")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(reviewedReportStatus)
-//                    .department(accountingDepartment)
-                    .term(term1)
-//                    .user(user3)
+                    .term(term4)
                     .build();
 
             FinancialReport report5 = FinancialReport.builder()
                     .name("Report Name 5")
                     .month(LocalDate.now())
-//                    .version("v1")
                     .status(reviewedReportStatus)
-//                    .department(accountingDepartment)
-                    .term(term3)
-//                    .user(user4)
+                    .term(term5)
                     .build();
 
             FinancialReport report6 = FinancialReport.builder()
                     .name("Report Name 6")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(closedReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term6)
                     .build();
 
             FinancialReport report7 = FinancialReport.builder()
                     .name("Report Name 7")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(newReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term7)
                     .build();
 
             FinancialReport report8 = FinancialReport.builder()
                     .name("Report Name 8")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(approvedReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term8)
                     .build();
 
             FinancialReport report9 = FinancialReport.builder()
                     .name("Report Name 9")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(waitingForApprovalReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term9)
                     .build();
 
             FinancialReport report10 = FinancialReport.builder()
                     .name("Report Name 10")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(newReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term10)
                     .build();
 
             FinancialReport report11 = FinancialReport.builder()
                     .name("Report Name 11")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(approvedReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term11)
                     .build();
 
             FinancialReport report12 = FinancialReport.builder()
                     .name("Report Name 12")
                     .month(LocalDate.now())
-//                    .version("v3")
                     .status(waitingForApprovalReportStatus)
-//                    .department(itDepartment)
-                    .term(term2)
-//                    .user(user1)
+                    .term(term12)
                     .build();
 
             financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6, report7, report8, report9, report10, report11, report12));
