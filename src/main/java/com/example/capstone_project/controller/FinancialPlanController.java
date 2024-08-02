@@ -5,8 +5,6 @@ import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBo
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.controller.body.plan.download.PlanBody;
-import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
@@ -36,8 +34,6 @@ import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImp
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -47,8 +43,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.util.List;
 
 @RestController
@@ -392,50 +386,50 @@ public class FinancialPlanController {
         }
     }
 
-    @PutMapping("/expense-approval")
-    public ResponseEntity<String> approvalExpenses(
-            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
-
-            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PutMapping("/expense-deny")
-    public ResponseEntity<String> denyExpenses(
-            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
-
-            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PutMapping("/expense-approval-all")
-    public ResponseEntity<String> approvalAllExpenses(
-            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
-
-            planService.approvalAllExpenses(body.getPlanId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
+//    @PutMapping("/expense-approval")
+//    public ResponseEntity<String> approvalExpenses(
+//            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
+//
+//    @PutMapping("/expense-deny")
+//    public ResponseEntity<String> denyExpenses(
+//            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
+//
+//    @PutMapping("/expense-approval-all")
+//    public ResponseEntity<String> approvalAllExpenses(
+//            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.approvalAllExpenses(body.getPlanId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
 
     @GetMapping("/download/template-xlsx")
     public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {

@@ -1,17 +1,19 @@
 package com.example.capstone_project.controller;
 
+import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
+import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
+import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
-import com.example.capstone_project.controller.body.report.download.ReportDownloadBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
-import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -24,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/report")
@@ -101,9 +106,19 @@ public class ReportController {
 //    }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteReport(
-            @Valid @RequestBody DeleteReportBody reportBody
+    public ResponseEntity<ExceptionResponse> deleteReport(
+            @Valid @RequestBody DeleteReportBody reportBody, BindingResult bindingResult
     ) {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
             FinancialReport deletedReport = reportService.deleteReport(reportBody.getReportId());
 
@@ -191,7 +206,7 @@ public class ReportController {
             ReportDetailResponse response;
 
             if (report != null) {
-                // Mapping to PlanDetail Response
+                // Mapping to report Detail Response
                 response = new ReportDetailMapperImpl().mapToReportDetailResponseMapping(report);
 
             } else {
@@ -334,7 +349,7 @@ public class ReportController {
             ReportActualCostResponse response = new ReportActualCostResponse();
 
             if (actualCost != null) {
-                // Mapping to PlanDetail Response
+                // Mapping to report Detail Response
                 response.setActualCost(actualCost);
 
             } else {
@@ -361,7 +376,7 @@ public class ReportController {
             ReportExpectedCostResponse response = new ReportExpectedCostResponse();
 
             if (expectedCost != null) {
-                // Mapping to PlanDetail Response
+                // Mapping to report Detail Response
                 response.setExpectedCost(expectedCost);
 
             } else {
@@ -376,4 +391,84 @@ public class ReportController {
         }
     }
 
+    @PutMapping("/expense-approval")
+    public ResponseEntity<ExceptionResponse> approvalExpenses(
+            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
+        try {
+
+            reportService.approvalExpenses(body.getReportId(), body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update Successful").message("Approval expense successful.").build());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+        }
+    }
+
+    @PutMapping("/expense-deny")
+    public ResponseEntity<ExceptionResponse> denyExpenses(
+            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
+        try {
+
+            reportService.denyExpenses(body.getReportId(), body.getListExpenseId());
+
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update Successful").message("Deny expense successful.").build());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+        }
+    }
+
+    @PutMapping("/expense-approval-all")
+    public ResponseEntity<ExceptionResponse> approvalAllExpenses(
+            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
+        try {
+
+            reportService.approvalAllExpenses(body.getReportId());
+
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update Successful").message("Approval all expense successful.").build());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+        }
+    }
 }

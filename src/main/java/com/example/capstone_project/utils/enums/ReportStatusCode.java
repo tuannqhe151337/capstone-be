@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum ReportStatusCode {
     NEW("New"),
     WAITING_FOR_APPROVAL("Waiting for approval"),
-    APPROVED("Approved"),
     REVIEWED("Reviewed"),
+    APPROVED("Approved"),
     CLOSED("Closed");
 
     private final String value;

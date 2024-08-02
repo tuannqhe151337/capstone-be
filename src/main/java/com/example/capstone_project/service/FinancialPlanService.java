@@ -39,7 +39,7 @@ public interface FinancialPlanService {
 
     String generateXLSFileName(Long fileId);
 
-    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+//    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
 
@@ -61,9 +61,9 @@ public interface FinancialPlanService {
 
     String generateXLSXFileNameByPlanId(Long planId);
 
-    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+//    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
-    void approvalAllExpenses(Long planId) throws Exception;
+//    void approvalAllExpenses(Long planId) throws Exception;
 
     void submitPlanForReview(Long planId) throws Exception;
 
