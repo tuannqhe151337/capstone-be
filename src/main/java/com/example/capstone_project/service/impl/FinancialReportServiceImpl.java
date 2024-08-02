@@ -9,10 +9,7 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.service.FinancialReportService;
-import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -309,15 +306,23 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (expenses == null || expenses.isEmpty()) {
                 throw new ResourceNotFoundException("Not exist report id = " + reportId + " or list expense is empty");
             }
+
+            // Get approval status
+            ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
+
+
             expenses.forEach(expense -> {
-                expense.setStatus(expenseStatusRepository.getReferenceById(3L));
+                expense.setStatus(approval);
             });
 
             expenseRepository.saveAll(expenses);
             // Get plan of this list expense
             FinancialReport report = financialReportRepository.getReferenceById(reportId);
-            // Change status to Approved
-            report.setStatus(reportStatusRepository.getReferenceById(4L));
+            // Change status to Reviewed
+
+            ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+
+            report.setStatus(reviewedReportStatus);
 
             financialReportRepository.save(report);
 
@@ -345,20 +350,24 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenses.size() == totalExpense) {
 
+                // Get approval status
+                ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
+
                 listExpenses.forEach(expense -> {
-                    if (!expenseRepository.existsById(expense)) {
-                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
-                    } else {
-                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
-                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(3L));
-                        expenses.add(updateExpense);
-                    }
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                    updateExpense.setStatus(approval);
+                    expenses.add(updateExpense);
                 });
+
                 expenseRepository.saveAll(expenses);
                 // Get plan of this list expense
+
                 FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
-                report.setStatus(reportStatusRepository.getReferenceById(3L));
+
+                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+
+                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
 
@@ -382,6 +391,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
+
             listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
@@ -389,21 +399,24 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             long totalExpense = expenseRepository.countListExpenseInReport(planId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenseId.size() == totalExpense) {
 
+                // Get approval status
+                ExpenseStatus denyStatus = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
+
                 listExpenseId.forEach(expense -> {
-                    if (!expenseRepository.existsById(expense)) {
-                        throw new ResourceNotFoundException("Not found expense have id = " + expense);
-                    } else {
-                        FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
-                        updateExpense.setStatus(expenseStatusRepository.getReferenceById(4L));
-                        expenses.add(updateExpense);
-                    }
+
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                    updateExpense.setStatus(denyStatus);
+                    expenses.add(updateExpense);
+
 
                 });
                 expenseRepository.saveAll(expenses);
                 // Get plan of this list expense
                 FinancialReport report = financialReportRepository.getReferenceById(planId);
                 // Change status to Reviewed
-                report.setStatus(reportStatusRepository.getReferenceById(3L));
+                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+
+                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
                 expenseRepository.saveAll(expenses);
