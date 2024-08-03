@@ -1,13 +1,7 @@
 package com.example.capstone_project.entity;
 
-import com.example.capstone_project.utils.enums.DepartmentCode;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
