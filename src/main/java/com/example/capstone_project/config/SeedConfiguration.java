@@ -705,19 +705,14 @@ public class SeedConfiguration {
                     .code(ReportStatusCode.REVIEWED)
                     .build();
 
-            ReportStatus approvedReportStatus = ReportStatus.builder()
-                    .id(4L)
-                    .name(ReportStatusCode.APPROVED.getValue())
-                    .code(ReportStatusCode.APPROVED)
-                    .build();
 
             ReportStatus closedReportStatus = ReportStatus.builder()
-                    .id(5L)
+                    .id(4L)
                     .name(ReportStatusCode.CLOSED.getValue())
                     .code(ReportStatusCode.CLOSED)
                     .build();
 
-            reportStatusRepository.saveAll(List.of(newReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, approvedReportStatus, closedReportStatus));
+            reportStatusRepository.saveAll(List.of(newReportStatus, waitingForApprovalReportStatus, reviewedReportStatus, closedReportStatus));
 
             Term term1 = Term.builder()
                     .id(1L)
@@ -1563,7 +1558,7 @@ public class SeedConfiguration {
             FinancialReport report3 = FinancialReport.builder()
                     .name("Report Name 3")
                     .month(LocalDate.now())
-                    .status(approvedReportStatus)
+                    .status(waitingForApprovalReportStatus)
                     .term(term3)
                     .build();
 
@@ -1598,7 +1593,7 @@ public class SeedConfiguration {
             FinancialReport report8 = FinancialReport.builder()
                     .name("Report Name 8")
                     .month(LocalDate.now())
-                    .status(approvedReportStatus)
+                    .status(waitingForApprovalReportStatus)
                     .term(term8)
                     .build();
 
@@ -1619,7 +1614,7 @@ public class SeedConfiguration {
             FinancialReport report11 = FinancialReport.builder()
                     .name("Report Name 11")
                     .month(LocalDate.now())
-                    .status(approvedReportStatus)
+                    .status(closedReportStatus)
                     .term(term11)
                     .build();
 
