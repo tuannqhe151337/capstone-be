@@ -31,9 +31,10 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY file.plan.id ")
     List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
-    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, plan.createdAt AS createdAt, " +
+    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
             " SUM(expense.unitPrice * expense.amount) AS totalPlan," +
             " term.id AS termId, term.name AS termName, term.startDate AS termStartDate, term.endDate AS termEndDate, term.reuploadStartDate AS termReuploadStartDate, term.reuploadEndDate AS termReuploadEndDate, term.finalEndTermDate AS termFinalEndTermDate, " +
+            " plan.createdAt AS createdAt, " +
             " department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialPlan plan " +
@@ -44,7 +45,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " LEFT JOIN fileExpense.planExpense expense " +
             " LEFT JOIN files.user user" +
             " WHERE plan.id = :planId AND " +
-            " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " files.id = (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " (plan.isDelete = false OR plan.isDelete IS NULL) AND" +
             " (expense.isDelete = false OR expense.isDelete IS NULL) " +
             " GROUP BY plan.id, plan.name," +
