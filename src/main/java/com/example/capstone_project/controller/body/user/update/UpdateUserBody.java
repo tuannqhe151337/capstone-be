@@ -20,7 +20,7 @@ public class UpdateUserBody {
 
         @NotEmpty(message = "Fullname cannot be empty")
         @Size(max = 100, message = "Fullname must be less than 100 characters")
-        @Pattern(regexp = "^[A-Za-z]+(?: [A-Za-z]+)*$", message = "Full name must contain only letters and spaces")
+        @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
         private String fullName;
 
 
@@ -42,12 +42,11 @@ public class UpdateUserBody {
         private Long positionId;
 
         @NotNull(message = "DOB cannot be null")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
         private LocalDateTime dob;
 
         @NotNull(message = "Address cannot be null")
         @NotBlank
         private String address;
+}
 
-    }
 
