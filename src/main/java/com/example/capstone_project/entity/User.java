@@ -43,7 +43,7 @@ public class User extends BaseEntity {
     @Column(name = "note")
     private String note;
 
-    @Size(max = 100, message = "Full name must be less than 100 characters")
+    @Size(min = 5, max = 100, message = "Full name must be less than 100 characters")
     @Column(name = "full_name", nullable = false, columnDefinition = "NVARCHAR(100)")
     @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
     private String fullName;

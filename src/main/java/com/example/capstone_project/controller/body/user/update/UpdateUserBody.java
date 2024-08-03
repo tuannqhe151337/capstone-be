@@ -19,7 +19,7 @@ public class UpdateUserBody {
         private Long id;
 
         @NotEmpty(message = "Fullname cannot be empty")
-        @Size(max = 100, message = "Fullname must be less than 100 characters")
+        @Size(min= 5, max = 100, message = "Fullname must be less than 100 characters")
         @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
         private String fullName;
 
