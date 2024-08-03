@@ -19,6 +19,7 @@ import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
@@ -200,8 +201,8 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not exist");
         }
         if (this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-           user.setPassword(this.passwordEncoder.encode(newPassword));
-           // user.setPassword(newPassword);
+            user.setPassword(this.passwordEncoder.encode(newPassword));
+            // user.setPassword(newPassword);
             userRepository.save(user);
         } else {
             throw new IllegalArgumentException("Password does not match");
@@ -287,19 +288,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody){
         //get new password
         String newPassword = resetPasswordBody.getNewPassword();
         //get id from header to find that user
         String userId = userIdTokenRepository.find(authHeader);
+        if(userId == null || userId.isEmpty()){
+            throw new InvalidDataAccessResourceUsageException("UserId not found");
+        }
         Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
-        if (user.isEmpty()) {
+        if (user.isEmpty() || user.get().getIsDelete()) {
             throw new ResourceNotFoundException("User does not exist");
         } else {
             //update new password encoded
             user.get().setPassword(this.passwordEncoder.encode(newPassword));
+            userRepository.save(user.get());
         }
-        userRepository.save(user.get());
+
     }
 
     @Override
