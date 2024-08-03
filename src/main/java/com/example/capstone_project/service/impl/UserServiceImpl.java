@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -348,7 +349,12 @@ public class UserServiceImpl implements UserService {
             String password = generatePassayPassword();
             user.setPassword(this.passwordEncoder.encode(password));
 
-            user.setUsername(generateUsernameFromFullName(user.getFullName()));
+            //remove punctation in full name
+            String normalized = Normalizer.normalize(user.getFullName(), Normalizer.Form.NFD);
+            // Remove diacritical marks (combining characters)
+            String fullname= normalized.replaceAll("\\p{M}", "");
+
+            user.setUsername(generateUsernameFromFullName(fullname));
             user.setIsDelete(false);
 
             userRepository.save(user);
