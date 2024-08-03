@@ -37,15 +37,16 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " department.id AS departmentId, department.name AS departmentName, " +
             " user.id AS userId , user.username AS username" +
             " FROM FinancialPlan plan " +
-            " JOIN plan.term term " +
-            " JOIN plan.department department " +
-            " JOIN plan.planFiles files" +
-            " JOIN files.planFileExpenses fileExpense " +
-            " JOIN fileExpense.planExpense expense " +
-            " JOIN files.user user" +
+            " LEFT JOIN plan.term term " +
+            " LEFT JOIN plan.department department " +
+            " LEFT JOIN plan.planFiles files" +
+            " LEFT JOIN files.planFileExpenses fileExpense " +
+            " LEFT JOIN fileExpense.planExpense expense " +
+            " LEFT JOIN files.user user" +
             " WHERE plan.id = :planId AND " +
             " files.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
-            " plan.isDelete = false AND expense.isDelete = false " +
+            " (plan.isDelete = false OR plan.isDelete IS NULL) AND" +
+            " (expense.isDelete = false OR expense.isDelete IS NULL) " +
             " GROUP BY plan.id, plan.name," +
             " term.id, term.name, term.startDate, term.endDate, term.reuploadStartDate, term.reuploadEndDate, term.finalEndTermDate," +
             " plan.createdAt, department.id, department.name, user.id, user.username " )
