@@ -718,10 +718,10 @@ public class SeedConfiguration {
                     .id(1L)
                     .name("Spring 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now().minusDays(10))
-                    .endDate(LocalDateTime.now().minusDays(10).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(10).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(10).plusDays(21))
+                    .startDate(LocalDateTime.now().minusDays(3))
+                    .endDate(LocalDateTime.now().minusDays(3).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().minusDays(3).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().minusDays(3).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user1)
                     .status(termStatus2)
@@ -757,10 +757,10 @@ public class SeedConfiguration {
                     .id(4L)
                     .name("Winter 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .startDate(LocalDateTime.now().minusDays(2))
+                    .endDate(LocalDateTime.now().minusDays(2).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().minusDays(2).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().minusDays(2).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user3)
                     .status(termStatus)
@@ -770,10 +770,10 @@ public class SeedConfiguration {
                     .id(5L)
                     .name("Spring 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
+                    .startDate(LocalDateTime.now().minusDays(1))
+                    .endDate(LocalDateTime.now().minusDays(1).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.now().minusDays(1).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.now().minusDays(1).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user4)
                     .status(termStatus2)
@@ -1228,7 +1228,7 @@ public class SeedConfiguration {
             char projectNameChar = 'A';
             char supplierNameChar = 'A';
 
-            for (int i = 1; i <= 54; i++) {
+            for (int i = 1; i <= 57; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomCostTypeIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(pics.length);
@@ -1538,8 +1538,23 @@ public class SeedConfiguration {
                     .file(financialPlanFile5_24)
                     .planExpense(expenseList.get(53))
                     .build();
+            FinancialPlanFileExpense fileExpense55 = FinancialPlanFileExpense.builder()
+                    .id(55L)
+                    .file(financialPlanFile6_1)
+                    .planExpense(expenseList.get(54))
+                    .build();
+            FinancialPlanFileExpense fileExpense56 = FinancialPlanFileExpense.builder()
+                    .id(56L)
+                    .file(financialPlanFile7_1)
+                    .planExpense(expenseList.get(55))
+                    .build();
+            FinancialPlanFileExpense fileExpense57 = FinancialPlanFileExpense.builder()
+                    .id(57L)
+                    .file(financialPlanFile8_1)
+                    .planExpense(expenseList.get(56))
+                    .build();
 
-            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense16, fileExpense17, fileExpense18, fileExpense19, fileExpense20, fileExpense21, fileExpense22, fileExpense23, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45, fileExpense46, fileExpense47, fileExpense48, fileExpense49, fileExpense50, fileExpense51, fileExpense52, fileExpense53, fileExpense54));
+            financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense16, fileExpense17, fileExpense18, fileExpense19, fileExpense20, fileExpense21, fileExpense22, fileExpense23, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45, fileExpense46, fileExpense47, fileExpense48, fileExpense49, fileExpense50, fileExpense51, fileExpense52, fileExpense53, fileExpense54, fileExpense55, fileExpense56, fileExpense57));
 
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")
