@@ -401,7 +401,7 @@ public class TermController {
             ExceptionResponse exceptionResponse = ExceptionResponse
                     .builder().field("error").message("Term not found")
                     .build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
