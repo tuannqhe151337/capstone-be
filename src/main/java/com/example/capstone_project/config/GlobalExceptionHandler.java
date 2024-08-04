@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     */
 
 
-    @ExceptionHandler({ConstraintViolationException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({ConstraintViolationException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ResponseEntity<List<ExceptionResponse>> handleConstraintViolationException(Exception ex, WebRequest request) {
         String exceptionMessage = ex.getMessage();
@@ -57,60 +57,41 @@ public class GlobalExceptionHandler {
     các đối tượng được gửi qua yêu cầu HTTP (như đối tượng JSON trong thân yêu cầu).  */
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ResponseEntity<List<ExceptionResponse>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, WebRequest request) {
-        Object[] errors = ex.getDetailMessageArguments();
-
-        List<ExceptionResponse> exceptionResponseList = new ArrayList<>();
-
-        if (errors != null) {
-            for (Object error: errors) {
-                if (error instanceof String s) {
-                    String[] parts = s.trim().split(": ");
-                    if (parts.length == 2) {
-                        String fieldName = parts[0];
-                        String errorMessageText = parts[1];
-                        ExceptionResponse exception = ExceptionResponse.builder()
-                                .field(fieldName).message(errorMessageText)
-                                .build();
-                        exceptionResponseList.add(exception);
-                    }
-                }
-            }
-        }
-
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+    public ResponseEntity<List<ExceptionResponse>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<ExceptionResponse> errorList = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errorList.add(new ExceptionResponse(fieldName, errorMessage));
+        });
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorList);
     }
 
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+        public ResponseEntity<List<ExceptionResponse>> handleHttpMessageNotReadableException(Exception ex, WebRequest request) {
+            String exceptionMessage = ex.getMessage();
+            List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse_HttpMessageNotReadableException(exceptionMessage);
 
-//        @ExceptionHandler(HttpMessageNotReadableException.class)
-//        @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-//        public ResponseEntity<List<ExceptionResponse>> handleHttpMessageNotReadableException(Exception ex, WebRequest request) {
-//            String exceptionMessage = ex.getMessage();
-//            List<ExceptionResponse> exceptionResponseList = this.parseMessageToListExceptionResponse(exceptionMessage);
-//
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
-//        }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseList);
+        }
 
-//    private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
-//        String[] errors = errorMessage.split(",");
-//        List<ExceptionResponse> exceptionResponseList = new ArrayList<>();
-//        for (String s : errors) {
-//            String[] parts = s.trim().split(": ");
-//            if (parts.length == 2) {
-//                String fieldName = parts[0].substring(parts[0].lastIndexOf(".") + 1);
-//                String errorMessageText = parts[1];
-//                ExceptionResponse exception = ExceptionResponse.builder()
-//                        .field(fieldName).message(errorMessageText)
-//                        .build();
-//                exceptionResponseList.add(exception);
-//            }
-//        }
-//
-//        return exceptionResponseList;
-//    }
-private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
+    private List<ExceptionResponse> parseMessageToListExceptionResponse_HttpMessageNotReadableException(String errorMessage) {
+        List<ExceptionResponse> errorList = new ArrayList<>();
+        // Biểu thức chính quy để tìm field và message
+        Pattern pattern = Pattern.compile("^(.*?):\\s(.*)$");
+        Matcher matcher = pattern.matcher(errorMessage);
+
+        while (matcher.find()) {
+            String field = matcher.group(1).trim(); // Lấy toàn bộ phần ký tự trước dấu : đầu tiên
+            String message = matcher.group(2).trim(); // Lấy phần còn lại của lỗi
+            errorList.add(new ExceptionResponse(field, message));
+        }
+
+        return errorList;
+    }
+
+    private List<ExceptionResponse> parseMessageToListExceptionResponse(String errorMessage) {
     List<ExceptionResponse> errorList = new ArrayList<>();
     // Biểu thức chính quy để tìm field và message
     Pattern pattern = Pattern.compile("(\\w+\\.\\w+\\.\\w+):\\s(.*?)(?=(?:\\w+\\.\\w+\\.\\w+:\\s|$))");
@@ -127,6 +108,7 @@ private List<ExceptionResponse> parseMessageToListExceptionResponse(String error
 
     return errorList;
 }
+
 
 }
 

@@ -25,6 +25,7 @@ public class UpdateUserBody {
 
 
         @NotBlank(message = "Email cannot be blank")
+        @Email(message = "Email invalid format")
         private String email;
 
         @NotNull(message = "Department cannot be blank")
