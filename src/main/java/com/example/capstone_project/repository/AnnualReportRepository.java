@@ -18,33 +18,35 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " annualReport.isDelete = false ")
     long countDistinctListAnnualReportPaging(String year);
 
-//    @Query(value = " SELECT year (term.planDueDate) AS year, count (term.id) AS totalTerm, " +
-//            " sum (expense.amount*expense.unitPrice) AS totalExpense, count (department.id) AS totalDepartment FROM Term term " +
-//            " JOIN term.financialReports report" +
-//            " JOIN report.department department " +
-//            " JOIN report.reportExpenses expense " +
-//            " WHERE year (term.planDueDate) = year (:now) AND " +
-//            " expense.status.code = :approved AND" +
-//            " term.isDelete = false AND " +
-//            " expense.isDelete = false AND " +
-//            " department.isDelete = false " +
-//            " GROUP BY year ")
-//    AnnualReportResult getAnnualReport(LocalDate now, ExpenseStatusCode approved);
+    @Query(value = " SELECT year (term.finalEndTermDate) AS year, count ( distinct term.id) AS totalTerm, " +
+            " count ( distinct department.id) AS totalDepartment FROM Term term " +
+            " JOIN term.financialPlans plans " +
+            " JOIN plans.department department " +
+            " WHERE year (term.finalEndTermDate) = year (:now) AND " +
+            " term.isDelete = false AND " +
+            " department.isDelete = false " +
+            " GROUP BY year ")
+    AnnualReportResult getAnnualReport(LocalDate now);
 
-//    @Query(value = " SELECT report.department.id AS departmentId, sum(expense.unitPrice*expense.amount) AS totalExpense, max(expense.unitPrice*expense.amount) AS biggestExpense, costType.id AS costTypeId FROM FinancialReportExpense expense " +
-//            " JOIN expense.costType costType " +
-//            " JOIN expense.financialReport report " +
-//            " JOIN report.department department " +
-//            " JOIN report.term term " +
-//            " WHERE year(term.planDueDate) = year(:now) AND " +
-//            " expense.status.code = :approved AND" +
-//            " term.isDelete = false AND " +
-//            " report.isDelete = false AND " +
-//            " department.isDelete = false AND " +
-//            " costType.isDelete = false AND " +
-//            " expense.isDelete = false " +
-//            " GROUP BY departmentId, costTypeId")
-//    List<ReportResult> getListReports(LocalDate now, ExpenseStatusCode approved);
+    @Query(value = " SELECT department.id AS departmentId, sum(expense.unitPrice*expense.amount) AS totalExpense, max(expense.unitPrice*expense.amount) AS biggestExpense, costType.id AS costTypeId FROM FinancialPlanExpense expense " +
+            " JOIN expense.files fileExpense " +
+            " JOIN fileExpense.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term" +
+            " JOIN expense.status status " +
+            " JOIN plan.department department " +
+            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE (report_2.isDelete = false OR report_2.isDelete is null)" +
+            "                       GROUP BY file_2.id) " +
+            " AND " +
+            " year(term.finalEndTermDate) = year(:now) AND " +
+            " status.code = :approved AND " +
+            " (expense.isDelete = false OR expense.isDelete is null) " +
+            " GROUP BY departmentId, costTypeId ")
+    List<ReportResult> generateReport(LocalDate now, ExpenseStatusCode approved);
 
     @Query(value = " SELECT count (distinct (report.id)) FROM Report report " +
             " JOIN report.annualReport annualReport " +
