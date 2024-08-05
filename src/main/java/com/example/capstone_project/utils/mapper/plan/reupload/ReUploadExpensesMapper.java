@@ -42,11 +42,8 @@ public interface ReUploadExpensesMapper {
     }
 
 
-    default FinancialPlan mapToPlanMapping(Long planId, Long userId, PlanVersionResult planVersionResult, List<FinancialPlanExpense> expenses) {
+    default FinancialPlan mapToPlanMapping(FinancialPlan plan, Long userId, PlanVersionResult planVersionResult, List<FinancialPlanExpense> expenses) {
         // Get user detail
-        FinancialPlan plan = new FinancialPlan();
-
-        plan.setId(planId);
 
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
 

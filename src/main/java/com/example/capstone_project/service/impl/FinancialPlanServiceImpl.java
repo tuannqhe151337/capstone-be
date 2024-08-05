@@ -15,10 +15,7 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.RoleCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -597,7 +594,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     }
 
                     // Map to plan
-                    return new ReUploadExpensesMapperImpl().mapToPlanMapping(planId, (long) UserHelper.getUserId(), version, listExpense);
+                    FinancialPlan plan = planRepository.getReferenceById(planId);
+                    return new ReUploadExpensesMapperImpl().mapToPlanMapping(plan, (long) UserHelper.getUserId(), version, listExpense);
                 } else {
                     throw new UnauthorizedException("User can't upload this plan because departmentId of plan not equal with departmentId of user");
                 }
