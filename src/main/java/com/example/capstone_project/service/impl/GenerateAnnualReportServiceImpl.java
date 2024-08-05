@@ -3,6 +3,7 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
 import com.example.capstone_project.repository.AnnualReportRepository;
+import com.example.capstone_project.repository.ReportRepository;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.service.GenerateAnnualReportService;
@@ -22,9 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
     private final AnnualReportRepository annualReportRepository;
+    private final ReportRepository reportRepository;
 
     // Chạy vào ngày 5 tháng 1 hàng năm
-    @Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "0 0 0 5 1 ?")
     @Transactional
     public void generateAnnualReport() {
 
@@ -53,5 +55,6 @@ public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportServ
         annualReport.setTotalExpense(BigDecimal.valueOf(totalCostOfYear));
 
         annualReportRepository.save(annualReport);
+        reportRepository.saveAll(reports);
     }
 }
