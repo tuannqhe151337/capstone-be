@@ -479,7 +479,7 @@ public class ReportController {
         }
     }
 
-    @PutMapping("/upload")
+    @PostMapping("/upload")
     public ResponseEntity<ExceptionResponse> uploadReportExpenses(
             @Valid @RequestBody UploadReportExpenses body, BindingResult bindingResult) throws Exception {
 

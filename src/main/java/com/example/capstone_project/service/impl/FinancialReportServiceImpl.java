@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -353,16 +354,20 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             // Check list expense in one file
             long totalExpense = expenseRepository.countListExpenseInReportUpload(reportId, listCodes, TermCode.IN_PROGRESS, LocalDateTime.now());
             if (listCodes.size() == totalExpense) {
+                List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listCodes);
 
+                HashMap<String, Long> codeAndId = new HashMap<>();
+                for (ExpenseResult expenseResult : expenseResults) {
+                    codeAndId.put(expenseResult.getExpenseCode(), expenseResult.getExpenseId());
+                }
 
                 rawExpenses.forEach(expense -> {
 
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceByPlanExpenseKey(expense.getPlanExpenseKey());
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(codeAndId.get(expense.getPlanExpenseKey()));
 
                     updateExpense.setStatus(expenseStatusRepository.getReferenceById(expense.getStatus().getId()));
 
                     expenses.add(updateExpense);
-
 
                 });
                 expenseRepository.saveAll(expenses);
