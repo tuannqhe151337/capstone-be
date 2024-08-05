@@ -1,5 +1,6 @@
 package com.example.capstone_project.repository;
 
+import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialPlanExpense, Long>, CustomFinancialPlanExpenseRepository {
+    FinancialPlanExpense getReferenceByPlanExpenseKey(String planExpenseKey);
+
     @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +
             " JOIN fileExpense.file file " +
@@ -171,4 +174,24 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (term.status.code = :termCode) AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermCode termCode, LocalDateTime now);
+
+    @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
+            " JOIN expense.files fileExpense " +
+            " JOIN fileExpense.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN term.status status " +
+            " WHERE expense.planExpenseKey IN (:listCodes) AND " +
+            " file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null ) " +
+            "                       GROUP BY plan_2.id) " +
+            " AND " +
+            " (status.code = :termCode) AND " +
+            " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
+            " expense.isDelete = false ")
+    long countListExpenseInReportUpload(Long reportId, List<String> listCodes, TermCode termCode, LocalDateTime now);
 }

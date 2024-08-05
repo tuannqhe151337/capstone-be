@@ -42,4 +42,6 @@ public interface FinancialReportService {
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
     void approvalAllExpenses(Long reportId) throws Exception;
+
+    void uploadReportExpenses(Long reportId, List<FinancialPlanExpense> rawExpenses) throws Exception;
 }

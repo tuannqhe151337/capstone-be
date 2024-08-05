@@ -3,12 +3,15 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
+import com.example.capstone_project.controller.body.expense.UploadReportExpenses;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
+import com.example.capstone_project.entity.ExpenseStatus;
+import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
@@ -17,6 +20,7 @@ import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
+import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
@@ -37,6 +41,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -414,7 +419,7 @@ public class ReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
         } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
         }
@@ -441,7 +446,7 @@ public class ReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
         } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
         }
@@ -468,7 +473,45 @@ public class ReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
         } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid").build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+        }
+    }
+
+    @PutMapping("/upload")
+    public ResponseEntity<ExceptionResponse> uploadReportExpenses(
+            @Valid @RequestBody UploadReportExpenses body, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
+        try {
+            List<FinancialPlanExpense> rawExpenses = new ArrayList<>();
+            body.setListExpenses(RemoveDuplicateHelper.removeDuplicateCodes(body.getListExpenses()));
+
+            body.getListExpenses().forEach(expenseBody -> {
+                rawExpenses.add(FinancialPlanExpense.builder()
+                        .planExpenseKey(expenseBody.getExpenseCode())
+                        .status(ExpenseStatus.builder()
+                                .id(expenseBody.getStatusId())
+                                .build())
+                        .build());
+            });
+
+            reportService.uploadReportExpenses(body.getReportId(), rawExpenses);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update Successful").message("Upload file report successful.").build());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
         }
