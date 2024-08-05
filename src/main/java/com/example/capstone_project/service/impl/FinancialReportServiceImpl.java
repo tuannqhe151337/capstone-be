@@ -61,9 +61,6 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
-        // Get user detail
-        UserDetail userDetail = userDetailRepository.get(userId);
-
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
             return financialReportRepository.countDistinctListReportPaginate(query, termId, statusId);
@@ -156,19 +153,20 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-        List<Department> departments = departmentRepository.findAll();
-        List<CostType> costTypes = costTypeRepository.findAll();
-        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
-        if (expenses != null) {
+
+        if (expenses != null && !expenses.isEmpty()) {
+            List<Department> departments = departmentRepository.findAll();
+            List<CostType> costTypes = costTypeRepository.findAll();
+            List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+        } else {
+            throw new ResourceNotFoundException("List expenses is empty");
         }
-
-        return null;
     }
 
     @Override
@@ -176,39 +174,40 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         FileNameResult fileNameResult = financialReportRepository.generateFileName(reportId);
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_Report.xlsx";
+        } else {
+            throw new ResourceNotFoundException("Not found any report have id = " + reportId);
         }
-        return null;
     }
 
     @Override
     public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-        List<Department> departments = departmentRepository.findAll();
-        List<CostType> costTypes = costTypeRepository.findAll();
-        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+
         if (expenses != null) {
+            List<Department> departments = departmentRepository.findAll();
+            List<CostType> costTypes = costTypeRepository.findAll();
+            List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+        } else {
+            throw new ResourceNotFoundException("List expense is null or empty");
         }
-
-        return null;
     }
 
     @Override
     public String generateXLSFileName(Long reportId) {
         FileNameResult fileNameResult = financialReportRepository.generateFileName(reportId);
 
-
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_Report.xls";
+        } else {
+            throw new ResourceNotFoundException("Not found report have id = " + reportId);
         }
-
-        return null;
     }
 
     @Override
