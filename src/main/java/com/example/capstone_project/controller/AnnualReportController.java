@@ -35,7 +35,7 @@ public class AnnualReportController {
     private final AnnualReportService annualReportService;
 
     @GetMapping("/expenses")
-    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense(
+    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> listExpenses(
             @RequestParam(required = true) Long annualReportId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) Long departmentId,
