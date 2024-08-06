@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateUserBody {
     @NotEmpty(message = "Fullname cannot be empty")
-    @Size(max = 100, message = "Fullname must be less than 100 characters")
-    @Pattern(regexp = "^[A-Za-z]+(?: [A-Za-z]+)*$", message = "Full name must contain only letters and spaces")
+    @Size(min= 5, max = 50, message = "Full name must be more than 5 and less than 50 characters")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
     private String fullName;
 
     @NotEmpty(message = "Email cannot be empty")
