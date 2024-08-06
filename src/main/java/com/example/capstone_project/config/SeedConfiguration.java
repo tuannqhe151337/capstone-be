@@ -313,7 +313,27 @@ public class SeedConfiguration {
                     .name("View project")
                     .build();
 
-            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, createNewCostType, deleteCostType, updateCostType, viewPosition, createNewPosition, updatePosition, deletePosition, viewProject, createNewProject, updateProject, deleteProject));
+            Authority createNewSupplier = Authority.builder()
+                    .code(AuthorityCode.CREATE_NEW_SUPPLIER)
+                    .name("Create new supplier")
+                    .build();
+
+            Authority updateSupplier = Authority.builder()
+                    .code(AuthorityCode.UPDATE_SUPPLIER)
+                    .name("Update supplier")
+                    .build();
+
+            Authority deleteSupplier = Authority.builder()
+                    .code(AuthorityCode.DELETE_SUPPLIER)
+                    .name("Delete supplier")
+                    .build();
+
+            Authority viewSupplier = Authority.builder()
+                    .code(AuthorityCode.VIEW_SUPPLIER)
+                    .name("View supplier")
+                    .build();
+
+            authorityRepository.saveAll(List.of(viewUserDetail, viewPlan, createUser, viewListUsers, deleteUser, editUser, activateUser, deactivateUser, createTerm, editTerm, viewTerm, startTerm, deleteTerm, importPlan, reUploadPlan, submitPlanForReview, deletePlan, downloadPlan, approvePlan, viewReport, downloadReport, deleteReport, viewAnnualReport, downloadAnnualReport, createNewDepartment, updateDepartment, deleteDepartment, createNewCostType, deleteCostType, updateCostType, viewPosition, createNewPosition, updatePosition, deletePosition, viewProject, createNewProject, updateProject, deleteProject, createNewSupplier, updateSupplier, deleteSupplier, viewSupplier));
 
             // Role
             Role admin = Role.builder()
@@ -646,6 +666,26 @@ public class SeedConfiguration {
                     .authority(deleteProject)
                     .build();
 
+            RoleAuthority accountantAuthority25 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(viewSupplier)
+                    .build();
+
+            RoleAuthority accountantAuthority26 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(createNewSupplier)
+                    .build();
+
+            RoleAuthority accountantAuthority27 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(updateSupplier)
+                    .build();
+
+            RoleAuthority accountantAuthority28 = RoleAuthority.builder()
+                    .role(accountant)
+                    .authority(deleteSupplier)
+                    .build();
+
             RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(createTerm)
@@ -727,7 +767,7 @@ public class SeedConfiguration {
                     .build();
 
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
-                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17, accountantAuthority18, accountantAuthority19, accountantAuthority20, accountantAuthority21, accountantAuthority22, accountantAuthority23, accountantAuthority24,
+                    accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17, accountantAuthority18, accountantAuthority19, accountantAuthority20, accountantAuthority21, accountantAuthority22, accountantAuthority23, accountantAuthority24, accountantAuthority25, accountantAuthority26, accountantAuthority27, accountantAuthority28,
                     financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
 
