@@ -41,8 +41,8 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
             AnnualReportRepository annualReportRepository,
-            ReportRepository reportRepository
-    ) {
+            ReportRepository reportRepository,
+            TermIntervalRepository termIntervalRepository) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
                 return;
@@ -70,6 +70,16 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+            // Term interval date
+
+            TermInterval termInterval = TermInterval
+                    .builder().startTermDate(25)
+                    .endTermInterval(5)
+                    .startReuploadInterval(20)
+                    .endReuploadInterval(3)
+                    .build();
+
+            termIntervalRepository.save(termInterval);
 
             // Department
             Department itDepartment = Department.builder()
