@@ -52,5 +52,7 @@ public class UpdateTermBody {
     @Column(name = "final_end_term")
     private LocalDateTime finalEndTermDate;
 
+    private boolean isReuploadable;
+
 
 }

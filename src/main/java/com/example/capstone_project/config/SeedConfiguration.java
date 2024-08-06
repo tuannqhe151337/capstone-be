@@ -724,6 +724,7 @@ public class SeedConfiguration {
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user1)
                     .status(termStatus2)
+                    .isReuploadable(false)
                     .build();
 
             Term term2 = Term.builder()
@@ -736,6 +737,7 @@ public class SeedConfiguration {
                     .reuploadEndDate(LocalDateTime.now().plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user1)
+                    .isReuploadable(false)
                     .status(termStatus2)
                     .build();
 
@@ -750,6 +752,7 @@ public class SeedConfiguration {
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user2)
                     .status(termStatus3)
+                    .isReuploadable(false)
                     .build();
 
             Term term4 = Term.builder()
@@ -763,6 +766,7 @@ public class SeedConfiguration {
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user3)
                     .status(termStatus)
+                    .isReuploadable(false)
                     .build();
 
             Term term5 = Term.builder()
@@ -776,6 +780,7 @@ public class SeedConfiguration {
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user4)
                     .status(termStatus2)
+                    .isReuploadable(false)
                     .build();
 
             termRepository.saveAll(List.of(term1, term2, term3, term4, term5));
