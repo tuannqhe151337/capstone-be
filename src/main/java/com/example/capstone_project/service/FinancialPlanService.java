@@ -41,9 +41,9 @@ public interface FinancialPlanService {
 
 //    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
-    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
+    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Pageable pageable) throws Exception;
 
-    long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId);
+    long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId);
 
     List<VersionResult> getListVersionWithPaginate(Long planId, Pageable pageable) throws Exception;
 
