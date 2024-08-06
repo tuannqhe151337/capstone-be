@@ -4,10 +4,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
-import com.example.capstone_project.repository.result.ReportDetailResult;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.FileNameResult;
-import com.example.capstone_project.repository.result.ReportExpenseResult;
+import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -380,6 +377,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         } else {
             throw new UnauthorizedException("Unauthorized to approval expense");
         }
+    }
+
+    @Override
+    public List<YearDiagramResult> generateYearDiagram(Integer year) {
+        return financialReportRepository.generateYearDiagram(year);
     }
 
     @Override

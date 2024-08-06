@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -71,6 +72,13 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
     BigDecimal calculateExpectedCostByReportId(Long reportId);
+
+    @Query(" SELECT month (report.month) AS month, report.actualCost AS actualCost, report.expectedCost AS expectedCost FROM FinancialReport report " +
+            " WHERE year(report.month) = :year ")
+    List<YearDiagramResult> generateYearDiagram(Integer year);
+
+    FinancialReport getReferenceByTermId(Long termId);
+
 
 //    @Query(value = " SELECT expenses FROM FinancialReportExpense expenses " +
 //            " JOIN expenses.financialReport report " +

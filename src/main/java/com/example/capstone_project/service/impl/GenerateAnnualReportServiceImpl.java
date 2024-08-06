@@ -1,11 +1,9 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.ExpenseStatus;
-import com.example.capstone_project.entity.FinancialPlanExpense;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.AnnualReportRepository;
 import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.FinancialReportRepository;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.service.GenerateAnnualReportService;
@@ -24,10 +22,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
     private final AnnualReportRepository annualReportRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     @Override
     public void generateAnnualReport() {
 
+    }
+
+    @Override
+    public void generateActualCostAndExpectedCost(Long termId) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        report.setExpectedCost(financialReportRepository.calculateExpectedCostByReportId(report.getId()));
+        report.setActualCost(financialReportRepository.calculateActualCostByReportId(report.getId(), ExpenseStatusCode.APPROVED));
+        financialReportRepository.save(report);
     }
 
 //    @Scheduled(cron = "0 0 0 5 1 ?")
