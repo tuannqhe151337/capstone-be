@@ -84,6 +84,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = FinancialPlanFile_.USER, fetch = FetchType.LAZY)
     private List<FinancialPlanFile> financialPlanFiles;
 
+    @OneToMany(mappedBy = FinancialPlanExpense_.PIC)
+    private List<FinancialPlanExpense> expenses;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete = false;
 }

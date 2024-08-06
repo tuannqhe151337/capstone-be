@@ -134,7 +134,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     long countDistinctListExpenseForReport(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
 
     @Query(" SELECT expense.planExpenseKey AS expenseCode, expense.createdAt AS date, term.name AS termName, department.name AS departmentName, expense.name AS expenseName," +
-            " costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount,(expense.unitPrice*expense.amount) AS total ,expense.projectName AS projectName, expense.supplierName AS supplierName, expense.pic AS pic," +
+            " costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount,(expense.unitPrice*expense.amount) AS total ,expense.project.name AS projectName, expense.supplier.name AS supplierName, expense.pic AS pic," +
             " expense.note AS note, status.code AS statusCode FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
             " LEFT JOIN files.file file " +

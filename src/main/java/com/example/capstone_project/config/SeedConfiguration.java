@@ -41,7 +41,10 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
             AnnualReportRepository annualReportRepository,
-            ReportRepository reportRepository
+            ReportRepository reportRepository,
+            SupplierRepository supplierRepository,
+            ProjectRepository projectRepository
+
     ) {
         return args -> {
             if (System.getenv("SPRING_PROFILES_ACTIVE") != null && System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
@@ -1068,6 +1071,70 @@ public class SeedConfiguration {
 
             expenseStatusRepository.saveAll(List.of(expenseStatus1, expenseStatus2, expenseStatus3));
 
+            Project project1 = Project.builder()
+                    .id(1L)
+                    .name("Project Name 1")
+                    .build();
+
+            Project project2 = Project.builder()
+                    .id(2L)
+                    .name("Project Name 2")
+                    .build();
+
+            Project project3 = Project.builder()
+                    .id(3L)
+                    .name("Project Name 3")
+                    .build();
+
+            Project project4 = Project.builder()
+                    .id(4L)
+                    .name("Project Name 4")
+                    .build();
+
+            Project project5 = Project.builder()
+                    .id(5L)
+                    .name("Project Name 5")
+                    .build();
+
+            Project project6 = Project.builder()
+                    .id(6L)
+                    .name("Project Name 6")
+                    .build();
+
+            projectRepository.saveAll(List.of(project1, project2, project3, project4, project5, project6));
+
+            Supplier supplier1 = Supplier.builder()
+                    .id(1L)
+                    .name("Supplier name 1")
+                    .build();
+
+            Supplier supplier2 = Supplier.builder()
+                    .id(2L)
+                    .name("Supplier name 2")
+                    .build();
+
+            Supplier supplier3 = Supplier.builder()
+                    .id(3L)
+                    .name("Supplier name 3")
+                    .build();
+
+            Supplier supplier4 = Supplier.builder()
+                    .id(4L)
+                    .name("Supplier name 4")
+                    .build();
+
+            Supplier supplier5 = Supplier.builder()
+                    .id(5L)
+                    .name("Supplier name 5")
+                    .build();
+
+            Supplier supplier6 = Supplier.builder()
+                    .id(6L)
+                    .name("Supplier name 6")
+                    .build();
+
+            supplierRepository.saveAll(List.of(supplier1, supplier2, supplier3, supplier4, supplier5, supplier6));
+
             FinancialPlanFile financialPlanFile1_1 = FinancialPlanFile.builder()
                     .id(1L)
                     .name("TERM-NAME1_PLAN-NAME1")
@@ -1364,17 +1431,20 @@ public class SeedConfiguration {
 
             financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1, financialPlanFile9_1, financialPlanFile10_1, financialPlanFile11_1, financialPlanFile12_1, financialPlanFile13_1, financialPlanFile14_1, financialPlanFile15_1));
 
+            //
+
             // Get 64 random expense
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
             Random random = new Random();
-            String[] pics = {"TuNM", "AnhPTH", "HuyHT", "VyNN"};
             char projectNameChar = 'A';
             char supplierNameChar = 'A';
 
             for (int i = 1; i <= 64; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomCostTypeIndex = random.nextInt(6) + 1;
-                int randomPicIndex = random.nextInt(pics.length);
+                int randomProjectIndex = random.nextInt(6) + 1;
+                int randomSupplierIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(5) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 1 -> expenseStatus1;
@@ -1393,14 +1463,43 @@ public class SeedConfiguration {
                     default -> costType1; // Default case, should never be reached
                 };
 
+                Project randomProject = switch (randomProjectIndex) {
+                    case 1 -> project1;
+                    case 2 -> project2;
+                    case 3 -> project3;
+                    case 4 -> project4;
+                    case 5 -> project5;
+                    case 6 -> project6;
+                    default -> project1; // Default case, should never be reached
+                };
+
+                Supplier randomSupplier = switch (randomSupplierIndex) {
+                    case 1 -> supplier1;
+                    case 2 -> supplier2;
+                    case 3 -> supplier3;
+                    case 4 -> supplier4;
+                    case 5 -> supplier5;
+                    case 6 -> supplier6;
+                    default -> supplier1; // Default case, should never be reached
+                };
+
+                User randomPic = switch (randomPicIndex) {
+                    case 1 -> user1;
+                    case 2 -> user2;
+                    case 3 -> user3;
+                    case 4 -> user4;
+                    case 5 -> user5;
+                    default -> user1; // Default case, should never be reached
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
                         .name("Expense " + projectNameChar)
                         .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 10000L))
                         .amount(random.nextInt(10) + 1)
-                        .projectName("Project name " + projectNameChar++)
-                        .supplierName("Supplier name " + supplierNameChar++)
-                        .pic(pics[randomPicIndex])
+                        .project(randomProject)
+                        .supplier(randomSupplier)
+                        .pic(randomPic)
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .build();
