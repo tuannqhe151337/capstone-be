@@ -35,7 +35,7 @@ public class AnnualReportController {
     private final AnnualReportService annualReportService;
 
     @GetMapping("/expenses")
-    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> confirmExpense(
+    public ResponseEntity<ListPaginationResponse<AnnualReportExpenseResponse>> listExpenses(
             @RequestParam(required = true) Long annualReportId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) Long departmentId,
@@ -164,7 +164,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -191,7 +191,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -214,7 +214,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -237,7 +237,7 @@ public class AnnualReportController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
