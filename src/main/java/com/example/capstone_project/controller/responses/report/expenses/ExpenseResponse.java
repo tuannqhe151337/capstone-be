@@ -1,8 +1,6 @@
 package com.example.capstone_project.controller.responses.report.expenses;
 
-import com.example.capstone_project.controller.responses.report.CostTypeResponse;
-import com.example.capstone_project.controller.responses.report.DepartmentResponse;
-import com.example.capstone_project.controller.responses.report.StatusResponse;
+import com.example.capstone_project.controller.responses.report.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,9 +19,9 @@ public class ExpenseResponse {
     private CostTypeResponse costType;
     private BigDecimal unitPrice;
     private Integer amount;
-    private String projectName;
-    private String supplierName;
-    private String pic;
+    private ProjectResponse projectName;
+    private SupplierResponse supplierName;
+    private PicResponse pic;
     private String notes;
     private StatusResponse status;
 }
