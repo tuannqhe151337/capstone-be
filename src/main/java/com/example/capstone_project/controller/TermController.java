@@ -184,7 +184,7 @@ public class TermController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<TermDetailResponse> getTermDetailById(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> getTermDetailById(@PathVariable("id") Long id) {
         try {
             TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl()
                     .mapTermToTermDetailResponse(termService.findTermById(id));
@@ -192,7 +192,10 @@ public class TermController {
         } catch (UnauthorizedException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("error").message("Term not found")
+                    .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -232,7 +235,7 @@ public class TermController {
     }
 
     @PutMapping
-    public ResponseEntity<TermDetailResponse> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
+    public ResponseEntity<Object> updateTerm(@Valid @RequestBody UpdateTermBody updateTermBody, BindingResult result) {
 
         //map create term body to term entity
         Term term = new UpdateTermBodyToTermEntityMapperImpl().mapUpdateTermBodyToTermEntity(updateTermBody);
@@ -243,8 +246,21 @@ public class TermController {
             return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidEndDateException | InvalidEndReupDateException | InvalidStartReupDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (InvalidEndDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("endDate").message("Invalid end date")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        }catch (InvalidEndReupDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("reuploadEndDate").message("Invalid re-upload end date")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        }catch (InvalidStartReupDateException e){
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("reuploadStartDate").message("Invalid re-upload start date")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -252,16 +268,19 @@ public class TermController {
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
+    public ResponseEntity<Object> deleteTerm(@Valid @RequestBody DeleteTermBody deleteTermBody, BindingResult result) {
         try {
             termService.deleteTerm(deleteTermBody.getId());
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Term not found");
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("error").message("Term not found")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -379,7 +398,10 @@ public class TermController {
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("error").message("Term not found")
+                    .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
