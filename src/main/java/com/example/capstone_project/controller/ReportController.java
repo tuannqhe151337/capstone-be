@@ -6,21 +6,27 @@ import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.expense.UploadReportExpenses;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
+import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
+import com.example.capstone_project.controller.responses.report.diagram.YearDiagramResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
 import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
+import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
@@ -479,7 +485,7 @@ public class ReportController {
         }
     }
 
-    @PutMapping("/upload")
+    @PostMapping("/upload")
     public ResponseEntity<ExceptionResponse> uploadReportExpenses(
             @Valid @RequestBody UploadReportExpenses body, BindingResult bindingResult) throws Exception {
 
@@ -514,6 +520,37 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+        }
+    }
+
+    @GetMapping("/year-diagram")
+    public ResponseEntity<ListResponse<YearDiagramResponse>> getYearDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            List<YearDiagramResult> yearDiagramResults = reportService.generateYearDiagram(year);
+
+            // Response
+            ListResponse<YearDiagramResponse> response = new ListResponse<>();
+
+            if (yearDiagramResults != null) {
+
+                yearDiagramResults.forEach(yearDiagramResult -> response.getData().add(YearDiagramResponse.builder()
+                        .month(yearDiagramResult.getMonth())
+                        .actualCost(yearDiagramResult.getActualCost())
+                        .expectedCost(yearDiagramResult.getExpectedCost())
+                        .build()));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 }

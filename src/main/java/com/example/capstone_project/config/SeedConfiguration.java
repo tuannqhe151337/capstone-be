@@ -1835,84 +1835,108 @@ public class SeedConfiguration {
 
             FinancialReport report1 = FinancialReport.builder()
                     .name("Report Name 1")
-                    .month(LocalDate.now())
+                    .month(LocalDate.of(2024,1,5))
+                    .expectedCost(BigDecimal.valueOf(601660487L))
+                    .actualCost(BigDecimal.valueOf(216579382))
                     .status(newReportStatus)
                     .term(term1)
                     .build();
 
             FinancialReport report2 = FinancialReport.builder()
                     .name("Report Name 2")
-                    .month(LocalDate.now())
+                    .month(LocalDate.of(2024,2,5))
+                    .expectedCost(BigDecimal.valueOf(901660487L))
+                    .actualCost(BigDecimal.valueOf(516579382))
                     .status(waitingForApprovalReportStatus)
                     .term(term2)
                     .build();
 
             FinancialReport report3 = FinancialReport.builder()
                     .name("Report Name 3")
-                    .month(LocalDate.now())
+                    .month(LocalDate.of(2024,3,5))
+                    .expectedCost(BigDecimal.valueOf(1001660487L))
+                    .actualCost(BigDecimal.valueOf(706579382))
                     .status(waitingForApprovalReportStatus)
                     .term(term3)
                     .build();
 
             FinancialReport report4 = FinancialReport.builder()
                     .name("Report Name 4")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(901660487L))
+                    .actualCost(BigDecimal.valueOf(616579382))
+                    .month(LocalDate.of(2024,4,5))
                     .status(reviewedReportStatus)
                     .term(term4)
                     .build();
 
             FinancialReport report5 = FinancialReport.builder()
                     .name("Report Name 5")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(801660487L))
+                    .actualCost(BigDecimal.valueOf(585579382))
+                    .month(LocalDate.of(2024,5,5))
                     .status(reviewedReportStatus)
                     .term(term5)
                     .build();
 
             FinancialReport report6 = FinancialReport.builder()
                     .name("Report Name 6")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(801660487L))
+                    .actualCost(BigDecimal.valueOf(516579382))
+                    .month(LocalDate.of(2024,6,5))
                     .status(closedReportStatus)
                     .term(term6)
                     .build();
 
             FinancialReport report7 = FinancialReport.builder()
                     .name("Report Name 7")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(1001660487L))
+                    .actualCost(BigDecimal.valueOf(616579382))
+                    .month(LocalDate.of(2024,7,5))
                     .status(newReportStatus)
                     .term(term7)
                     .build();
 
             FinancialReport report8 = FinancialReport.builder()
                     .name("Report Name 8")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(701660487L))
+                    .actualCost(BigDecimal.valueOf(616579382))
+                    .month(LocalDate.of(2024,8,5))
                     .status(waitingForApprovalReportStatus)
                     .term(term8)
                     .build();
 
             FinancialReport report9 = FinancialReport.builder()
                     .name("Report Name 9")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(401660487L))
+                    .actualCost(BigDecimal.valueOf(316579382))
+                    .month(LocalDate.of(2024,9,5))
                     .status(waitingForApprovalReportStatus)
                     .term(term9)
                     .build();
 
             FinancialReport report10 = FinancialReport.builder()
                     .name("Report Name 10")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(901660487L))
+                    .actualCost(BigDecimal.valueOf(616579382))
+                    .month(LocalDate.of(2024,10,5))
                     .status(newReportStatus)
                     .term(term10)
                     .build();
 
             FinancialReport report11 = FinancialReport.builder()
                     .name("Report Name 11")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(131660487L))
+                    .actualCost(BigDecimal.valueOf(1216579382))
+                    .month(LocalDate.of(2024,11,5))
                     .status(closedReportStatus)
                     .term(term11)
                     .build();
 
             FinancialReport report12 = FinancialReport.builder()
                     .name("Report Name 12")
-                    .month(LocalDate.now())
+                    .expectedCost(BigDecimal.valueOf(151660487L))
+                    .actualCost(BigDecimal.valueOf(1006579382))
+                    .month(LocalDate.of(2024,12,5))
                     .status(waitingForApprovalReportStatus)
                     .term(term12)
                     .build();

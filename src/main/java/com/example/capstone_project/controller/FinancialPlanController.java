@@ -1,9 +1,6 @@
 package com.example.capstone_project.controller;
 
 
-import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
-import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
@@ -20,7 +17,6 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -372,7 +368,7 @@ public class FinancialPlanController {
             FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
 
             // Save plan
-            FinancialPlan savedPlan = planService.creatPlan(plan, term);
+            FinancialPlan savedPlan = planService.createPlan(plan, term);
 
             if (savedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

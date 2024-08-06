@@ -3,9 +3,7 @@ package com.example.capstone_project.controller.body.user.update;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,10 +18,14 @@ public class UpdateUserBody {
         @NotNull(message = "Id cannot be blank")
         private Long id;
 
-        @NotBlank(message = "Full name cannot be blank")
+        @NotEmpty(message = "Fullname cannot be empty")
+        @Size(min= 5, max = 50, message = "Fullname must be less than 100 characters")
+        @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
         private String fullName;
 
+
         @NotBlank(message = "Email cannot be blank")
+        @Email(message = "Email invalid format")
         private String email;
 
         @NotNull(message = "Department cannot be blank")
@@ -41,12 +43,11 @@ public class UpdateUserBody {
         private Long positionId;
 
         @NotNull(message = "DOB cannot be null")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
         private LocalDateTime dob;
 
         @NotNull(message = "Address cannot be null")
         @NotBlank
         private String address;
+}
 
-    }
 

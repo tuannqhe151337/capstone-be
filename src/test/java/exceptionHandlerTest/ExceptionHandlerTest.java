@@ -111,7 +111,9 @@ public class ExceptionHandlerTest {
         assertEquals("newPassword", firstError.getField());
         assertEquals("New password must be at least 8 characters long, contain at least one special character, one uppercase letter, and one lowercase letter", firstError.getMessage());
 
-    }  @Test
+    }
+
+    @Test
     void testParseMessageToListExceptionResponse_PrivateMethod_EmptyMessage() throws Exception {
         // Sử dụng reflection để lấy phương thức private
         Method parseMethod = GlobalExceptionHandler.class.getDeclaredMethod("parseMessageToListExceptionResponse", String.class);
@@ -127,6 +129,30 @@ public class ExceptionHandlerTest {
 
 
     }
+    @Test
+    public void testParseMessageToListExceptionResponse2_JSONParseError() throws Exception {
+        // Sử dụng reflection để lấy phương thức private
+        Method parseMethod = GlobalExceptionHandler.class.getDeclaredMethod("parseMessageToListExceptionResponse_HttpMessageNotReadableException", String.class);
+        parseMethod.setAccessible(true);
+
+        // Dữ liệu đầu vào - lỗi parse JSON
+        String errorMessage = "JSON parse error: Unrecognized field \"department\" (class com.example.capstone_project.controller.body.user.update.UpdateUserBody), not marked as ignorable";
+
+        // Gọi phương thức private thông qua reflection
+        @SuppressWarnings("unchecked")
+        List<ExceptionResponse> result = (List<ExceptionResponse>) parseMethod.invoke(globalExceptionHandler, errorMessage);
+
+        // Kết quả mong đợi
+        ExceptionResponse expectedResponse = new ExceptionResponse("JSON parse error", "Unrecognized field \"department\" (class com.example.capstone_project.controller.body.user.update.UpdateUserBody), not marked as ignorable");
+
+        // Kiểm tra kết quả
+        assertEquals(1, result.size());
+        assertEquals(expectedResponse.getField(), result.get(0).getField());
+        assertEquals(expectedResponse.getMessage(), result.get(0).getMessage());
+    }
+
+
+
 }
 
 
