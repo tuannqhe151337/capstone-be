@@ -1,67 +1,77 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.TermDuration;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import jakarta.validation.constraints.NotEmpty;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(schema = "capstone_v2",name = "terms")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
 @Builder
-public class Term {
+public class Term extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Name cannot be empty")
     @Column(name = "name")
     private String name;
 
+    @NotNull(message = "Duration cannot be empty")
     @Column(name = "duration")
-    private String duration;
+    @Enumerated(EnumType.STRING)
+    private TermDuration duration ;
 
+    @NotNull(message = "Start date cannot be null")
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
+    @NotNull(message = "End date cannot be null")
+//    @Future(message = "End date must be in the future")
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
-    @Column(name = "plan_due_date")
-    private LocalDate planDueDate;
+    @NotNull(message = "Re-upload start date cannot be null")
+//    @Future(message = "Re-upload start date must be in the future")
+    @Column(name = "start_reupload_date")
+    private LocalDateTime reuploadStartDate;
 
-    @Column(name = "report_due_date")
-    private LocalDate reportDueDate;
+
+    @NotNull(message = "Re-upload end date cannot be null")
+//    @Future(message = "Re-upload end date must be in the future")
+    @Column(name = "end_reupload_date")
+    private LocalDateTime reuploadEndDate;
+
+    @NotNull(message = "Final end date cannot be null")
+//    @Future(message = "Final end date must be in the future")
+    @Column(name = "final_end_term")
+    private LocalDateTime finalEndTermDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
-    private TermStatus status;
+    private TermStatus status; //trong day da co isDelete roi
 
-    @OneToMany(mappedBy = "term")
+    @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialPlan> financialPlans;
 
-    @OneToMany(mappedBy = "term")
+    @OneToMany(mappedBy = "term", fetch = FetchType.LAZY)
     private List<FinancialReport> financialReports;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
+
 }

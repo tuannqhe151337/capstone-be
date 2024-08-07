@@ -1,14 +1,8 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -16,8 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
-public class FinancialPlan {
+public class FinancialPlan extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,25 +20,20 @@ public class FinancialPlan {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.FINANCIAL_PLAN)
-    private List<FinancialPlanFile> financialPlanFiles;
+    @Transient
+    private Integer version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = FinancialPlanFile_.PLAN, cascade=CascadeType.ALL)
+    private List<FinancialPlanFile> planFiles;
+
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
     @JoinColumn(name = "term_id")
     private Term term;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id")
-    private FinancialStatus status;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
+    @ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.MERGE)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

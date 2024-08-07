@@ -8,22 +8,19 @@ import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.impl.AuthService;
 import com.example.capstone_project.service.result.LoginResult;
 import com.example.capstone_project.service.result.TokenPair;
-import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
-import com.example.capstone_project.utils.mapper.LoginResultResponseMapperImpl;
-import com.example.capstone_project.utils.mapper.UserEntityDetailResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.auth.LoginResultResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.auth.UserEntityDetailResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthService authService;
-    private final JwtHelper jwtHelper;
 
     @PostMapping("login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequestBody body) {
@@ -45,7 +42,7 @@ public class AuthenticationController {
     public ResponseEntity<UserDataResponse> me() {
         try {
             int userId = UserHelper.getUserId();
-            User user = this.authService.getDetailedUserById(userId);
+            User user = this.authService.getDetailedUserByIdFromDatabase(userId);
 
             return ResponseEntity.ok(
                 new UserEntityDetailResponseMapperImpl().mapToUserDataResponse(user)

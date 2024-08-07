@@ -1,12 +1,12 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.AuthorityCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -14,9 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
-@ToString
-public class Authority {
+public class Authority extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,17 +25,10 @@ public class Authority {
     private String name;
 
     @Column(name = "code")
-    private String code;
+    @Enumerated(EnumType.STRING)
+    private AuthorityCode code;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    @Column(name = "is_delete",columnDefinition = "bit default 0")
     private Boolean isDelete;
 
     @ToString.Exclude

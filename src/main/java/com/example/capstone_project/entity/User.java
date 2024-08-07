@@ -1,63 +1,73 @@
 package com.example.capstone_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDate;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(schema = "capstone_v2", name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Username cannot be empty")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    @NotEmpty(message = "Password cannot be empty")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email")
+    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "Email should be valid")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @NotNull(message = "Date of birth cannot be null")
+    @Past(message = "Date of birth must be in the past")
     @Column(name = "dob")
-    private LocalDate dob;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
+    private LocalDateTime dob;
 
     @Column(name = "note")
     private String note;
 
-    @Column(name = "full_name")
+    @Size(min = 5, max = 100, message = "Full name must be less than 100 characters")
+    @Column(name = "full_name", nullable = false, columnDefinition = "NVARCHAR(100)")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
     private String fullName;
 
+    @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
     @Column(name = "phone_number")
+    @NotEmpty(message = "Password cannot be empty")
     private String phoneNumber;
 
+    @Size(max = 200, message = "Address must be less than 200 characters")
     @Column(name = "address")
     private String address;
 
-    @Column(name = "status")
-    private Boolean status;
-
+    @NotNull(message = "Position cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     private Position position;
 
+    @NotNull(message = "Department cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
 
+    @NotNull(message = "Role cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
@@ -65,23 +75,15 @@ public class User {
     @Transient
     private List<Authority> authorities;
 
-    @OneToOne(mappedBy = UserSetting_.USER)
+    @OneToOne(mappedBy = UserSetting_.USER, fetch = FetchType.LAZY)
     private UserSetting userSetting;
 
-    @OneToMany(mappedBy = Term_.USER)
+    @OneToMany(mappedBy = Term_.USER, fetch = FetchType.LAZY)
     private List<Term> terms;
 
-    @OneToMany(mappedBy = FinancialPlanFile_.USER)
+    @OneToMany(mappedBy = FinancialPlanFile_.USER, fetch = FetchType.LAZY)
     private List<FinancialPlanFile> financialPlanFiles;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
-    @Column(name = "is_delete",columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private Boolean isDelete = false;
 }

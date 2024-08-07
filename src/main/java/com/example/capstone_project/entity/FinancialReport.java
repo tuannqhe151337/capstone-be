@@ -1,23 +1,19 @@
 package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
-@Table(schema = "capstone_v2",name = "financial_reports")
+@Table(schema = "capstone_v2", name = "financial_reports")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
-public class FinancialReport {
+public class FinancialReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,21 +24,20 @@ public class FinancialReport {
     @Column(name = "month")
     private LocalDate month;
 
+    @Column(name = "actual_cost")
+    private BigDecimal actualCost;
+
+    @Column(name = "expected_cost")
+    private BigDecimal expectedCost;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "status_id")
+    private ReportStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "term_id")
+    @JoinColumn(name = "term_id", unique = true)
     private Term term;
 
-    @OneToMany(mappedBy = FinancialReportExpense_.FINANCIAL_REPORT)
-    private List<FinancialReportExpense> financialReportExpenses;
-
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDate updatedAt;
-
     @Column(name = "is_delete", columnDefinition = "bit default 0")
-    private Boolean isDelete;
+    private boolean isDelete;
 }

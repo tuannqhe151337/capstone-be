@@ -2,7 +2,10 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.google.cloud.tools.jib' version '3.4.3'
 }
+
+// jib.to.image = 'gcr.io/my-gcp-project/my-app'
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
@@ -42,20 +45,85 @@ dependencies {
     implementation 'org.mapstruct:mapstruct-processor:1.6.0.Beta1'
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-maven-plugin
     implementation 'org.springdoc:springdoc-openapi-maven-plugin:1.4'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
+    implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
+    // https://mvnrepository.com/artifact/org.apache.poi/poi
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-core
+    implementation 'org.hibernate:hibernate-core:6.5.0.Final'
 
+
+
+    implementation 'org.apache.poi:poi:5.2.5'
+    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+    implementation 'org.passay:passay:1.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    implementation 'org.passay:passay:1.6.3'
 
 
     testImplementation 'org.springframework.security:spring-security-test'
+
+//TEST JUNIT MOCKITO
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation('org.mockito:mockito-core:3.7.7')
+
+
+    // If using JUnit Jupiter
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+    // If using JUnit 4
+    testImplementation 'junit:junit:4.13.2'
+
+
+    // Spring Boot Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+    // Mockito Dependencies
+    testImplementation 'org.mockito:mockito-core:4.0.0' // Cập nhật phiên bản Mockito mới nhất
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0' // Cập nhật phiên bản Mockito mới nhất
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+
+    //TEST JUNIT MOCKITO
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation('org.mockito:mockito-core:3.7.7')
+
+
+    // Spring Boot Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+    // Mockito Dependencies
+    testImplementation 'org.mockito:mockito-core:4.0.0' // Cập nhật phiên bản Mockito mới nhất
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0' // Cập nhật phiên bản Mockito mới nhất
+
     compileOnly 'org.projectlombok:lombok'
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen
     compileOnly 'org.hibernate:hibernate-jpamodelgen:6.5.0.Final'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor "org.mapstruct:mapstruct-processor:1.6.0.Beta1"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
     annotationProcessor("org.hibernate.orm:hibernate-jpamodelgen:6.3.1.Final")
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.5.0'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.16.1'
+
 }
 
 tasks.named('test') {

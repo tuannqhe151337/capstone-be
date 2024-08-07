@@ -3,16 +3,16 @@ package com.example.capstone_project.controller.responses;
 import lombok.*;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class Pagination {
     private long page;
 
-    private long count;
+    private long totalRecords;
 
-    private long displayRecord;
+    private long limitRecordsPerPage;
 
     private long numPages;
 }
