@@ -19,8 +19,8 @@ public class ExpenseResponse {
     private CostTypeResponse costType;
     private BigDecimal unitPrice;
     private Integer amount;
-    private ProjectResponse projectName;
-    private SupplierResponse supplierName;
+    private ProjectResponse project;
+    private SupplierResponse supplier;
     private PicResponse pic;
     private String notes;
     private StatusResponse status;
