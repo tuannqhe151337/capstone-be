@@ -1,8 +1,8 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.Supplier.DeleteSupplierBody;
-import com.example.capstone_project.controller.body.Supplier.NewSupplierBody;
-import com.example.capstone_project.controller.body.Supplier.UpdateSupplierBody;
+import com.example.capstone_project.controller.body.supplier.DeleteSupplierBody;
+import com.example.capstone_project.controller.body.supplier.NewSupplierBody;
+import com.example.capstone_project.controller.body.supplier.UpdateSupplierBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;

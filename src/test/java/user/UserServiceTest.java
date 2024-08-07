@@ -12,6 +12,7 @@ import com.example.capstone_project.repository.impl.MailRepository;
 import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.JwtHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
@@ -23,9 +24,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -253,6 +256,72 @@ public class UserServiceTest {
             verify(userIdTokenRepository).save(eq(newToken), eq(Long.parseLong(userId)), any());
         }
 
+        @Test
+        public void testGetAllUsers_Authorized() {
+            // Setup
+            Long roleId = 1L;
+            Long departmentId = 2L;
+            Long positionId = 3L;
+            String searchQuery = "testUser";
+            Pageable pageable = PageRequest.of(0, 10);
+
+
+            // Mock UserHelper behavior
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock UserAuthorityRepository behavior
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock UserRepository behavior
+            List<User> expectedUsers = List.of(user, user2);
+            when(userRepository.getUserWithPagination(roleId, departmentId, positionId, searchQuery, pageable)).thenReturn(expectedUsers);
+
+            // Call the method under test
+            List<User> result = userServiceImpl.getAllUsers(roleId, departmentId, positionId, searchQuery, pageable);
+
+            // Verify interactions with mocks
+            verify(userAuthorityRepository).get(actorId);
+            verify(userRepository).getUserWithPagination(roleId, departmentId, positionId, searchQuery, pageable);
+
+            // Assert the result
+            assertNotNull(result);
+            assertEquals(expectedUsers, result);
+
+        }
+        @Test
+        public void testGetAllUsers_WithDifferentPageable_EmptyResults() {
+            // Setup
+            Long roleId = 1L;
+            Long departmentId = 2L;
+            Long positionId = 3L;
+            String searchQuery = "testUser";
+            Pageable pageable = PageRequest.of(1, 5, Sort.by("username").descending());
+
+            // Mock UserHelper behavior
+            when(UserHelper.getUserId()).thenReturn(Math.toIntExact(actorId));
+
+            // Mock UserAuthorityRepository behavior
+            when(userAuthorityRepository.get(actorId)).thenReturn(Set.of(AuthorityCode.VIEW_LIST_USERS.getValue()));
+
+            // Mock UserRepository behavior
+            List<User> expectedUsers = List.of(new User());
+            when(userRepository.getUserWithPagination(roleId, departmentId, positionId, searchQuery, pageable)).thenReturn(expectedUsers);
+
+            // Call the method under test
+            List<User> result = userServiceImpl.getAllUsers(roleId, departmentId, positionId, searchQuery, pageable);
+
+            // Verify interactions with mocks
+            verify(userAuthorityRepository).get(actorId);
+            verify(userRepository).getUserWithPagination(roleId, departmentId, positionId, searchQuery, pageable);
+
+            // Assert the result
+            assertNotNull(result);
+            assertEquals(expectedUsers, result);
+        }
+        //OTP VALIDATE
+
+
+
 
     }
 
@@ -261,6 +330,65 @@ public class UserServiceTest {
         @BeforeEach
         void setUp() {
             // Custom setup for this test group if needed
+        }
+
+        @Test
+        void otpValidate_returnsNewToken_whenOtpIsValid() throws Exception {
+            OTPBody otpBody = new OTPBody();
+            otpBody.setOtp("correctOtp");
+
+            User mockUser = mock(User.class);
+            when(mockUser.getIsDelete()).thenReturn(false);
+
+            when(otpTokenRepository.getUserID(anyString())).thenReturn("123");
+            when(userRepository.findById(Long.parseLong("123"))).thenReturn(Optional.of(mockUser));
+            when(otpTokenRepository.getOtpCode(anyString(), eq(123L))).thenReturn("correctOtp");
+            when(jwtHelper.genBlankTokenOtp()).thenReturn("newToken");
+
+            String result = userServiceImpl.otpValidate(otpBody, "someToken");
+
+            verify(userIdTokenRepository).save(eq("newToken"), eq(Long.parseLong("123")), any());
+            assertEquals("newToken", result);
+        }
+
+        @Test
+        void otpValidate_throwsUnauthorizedException_whenOtpDoesNotMatch() {
+            OTPBody otpBody = new OTPBody();
+            otpBody.setOtp("wrongOtp");
+
+            when(otpTokenRepository.getUserID(anyString())).thenReturn("123");
+            when(userRepository.findById(123L)).thenReturn(Optional.of(new User()));
+            when(otpTokenRepository.getOtpCode(anyString(), eq(123L))).thenReturn("correctOtp");
+
+            assertThrows(UnauthorizedException.class, () -> {
+                userServiceImpl.otpValidate(otpBody, "someToken");
+            });
+        }
+        @Test
+        void otpValidate_throwsResourceNotFoundException_whenUserIsNotFound() {
+            OTPBody otpBody = new OTPBody();
+            when(otpTokenRepository.getUserID(anyString())).thenReturn("123");
+            when(userRepository.findById(123L)).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> {
+                userServiceImpl.otpValidate(otpBody, "someToken");
+            });
+        }
+
+        @Test
+        void otpValidate_throwsInvalidDataAccessResourceUsageException_whenUserIdIsNull() {
+            OTPBody otpBody = new OTPBody();
+            when(otpTokenRepository.getUserID(anyString())).thenReturn(null);
+            assertThrows(InvalidDataAccessResourceUsageException.class, () -> {
+                userServiceImpl.otpValidate(otpBody, "someToken");
+            });
+        }
+        @Test
+        void otpValidate_throwsDataIntegrityViolationException_whenAuthHeaderTokenIsNull() {
+            OTPBody otpBody = new OTPBody();
+            assertThrows(DataIntegrityViolationException.class, () -> {
+                userServiceImpl.otpValidate(otpBody, null);
+            });
         }
         @Test
         void testOtpValidate_InvalidToken() {
