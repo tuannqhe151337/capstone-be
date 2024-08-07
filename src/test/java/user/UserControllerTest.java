@@ -242,7 +242,7 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(userBody)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.field").value("email"))
-                .andExpect(jsonPath("$.message").value("emails already exists"));
+                .andExpect(jsonPath("$.message").value("Emails already exists"));
     }
 
 
