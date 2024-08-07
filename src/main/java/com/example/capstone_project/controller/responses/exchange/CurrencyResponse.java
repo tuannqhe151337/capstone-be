@@ -1,0 +1,15 @@
+package com.example.capstone_project.controller.responses.exchange;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CurrencyResponse {
+    private Long currencyId;
+    private String name;
+}
