@@ -27,10 +27,11 @@ public interface ReportExpenseResponseMapper {
                 .amount(reportExpenseResult.getAmount())
                 .projectName(reportExpenseResult.getProjectName())
                 .supplierName(reportExpenseResult.getSupplierName())
-                .pic(reportExpenseResult.getPic())
+                .pic(reportExpenseResult.getPicName())
                 .notes(reportExpenseResult.getNote())
                 .status(StatusResponse.builder()
                         .statusId(reportExpenseResult.getStatusId())
+                        .code(reportExpenseResult.getStatusCode())
                         .name(reportExpenseResult.getStatusName())
                         .build())
                 .build();

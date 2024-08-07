@@ -7,6 +7,7 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface FinancialPlanService {
@@ -14,7 +15,7 @@ public interface FinancialPlanService {
 
     List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
 
-    FinancialPlan creatPlan(FinancialPlan plan, Term term) throws Exception;
+    FinancialPlan createPlan(FinancialPlan plan, Term term) throws Exception;
 
     UserDetail getUserDetail() throws Exception;
 
@@ -38,7 +39,7 @@ public interface FinancialPlanService {
 
     String generateXLSFileName(Long fileId);
 
-    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+//    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception;
 
@@ -60,9 +61,12 @@ public interface FinancialPlanService {
 
     String generateXLSXFileNameByPlanId(Long planId);
 
-    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+//    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
-    void approvalAllExpenses(Long planId) throws Exception;
+//    void approvalAllExpenses(Long planId) throws Exception;
 
     void submitPlanForReview(Long planId) throws Exception;
+
+    byte[] getTemplateData() throws IOException;
+
 }

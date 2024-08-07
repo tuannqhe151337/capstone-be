@@ -43,9 +43,9 @@ public class User extends BaseEntity {
     @Column(name = "note")
     private String note;
 
-    @Size(max = 100, message = "Full name must be less than 100 characters")
+    @Size(min = 5, max = 100, message = "Full name must be less than 100 characters")
     @Column(name = "full_name", nullable = false, columnDefinition = "NVARCHAR(100)")
-    @Pattern(regexp = "^[A-Za-z]+(?: [A-Za-z]+)*$", message = "Full name must contain only letters and spaces")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ]+(?: [a-zA-ZÀ-ỹ]+)*$", message = "Full name must contain only letters and spaces")
     private String fullName;
 
     @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
@@ -83,6 +83,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = FinancialPlanFile_.USER, fetch = FetchType.LAZY)
     private List<FinancialPlanFile> financialPlanFiles;
+
+    @OneToMany(mappedBy = FinancialPlanExpense_.PIC)
+    private List<FinancialPlanExpense> expenses;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private Boolean isDelete = false;

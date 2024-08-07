@@ -1,12 +1,7 @@
 package com.example.capstone_project.controller;
 
 
-import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
-import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
-import com.example.capstone_project.controller.body.plan.download.PlanBody;
-import com.example.capstone_project.controller.body.plan.download.PlanDownloadBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
 import com.example.capstone_project.controller.responses.ListResponse;
@@ -22,7 +17,6 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -36,8 +30,6 @@ import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImp
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -47,8 +39,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.util.List;
 
 @RestController
@@ -201,16 +191,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/xlsx")
+    @GetMapping("/download-xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
-            @Valid @RequestBody PlanDownloadBody planBody
+            @RequestParam(required = true) Long fileId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getBodyFileExcelXLSX(planBody.getFileId());
+            byte[] report = planService.getBodyFileExcelXLSX(fileId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSXFileName(planBody.getFileId());
+                String outFileName = planService.generateXLSXFileName(fileId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
@@ -224,16 +214,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/xls")
+    @GetMapping("/download-xls")
     public ResponseEntity<byte[]> generateXlsReport(
-            @Valid @RequestBody PlanDownloadBody planBody
+            @RequestParam(required = true) Long fileId
     ) throws Exception {
 
         /// Get data for file Excel
-        byte[] report = planService.getBodyFileExcelXLS(planBody.getFileId());
+        byte[] report = planService.getBodyFileExcelXLS(fileId);
         if (report != null) {
             // Create file name for file Excel
-            String outFileName = planService.generateXLSFileName(planBody.getFileId());
+            String outFileName = planService.generateXLSFileName(fileId);
 
             return createExcelFileResponseEntity(report, outFileName);
 
@@ -378,7 +368,7 @@ public class FinancialPlanController {
             FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
 
             // Save plan
-            FinancialPlan savedPlan = planService.creatPlan(plan, term);
+            FinancialPlan savedPlan = planService.createPlan(plan, term);
 
             if (savedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -392,90 +382,87 @@ public class FinancialPlanController {
         }
     }
 
-    @PutMapping("/expense-approval")
-    public ResponseEntity<String> approvalExpenses(
-            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
+//    @PutMapping("/expense-approval")
+//    public ResponseEntity<String> approvalExpenses(
+//            @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
+//
+//    @PutMapping("/expense-deny")
+//    public ResponseEntity<String> denyExpenses(
+//            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
+//
+//    @PutMapping("/expense-approval-all")
+//    public ResponseEntity<String> approvalAllExpenses(
+//            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
+//        try {
+//
+//            planService.approvalAllExpenses(body.getPlanId());
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+//        } catch (UnauthorizedException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        } catch (InvalidInputException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
 
-            planService.approvalExpenses(body.getPlanId(), body.getListExpenseId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PutMapping("/expense-deny")
-    public ResponseEntity<String> denyExpenses(
-            @Valid @RequestBody DenyExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
-
-            planService.denyExpenses(body.getPlanId(), body.getListExpenseId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PutMapping("/expense-approval-all")
-    public ResponseEntity<String> approvalAllExpenses(
-            @Valid @RequestBody ApprovalAllExpenseBody body, BindingResult bindingResult) throws Exception {
-        try {
-
-            planService.approvalAllExpenses(body.getPlanId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PostMapping("/download/template/xlsx")
+    @GetMapping("/download/template-xlsx")
     public ResponseEntity<byte[]> downloadXlsxReportTemplate() throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
+        /// Get data for file Excel
+        byte[] report = planService.getTemplateData();
 
-        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xlsx");
+        if (report != null) {
+            return createExcelFileResponseEntity(report, "Financial_Planning_Template.xlsx");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
     }
 
 
-    @PostMapping("/download/template/xls")
+    @GetMapping("/download/template-xls")
     public ResponseEntity<byte[]> downloadXlsReportTemplate() throws Exception {
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-        FileInputStream file = new FileInputStream(fileLocation);
-        HSSFWorkbook wb = new HSSFWorkbook(file);
+        /// Get data for file Excel
+        byte[] report = planService.getTemplateData();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-        out.close();
-
-        return createExcelFileResponseEntity(out.toByteArray(), "Financial_Planning_Template.xls");
+        if (report != null) {
+            return createExcelFileResponseEntity(report, "Financial_Planning_Template.xls");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
     }
 
-    @PostMapping("/download/last-version-xls")
+    @GetMapping("/download/last-version-xls")
     public ResponseEntity<byte[]> generateLastVersionXlsReport(
-            @Valid @RequestBody PlanBody planBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getLastVersionBodyFileExcelXLS(planBody.getPlanId());
+            byte[] report = planService.getLastVersionBodyFileExcelXLS(planId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSFileNameByPlanId(planBody.getPlanId());
+                String outFileName = planService.generateXLSFileNameByPlanId(planId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 
@@ -489,16 +476,16 @@ public class FinancialPlanController {
         }
     }
 
-    @PostMapping("/download/last-version-xlsx")
+    @GetMapping("/download/last-version-xlsx")
     public ResponseEntity<byte[]> generateLastVersionXlsxReport(
-            @Valid @RequestBody PlanBody planBody
+            @RequestParam(required = true) Long planId
     ) throws Exception {
         try {
             /// Get data for file Excel
-            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planBody.getPlanId());
+            byte[] report = planService.getLastVersionBodyFileExcelXLSX(planId);
             if (report != null) {
                 // Create file name for file Excel
-                String outFileName = planService.generateXLSXFileNameByPlanId(planBody.getPlanId());
+                String outFileName = planService.generateXLSXFileNameByPlanId(planId);
 
                 return createExcelFileResponseEntity(report, outFileName);
 

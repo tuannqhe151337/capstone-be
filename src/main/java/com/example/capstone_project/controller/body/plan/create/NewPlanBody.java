@@ -3,13 +3,14 @@ package com.example.capstone_project.controller.body.plan.create;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewPlanBody {
     @NotNull(message = "Term Id can not be null")
     private Long termId;

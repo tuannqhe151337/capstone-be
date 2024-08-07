@@ -37,22 +37,23 @@ public class Term extends BaseEntity{
     private LocalDateTime startDate;
 
     @NotNull(message = "End date cannot be null")
-    @Future(message = "End date must be in the future")
+   // @Future(message = "End date must be in the future")
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
 
-    @Future(message = "Re-upload start date must be in the future")
+  // @Future(message = "Re-upload start date must be in the future")
     @Column(name = "start_reupload_date")
     private LocalDateTime reuploadStartDate;
 
 
-    @Future(message = "Re-upload end date must be in the future")
+
+   // @Future(message = "Re-upload end date must be in the future")
     @Column(name = "end_reupload_date")
     private LocalDateTime reuploadEndDate;
 
     @NotNull(message = "Final end date cannot be null")
-    @Future(message = "Final end date must be in the future")
+    //@Future(message = "Final end date must be in the future")
     @Column(name = "final_end_term")
     private LocalDateTime finalEndTermDate;
 

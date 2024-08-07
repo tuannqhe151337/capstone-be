@@ -5,6 +5,7 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
@@ -36,4 +37,14 @@ public interface FinancialReportService {
     BigDecimal calculateActualCostByReportId(Long reportId);
 
     BigDecimal calculateExpectedCostByReportId(Long reportId);
+
+    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+
+    void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
+
+    void approvalAllExpenses(Long reportId) throws Exception;
+
+    void uploadReportExpenses(Long reportId, List<FinancialPlanExpense> rawExpenses) throws Exception;
+
+    List<YearDiagramResult> generateYearDiagram(Integer year);
 }

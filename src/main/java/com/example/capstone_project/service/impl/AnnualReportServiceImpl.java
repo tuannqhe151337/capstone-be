@@ -51,7 +51,14 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public long countDistinctListAnnualReportPaging(String year) {
-        return annualReportRepository.countDistinctListAnnualReportPaging(year);
+        // Get list authorities of this user
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            return annualReportRepository.countDistinctListAnnualReportPaging(year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
+        }
     }
 
     @Override
@@ -71,7 +78,17 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId) {
-        return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
+        // Get list authorities of this user
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (!annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any annual report have id = " + annualReportId);
+            }
+            return annualReportRepository.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
+        }
     }
 
     @Override
@@ -79,7 +96,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            if (annualReportRepository.existsById(annualReportId)) {
+            if (!annualReportRepository.existsById(annualReportId)) {
                 throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
             }
             return annualReportRepository.getAnnualReportCostTypeDiagram(annualReportId);
@@ -93,7 +110,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            if (annualReportRepository.existsById(annualReportId)) {
+            if (!annualReportRepository.existsById(annualReportId)) {
                 throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
             }
             return annualReportRepository.getReferenceById(annualReportId);
@@ -128,8 +145,17 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public String generateXLSXFileName(Long annualReportId) {
-        String year = annualReportRepository.getYear(annualReportId);
-        return "AnnualReport" + "_" + year + ".xlsx";
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (!annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            }
+            String year = annualReportRepository.getYear(annualReportId);
+            return "AnnualReport" + "_" + year + ".xlsx";
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
+        }
     }
 
     @Override
@@ -157,8 +183,17 @@ public class AnnualReportServiceImpl implements AnnualReportService {
 
     @Override
     public String generateXLSFileName(Long annualReportId) {
-        String year = annualReportRepository.getYear(annualReportId);
-        return "AnnualReport" + "_" + year + ".xls";
+        Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
+            if (!annualReportRepository.existsById(annualReportId)) {
+                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            }
+            String year = annualReportRepository.getYear(annualReportId);
+            return "AnnualReport" + "_" + year + ".xls";
+        } else {
+            throw new UnauthorizedException("Unauthorized to view annual report");
+        }
     }
 
     private byte[] fillDataToExcel(Workbook wb, List<AnnualReportExpenseResult> expenses) throws IOException {

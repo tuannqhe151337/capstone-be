@@ -66,7 +66,7 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
                 " JOIN report.department department " +
                 " WHERE annualReport.id = :annualReportId AND " +
                 " (:departmentId IS NULL OR report.department.id = :departmentId) AND " +
-                " (:costTypeId IS NULL OR report.costType = :costTypeId) AND " +
+                " (:costTypeId IS NULL OR report.costType.id = :costTypeId) AND " +
                 " report.isDelete = false OR report.isDelete is null " +
                 " ORDER BY ";
 

@@ -19,6 +19,7 @@ import com.example.capstone_project.repository.redis.UserIdTokenRepository;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -195,8 +197,13 @@ public class UserServiceImpl implements UserService {
         String newPassword = changePasswordBody.getNewPassword();
         long userId = UserHelper.getUserId();
         User user = userRepository.getReferenceById(userId);
+        if(user.getIsDelete())
+        {
+            throw new ResourceNotFoundException("User not exist");
+        }
         if (this.passwordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(this.passwordEncoder.encode(newPassword));
+            // user.setPassword(newPassword);
             userRepository.save(user);
         } else {
             throw new IllegalArgumentException("Password does not match");
@@ -282,19 +289,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody){
         //get new password
         String newPassword = resetPasswordBody.getNewPassword();
         //get id from header to find that user
         String userId = userIdTokenRepository.find(authHeader);
+        if(userId == null || userId.isEmpty()){
+            throw new InvalidDataAccessResourceUsageException("UserId not found");
+        }
         Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
-        if (user.isEmpty()) {
+        if (user.isEmpty() || user.get().getIsDelete()) {
             throw new ResourceNotFoundException("User does not exist");
         } else {
             //update new password encoded
             user.get().setPassword(this.passwordEncoder.encode(newPassword));
+            userRepository.save(user.get());
         }
-        userRepository.save(user.get());
+
     }
 
     @Override
@@ -338,7 +349,12 @@ public class UserServiceImpl implements UserService {
             String password = generatePassayPassword();
             user.setPassword(this.passwordEncoder.encode(password));
 
-            user.setUsername(generateUsernameFromFullName(user.getFullName()));
+            //remove punctation in full name
+            String normalized = Normalizer.normalize(user.getFullName(), Normalizer.Form.NFD);
+            // Remove diacritical marks (combining characters)
+            String fullname= normalized.replaceAll("\\p{M}", "");
+
+            user.setUsername(generateUsernameFromFullName(fullname));
             user.setIsDelete(false);
 
             userRepository.save(user);

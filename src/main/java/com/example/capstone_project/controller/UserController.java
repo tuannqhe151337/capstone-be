@@ -12,10 +12,12 @@ import com.example.capstone_project.controller.body.user.updateUserSetting.Updat
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.token.Token;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.service.UserService;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
@@ -152,7 +154,7 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UpdateUserBody updateUserBody, BindingResult bindingResult) {
         try {
             userService.updateUser(
-                new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
+                    new UpdateUserBodyToUserEntityMapperImpl().updateUserFromDto(updateUserBody)
             );
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } catch (UnauthorizedException ex) {
@@ -195,7 +197,7 @@ public class UserController {
         } catch (UnauthorizedException e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e){
-           ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -214,21 +216,26 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Old password does not match").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch (Exception e){
-
+        }catch(ResourceNotFoundException e){
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        }
+        catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
 
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<Object> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> resetPassword(@Valid @RequestHeader("Authorization") String authHeader, @Valid @RequestBody ResetPasswordBody resetPasswordBody, BindingResult bindingResult) {
         try {
             userService.resetPassword(authHeader, resetPasswordBody);
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Reset password success").build();
-            return ResponseEntity.status(HttpStatus.OK).body(exceptionResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (ResourceNotFoundException e) {
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("User not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+        } catch (InvalidDataAccessResourceUsageException e){
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("UserID cannot be retrieved from AuthHeader").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -237,7 +244,7 @@ public class UserController {
 
     @PutMapping("/user-setting/update")
     public ResponseEntity<String> updateUserSetting(@Valid @RequestBody UpdateUserSettingBody updateUserSettingBody, BindingResult bindingResult) {
-                userService.updateUserSetting(updateUserSettingBody);
+        userService.updateUserSetting(updateUserSettingBody);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
@@ -247,7 +254,8 @@ public class UserController {
         String token = null;
         try {
             token = userService.forgetPassword(forgetPasswordEmailBody);
-            return ResponseEntity.status(HttpStatus.OK).body(token);
+            Token tokenString = Token.builder().token(token).build();
+            return ResponseEntity.status(HttpStatus.OK).body(tokenString);
         } catch (ResourceNotFoundException e) {
             ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Email not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
@@ -257,11 +265,12 @@ public class UserController {
 
     }
     @PostMapping("/auth/otp")
-    public ResponseEntity<Object> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @RequestBody OTPBody otpBody, BindingResult bindingResult) {
-            //return  Token  user:dnfpajsdfhp...:id, 6.
+    public ResponseEntity<Object> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
+        //return  Token  user:dnfpajsdfhp...:id, 6.
         try {
             String token = userService.otpValidate(otpBody, authHeader);
-            return ResponseEntity.status(HttpStatus.OK).body(token);
+            Token tokenString = Token.builder().token(token).build();
+            return ResponseEntity.status(HttpStatus.OK).body(tokenString);
         }catch (DataIntegrityViolationException e){
             ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Bearer token does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
@@ -276,5 +285,5 @@ public class UserController {
         }
 
     }
-    }
+}
 
