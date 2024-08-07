@@ -43,4 +43,6 @@ public class CreateTermBody {
     private LocalDateTime finalEndTermDate;
 
     private boolean isReuploadable;
+
+    private boolean allowReupload;
 }

@@ -54,5 +54,7 @@ public class UpdateTermBody {
 
     private boolean isReuploadable;
 
+    private boolean allowReupload;
+
 
 }

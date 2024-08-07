@@ -41,13 +41,12 @@ public class Term extends BaseEntity{
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @NotNull(message = "Re-upload start date cannot be null")
+
     @Future(message = "Re-upload start date must be in the future")
     @Column(name = "start_reupload_date")
     private LocalDateTime reuploadStartDate;
 
 
-    @NotNull(message = "Re-upload end date cannot be null")
     @Future(message = "Re-upload end date must be in the future")
     @Column(name = "end_reupload_date")
     private LocalDateTime reuploadEndDate;
@@ -74,7 +73,10 @@ public class Term extends BaseEntity{
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 
-  @Column(name = "is_reuploadable", columnDefinition = "bit default 0")
+    @Column(name = "is_reuploadable", columnDefinition = "bit default 0")
     private boolean isReuploadable;
+
+    @Column(name = "allow_reupload", columnDefinition = "bit default 0")
+    private boolean allowReupload;
 
 }

@@ -45,5 +45,7 @@ public class TermDetailResponse {
 
     private boolean isReuploadable;
 
+    private boolean allowReupload;
+
 
 }
