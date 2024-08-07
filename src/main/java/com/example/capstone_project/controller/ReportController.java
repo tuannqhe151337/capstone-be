@@ -294,6 +294,9 @@ public class ReportController {
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
+            @RequestParam(required = false) Integer projectId,
+            @RequestParam(required = false) Integer supplierId,
+            @RequestParam(required = false) Integer picId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -313,7 +316,7 @@ public class ReportController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<ReportExpenseResult> expenses = reportService.getListExpenseWithPaginate(reportId, query, departmentId, statusId, costTypeId, pageable);
+            List<ReportExpenseResult> expenses = reportService.getListExpenseWithPaginate(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
             // Response
             ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
@@ -323,7 +326,7 @@ public class ReportController {
             if (expenses != null) {
 
                 // Count total record
-                count = reportService.countDistinctListExpenseWithPaginate(query, reportId, departmentId, statusId, costTypeId);
+                count = reportService.countDistinctListExpenseWithPaginate(query, reportId, departmentId, statusId, costTypeId, projectId, supplierId, picId);
 
                 // Mapping to TermPaginateResponse
                 expenses.forEach(expense -> response.getData().add(new ReportExpenseResponseMapperImpl().mapToReportExpenseResponseMapping(expense)));
