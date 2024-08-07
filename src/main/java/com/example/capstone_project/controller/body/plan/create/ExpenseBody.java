@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class ExpenseBody {
     @NotNull(message = "Cost type id can not be null")
     private Long costTypeId;
 
-    @NotNull( message = "Unit price can't be null")
+    @NotNull(message = "Unit price can't be null")
     @Range(min = 0, message = "Unit price can not be negative")
     private BigDecimal unitPrice;
 
@@ -31,17 +32,14 @@ public class ExpenseBody {
     @Min(value = 0, message = "Amount can not be negative")
     private Integer amount;
 
-    @NotEmpty(message = "Project name can not be empty")
-    @Size(max = 100, message = "Project name must be less than 100 characters")
-    private String projectName;
+    @NotEmpty(message = "Project id can not be empty")
+    private Long projectId;
 
-    @NotEmpty(message = "Supplier name can not be empty")
-    @Size(max = 100, message = "Supplier name must be less than 100 characters")
-    private String supplierName;
+    @NotEmpty(message = "Supplier id can not be empty")
+    private Long supplierId;
 
-    @NotEmpty(message = "PiC can not be empty")
-    @Size(max = 100, message = "PIC must be less than 100 characters")
-    private String pic;
+    @NotEmpty(message = "PiC id can not be empty")
+    private Long picId;
 
     @Size(max = 200, message = "Note must be less than 200 characters")
     private String notes;
