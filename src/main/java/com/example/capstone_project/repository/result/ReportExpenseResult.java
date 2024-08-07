@@ -17,9 +17,12 @@ public class ReportExpenseResult {
     String costTypeName;
     BigDecimal unitPrice;
     int amount;
+    long projectId;
     String projectName;
+    long supplierId;
     String supplierName;
-    String pic;
+    long picId;
+    String picName;
     String note;
     long statusId;
     String statusCode;

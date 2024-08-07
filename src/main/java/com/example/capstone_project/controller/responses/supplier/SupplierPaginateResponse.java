@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.responses.expense;
+package com.example.capstone_project.controller.responses.supplier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CostTypeResponse {
-    private Long costTypeId;
+public class SupplierPaginateResponse {
+    private Long supplierId;
     private String name;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
