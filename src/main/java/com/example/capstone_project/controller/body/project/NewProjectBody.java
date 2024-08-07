@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NewProjectBody {
     @NotEmpty(message = "New project name can't be empty")
-    @Pattern(regexp = "^[a-zA-Z ]{1,50}$", message = "Project name must only contain letters and be up to 50 characters long")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ0-9]{1,50}(?: [a-zA-ZÀ-ỹ0-9]+)*$", message = "Project name must only contain letters and numbers and be up to 50 characters long")
     private String projectName;
 }
