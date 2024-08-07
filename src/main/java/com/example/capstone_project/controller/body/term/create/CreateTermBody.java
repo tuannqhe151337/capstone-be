@@ -42,7 +42,6 @@ public class CreateTermBody {
     @Future(message = "Final end term date must be in the future")
     private LocalDateTime finalEndTermDate;
 
-    private boolean isReuploadable;
-
+    @NotNull(message = "allowReupload cannot be null")
     private boolean allowReupload;
 }

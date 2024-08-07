@@ -43,8 +43,7 @@ public class TermDetailResponse {
 
     private TermStatusResponse status;
 
-    private boolean isReuploadable;
-
+    @NotNull(message = "allowReupload cannot be null")
     private boolean allowReupload;
 
 

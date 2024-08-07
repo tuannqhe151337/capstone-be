@@ -74,9 +74,7 @@ public class Term extends BaseEntity{
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 
-    @Column(name = "is_reuploadable", columnDefinition = "bit default 0")
-    private boolean isReuploadable;
-
+    @NotNull(message = "allowReupload cannot be null")
     @Column(name = "allow_reupload", columnDefinition = "bit default 0")
     private boolean allowReupload;
 
