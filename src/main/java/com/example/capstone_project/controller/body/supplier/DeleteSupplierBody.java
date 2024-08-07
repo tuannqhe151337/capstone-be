@@ -1,4 +1,4 @@
-package com.example.capstone_project.controller.body.Supplier;
+package com.example.capstone_project.controller.body.supplier;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
