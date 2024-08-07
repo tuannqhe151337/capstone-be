@@ -9,7 +9,7 @@ import java.util.List;
 public interface CustomFinancialPlanExpenseRepository {
     void saveListExpenses(List<FinancialPlanExpense> expenses);
 
-    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable);
+    List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Pageable pageable);
 
     List<ReportExpenseResult> getListExpenseForReport(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable);
 }
