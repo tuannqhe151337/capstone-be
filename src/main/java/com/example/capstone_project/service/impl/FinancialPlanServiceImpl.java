@@ -315,7 +315,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
         // Get user detail
@@ -331,14 +331,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
-                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
                 // But financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
 
                 if (userDetail.getDepartmentId() == planRepository.getDepartmentIdByPlanId(planId)) {
 
-                    return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+                    return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
                 } else {
                     throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
@@ -348,13 +348,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
+    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
-            return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+            return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId, projectId, supplierId, picId);
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");
         }

@@ -209,7 +209,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable) {
+    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -218,7 +218,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, pageable);
+            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
@@ -226,7 +226,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId) {
+    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -235,7 +235,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId);
+            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId, projectId, supplierId, picId);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
