@@ -186,7 +186,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         // Get term
         Term term = termRepository.getReferenceById(termId);
 
-        if (!LocalDateTime.now().isBefore(term.getEndDate())) {
+        if (!(LocalDateTime.now().isBefore(term.getEndDate()) && LocalDateTime.now().isAfter(term.getStartDate()))) {
             throw new InvalidDateException("Plan due date of this term was expired");
         }
 
