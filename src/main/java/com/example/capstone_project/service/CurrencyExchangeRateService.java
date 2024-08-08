@@ -10,7 +10,7 @@ import java.util.List;
 public interface CurrencyExchangeRateService {
     HashMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable);
 
-    long countDistinctListExchangePaging(Integer year);
+    long countDistinctListExchangePaging(Integer year, Pageable pageable);
 
     void createExchange(List<CurrencyExchangeRate> exchangeRates);
 

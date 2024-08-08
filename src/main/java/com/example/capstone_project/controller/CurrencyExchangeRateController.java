@@ -69,7 +69,7 @@ public class CurrencyExchangeRateController {
             if (exchanges != null) {
 
                 // Count total record
-                count = exchangeService.countDistinctListExchangePaging(year);
+                count = exchangeService.countDistinctListExchangePaging(year, pageable);
 
                 exchanges.forEach((month, exchangeResults) -> {
                     response.getData().add(MonthExchangeRateResponse.builder()

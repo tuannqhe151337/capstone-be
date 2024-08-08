@@ -63,8 +63,9 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
     }
 
     @Override
-    public long countDistinctListExchangePaging(Integer year) {
-        return currencyExchangeRateRepository.countDistinctListExchangePaging(year);
+    public long countDistinctListExchangePaging(Integer year, Pageable pageable) {
+        List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getExchangeWithPagination(year, pageable);
+        return currencyExchangeRateRepository.countDistinctListExchangePaging(paginateExchanges);
     }
 
     @Override

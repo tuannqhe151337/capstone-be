@@ -33,7 +33,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
     @Override
     public List<CurrencyExchangeRate> getListCurrencyExchangeRate(List<PaginateExchange> paginateExchanges) {
         // HQL query
-        String hql = "SELECT exchangeRate FROM CurrencyExchangeRate exchangeRate " +
+        String hql = "SELECT  exchangeRate FROM CurrencyExchangeRate exchangeRate " +
                 " LEFT JOIN exchangeRate.currency currency " +
                 " WHERE ";
 
@@ -43,7 +43,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
             if (i != paginateExchanges.size() - 1) {
                 hql += " OR ";
             } else {
-                hql += " ORDER BY exchangeRate.month desc  ";
+                hql += " ORDER BY month(exchangeRate.month) desc, currency.id desc ";
             }
         }
 
@@ -55,5 +55,27 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
         return entityManager.createQuery(hql, CurrencyExchangeRate.class)
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
+    }
+
+    @Override
+    public long countDistinctListExchangePaging(List<PaginateExchange> paginateExchanges) {
+        // HQL query
+        String hql = "SELECT distinct count(*) FROM CurrencyExchangeRate exchangeRate " +
+                " LEFT JOIN exchangeRate.currency currency " +
+                " WHERE ";
+
+
+        for (int i = 0; i < paginateExchanges.size(); i++) {
+            hql += " (year(exchangeRate.month) = " + paginateExchanges.get(i).getYear() + " AND month(exchangeRate.month) = " + paginateExchanges.get(i).getMonth() + ")";
+            if (i != paginateExchanges.size() - 1) {
+                hql += " OR ";
+            } else {
+                hql += " GROUP BY currency.id ";
+            }
+        }
+
+        // Run query
+        return (long) entityManager.createQuery(hql)
+                .getSingleResult();
     }
 }

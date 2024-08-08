@@ -10,4 +10,6 @@ public interface CustomCurrencyExchangeRateRepository {
     List<PaginateExchange> getExchangeWithPagination(Integer year, Pageable pageable);
 
     List<CurrencyExchangeRate> getListCurrencyExchangeRate(List<PaginateExchange> paginateExchanges);
+
+    long countDistinctListExchangePaging(List<PaginateExchange> paginateExchanges);
 }
