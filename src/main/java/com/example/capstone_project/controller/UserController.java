@@ -271,17 +271,18 @@ public class UserController {
             String token = userService.otpValidate(otpBody, authHeader);
             Token tokenString = Token.builder().token(token).build();
             return ResponseEntity.status(HttpStatus.OK).body(tokenString);
-        }catch (DataIntegrityViolationException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Bearer token does not exist").build();
+        }catch (DataIntegrityViolationException | InvalidDataAccessResourceUsageException e){
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         }catch (UnauthorizedException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Invalid otp").build();
+            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
-        }catch (InvalidDataAccessResourceUsageException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Invalid user id").build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (ResourceNotFoundException e){
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
         }
 
     }

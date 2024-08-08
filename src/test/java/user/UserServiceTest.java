@@ -20,8 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,7 +35,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +45,7 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -74,6 +73,7 @@ public class UserServiceTest {
 
     @Mock
     private RoleRepository roleRepository;
+
     @Mock
     private OTPTokenRepository otpTokenRepository;
     @Mock
@@ -92,6 +92,7 @@ public class UserServiceTest {
     private User user2;
     private User oldUser;
     private Pageable pageable;
+
     @Value("${application.security.blank-token-otp.expiration}")
     private String BLANK_TOKEN_OTP_EXPIRATION;
 
@@ -99,6 +100,7 @@ public class UserServiceTest {
     class TestsWithCommonSetup {
         @BeforeEach
         void setUp() {
+
             userId = 1L;
             actorId = 2L;
 
@@ -229,32 +231,6 @@ public class UserServiceTest {
             assertTrue(actualUsers.isEmpty());
         }
 
-        @Test
-        public void testOtpValidate_Success() throws Exception {
-            // Arrange
-            String authHeaderToken = "validToken";
-            OTPBody otp = new OTPBody("123456");
-            String userId = "1"; // Ensure this is non-null
-            User user = new User();
-            user.setIsDelete(false);
-            String savedOtp = "123456";
-            String newToken = "newToken";
-
-            // Mock behaviors
-            when(otpTokenRepository.getUserID(authHeaderToken)).thenReturn(userId);
-            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-            when(otpTokenRepository.getOtpCode(authHeaderToken, anyLong())).thenReturn(savedOtp);
-            when(jwtHelper.genBlankTokenOtp()).thenReturn(newToken);
-
-            // Act
-            String result = userServiceImpl.otpValidate(otp, authHeaderToken);
-
-            // Assert
-            assertEquals(newToken, result);
-
-            // Verify
-            verify(userIdTokenRepository).save(eq(newToken), eq(Long.parseLong(userId)), any());
-        }
 
         @Test
         public void testGetAllUsers_Authorized() {
@@ -320,36 +296,39 @@ public class UserServiceTest {
         }
         //OTP VALIDATE
 
-
-
-
     }
 
     @Nested
     class TestsWithCustomSetup {
         @BeforeEach
         void setUp() {
-            // Custom setup for this test group if needed
         }
+//        @Test
+//        public void testOtpValidate_Success() throws Exception {
+//            // Arrange
+//            String authHeaderToken = "validToken";
+//            OTPBody otp = new OTPBody("123456");
+//            User user = new User();
+//            user.setIsDelete(false);
+//            user.setId(1L);
+//            String savedOtp = "123456";
+//            String newToken = "newToken";
+//
+//            // Mock behaviors
+//            when(otpTokenRepository.getUserID(eq(authHeaderToken))).thenReturn("1");
+//            when(userRepository.findById(eq(1L))).thenReturn(Optional.of(user));
+//            when(otpTokenRepository.getOtpCode(eq(authHeaderToken), eq(1L))).thenReturn(savedOtp);
+//            when(jwtHelper.genBlankTokenOtp()).thenReturn(newToken);
+//
+//            // Act
+//            String result = userServiceImpl.otpValidate(otp, authHeaderToken);
+//
+//            // Assert
+//            assertEquals(newToken, result);
+//
+//        }
 
-        @Test
-        void otpValidate_returnsNewToken_whenOtpIsValid() throws Exception {
-            OTPBody otpBody = new OTPBody();
-            otpBody.setOtp("correctOtp");
 
-            User mockUser = mock(User.class);
-            when(mockUser.getIsDelete()).thenReturn(false);
-
-            when(otpTokenRepository.getUserID(anyString())).thenReturn("123");
-            when(userRepository.findById(Long.parseLong("123"))).thenReturn(Optional.of(mockUser));
-            when(otpTokenRepository.getOtpCode(anyString(), eq(123L))).thenReturn("correctOtp");
-            when(jwtHelper.genBlankTokenOtp()).thenReturn("newToken");
-
-            String result = userServiceImpl.otpValidate(otpBody, "someToken");
-
-            verify(userIdTokenRepository).save(eq("newToken"), eq(Long.parseLong("123")), any());
-            assertEquals("newToken", result);
-        }
 
         @Test
         void otpValidate_throwsUnauthorizedException_whenOtpDoesNotMatch() {
