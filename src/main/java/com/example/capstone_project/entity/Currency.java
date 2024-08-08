@@ -17,4 +17,7 @@ public class Currency extends BaseEntity {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "is_delete", columnDefinition = "bit default 0")
+    private boolean isDelete;
 }
