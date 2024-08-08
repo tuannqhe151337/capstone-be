@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
@@ -23,7 +24,7 @@ public interface FinancialPlanService {
 
     List<ReportStatus> getListPlanStatus();
 
-    FinancialPlan deletePlan(long planId);
+    FinancialPlan deletePlan(long planId) throws InvalidDateException;
 
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
