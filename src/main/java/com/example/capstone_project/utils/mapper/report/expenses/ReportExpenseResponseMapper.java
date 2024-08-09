@@ -12,6 +12,7 @@ public interface ReportExpenseResponseMapper {
     default ExpenseResponse mapToReportExpenseResponseMapping(ReportExpenseResult reportExpenseResult) {
         return ExpenseResponse.builder()
                 .expenseId(reportExpenseResult.getExpenseId())
+                .expenseCode(reportExpenseResult.getExpenseCode())
                 .department(DepartmentResponse.builder()
                         .departmentId(reportExpenseResult.getDepartmentId())
                         .name(reportExpenseResult.getDepartmentName())

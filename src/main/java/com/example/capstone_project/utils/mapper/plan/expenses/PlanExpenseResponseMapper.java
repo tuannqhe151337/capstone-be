@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PlanExpenseResponseMapper {
     @Mapping(source = "id", target = "expenseId")
+    @Mapping(source = "planExpenseKey", target = "expenseCode")
     @Mapping(source = "costType.id", target = "costType.costTypeId")
     @Mapping(source = "status.id", target = "status.statusId")
     @Mapping(source = "project.id", target = "project.projectId")
