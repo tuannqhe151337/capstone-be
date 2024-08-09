@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ExpenseResponse {
     private Long expenseId;
+    private String expenseCode;
     private String name;
     private CostTypeResponse costType;
     private BigDecimal unitPrice;
