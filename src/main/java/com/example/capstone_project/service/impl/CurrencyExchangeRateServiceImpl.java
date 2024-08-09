@@ -19,10 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
     private final CurrencyRepository currencyRepository;
 
     @Override
-    public HashMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable) {
+    public TreeMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
@@ -55,7 +55,20 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
                                 .build());
             });
 
-            return exchangeHashMap;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/yyyy");
+
+            TreeMap<String, List<ExchangeResult>> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            sortedMap.putAll(exchangeHashMap);
+
+            return sortedMap;
 
         } else {
             throw new UnauthorizedException("User unauthorized");

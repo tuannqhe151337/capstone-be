@@ -43,7 +43,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
             if (i != paginateExchanges.size() - 1) {
                 hql += " OR ";
             } else {
-                hql += " ORDER BY month(exchangeRate.month) desc, currency.id desc ";
+                hql += " ORDER BY month(exchangeRate.month) desc, currency.id asc ";
             }
         }
 

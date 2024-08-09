@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -59,7 +60,7 @@ public class CurrencyExchangeRateController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            HashMap<String, List<ExchangeResult>> exchanges = exchangeService.getListExchangePaging(query, year, pageable);
+            TreeMap<String, List<ExchangeResult>> exchanges = exchangeService.getListExchangePaging(query, year, pageable);
 
             // Response
             ListPaginationResponse<MonthExchangeRateResponse> response = new ListPaginationResponse<>();

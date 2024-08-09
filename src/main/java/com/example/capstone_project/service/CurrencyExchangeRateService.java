@@ -6,9 +6,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public interface CurrencyExchangeRateService {
-    HashMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable);
+    TreeMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable);
 
     long countDistinctListExchangePaging(Integer year, Pageable pageable);
 
