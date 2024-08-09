@@ -5,7 +5,6 @@ import lombok.Getter;
 @Getter
 public enum ExpenseStatusCode {
     NEW("New"),
-    WAITING_FOR_APPROVAL("Waiting for approval"),
     APPROVED("Approved"),
     DENIED("Denied");
 

@@ -30,14 +30,17 @@ public class FinancialPlanExpense extends BaseEntity {
     @Column(name = "amount")
     private Integer amount;
 
-    @Column(name = "project_name")
-    private String projectName;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    @Column(name = "supplier_name")
-    private String supplierName;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 
-    @Column(name = "pic")
-    private String pic;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "pic_id")
+    private User pic;
 
     @Column(name = "note")
     private String note;

@@ -5,14 +5,21 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReUploadExpenseBody {
-    @NotEmpty(message = "Expense code can't be empty.")
+    @NotNull(message = "Expense id can't be null.")
+    private Long expenseId;
+
     @Size(max = 100, message = "Expense code must be less than 100 characters")
     private String expenseCode;
 
@@ -32,17 +39,14 @@ public class ReUploadExpenseBody {
     private Integer amount;
 
     @NotEmpty(message = "Project name can't be empty.")
-    @Size(max = 100, message = "Project name must be less than 100 characters")
-    private String projectName;
+    private Long projectId;
 
     @NotEmpty(message = "Supplier name can't be empty.")
-    @Size(max = 100, message = "Supplier name must be less than 100 characters")
-    private String supplierName;
+    private Long supplierId;
 
     @NotEmpty(message = "PIC can't be empty.")
-    @Size(max = 100, message = "PIC must be less than 100 characters")
-    private String pic;
+    private Long picId;
 
-    @Size(max = 200, message = "Notes must be less than 100 characters")
+    @Size(max = 200, message = "Notes must be less than 200 characters")
     private String notes;
 }

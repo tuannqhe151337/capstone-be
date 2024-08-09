@@ -86,7 +86,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
         String hql = " SELECT term FROM Term term " +
                 " LEFT JOIN term.status " +
                 " WHERE term.name LIKE :query AND " +
-                ":statusId IS NULL OR term.status.id = :statusId AND " +
+                "(:statusId IS NULL OR term.status.id = :statusId) AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
 
