@@ -201,8 +201,8 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             "                       (report_2.isDelete = false OR report_2.isDelete is null ) " +
             "                       GROUP BY plan_2.id) " +
             " AND " +
-            " (true OR status.code = :termCode) AND " +
-            " (true OR (:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
+            " (status.code = :termCode) AND " +
+            " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
     List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<Long> listExpenseId, TermCode termCode, LocalDateTime now);
 
