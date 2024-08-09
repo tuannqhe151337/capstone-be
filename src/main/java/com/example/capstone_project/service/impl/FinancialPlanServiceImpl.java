@@ -203,9 +203,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan deletePlan(long planId) {
+    public FinancialPlan deletePlan(long planId) throws InvalidDateException {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
+
+            Term term = termRepository.getTermByPlanId(planId);
+
+            if (!(LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))) {
+                throw new InvalidDateException("Can not delete plan in this time period");
+            }
 
             FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
                     new ResourceNotFoundException("Not found any plan have id = " + planId));
