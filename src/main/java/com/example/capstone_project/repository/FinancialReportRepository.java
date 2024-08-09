@@ -89,7 +89,7 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             "                       WHERE report_2.id = :reportId AND " +
             "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
             "                       GROUP BY file_2.id)" +
-            "ORDER BY length(expense.planExpenseKey) desc, expense.planExpenseKey desc ")
+            "ORDER BY length(expense.planExpenseKey) desc, expense.planExpenseKey desc LIMIT 1 ")
     String getLastCodeInReport(Long reportId);
 
 

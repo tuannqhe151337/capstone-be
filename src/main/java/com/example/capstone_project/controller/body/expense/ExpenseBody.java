@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.body.expense;
 
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,8 +16,6 @@ public class ExpenseBody {
     @NotEmpty(message = "Expense id can't be empty")
     private Long expenseId;
 
-    private String expenseCode;
-
-    @NotNull(message = "Status id can't be null")
-    private Long statusId;
+    @NotNull(message = "Status code can't be null")
+    private ExpenseStatusCode statusCode;
 }

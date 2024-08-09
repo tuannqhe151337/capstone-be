@@ -377,6 +377,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     idAndCode.put(expenseResult.getExpenseId(), expenseResult.getExpenseCode());
                 }
 
+                ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
+                ExpenseStatus denied = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
+
                 // Get report of this list expense to generate expense code
                 FinancialReport report = financialReportRepository.findById(reportId).get();
 
@@ -388,7 +391,12 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                         updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
                     }
                     // Update status for expense
-                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(expense.getStatus().getId()));
+                    if (expense.getStatus().getCode().equals(approval.getCode())) {
+                        updateExpense.setStatus(approval);
+                    } else {
+                        updateExpense.setStatus(denied);
+
+                    }
 
                     expenses.add(updateExpense);
                 }

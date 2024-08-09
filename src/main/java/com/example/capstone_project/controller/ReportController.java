@@ -509,7 +509,7 @@ public class ReportController {
                 rawExpenses.add(FinancialPlanExpense.builder()
                         .id(expenseBody.getExpenseId())
                         .status(ExpenseStatus.builder()
-                                .id(expenseBody.getStatusId())
+                                .code(expenseBody.getStatusCode())
                                 .build())
                         .build());
             });
