@@ -39,6 +39,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final ExpenseStatusRepository expenseStatusRepository;
     private final ReportStatusRepository reportStatusRepository;
     private final HandleFileHelper handleFileHelper;
+    private final ProjectRepository projectRepository;
+    private final SupplierRepository supplierRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -156,12 +158,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
         } else {
             throw new ResourceNotFoundException("List expenses is empty");
         }
@@ -186,12 +190,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
         } else {
             throw new ResourceNotFoundException("List expense is null or empty");
         }

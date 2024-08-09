@@ -27,6 +27,7 @@ import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImp
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
@@ -40,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -348,7 +350,12 @@ public class FinancialPlanController {
             @Valid @RequestBody ListReUploadExpenseBody reUploadExpenseBody, BindingResult bindingResult
     ) throws Exception {
         try {
-            FinancialPlan plan = planService.convertListExpenseAndMapToPlan(reUploadExpenseBody.getPlanId(), reUploadExpenseBody.getData());
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            reUploadExpenseBody.getData().forEach(reUploadExpense -> {
+                expenses.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(reUploadExpense));
+            });
+
+            FinancialPlan plan = planService.convertListExpenseAndMapToPlan(reUploadExpenseBody.getPlanId(), expenses);
 
             planService.reUploadPlan(plan);
 
@@ -364,17 +371,14 @@ public class FinancialPlanController {
     public ResponseEntity<ExceptionResponse> confirmExpenses(
             @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         try {
-            // Get user detail
-            UserDetail userDetail = planService.getUserDetail();
-
-            // Get term
-            Term term = planService.getTermById(planBody.getTermId());
 
             // Mapping to planBody to FinancialPlan
-            FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
+            FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody);
 
+            //
+            List<FinancialPlanExpense> expenses = new CreatePlanMapperImpl().mapExpenseBodyToExpense(planBody.getExpenses());
             // Save plan
-            FinancialPlan savedPlan = planService.createPlan(plan, term);
+            FinancialPlan savedPlan = planService.createPlan(plan, expenses, planBody.getFileName(), planBody.getTermId());
 
             if (savedPlan == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Error Exception").message("").build());
