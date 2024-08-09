@@ -76,7 +76,9 @@ public class SeedConfiguration {
 
         // Term interval date
             TermInterval termInterval = TermInterval
-                    .builder().startTermDate(25)
+                    .builder()
+                    .id(1L)
+                    .startTermDate(25)
                     .endTermInterval(5)
                     .startReuploadInterval(20)
                     .endReuploadInterval(3)

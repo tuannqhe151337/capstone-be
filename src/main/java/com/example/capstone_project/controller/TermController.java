@@ -421,7 +421,7 @@ public class TermController {
     }
     @GetMapping("/termInterval")
     public ResponseEntity<Object> getTermInterval() {
-      TermInterval termInterval = termIntervalService.getTermInterval(1L);
+      TermInterval termInterval = termIntervalService.getTermInterval();
         return ResponseEntity.status(HttpStatus.OK).body(termInterval);
     }
 }

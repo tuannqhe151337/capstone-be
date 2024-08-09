@@ -12,7 +12,7 @@ public class TermIntervalServiceImpl implements TermIntervalService {
     private final TermIntervalRepository termIntervalRepository;
 
     @Override
-    public TermInterval getTermInterval(Long id) {
+    public TermInterval getTermInterval() {
         return termIntervalRepository.findById(1).get();
     }
 }
