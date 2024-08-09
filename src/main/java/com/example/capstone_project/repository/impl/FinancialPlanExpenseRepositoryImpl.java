@@ -126,7 +126,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     public List<ReportExpenseResult> getListExpenseForReport(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
         // HQL query
         String hql = " SELECT new com.example.capstone_project.repository.result.ReportExpenseResult " +
-                " (expense.id AS expenseId, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
+                " (expense.id AS expenseId, expense.planExpenseKey AS expenseCode, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
                 " expense.supplier.id AS supplierId, expense.supplier.name AS supplierName, expense.pic.id AS picId, expense.pic.username AS picName, expense.note AS note, status.id AS statusId, cast(status.code AS string) AS statusCode ,status.name AS statusName, department.id AS departmentId, department.name AS departmentName) FROM FinancialPlanExpense expense " +
                 " LEFT JOIN expense.files files " +
                 " LEFT JOIN files.file file " +

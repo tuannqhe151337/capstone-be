@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
@@ -15,7 +16,7 @@ public interface FinancialPlanService {
 
     List<FinancialPlan> getPlanWithPagination(String query, Long termId, Long departmentId, Integer page, Integer size, String sortBy, String sortType) throws Exception;
 
-    FinancialPlan createPlan(FinancialPlan plan, Term term) throws Exception;
+    FinancialPlan createPlan(FinancialPlan plan, List<FinancialPlanExpense> expenses, String fileName, Long termId) throws Exception;
 
     UserDetail getUserDetail() throws Exception;
 
@@ -23,7 +24,7 @@ public interface FinancialPlanService {
 
     List<ReportStatus> getListPlanStatus();
 
-    FinancialPlan deletePlan(long planId);
+    FinancialPlan deletePlan(long planId) throws InvalidDateException;
 
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
@@ -49,7 +50,7 @@ public interface FinancialPlanService {
 
     long countDistinctListPlanVersionPaging(Long planId);
 
-    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception;
+    FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<FinancialPlanExpense> reUploadExpenses) throws Exception;
 
     void reUploadPlan(FinancialPlan plan);
 

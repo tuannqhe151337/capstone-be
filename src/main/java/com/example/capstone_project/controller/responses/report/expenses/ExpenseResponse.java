@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ExpenseResponse {
     private Long expenseId;
+    private String expenseCode;
     private DepartmentResponse department;
     private String name;
     private CostTypeResponse costType;
