@@ -4,10 +4,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
-import com.example.capstone_project.repository.result.ReportDetailResult;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.FileNameResult;
-import com.example.capstone_project.repository.result.ReportExpenseResult;
+import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -27,6 +24,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -41,6 +39,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final ExpenseStatusRepository expenseStatusRepository;
     private final ReportStatusRepository reportStatusRepository;
     private final HandleFileHelper handleFileHelper;
+    private final ProjectRepository projectRepository;
+    private final SupplierRepository supplierRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -60,9 +60,6 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
-
-        // Get user detail
-        UserDetail userDetail = userDetailRepository.get(userId);
 
         // Check authority or role
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
@@ -156,19 +153,22 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     public byte[] getBodyFileExcelXLSX(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-        List<Department> departments = departmentRepository.findAll();
-        List<CostType> costTypes = costTypeRepository.findAll();
-        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
-        if (expenses != null) {
+
+        if (expenses != null && !expenses.isEmpty()) {
+            List<Department> departments = departmentRepository.findAll();
+            List<CostType> costTypes = costTypeRepository.findAll();
+            List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+        } else {
+            throw new ResourceNotFoundException("List expenses is empty");
         }
-
-        return null;
     }
 
     @Override
@@ -176,43 +176,46 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         FileNameResult fileNameResult = financialReportRepository.generateFileName(reportId);
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_Report.xlsx";
+        } else {
+            throw new ResourceNotFoundException("Not found any report have id = " + reportId);
         }
-        return null;
     }
 
     @Override
     public byte[] getBodyFileExcelXLS(Long reportId) throws Exception {
         // Checkout authority and get list expenses by file id
         List<ExpenseResult> expenses = getListExpenseByReportId(reportId);
-        List<Department> departments = departmentRepository.findAll();
-        List<CostType> costTypes = costTypeRepository.findAll();
-        List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+
         if (expenses != null) {
+            List<Department> departments = departmentRepository.findAll();
+            List<CostType> costTypes = costTypeRepository.findAll();
+            List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+        } else {
+            throw new ResourceNotFoundException("List expense is null or empty");
         }
-
-        return null;
     }
 
     @Override
     public String generateXLSFileName(Long reportId) {
         FileNameResult fileNameResult = financialReportRepository.generateFileName(reportId);
 
-
         if (fileNameResult != null) {
             return fileNameResult.getTermName() + "_Report.xls";
+        } else {
+            throw new ResourceNotFoundException("Not found report have id = " + reportId);
         }
-
-        return null;
     }
 
     @Override
-    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable) {
+    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -221,7 +224,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, pageable);
+            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
@@ -229,7 +232,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId) {
+    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -238,7 +241,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId);
+            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId, projectId, supplierId, picId);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
@@ -353,16 +356,20 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             // Check list expense in one file
             long totalExpense = expenseRepository.countListExpenseInReportUpload(reportId, listCodes, TermCode.IN_PROGRESS, LocalDateTime.now());
             if (listCodes.size() == totalExpense) {
+                List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listCodes);
 
+                HashMap<String, Long> codeAndId = new HashMap<>();
+                for (ExpenseResult expenseResult : expenseResults) {
+                    codeAndId.put(expenseResult.getExpenseCode(), expenseResult.getExpenseId());
+                }
 
                 rawExpenses.forEach(expense -> {
 
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceByPlanExpenseKey(expense.getPlanExpenseKey());
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(codeAndId.get(expense.getPlanExpenseKey()));
 
                     updateExpense.setStatus(expenseStatusRepository.getReferenceById(expense.getStatus().getId()));
 
                     expenses.add(updateExpense);
-
 
                 });
                 expenseRepository.saveAll(expenses);
@@ -381,6 +388,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         } else {
             throw new UnauthorizedException("Unauthorized to approval expense");
         }
+    }
+
+    @Override
+    public List<YearDiagramResult> generateYearDiagram(Integer year) {
+        return financialReportRepository.generateYearDiagram(year);
     }
 
     @Override

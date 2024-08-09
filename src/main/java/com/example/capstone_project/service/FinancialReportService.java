@@ -5,6 +5,7 @@ import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
@@ -29,9 +30,9 @@ public interface FinancialReportService {
 
     String generateXLSFileName(Long reportId);
 
-    List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable);
+    List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable);
 
-    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
+    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId);
 
     BigDecimal calculateActualCostByReportId(Long reportId);
 
@@ -44,4 +45,6 @@ public interface FinancialReportService {
     void approvalAllExpenses(Long reportId) throws Exception;
 
     void uploadReportExpenses(Long reportId, List<FinancialPlanExpense> rawExpenses) throws Exception;
+
+    List<YearDiagramResult> generateYearDiagram(Integer year);
 }

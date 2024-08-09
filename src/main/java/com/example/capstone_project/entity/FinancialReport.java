@@ -3,6 +3,7 @@ package com.example.capstone_project.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -23,7 +24,13 @@ public class FinancialReport extends BaseEntity {
     @Column(name = "month")
     private LocalDate month;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
+    @Column(name = "actual_cost")
+    private BigDecimal actualCost;
+
+    @Column(name = "expected_cost")
+    private BigDecimal expectedCost;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "status_id")
     private ReportStatus status;
 

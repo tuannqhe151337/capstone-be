@@ -2,8 +2,11 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.AnnualReportRepository;
 import com.example.capstone_project.repository.ReportRepository;
+import com.example.capstone_project.repository.FinancialPlanRepository;
+import com.example.capstone_project.repository.FinancialReportRepository;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.service.GenerateAnnualReportService;
@@ -24,6 +27,7 @@ import java.util.List;
 public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportService {
     private final AnnualReportRepository annualReportRepository;
     private final ReportRepository reportRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     // Chạy vào ngày 5 tháng 1 hàng năm
     @Scheduled(cron = "0 0 0 5 1 ?")
@@ -57,4 +61,33 @@ public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportServ
         annualReportRepository.save(annualReport);
         reportRepository.saveAll(reports);
     }
+
+    @Override
+    public void generateActualCostAndExpectedCost(Long termId) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        report.setExpectedCost(financialReportRepository.calculateExpectedCostByReportId(report.getId()));
+        report.setActualCost(financialReportRepository.calculateActualCostByReportId(report.getId(), ExpenseStatusCode.APPROVED));
+        financialReportRepository.save(report);
+    }
+
+//    @Scheduled(cron = "0 0 0 5 1 ?")
+//    @Transactional
+//    public void generateAnnualReport() {
+//        // Generate annual report
+//        AnnualReportResult annualReportResult = annualReportRepository.getAnnualReport(LocalDate.now(), ExpenseStatusCode.APPROVED);
+//
+//        AnnualReport annualReport = new AnnualReportMapperImpl().mapToAnnualReportMapping(annualReportResult);
+//
+//        // Generate annual list reports
+//        List<ReportResult> reportResults = annualReportRepository.getListReports(LocalDate.now(), ExpenseStatusCode.APPROVED);
+//        List<Report> reports = new ArrayList<>();
+//        reportResults.forEach(reportResult -> {
+//            Report report = new AnnualReportMapperImpl().mapToReportMapping(reportResult);
+//            report.setAnnualReport(annualReport);
+//            reports.add(report);
+//        });
+//
+//        annualReport.setReports(reports);
+//        annualReportRepository.save(annualReport);
+//    }
 }

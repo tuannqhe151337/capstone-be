@@ -1,12 +1,10 @@
 package com.example.capstone_project.controller;
 
 
-import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBody;
-import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
-import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -20,7 +18,6 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -30,6 +27,7 @@ import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImp
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.list.ListPlanResponseMapperImpl;
+import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import jakarta.validation.Valid;
 import com.example.capstone_project.utils.mapper.plan.version.PlanListVersionResponseMapperImpl;
@@ -43,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -114,6 +113,9 @@ public class FinancialPlanController {
             @RequestParam(required = true) Long planId,
             @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) Long costTypeId,
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) Long supplierId,
+            @RequestParam(required = false) Long picId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String size,
@@ -134,7 +136,7 @@ public class FinancialPlanController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
             // Response
             ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
@@ -144,7 +146,7 @@ public class FinancialPlanController {
             if (expenses != null) {
 
                 // Count total record
-                count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+                count = planService.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId, projectId, supplierId, picId);
 
                 // Mapping to TermPaginateResponse
                 expenses.forEach(expense -> response.getData().add(new PlanExpenseResponseMapperImpl().mapToExpenseResponseMapping(expense)));
@@ -323,66 +325,70 @@ public class FinancialPlanController {
     }
 
     @DeleteMapping("/delete")
-    private ResponseEntity<String> deletePlan(
+    private ResponseEntity<ExceptionResponse> deletePlan(
             @Valid @RequestBody DeletePlanBody planBody, BindingResult bindingResult) {
         try {
             FinancialPlan deletedPlan = planService.deletePlan(planBody.getPlanId());
 
             if (deletedPlan == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Delete successful").message("Deleted plan have id = " + planBody.getPlanId()).build());
             }
 
             return ResponseEntity.ok(null);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized exception").message("User unauthorized").build());
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Not exist exception").message("Not found any plan have id = " + planBody.getPlanId()).build());
+        } catch (InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Invalid time").message("Can not delete plan in this time period").build());
         }
 
     }
 
     @PutMapping("/re-upload")
-    private ResponseEntity<String> reUploadPlan(
+    private ResponseEntity<ExceptionResponse> reUploadPlan(
             @Valid @RequestBody ListReUploadExpenseBody reUploadExpenseBody, BindingResult bindingResult
     ) throws Exception {
         try {
-            FinancialPlan plan = planService.convertListExpenseAndMapToPlan(reUploadExpenseBody.getPlanId(), reUploadExpenseBody.getData());
+            List<FinancialPlanExpense> expenses = new ArrayList<>();
+            reUploadExpenseBody.getData().forEach(reUploadExpense -> {
+                expenses.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(reUploadExpense));
+            });
+
+            FinancialPlan plan = planService.convertListExpenseAndMapToPlan(reUploadExpenseBody.getPlanId(), expenses);
 
             planService.reUploadPlan(plan);
 
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Successful").message("Re-upload successful").build());
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized exception").message("User unauthorized").build());
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Not exist exception").message("Not found any plan have id = " + reUploadExpenseBody.getPlanId()).build());
         }
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> confirmExpenses(
+    public ResponseEntity<ExceptionResponse> confirmExpenses(
             @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
         try {
-            // Get user detail
-            UserDetail userDetail = planService.getUserDetail();
-
-            // Get term
-            Term term = planService.getTermById(planBody.getTermId());
 
             // Mapping to planBody to FinancialPlan
-            FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody, userDetail.getDepartmentId(), (long) UserHelper.getUserId(), term.getName());
+            FinancialPlan plan = new CreatePlanMapperImpl().mapPlanBodyToPlanMapping(planBody);
 
+            //
+            List<FinancialPlanExpense> expenses = new CreatePlanMapperImpl().mapExpenseBodyToExpense(planBody.getExpenses());
             // Save plan
-            FinancialPlan savedPlan = planService.creatPlan(plan, term);
+            FinancialPlan savedPlan = planService.createPlan(plan, expenses, planBody.getFileName(), planBody.getTermId());
 
             if (savedPlan == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Error Exception").message("").build());
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Successful").message("Upload successful").build());
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized exception").message("User unauthorized").build());
         } catch (DuplicateKeyException | InvalidDateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error Exception").message("").build());
         }
     }
 

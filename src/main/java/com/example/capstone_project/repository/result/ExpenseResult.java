@@ -28,7 +28,7 @@ public interface ExpenseResult {
 
     String getSupplierName();
 
-    String getPic();
+    String getPicName();
 
     String getNote();
 
