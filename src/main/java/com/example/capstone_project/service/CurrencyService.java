@@ -10,7 +10,7 @@ public interface CurrencyService {
 
     long countDistinctListCurrencyPaging(String query);
 
-    void createCurrency(String currencyName);
+    void createCurrency(Currency currency);
 
     void deleteCurrency(Long currencyId);
 

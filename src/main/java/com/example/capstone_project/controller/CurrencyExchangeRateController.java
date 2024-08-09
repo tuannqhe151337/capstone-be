@@ -81,6 +81,8 @@ public class CurrencyExchangeRateController {
                                         .currency(CurrencyResponse.builder()
                                                 .currencyId(exchangeResult.getCurrency().getId())
                                                 .name(exchangeResult.getCurrency().getName())
+                                                .symbol(exchangeResult.getCurrency().getSymbol())
+                                                .affix(exchangeResult.getCurrency().getAffix())
                                                 .build())
                                         .build();
                             }).toList())

@@ -49,13 +49,17 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public void createCurrency(String currencyName) {
+    public void createCurrency(Currency currency) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
         try {
             if (listAuthorities.contains(AuthorityCode.CREATE_NEW_CURRENCY.getValue())) {
-                currencyRepository.save(Currency.builder().name(currencyName).build());
+                currencyRepository.save(Currency.builder()
+                        .name(currency.getName())
+                        .symbol(currency.getSymbol())
+                        .affix(currency.getAffix())
+                        .build());
             } else {
                 throw new UnauthorizedException("Unauthorized to create new currency");
             }

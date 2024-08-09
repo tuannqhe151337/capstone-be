@@ -69,6 +69,8 @@ public class CurrencyController {
                 currencies.forEach(currency -> response.getData().add(CurrencyPaginateResponse.builder()
                         .currencyId(currency.getId())
                         .name(currency.getName())
+                        .symbol(currency.getSymbol())
+                        .affix(currency.getAffix())
                         .createdAt(currency.getCreatedAt())
                         .updatedAt(currency.getUpdatedAt())
                         .build()));
@@ -106,7 +108,11 @@ public class CurrencyController {
 
         try {
 
-            currencyService.createCurrency(newCurrencyBody.getCurrencyName());
+            currencyService.createCurrency(Currency.builder()
+                    .name(newCurrencyBody.getCurrencyName())
+                    .symbol(newCurrencyBody.getCurrencySymbol())
+                    .affix(newCurrencyBody.getCurrencyAffix())
+                    .build());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Create").message("Create successful").build());
         } catch (UnauthorizedException e) {
@@ -147,7 +153,12 @@ public class CurrencyController {
 
         try {
 
-            currencyService.updateCurrency(Currency.builder().id(updateCurrencyBody.getCurrencyId()).name(updateCurrencyBody.getCurrencyName()).build());
+            currencyService.updateCurrency(Currency.builder()
+                    .id(updateCurrencyBody.getCurrencyId())
+                    .name(updateCurrencyBody.getCurrencyName())
+                    .symbol(updateCurrencyBody.getCurrencySymbol())
+                    .affix(updateCurrencyBody.getCurrencyAffix())
+                    .build());
 
             return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
         } catch (UnauthorizedException e) {
@@ -173,6 +184,8 @@ public class CurrencyController {
                 responses.getData().add(CurrencyPaginateResponse.builder()
                         .currencyId(currency.getId())
                         .name(currency.getName())
+                        .symbol(currency.getSymbol())
+                        .affix(currency.getAffix())
                         .createdAt(currency.getCreatedAt())
                         .updatedAt(currency.getUpdatedAt())
                         .build());

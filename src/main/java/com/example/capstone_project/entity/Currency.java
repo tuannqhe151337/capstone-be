@@ -1,5 +1,6 @@
 package com.example.capstone_project.entity;
 
+import com.example.capstone_project.utils.enums.Affix;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,13 @@ public class Currency extends BaseEntity {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "symbol", columnDefinition = "NVARCHAR(10)")
+    private String symbol;
+
+    @Column(name = "affrix")
+    @Enumerated(EnumType.STRING)
+    private Affix affix;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;

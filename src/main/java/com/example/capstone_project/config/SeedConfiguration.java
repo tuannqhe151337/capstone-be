@@ -2258,21 +2258,29 @@ public class SeedConfiguration {
             Currency currency1 = Currency.builder()
                     .id(1L)
                     .name("VND")
+                    .symbol("₫")
+                    .affix(Affix.SUFFIX)
                     .build();
 
             Currency currency2 = Currency.builder()
                     .id(2L)
                     .name("USD")
+                    .symbol("$")
+                    .affix(Affix.PREFIX)
                     .build();
 
             Currency currency3 = Currency.builder()
                     .id(3L)
                     .name("JPY")
+                    .symbol("¥")
+                    .affix(Affix.PREFIX)
                     .build();
 
             Currency currency4 = Currency.builder()
                     .id(4L)
                     .name("KRW")
+                    .symbol("₩")
+                    .affix(Affix.PREFIX)
                     .build();
 
             currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
