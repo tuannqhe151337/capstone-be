@@ -58,9 +58,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " (file.isDelete = false OR file.isDelete is null) " )
     int getPlanVersionByPlanId(@Param("planId") Long planId);
 
-    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
+    @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
-            " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
             " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
@@ -90,9 +90,9 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY file.plan.id, file.plan.term.name, file.plan.department.name ")
     PlanVersionResult getCurrentVersionByPlanId(Long planId);
 
-    @Query(value = " SELECT expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
+    @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
-            " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic AS pic, expenses.note AS note," +
+            " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
             " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +

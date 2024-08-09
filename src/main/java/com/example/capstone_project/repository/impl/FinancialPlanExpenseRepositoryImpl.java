@@ -34,7 +34,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     }
 
     @Override
-    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) {
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Pageable pageable) {
 
         // HQL query
         String hql = " SELECT expense FROM FinancialPlanExpense expense " +
@@ -43,11 +43,17 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " LEFT JOIN file.plan plan " +
                 " LEFT JOIN expense.status status " +
                 " LEFT JOIN expense.costType costType " +
+                " LEFT JOIN expense.project project " +
+                " LEFT JOIN expense.supplier supplier " +
+                " LEFT JOIN expense.pic pic " +
                 " WHERE :planId = plan.id AND " +
                 " expense.name like :query AND " +
                 " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
                 " (:statusId IS NULL OR status.id = :statusId) AND " +
+                " (:projectId IS NULL OR project.id = :projectId) AND " +
+                " (:supplierId IS NULL OR supplier.id = :supplierId) AND " +
+                " (:picId IS NULL OR pic.id = :picId) AND " +
                 " (expense.isDelete = false OR expense.isDelete is null) " +
                 " ORDER BY ";
 
@@ -66,6 +72,15 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                     break;
                 case "costtype.id", "costtype_id", "costtype":
                     hql += "costType.id " + sortType;
+                    break;
+                case "project.id", "project_id", "project":
+                    hql += "project.id " + sortType;
+                    break;
+                case "supplier.id", "supplier_id", "supplier":
+                    hql += "supplier.id " + sortType;
+                    break;
+                case "pic.id", "pic_id", "pic":
+                    hql += "pic.id " + sortType;
                     break;
                 case "created-date", "created_date", "created_at", "createdat":
                     hql += "expense.createdAt " + sortType;
@@ -88,6 +103,9 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         EntityGraph<FinancialPlanExpense> entityGraph = entityManager.createEntityGraph(FinancialPlanExpense.class);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.STATUS);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.COST_TYPE);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.PROJECT);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.SUPPLIER);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.PIC);
 
         // Run query
         return entityManager.createQuery(hql, FinancialPlanExpense.class)
@@ -95,6 +113,9 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 .setParameter("planId", planId)
                 .setParameter("costTypeId", costTypeId)
                 .setParameter("statusId", statusId)
+                .setParameter("projectId", projectId)
+                .setParameter("supplierId", supplierId)
+                .setParameter("picId", picId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
@@ -102,17 +123,20 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     }
 
     @Override
-    public List<ReportExpenseResult> getListExpenseForReport(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable) {
+    public List<ReportExpenseResult> getListExpenseForReport(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
         // HQL query
         String hql = " SELECT new com.example.capstone_project.repository.result.ReportExpenseResult " +
-                " (expense.id AS expenseId, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
+                " (expense.id AS expenseId, expense.planExpenseKey AS expenseCode, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
                 " expense.supplier.id AS supplierId, expense.supplier.name AS supplierName, expense.pic.id AS picId, expense.pic.username AS picName, expense.note AS note, status.id AS statusId, cast(status.code AS string) AS statusCode ,status.name AS statusName, department.id AS departmentId, department.name AS departmentName) FROM FinancialPlanExpense expense " +
                 " LEFT JOIN expense.files files " +
                 " LEFT JOIN files.file file " +
                 " LEFT JOIN file.plan plan " +
                 " LEFT JOIN plan.department department " +
                 " LEFT JOIN expense.status status " +
-                " LEFT JOIN expense.costType costType" +
+                " LEFT JOIN expense.costType costType " +
+                " LEFT JOIN expense.project project " +
+                " LEFT JOIN expense.supplier supplier " +
+                " LEFT JOIN expense.pic pic " +
                 " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
                 "                       JOIN file_2.plan plan_2 " +
                 "                       JOIN plan_2.term term_2 " +
@@ -125,6 +149,9 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " (:departmentId IS NULL OR department.id = :departmentId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
                 " (:statusId IS NULL OR status.id = :statusId) AND " +
+                " (:projectId IS NULL OR project.id = :projectId) AND " +
+                " (:supplierId IS NULL OR supplier.id = :supplierId) AND " +
+                " (:picId IS NULL OR pic.id = :picId) AND " +
                 " (expense.isDelete = false OR expense.isDelete is null) " +
                 " ORDER BY ";
 
@@ -146,6 +173,15 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                     break;
                 case "costtype.id", "costtype_id", "costtype":
                     hql += "costType.id " + sortType;
+                    break;
+                case "project.id", "project_id", "project":
+                    hql += "project.id " + sortType;
+                    break;
+                case "supplier.id", "supplier_id", "supplier":
+                    hql += "supplier.id " + sortType;
+                    break;
+                case "pic.id", "pic_id", "pic":
+                    hql += "pic.id " + sortType;
                     break;
                 case "created-date", "created_date", "created_at", "createdat":
                     hql += "expense.createdAt " + sortType;
@@ -171,6 +207,9 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 .setParameter("departmentId", departmentId)
                 .setParameter("costTypeId", costTypeId)
                 .setParameter("statusId", statusId)
+                .setParameter("projectId", projectId)
+                .setParameter("supplierId", supplierId)
+                .setParameter("picId", picId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();

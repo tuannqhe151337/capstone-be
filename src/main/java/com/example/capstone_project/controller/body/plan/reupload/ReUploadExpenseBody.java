@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReUploadExpenseBody {
-    @NotEmpty(message = "Expense code can't be empty.")
+    @NotNull(message = "Expense id can't be null.")
+    private Long expenseId;
+
     @Size(max = 100, message = "Expense code must be less than 100 characters")
     private String expenseCode;
 

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @ToString
 public class ReportExpenseResult {
     long expenseId;
+    String expenseCode;
     String expenseName;
     long costTypeId;
     String costTypeName;
