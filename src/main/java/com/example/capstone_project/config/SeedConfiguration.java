@@ -44,6 +44,7 @@ public class SeedConfiguration {
             ReportRepository reportRepository,
             SupplierRepository supplierRepository,
             ProjectRepository projectRepository,
+                       TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
             CurrencyExchangeRateRepository currencyExchangeRateRepository
 
@@ -75,6 +76,17 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+
+        // Term interval date
+            TermInterval termInterval = TermInterval
+                    .builder()
+                    .id(1L)
+                    .startTermDate(25)
+                    .endTermInterval(5)
+                    .startReuploadInterval(20)
+                    .endReuploadInterval(3)
+                    .build();
+            termIntervalRepository.save(termInterval);
 
             // Department
             Department itDepartment = Department.builder()
