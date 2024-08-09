@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
         // Find user from database to track what field is changed
         User oldUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + user));
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + user.getId()));
 
         // Check email unique
         if (!oldUser.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail())) {
