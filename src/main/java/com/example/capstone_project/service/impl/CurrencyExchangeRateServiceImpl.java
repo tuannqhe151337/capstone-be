@@ -60,7 +60,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
             TreeMap<String, List<ExchangeResult>> sortedMap = new TreeMap<>((key1, key2) -> {
                 try {
 
-                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                    return dateFormat.parse(key2).compareTo(dateFormat.parse(key1));
                 } catch (ParseException e) {
                     throw new IllegalArgumentException(e);
                 }

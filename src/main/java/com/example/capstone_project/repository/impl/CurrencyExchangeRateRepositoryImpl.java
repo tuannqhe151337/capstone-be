@@ -20,7 +20,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
         String hql = " SELECT new com.example.capstone_project.repository.result.PaginateExchange (year(exchangeRate.month) , month(exchangeRate.month)) FROM CurrencyExchangeRate exchangeRate " +
                 " WHERE (year(exchangeRate.month) = :year OR :year is null) " +
                 " GROUP BY  month(exchangeRate.month), year(exchangeRate.month) " +
-                " ORDER BY month(exchangeRate.month), year(exchangeRate.month) ";
+                " ORDER BY month(exchangeRate.month) desc, year(exchangeRate.month) desc ";
 
         // Run query
         return entityManager.createQuery(hql, PaginateExchange.class)
