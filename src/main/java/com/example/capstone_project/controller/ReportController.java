@@ -507,7 +507,7 @@ public class ReportController {
 
             body.getListExpenses().forEach(expenseBody -> {
                 rawExpenses.add(FinancialPlanExpense.builder()
-                        .planExpenseKey(expenseBody.getExpenseCode())
+                        .id(expenseBody.getExpenseId())
                         .status(ExpenseStatus.builder()
                                 .id(expenseBody.getStatusId())
                                 .build())

@@ -12,8 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ExpenseBody {
-    @NotEmpty(message = "Expense code can't be empty")
+    @NotEmpty(message = "Expense id can't be empty")
+    private Long expenseId;
+
     private String expenseCode;
+
     @NotNull(message = "Status id can't be null")
     private Long statusId;
 }

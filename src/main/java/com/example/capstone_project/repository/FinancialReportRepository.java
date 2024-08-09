@@ -79,6 +79,19 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
 
     FinancialReport getReferenceByTermId(Long termId);
 
+    @Query(" SELECT expense.planExpenseKey FROM FinancialPlanExpense expense " +
+            " LEFT JOIN expense.files fileExpense " +
+            " LEFT JOIN fileExpense.file file " +
+            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
+            "                       JOIN file_2.plan plan_2 " +
+            "                       JOIN plan_2.term term_2 " +
+            "                       JOIN term_2.financialReports report_2 " +
+            "                       WHERE report_2.id = :reportId AND " +
+            "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
+            "                       GROUP BY file_2.id)" +
+            "ORDER BY length(expense.planExpenseKey) desc, expense.planExpenseKey desc ")
+    String getLastCodeInReport(Long reportId);
+
 
 //    @Query(value = " SELECT expenses FROM FinancialReportExpense expenses " +
 //            " JOIN expenses.financialReport report " +
