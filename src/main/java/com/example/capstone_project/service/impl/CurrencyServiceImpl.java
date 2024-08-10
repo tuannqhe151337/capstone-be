@@ -116,7 +116,7 @@ public class CurrencyServiceImpl implements CurrencyService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_CURRENCY.getValue())) {
-            return currencyRepository.findAll(Sort.by(Currency_.ID).ascending());
+            return currencyRepository.findAll();
         } else {
             throw new UnauthorizedException("Unauthorized to view list currency");
         }

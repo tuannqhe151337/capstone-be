@@ -13,9 +13,9 @@ public interface CurrencyExchangeRateService {
 
     long countDistinctListExchangePaging(Integer year, Pageable pageable);
 
-    void createExchange(List<CurrencyExchangeRate> exchangeRates);
+    void createExchange(String month, List<CurrencyExchangeRate> exchangeRates);
 
-    void deleteExchange(Long exchangeId);
+    void deleteExchange(String monthYear);
 
     void updateExchange(CurrencyExchangeRate build);
 
