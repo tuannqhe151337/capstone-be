@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class CreateExchangeBody {
     @NotNull(message = "Month can't be null.")
-    private LocalDate month;
+    private String month;
 
     @NotNull(message = "List exchange can't be null.")
     private List<ExchangeBody> exchangeRates;

@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface CustomCurrencyRepository {
     List<Currency> getCurrencyWithPagination(String query, Pageable pageable);
-
 }

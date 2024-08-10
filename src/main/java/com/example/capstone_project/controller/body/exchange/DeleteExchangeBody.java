@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class DeleteExchangeBody {
-    @NotNull(message = "Exchange id can't be empty")
-    private Long exchangeId;
+    @NotNull(message = "Month can not be emptied")
+    private String month;
 }
