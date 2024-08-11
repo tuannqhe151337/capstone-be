@@ -34,7 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -54,6 +57,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final ProjectRepository projectRepository;
     private final SupplierRepository supplierRepository;
     private final UserRepository userRepository;
+    private final CurrencyRepository currencyRepository;
 
 
     @Override
@@ -360,7 +364,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Pageable pageable) throws Exception {
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Long toCurrencyId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
         // Get user detail
@@ -375,15 +379,21 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
+                // Handle exchange money
+                handleCurrencyExchange(toCurrencyId, expenses);
 
+                return expenses;
                 // But financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-
                 if (userDetail.getDepartmentId() == planRepository.getDepartmentIdByPlanId(planId)) {
+                    List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                    return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
+                    // Handle exchange money
+                    handleCurrencyExchange(toCurrencyId, expenses);
+
+                    return expenses;
                 } else {
                     throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
@@ -1032,5 +1042,58 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         out.close();
 
         return out.toByteArray();
+    }
+
+    private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
+        //Handle currency
+        if (toCurrencyId != null) {
+            if (!currencyRepository.existsById(toCurrencyId)) {
+                throw new ResourceNotFoundException("Currency id not exist id = " + toCurrencyId);
+            }
+            try {
+                // Inner hashmap: map by currency id
+                HashMap<Long, List<FinancialPlanExpense>> fromCurrencyIdHashMap = new HashMap<>();
+
+                Set<Integer> years = new HashSet<>();
+                Set<Integer> months = new HashSet<>();
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
+                    years.add(expense.getCreatedAt().getYear());
+                    months.add(expense.getCreatedAt().getMonthValue());
+                });
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                });
+
+                // Get list exchange rates
+                List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, toCurrencyId);
+
+                // Outer hashmap: map by date
+                HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+                });
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+                });
+
+                fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
+                    fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
+                        BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
+                        BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
+                        expense.setUnitPrice(expense.getUnitPrice().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                        expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
+                    });
+                });
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException("Can't divided by 0");
+            } catch (NullPointerException e) {
+                throw new Exception();
+            }
+        }
     }
 }

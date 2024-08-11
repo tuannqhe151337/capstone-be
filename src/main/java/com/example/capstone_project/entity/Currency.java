@@ -4,6 +4,8 @@ import com.example.capstone_project.utils.enums.Affix;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(schema = "capstone_v2", name = "currency")
 @AllArgsConstructor
@@ -25,6 +27,9 @@ public class Currency extends BaseEntity {
     @Column(name = "affrix")
     @Enumerated(EnumType.STRING)
     private Affix affix;
+
+    @OneToMany(mappedBy = CurrencyExchangeRate_.CURRENCY)
+    private List<CurrencyExchangeRate> currencyExchangeRates;
 
     @Column(name = "isDefault")
     private boolean isDefault;

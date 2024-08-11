@@ -22,10 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +41,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final HandleFileHelper handleFileHelper;
     private final ProjectRepository projectRepository;
     private final SupplierRepository supplierRepository;
+    private final CurrencyRepository currencyRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -215,7 +216,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
+    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Long toCurrencyId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -224,8 +225,60 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
+            List<ReportExpenseResult> expenses = expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
+            //Handle currency
+            if (toCurrencyId != null) {
+                if (!currencyRepository.existsById(toCurrencyId)) {
+                    throw new ResourceNotFoundException("Currency id not exist id = " + toCurrencyId);
+                }
+                try {
+                    // Inner hashmap: map by currency id
+                    HashMap<Long, List<ReportExpenseResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+                    Set<Integer> years = new HashSet<>();
+                    Set<Integer> months = new HashSet<>();
+
+                    expenses.forEach(expense -> {
+                        fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
+                        years.add(expense.getCreatedAt().getYear());
+                        months.add(expense.getCreatedAt().getMonthValue());
+                    });
+
+                    expenses.forEach(expense -> {
+                        fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                    });
+
+                    // Get list exchange rates
+                    List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, toCurrencyId);
+
+                    // Outer hashmap: map by date
+                    HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+                    });
+
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+                    });
+
+                    fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
+                        fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
+                            BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
+                            BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
+                            expense.setUnitPrice(expense.getUnitPrice().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                            expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
+                        });
+                    });
+                } catch (ArithmeticException e) {
+                    throw new ArithmeticException("Can't divided by 0");
+                } catch (NullPointerException e) {
+                    throw new Exception();
+                }
+            }
+
+            return expenses;
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }

@@ -111,6 +111,7 @@ public class FinancialPlanController {
     @GetMapping("expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = true) Long planId,
+            @RequestParam(required = false) Long currencyId,
             @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) Long projectId,
@@ -136,7 +137,7 @@ public class FinancialPlanController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
+            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, currencyId, pageable);
 
             // Response
             ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
@@ -167,8 +168,10 @@ public class FinancialPlanController {
 
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | ArithmeticException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
 

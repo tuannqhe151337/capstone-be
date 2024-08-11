@@ -291,6 +291,7 @@ public class ReportController {
     @GetMapping("/expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = true) Long reportId,
+            @RequestParam(required = false) Long currencyId,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer costTypeId,
@@ -316,7 +317,7 @@ public class ReportController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<ReportExpenseResult> expenses = reportService.getListExpenseWithPaginate(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
+            List<ReportExpenseResult> expenses = reportService.getListExpenseWithPaginate(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, currencyId, pageable);
 
             // Response
             ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();

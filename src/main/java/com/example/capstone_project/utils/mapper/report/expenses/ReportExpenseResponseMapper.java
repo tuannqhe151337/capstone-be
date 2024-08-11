@@ -1,5 +1,6 @@
 package com.example.capstone_project.utils.mapper.report.expenses;
 
+import com.example.capstone_project.controller.responses.expense.CurrencyResponse;
 import com.example.capstone_project.controller.responses.report.*;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
@@ -39,6 +40,14 @@ public interface ReportExpenseResponseMapper {
                         .code(reportExpenseResult.getStatusCode())
                         .name(reportExpenseResult.getStatusName())
                         .build())
+                .currency(CurrencyResponse.builder()
+                        .currencyId(reportExpenseResult.getCurrency().getId())
+                        .name(reportExpenseResult.getCurrency().getName())
+                        .symbol(reportExpenseResult.getCurrency().getSymbol())
+                        .affix(reportExpenseResult.getCurrency().getAffix())
+                        .build())
+                .createdAt(reportExpenseResult.getCreatedAt())
+                .updatedAt(reportExpenseResult.getUpdatedAt())
                 .build();
     }
 
