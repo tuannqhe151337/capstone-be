@@ -2272,6 +2272,7 @@ public class SeedConfiguration {
                     .name("VND")
                     .symbol("₫")
                     .affix(Affix.SUFFIX)
+                    .isDefault(true)
                     .build();
 
             Currency currency2 = Currency.builder()

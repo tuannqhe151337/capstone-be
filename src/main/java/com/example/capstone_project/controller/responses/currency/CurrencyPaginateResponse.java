@@ -17,6 +17,7 @@ public class CurrencyPaginateResponse {
     private String name;
     private String symbol;
     private Affix affix;
+    private boolean isDefault;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
