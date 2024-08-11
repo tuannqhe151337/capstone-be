@@ -1,5 +1,6 @@
 package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.repository.result.UserDownloadResult;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNullApi;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
@@ -81,4 +83,9 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     String getLatestSimilarUsername(String pattern);
 
     boolean existsByEmail(String email);
+
+    @Query(" SELECT user.id AS userId, user.username AS userName FROM User user " +
+            " WHERE user.username IN :listUsername AND " +
+            " (user.isDelete = false OR user.isDelete is null )")
+    List<UserDownloadResult> checkUsernameExist(List<String> listUsername);
 }

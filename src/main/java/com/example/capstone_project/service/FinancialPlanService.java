@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.UserDownloadResult;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
@@ -70,4 +71,5 @@ public interface FinancialPlanService {
 
     byte[] getTemplateData() throws IOException;
 
+    List<UserDownloadResult> checkUsernameExist(List<String> listUsername) throws Exception;
 }
