@@ -26,6 +26,9 @@ public class Currency extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Affix affix;
 
+    @Column(name = "isDefault")
+    private boolean isDefault;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 }
