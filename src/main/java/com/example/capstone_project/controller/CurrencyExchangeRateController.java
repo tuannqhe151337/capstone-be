@@ -68,7 +68,6 @@ public class CurrencyExchangeRateController {
             long count = 0;
 
             if (exchanges != null) {
-
                 // Count total record
                 count = exchangeService.countDistinctListExchangePaging(year, pageable);
 
@@ -77,6 +76,7 @@ public class CurrencyExchangeRateController {
                             .month(month)
                             .exchangeRates(exchangeResults.stream().map(exchangeResult -> {
                                 return ExchangeRateResponse.builder()
+                                        .exchangeRateId(exchangeResult.getExchangeRateId())
                                         .amount(exchangeResult.getAmount())
                                         .currency(CurrencyResponse.builder()
                                                 .currencyId(exchangeResult.getCurrency().getId())
@@ -90,7 +90,7 @@ public class CurrencyExchangeRateController {
                 });
 
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
 
             long numPages = PaginationHelper.calculateNumPages(count, sizeInt);
@@ -104,7 +104,7 @@ public class CurrencyExchangeRateController {
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
 
@@ -125,18 +125,19 @@ public class CurrencyExchangeRateController {
             createExchangeBody.getExchangeRates().forEach(exchangeRate ->
             {
                 exchangeRates.add(CurrencyExchangeRate.builder()
-                        .month(createExchangeBody.getMonth())
                         .currency(Currency.builder()
                                 .id(exchangeRate.getCurrencyId())
                                 .build())
                         .amount(exchangeRate.getAmount())
                         .build());
             });
-            exchangeService.createExchange(exchangeRates);
+            exchangeService.createExchange(createExchangeBody.getMonth(), exchangeRates);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(ExceptionResponse.builder().field("Create").message("Create successful").build());
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Month").message("Format must be like '02/2023', '03/2023'").build());
         } catch (DuplicateKeyException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Duplicate name exchange").build());
         }
@@ -146,15 +147,12 @@ public class CurrencyExchangeRateController {
     public ResponseEntity<ExceptionResponse> deleteExchange(
             @Valid @RequestBody DeleteExchangeBody deleteExchangeBody, BindingResult bindingResult) throws Exception {
         try {
-
-            // Delete plan
-            exchangeService.deleteExchange(deleteExchangeBody.getExchangeId());
+            // Delete currency exchange rate
+            exchangeService.deleteExchange(deleteExchangeBody.getMonth());
 
             return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
-        } catch (DuplicateKeyException | ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any exchange have id = " + deleteExchangeBody.getExchangeId()).build());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
         }
     }
 
@@ -179,9 +177,9 @@ public class CurrencyExchangeRateController {
 
             return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update").message("Update successful").build());
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
         } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Duplicate name exchange").build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Duplicate name exchange").build());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any exchange have id = " + updateExchangeBody.getExchangeId()).build());
         }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExchangeRateResponse {
+    private long exchangeRateId;
     private CurrencyResponse currency;
     private BigDecimal amount;
 }

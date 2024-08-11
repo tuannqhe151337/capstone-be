@@ -44,6 +44,7 @@ public class SeedConfiguration {
             ReportRepository reportRepository,
             SupplierRepository supplierRepository,
             ProjectRepository projectRepository,
+            TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
             CurrencyExchangeRateRepository currencyExchangeRateRepository
 
@@ -75,6 +76,17 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+
+        // Term interval date
+            TermInterval termInterval = TermInterval
+                    .builder()
+                    .id(1L)
+                    .startTermDate(25)
+                    .endTermInterval(5)
+                    .startReuploadInterval(20)
+                    .endReuploadInterval(3)
+                    .build();
+            termIntervalRepository.save(termInterval);
 
             // Department
             Department itDepartment = Department.builder()
@@ -1688,7 +1700,7 @@ public class SeedConfiguration {
 
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
-                        .name("Expense " + projectNameChar)
+                        .name("Expense " + projectNameChar++)
                         .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 10000L))
                         .amount(random.nextInt(10) + 1)
                         .project(randomProject)
@@ -2287,25 +2299,25 @@ public class SeedConfiguration {
             reportRepository.saveAll(reports);
 
             CurrencyExchangeRate exchangeRate1_1 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2024, 8, 17))
+                    .month(LocalDate.of(2020, 4, 17))
                     .currency(currency1)
                     .amount(BigDecimal.valueOf(20000))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_2 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2024, 8, 10))
+                    .month(LocalDate.of(2020, 4, 10))
                     .currency(currency2)
                     .amount(BigDecimal.valueOf(1))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_3 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2024, 8, 11))
+                    .month(LocalDate.of(2020, 4, 11))
                     .currency(currency3)
                     .amount(BigDecimal.valueOf(147))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_4 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2024, 8, 18))
+                    .month(LocalDate.of(2020, 4, 18))
                     .currency(currency4)
                     .amount(BigDecimal.valueOf(1374))
                     .build();
@@ -2383,7 +2395,83 @@ public class SeedConfiguration {
                     .amount(BigDecimal.valueOf(1550))
                     .build();
 
-            currencyExchangeRateRepository.saveAll(List.of(exchangeRate1_1, exchangeRate1_2, exchangeRate1_3, exchangeRate1_4, exchangeRate2_1, exchangeRate2_2, exchangeRate2_3, exchangeRate2_4, exchangeRate3_1, exchangeRate3_2, exchangeRate3_3, exchangeRate3_4, exchangeRate4_1, exchangeRate4_2, exchangeRate4_3, exchangeRate4_4));
+            CurrencyExchangeRate exchangeRate5_1 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 17))
+                    .currency(currency1)
+                    .amount(BigDecimal.valueOf(25500))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_2 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 18))
+                    .currency(currency2)
+                    .amount(BigDecimal.valueOf(1))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_3 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 20))
+                    .currency(currency3)
+                    .amount(BigDecimal.valueOf(133))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_4 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 25))
+                    .currency(currency4)
+                    .amount(BigDecimal.valueOf(1550))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_1 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 17))
+                    .currency(currency1)
+                    .amount(BigDecimal.valueOf(25500))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_2 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 18))
+                    .currency(currency2)
+                    .amount(BigDecimal.valueOf(1))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_3 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 20))
+                    .currency(currency3)
+                    .amount(BigDecimal.valueOf(133))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_4 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 25))
+                    .currency(currency4)
+                    .amount(BigDecimal.valueOf(1550))
+                    .build();
+
+            for (int i = 0; i < 12; i++) {
+                CurrencyExchangeRate exchangeRate1 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency1)
+                        .amount(BigDecimal.valueOf(25500))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate2 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency2)
+                        .amount(BigDecimal.valueOf(1))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate3 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency3)
+                        .amount(BigDecimal.valueOf(133))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate4 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency4)
+                        .amount(BigDecimal.valueOf(1550))
+                        .build();
+
+                currencyExchangeRateRepository.saveAll(List.of(exchangeRate1, exchangeRate2, exchangeRate3, exchangeRate4));
+            }
+
+            currencyExchangeRateRepository.saveAll(List.of(exchangeRate1_1, exchangeRate1_2, exchangeRate1_3, exchangeRate1_4, exchangeRate2_1, exchangeRate2_2, exchangeRate2_3, exchangeRate2_4, exchangeRate3_1, exchangeRate3_2, exchangeRate3_3, exchangeRate3_4, exchangeRate4_1, exchangeRate4_2, exchangeRate4_3, exchangeRate4_4, exchangeRate5_1, exchangeRate5_2, exchangeRate5_3, exchangeRate5_4, exchangeRate6_1, exchangeRate6_2, exchangeRate6_3, exchangeRate6_4));
         };
     }
 }

@@ -19,4 +19,9 @@ public interface CurrencyRepository extends JpaRepository<Currency, Long>, Custo
             " (year(exchangeRate.month) IN :years AND month(exchangeRate.month) IN :months) AND " +
             " (exchangeRate.isDelete = false OR exchangeRate.isDelete is null)")
     List<ExchangeRateResult> getListExchangeRate(Set<Long> fromCurrencyId, Set<Integer> years, Set<Integer> months, Long toCurrencyId);
+
+    @Query("SELECT currency from Currency currency " +
+            "WHERE currency.isDelete = false OR currency.isDelete IS NULL " +
+            "ORDER BY currency.id desc")
+    List<Currency> findAll();
 }

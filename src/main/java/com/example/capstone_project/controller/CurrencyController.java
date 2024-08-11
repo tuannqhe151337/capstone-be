@@ -71,6 +71,7 @@ public class CurrencyController {
                         .name(currency.getName())
                         .symbol(currency.getSymbol())
                         .affix(currency.getAffix())
+                        .isDefault(currency.isDefault())
                         .createdAt(currency.getCreatedAt())
                         .updatedAt(currency.getUpdatedAt())
                         .build()));
@@ -186,6 +187,7 @@ public class CurrencyController {
                         .name(currency.getName())
                         .symbol(currency.getSymbol())
                         .affix(currency.getAffix())
+                        .isDefault(currency.isDefault())
                         .createdAt(currency.getCreatedAt())
                         .updatedAt(currency.getUpdatedAt())
                         .build());

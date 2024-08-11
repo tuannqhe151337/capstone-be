@@ -31,6 +31,9 @@ public class Currency extends BaseEntity {
     @OneToMany(mappedBy = CurrencyExchangeRate_.CURRENCY)
     private List<CurrencyExchangeRate> currencyExchangeRates;
 
+    @Column(name = "isDefault")
+    private boolean isDefault;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 }
