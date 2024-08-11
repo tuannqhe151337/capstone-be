@@ -15,10 +15,10 @@ public class RemoveDuplicateHelper {
     }
 
     public static List<ExpenseBody> removeDuplicateCodes(List<ExpenseBody> expenses) {
-        Map<String, ExpenseBody> expenseMap = new HashMap<>();
+        Map<Long, ExpenseBody> expenseMap = new HashMap<>();
 
         for (ExpenseBody expense : expenses) {
-            expenseMap.put(expense.getExpenseCode(), expense);
+            expenseMap.put(expense.getExpenseId(), expense);
         }
 
         return new ArrayList<>(expenseMap.values());

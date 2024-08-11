@@ -346,35 +346,61 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
-            List<String> listCodes = new ArrayList<>();
+            List<Long> listExpenseId = new ArrayList<>();
 
             for (FinancialPlanExpense expense : rawExpenses) {
-                listCodes.add(expense.getPlanExpenseKey());
+                listExpenseId.add(expense.getId());
             }
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            long totalExpense = expenseRepository.countListExpenseInReportUpload(reportId, listCodes, TermCode.IN_PROGRESS, LocalDateTime.now());
-            if (listCodes.size() == totalExpense) {
-                List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listCodes);
+            // Check list expense in one report
+            List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
 
-                HashMap<String, Long> codeAndId = new HashMap<>();
-                for (ExpenseResult expenseResult : expenseResults) {
-                    codeAndId.put(expenseResult.getExpenseCode(), expenseResult.getExpenseId());
+            if (listExpenseId.size() == expenseResults.size()) {
+
+                // Get last code in this report
+                String lastCode = financialReportRepository.getLastCodeInReport(reportId);
+                int index = 0;
+
+                // If list expense not have any expense have code then index start from 1
+                if (lastCode != null) {
+                    // Split the string by the underscore character
+                    String[] parts = lastCode.split("_");
+
+                    // Get last index
+                    index = Integer.parseInt(parts[parts.length - 1]);
                 }
 
-                rawExpenses.forEach(expense -> {
+                HashMap<Long, String> idAndCode = new HashMap<>();
 
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(codeAndId.get(expense.getPlanExpenseKey()));
+                for (ExpenseResult expenseResult : expenseResults) {
+                    idAndCode.put(expenseResult.getExpenseId(), expenseResult.getExpenseCode());
+                }
 
-                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(expense.getStatus().getId()));
+                ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
+                ExpenseStatus denied = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
+
+                // Get report of this list expense to generate expense code
+                FinancialReport report = financialReportRepository.findById(reportId).get();
+
+                for (FinancialPlanExpense expense : rawExpenses) {
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense.getId());
+
+                    // Generate code for approved expense not have code
+                    if (idAndCode.get(expense.getId()) != null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                        updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
+                    }
+                    // Update status for expense
+                    if (expense.getStatus().getCode().equals(approval.getCode())) {
+                        updateExpense.setStatus(approval);
+                    } else {
+                        updateExpense.setStatus(denied);
+
+                    }
 
                     expenses.add(updateExpense);
+                }
 
-                });
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
                 ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
 
@@ -397,7 +423,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
     @Override
     @Transactional
-    public void approvalExpenses(Long reportId, List<Long> listExpenses) throws Exception {
+    public void approvalExpenses(Long reportId, List<Long> listExpenseId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -406,28 +432,44 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            listExpenses = RemoveDuplicateHelper.removeDuplicates(listExpenses);
+            listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
-            if (listExpenses.size() == totalExpense) {
+            // Check list expense exist in one report
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenseId.size() == totalExpense) {
 
                 // Get approval status
                 ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
 
-                listExpenses.forEach(expense -> {
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                String lastCode = financialReportRepository.getLastCodeInReport(reportId);
+                int index = 0;
+
+                if (lastCode != null) {
+                    // Split the string by the underscore character
+                    String[] parts = lastCode.split("_");
+
+                    // Get last index
+                    index = Integer.parseInt(parts[parts.length - 1]);
+
+                }
+
+                // Get report of this list expense
+                FinancialReport report = financialReportRepository.findById(reportId).get();
+
+                for (Long expenseId : listExpenseId) {
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expenseId);
+
+                    if (updateExpense.getPlanExpenseKey() == null || updateExpense.getPlanExpenseKey().isEmpty()) {
+                        updateExpense.setPlanExpenseKey(report.getName() + "_" + (++index));
+                    }
+
                     updateExpense.setStatus(approval);
                     expenses.add(updateExpense);
-                });
+                }
 
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
 
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
-
                 ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
 
                 report.setStatus(reviewedReportStatus);
@@ -458,11 +500,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
+            // Check list expense exist in one report
             long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenseId.size() == totalExpense) {
 
-                // Get approval status
+                // Get deny status
                 ExpenseStatus denyStatus = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
 
                 listExpenseId.forEach(expense -> {
@@ -471,10 +513,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     updateExpense.setStatus(denyStatus);
                     expenses.add(updateExpense);
 
-
                 });
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
+
+                // Get report of this list expense
                 FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
                 ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
