@@ -204,6 +204,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             expense.setProject(projectRepository.getReferenceById(expense.getProject().getId()));
             expense.setSupplier(supplierRepository.getReferenceById(expense.getSupplier().getId()));
             expense.setPic(userRepository.getReferenceById(expense.getPic().getId()));
+            expense.setCurrency(currencyRepository.getReferenceById(expense.getCurrency().getId()));
             expense.setStatus(status);
         });
 
@@ -619,8 +620,17 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             Term term = termRepository.getTermByPlanId(planId);
 
-            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))
-                    || (LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
+            boolean isAllowToReupload = false;
+
+            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))) {
+                isAllowToReupload = true;
+            } else if (term.isAllowReupload()) {
+                if ((LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
+                    isAllowToReupload = true;
+                }
+            }
+
+            if (isAllowToReupload) {
                 long departmentId = planRepository.getDepartmentIdByPlanId(planId);
                 // Check department
                 if (departmentId == userDetail.getDepartmentId()) {
@@ -663,7 +673,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                             hashMapExpense.putIfAbsent(expenseResult.getExpenseId(), ExpenseStatusCode.DENIED);
                         }
                     }
-
                     ExpenseStatus status = expenseStatusRepository.findByCode(ExpenseStatusCode.NEW);
 
                     // Handle new expenses need to re-upload
@@ -671,7 +680,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
                         // If exist expense code and status not approve, create new expense with new information and map to plan in database
                         if (hashMapExpense.containsKey(expense.getId()) &&
-                                !hashMapExpense.get(expense.getId()).getValue().equals(ExpenseStatusCode.APPROVED.getValue())
+                                !hashMapExpense.get(expense.getId()).equals(ExpenseStatusCode.APPROVED)
                         ) {
                             FinancialPlanExpense updateExpense = FinancialPlanExpense.builder()
                                     .name(expense.getName())
@@ -681,11 +690,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                                     .project(projectRepository.getReferenceById(expense.getProject().getId()))
                                     .supplier(supplierRepository.getReferenceById(expense.getSupplier().getId()))
                                     .pic(userRepository.getReferenceById(expense.getPic().getId()))
+                                    .currency(currencyRepository.getReferenceById(expense.getCurrency().getId()))
                                     .status(status)
                                     .build();
-                            if (expense.getPlanExpenseKey() != null) {
-                                updateExpense.setPlanExpenseKey(expense.getPlanExpenseKey());
-                            }
 
                             listExpense.add(updateExpense);
 
@@ -699,6 +706,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                                     .project(projectRepository.getReferenceById(expense.getProject().getId()))
                                     .supplier(supplierRepository.getReferenceById(expense.getSupplier().getId()))
                                     .pic(userRepository.getReferenceById(expense.getPic().getId()))
+                                    .currency(currencyRepository.getReferenceById(expense.getCurrency().getId()))
                                     .status(status)
                                     .build());
                         }
@@ -1042,6 +1050,24 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         out.close();
 
         return out.toByteArray();
+    }
+
+    @Override
+    public List<UserDownloadResult> checkUsernameExist(List<String> listUsername) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority or role
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue())) {
+            return userRepository.checkUsernameExist(listUsername);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
     }
 
     private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {

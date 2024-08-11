@@ -12,8 +12,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ReUploadExpensesMapper {
-
-    @Mapping(source = "expenseCode", target = "planExpenseKey")
+    @Mapping(source = "expenseId", target = "id")
     @Mapping(source = "expenseName", target = "name")
     @Mapping(source = "costTypeId", target = "costType.id")
     @Mapping(source = "unitPrice", target = "unitPrice")
@@ -22,6 +21,7 @@ public interface ReUploadExpensesMapper {
     @Mapping(source = "supplierId", target = "supplier.id")
     @Mapping(source = "picId", target = "pic.id")
     @Mapping(source = "notes", target = "note")
+    @Mapping(source = "currencyId", target = "currency.id")
     FinancialPlanExpense mapUpdateExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody);
 
     default FinancialPlanExpense newExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody) {

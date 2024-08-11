@@ -47,6 +47,9 @@ public interface CreatePlanMapper {
                     .costType(CostType.builder()
                             .id(expenseBody.getCostTypeId())
                             .build())
+                    .currency(Currency.builder()
+                            .id(expenseBody.getCurrencyId())
+                            .build())
                     .build());
         }
         return planExpenses;
