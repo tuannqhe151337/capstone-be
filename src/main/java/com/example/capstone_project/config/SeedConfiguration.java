@@ -1595,7 +1595,37 @@ public class SeedConfiguration {
 
             financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1, financialPlanFile9_1, financialPlanFile10_1, financialPlanFile11_1, financialPlanFile12_1, financialPlanFile13_1, financialPlanFile14_1, financialPlanFile15_1));
 
-            //
+            // Create currency data
+            Currency currency1 = Currency.builder()
+                    .id(1L)
+                    .name("VND")
+                    .symbol("₫")
+                    .affix(Affix.SUFFIX)
+                    .build();
+
+            Currency currency2 = Currency.builder()
+                    .id(2L)
+                    .name("USD")
+                    .symbol("$")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            Currency currency3 = Currency.builder()
+                    .id(3L)
+                    .name("JPY")
+                    .symbol("¥")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            Currency currency4 = Currency.builder()
+                    .id(4L)
+                    .name("KRW")
+                    .symbol("₩")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
+
 
             // Get 64 random expense
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
@@ -1666,6 +1696,7 @@ public class SeedConfiguration {
                         .pic(randomPic)
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
+                        .currency(currency1)
                         .build();
 
                 expenseList.add(expense);
@@ -2255,56 +2286,26 @@ public class SeedConfiguration {
 
             reportRepository.saveAll(reports);
 
-            Currency currency1 = Currency.builder()
-                    .id(1L)
-                    .name("VND")
-                    .symbol("₫")
-                    .affix(Affix.SUFFIX)
-                    .build();
-
-            Currency currency2 = Currency.builder()
-                    .id(2L)
-                    .name("USD")
-                    .symbol("$")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            Currency currency3 = Currency.builder()
-                    .id(3L)
-                    .name("JPY")
-                    .symbol("¥")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            Currency currency4 = Currency.builder()
-                    .id(4L)
-                    .name("KRW")
-                    .symbol("₩")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
-
             CurrencyExchangeRate exchangeRate1_1 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2020, 4, 17))
+                    .month(LocalDate.of(2024, 8, 17))
                     .currency(currency1)
                     .amount(BigDecimal.valueOf(20000))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_2 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2020, 4, 10))
+                    .month(LocalDate.of(2024, 8, 10))
                     .currency(currency2)
                     .amount(BigDecimal.valueOf(1))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_3 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2020, 4, 11))
+                    .month(LocalDate.of(2024, 8, 11))
                     .currency(currency3)
                     .amount(BigDecimal.valueOf(147))
                     .build();
 
             CurrencyExchangeRate exchangeRate1_4 = CurrencyExchangeRate.builder()
-                    .month(LocalDate.of(2020, 4, 18))
+                    .month(LocalDate.of(2024, 8, 18))
                     .currency(currency4)
                     .amount(BigDecimal.valueOf(1374))
                     .build();

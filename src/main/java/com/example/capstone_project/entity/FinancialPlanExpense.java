@@ -56,6 +56,10 @@ public class FinancialPlanExpense extends BaseEntity {
     @JoinColumn(name = "cost_type_id")
     private CostType costType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "currency_id")
+    private Currency currency;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 

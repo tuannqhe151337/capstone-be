@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.responses.expense.list;
 
+import com.example.capstone_project.controller.responses.expense.CurrencyResponse;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.PicResponse;
 import com.example.capstone_project.controller.responses.expense.ProjectResponse;
@@ -26,4 +27,5 @@ public class ExpenseResponse {
     private PicResponse pic;
     private String notes;
     private StatusResponse status;
+    private CurrencyResponse currency;
 }

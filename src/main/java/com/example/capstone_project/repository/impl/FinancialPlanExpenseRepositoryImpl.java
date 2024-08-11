@@ -101,6 +101,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
 
         // Handling join
         EntityGraph<FinancialPlanExpense> entityGraph = entityManager.createEntityGraph(FinancialPlanExpense.class);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.CURRENCY);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.STATUS);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.COST_TYPE);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.PROJECT);
