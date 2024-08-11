@@ -41,4 +41,6 @@ public interface ExpenseResult {
     Long getCostTypeId();
 
     Long getStatusId();
+
+    String getCurrencyName();
 }

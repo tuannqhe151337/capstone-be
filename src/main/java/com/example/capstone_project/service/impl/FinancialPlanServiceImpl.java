@@ -3,6 +3,7 @@ package com.example.capstone_project.service.impl;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
@@ -510,12 +511,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -532,12 +534,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -745,12 +748,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expenses is empty");
         }
@@ -805,12 +809,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expenses is empty");
         }
@@ -913,6 +918,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
         List<Project> projects = projectRepository.findAll();
         List<Supplier> suppliers = supplierRepository.findAll();
+        List<Currency> currencies = currencyRepository.findAll();
 
         String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
         FileInputStream file = new FileInputStream(fileLocation);
@@ -985,6 +991,18 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             row.createCell(colPosition).setCellValue(supplier.getName());
         }
 
+        // Write currency
+        rowPosition = 2;
+
+        for (Currency currency : currencies) {
+            colPosition = 15;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(currency.getId());
+            row.createCell(colPosition).setCellValue(currency.getName());
+        }
+
         // Add validation
         sheet = wb.getSheet("Expense");
         // Add validation for department
@@ -1022,7 +1040,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         constraint = validationHelper.createFormulaListConstraint("List!$K$3:$K$" + (projects.size() + 2));
 
-        addressList = new CellRangeAddressList(2, projects.size() + 2, 10, 10);
+        addressList = new CellRangeAddressList(2, 100, 11, 11);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
@@ -1032,7 +1050,17 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         constraint = validationHelper.createFormulaListConstraint("List!$N$3:$N$" + (suppliers.size() + 2));
 
-        addressList = new CellRangeAddressList(2, suppliers.size() + 2, 11, 11);
+        addressList = new CellRangeAddressList(2, 100, 12, 12);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for currency
+
+        constraint = validationHelper.createFormulaListConstraint("List!$Q$3:$Q$" + (currencies.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 10, 10);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
