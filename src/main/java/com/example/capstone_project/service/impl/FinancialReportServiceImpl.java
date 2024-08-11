@@ -1,6 +1,7 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
@@ -160,13 +161,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expenses is empty");
         }
@@ -192,13 +194,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expense is null or empty");
         }
