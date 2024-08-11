@@ -381,55 +381,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                //Handle currency
-                if (toCurrencyId != null) {
-                    try {
-
-                        HashMap<Long, List<FinancialPlanExpense>> fromCurrencyIdHashMap = new HashMap<>();
-
-                        expenses.forEach(expense -> {
-                            fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
-                        });
-
-                        expenses.forEach(expense -> {
-                            fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
-                        });
-
-                        List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet().stream().toList(), toCurrencyId);
-
-                        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
-
-                        exchangeRates.forEach(exchangeRate -> {
-                            exchangeRateHashMap.put(exchangeRate.getDate(), new HashMap<>());
-                        });
-
-                        exchangeRates.forEach(exchangeRate -> {
-                            exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
-                        });
-
-                        fromCurrencyIdHashMap.keySet().forEach(formCurrencyId -> {
-                            fromCurrencyIdHashMap.get(formCurrencyId).forEach(expense -> {
-                                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("MM/yyyy"))).get(formCurrencyId).longValue());
-                                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("MM/yyyy"))).get(toCurrencyId).longValue());
-                                expense.setUnitPrice(expense.getUnitPrice().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
-                                expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
-                            });
-                        });
-
-                    } catch (ArithmeticException e) {
-                        throw new ArithmeticException("Can not dived by 0");
-                    } catch (NullPointerException e) {
-                        throw new Exception();
-                    }
-                }
+                // Handle exchange money
+                handleCurrencyExchange(toCurrencyId, expenses);
 
                 return expenses;
                 // But financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-
                 if (userDetail.getDepartmentId() == planRepository.getDepartmentIdByPlanId(planId)) {
+                    List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                    return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
+                    // Handle exchange money
+                    handleCurrencyExchange(toCurrencyId, expenses);
+
+                    return expenses;
                 } else {
                     throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
@@ -1078,5 +1042,58 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         out.close();
 
         return out.toByteArray();
+    }
+
+    private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
+        //Handle currency
+        if (toCurrencyId != null) {
+            if (!currencyRepository.existsById(toCurrencyId)) {
+                throw new ResourceNotFoundException("Currency id not exist id = " + toCurrencyId);
+            }
+            try {
+                // Inner hashmap: map by currency id
+                HashMap<Long, List<FinancialPlanExpense>> fromCurrencyIdHashMap = new HashMap<>();
+
+                Set<Integer> years = new HashSet<>();
+                Set<Integer> months = new HashSet<>();
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
+                    years.add(expense.getCreatedAt().getYear());
+                    months.add(expense.getCreatedAt().getMonthValue());
+                });
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                });
+
+                // Get list exchange rates
+                List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, toCurrencyId);
+
+                // Outer hashmap: map by date
+                HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+                });
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+                });
+
+                fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
+                    fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
+                        BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
+                        BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
+                        expense.setUnitPrice(expense.getUnitPrice().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                        expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
+                    });
+                });
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException("Can't divided by 0");
+            } catch (NullPointerException e) {
+                throw new Exception();
+            }
+        }
     }
 }

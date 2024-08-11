@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -28,4 +30,6 @@ public class ExpenseResponse {
     private String notes;
     private StatusResponse status;
     private CurrencyResponse currency;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

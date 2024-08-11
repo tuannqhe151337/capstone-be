@@ -1,9 +1,11 @@
 package com.example.capstone_project.repository.result;
 
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -30,4 +32,7 @@ public class ReportExpenseResult {
     String statusName;
     long departmentId;
     String departmentName;
+    Currency currency;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 }
