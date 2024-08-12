@@ -162,7 +162,7 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to create term");
         }
-        if(term.isAllowReupload() == false){
+        if(!term.isAllowReupload()){
             term.setReuploadStartDate(null);
             term.setReuploadEndDate(null);
         }
@@ -201,7 +201,8 @@ public class TermServiceImpl implements TermService {
     public long countDistinctListTermPaging(Long statusId, String query) {
         return termRepository.countDistinctListTermPaging(statusId, query);
     }
-    //Check valid date of term
+
+    // Check valid date of term
     public void checkValidDateOfTerm(Term term) throws Exception {
         LocalDateTime finalEndTermDate;
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
@@ -215,7 +216,7 @@ public class TermServiceImpl implements TermService {
             throw new InvalidEndDateException("Final end date must be in the future");
         }
 
-        //throw exception if end date is before start date
+        // throw exception if end date is before start date
         //after 5 days from start day - false
        LocalDateTime boundaryEndDate = term.getStartDate().plusDays(termInterval.getEndTermInterval());
         if (!term.getEndDate().isAfter(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)
@@ -226,7 +227,7 @@ public class TermServiceImpl implements TermService {
         }
         //throw exception if start reup date is before end date
         //before 20 days - false
-        if(term.isAllowReupload() == true) {
+        if(term.isAllowReupload()) {
             LocalDateTime boundaryStartReuploadDate = term.getStartDate().plusDays(termInterval.getStartReuploadInterval());
             if (!term.getReuploadStartDate().isAfter(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)
                     || term.getReuploadStartDate().isBefore(boundaryStartReuploadDate)) {

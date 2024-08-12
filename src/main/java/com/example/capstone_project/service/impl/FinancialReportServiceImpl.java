@@ -1,6 +1,7 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
@@ -42,6 +43,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final ProjectRepository projectRepository;
     private final SupplierRepository supplierRepository;
     private final CurrencyRepository currencyRepository;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -160,13 +162,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expenses is empty");
         }
@@ -192,13 +195,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
             List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expense is null or empty");
         }
@@ -236,31 +240,35 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     // Inner hashmap: map by currency id
                     HashMap<Long, List<ReportExpenseResult>> fromCurrencyIdHashMap = new HashMap<>();
 
-                    Set<Integer> years = new HashSet<>();
-                    Set<Integer> months = new HashSet<>();
+                    Set<PaginateExchange> monthYearSet = new HashSet<>();
 
                     expenses.forEach(expense -> {
                         fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
-                        years.add(expense.getCreatedAt().getYear());
-                        months.add(expense.getCreatedAt().getMonthValue());
                     });
 
                     expenses.forEach(expense -> {
                         fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                        monthYearSet.add(PaginateExchange.builder()
+                                        .month(expense.getCreatedAt().getMonthValue())
+                                        .year(expense.getCreatedAt().getYear())
+                                        .build());
                     });
 
                     // Get list exchange rates
-                    List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, toCurrencyId);
+                    List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+                    currencyIds.add(toCurrencyId);
+
+                    List<CurrencyExchangeRate> exchangeRates = this.currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
 
                     // Outer hashmap: map by date
                     HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
 
                     exchangeRates.forEach(exchangeRate -> {
-                        exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+                        exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
                     });
 
                     exchangeRates.forEach(exchangeRate -> {
-                        exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+                        exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
                     });
 
                     fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {

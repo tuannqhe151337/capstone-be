@@ -5,13 +5,11 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.PlanStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -57,7 +55,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
     @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
             " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
-            " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
+            " statuses.code AS statusCode, expenses.currency.name AS currencyName  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +
@@ -89,7 +87,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
     @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
             " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
-            " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
+            " statuses.code AS statusCode, expenses.currency.name AS currencyName  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +
@@ -101,7 +99,8 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " file.isDelete = false AND expenses.isDelete = false ")
     List<ExpenseResult> getListExpenseByPlanId(Long planId);
-    @Query(value = " SELECT currency.id AS currencyId, concat(month (expenses.createdAt), '/', year (expenses.createdAt)) ,sum(expenses.unitPrice * expenses.amount) AS totalCost FROM FinancialPlanExpense expenses " +
+
+    @Query(value = " SELECT currency.id AS currencyId, month (expenses.createdAt) AS month, year (expenses.createdAt) AS year ,sum(expenses.unitPrice * expenses.amount) AS totalCost FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +
@@ -111,10 +110,10 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " LEFT JOIN expenses.status statuses " +
             " LEFT JOIN expenses.currency currency " +
             " WHERE plan.id = :planId AND " +
-            " statuses.code = :approved AND " +
+            " (statuses.code = :statusCode OR :statusCode is null ) AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
-            " file.isDelete = false AND expenses.isDelete = false ")
-    List<TotalCostByCurrencyResult> calculateActualCostByPlanId(Long planId, ExpenseStatusCode approved);
-//
-//    BigDecimal calculateExpectedCostByPlanId(Long planId);
+            " file.isDelete = false AND expenses.isDelete = false " +
+            " GROUP BY currency.id, month (expenses.createdAt), year (expenses.createdAt)")
+    List<TotalCostByCurrencyResult> calculateCostByPlanId(Long planId, ExpenseStatusCode statusCode);
+
 }

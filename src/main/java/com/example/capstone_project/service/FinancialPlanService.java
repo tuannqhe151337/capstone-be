@@ -2,15 +2,14 @@ package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.service.result.ActualCostResult;
+import com.example.capstone_project.repository.result.UserDownloadResult;
+import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface FinancialPlanService {
@@ -72,7 +71,8 @@ public interface FinancialPlanService {
 
     byte[] getTemplateData() throws IOException;
 
-    ActualCostResult calculateActualCostByPlanId(Long planId) throws Exception;
+    List<UserDownloadResult> checkUsernameExist(List<String> listUsername) throws Exception;
+    CostResult calculateActualCostByPlanId(Long planId) throws Exception;
 
-    BigDecimal calculateExpectedCostByPlanId(Long planId);
+    CostResult calculateExpectedCostByPlanId(Long planId) throws Exception;
 }

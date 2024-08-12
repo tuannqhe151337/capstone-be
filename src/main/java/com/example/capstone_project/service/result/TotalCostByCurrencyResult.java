@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class TotalCostByCurrencyResult {
-    private Long currencyId;
-    private String date;
-    private BigDecimal totalCost;
+
+public interface TotalCostByCurrencyResult {
+    Long getCurrencyId();
+
+    Integer getMonth();
+
+    Integer getYear();
+
+    BigDecimal getTotalCost();
 }

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ActualCostResult {
+public class CostResult {
     BigDecimal cost;
     Currency currency;
 }
