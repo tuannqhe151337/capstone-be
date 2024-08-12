@@ -29,8 +29,8 @@ public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportServ
     private final ReportRepository reportRepository;
     private final FinancialReportRepository financialReportRepository;
 
-    // Chạy vào ngày 5 tháng 1 hàng năm
-    @Scheduled(cron = "0 0 0 5 1 ?")
+    // Chạy vào ngày 25 tháng 12 hàng năm
+    @Scheduled(cron = "0 0 0 25 12 ?")
     @Transactional
     public void generateAnnualReport() {
 
@@ -65,6 +65,14 @@ public class GenerateAnnualReportServiceImpl implements GenerateAnnualReportServ
     @Override
     public void generateActualCostAndExpectedCost(Long termId) {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        report.setExpectedCost(financialReportRepository.calculateExpectedCostByReportId(report.getId()));
+        report.setActualCost(financialReportRepository.calculateActualCostByReportId(report.getId(), ExpenseStatusCode.APPROVED));
+        financialReportRepository.save(report);
+    }
+
+    public void generateReportStatistical(Long termId) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+
         report.setExpectedCost(financialReportRepository.calculateExpectedCostByReportId(report.getId()));
         report.setActualCost(financialReportRepository.calculateActualCostByReportId(report.getId(), ExpenseStatusCode.APPROVED));
         financialReportRepository.save(report);
