@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.body.exchange;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,13 +13,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateExchangeBody {
-    @NotNull(message = "Month can't be null.")
-    private String month;
-
-    @NotNull(message = "Currency id can't be null.")
-    private Long currencyId;
+public class UpdateMonthlyExchangeBody {
+    private Long exchangeId;
 
     @NotNull(message = "Amount can't be null.")
+    @Min(value = 0, message = "Unit price can't be negative")
     private BigDecimal amount;
 }

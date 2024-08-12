@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.entity.CurrencyExchangeRate;
 import com.example.capstone_project.entity.Report_;
 import com.example.capstone_project.repository.CurrencyExchangeRateRepository;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -33,7 +35,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
     private final CurrencyRepository currencyRepository;
 
     @Override
-    public TreeMap<String, List<ExchangeResult>> getListExchangePaging(String query, Integer year, Pageable pageable) {
+    public TreeMap<String, List<ExchangeResult>> getListMonthlyExchangePaging(String query, Integer year, Pageable pageable) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
@@ -85,21 +87,21 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
     }
 
     @Override
-    public long countDistinctListExchangePaging(Integer year, Pageable pageable) {
+    public long countDistinctListMonthlyExchangePaging(Integer year, Pageable pageable) {
         List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getMonthYearPaginated(year, pageable);
         return currencyExchangeRateRepository.countDistinctListExchangePaging(year);
     }
 
     @Override
     @Transactional
-    public void createExchange(String month, List<CurrencyExchangeRate> exchangeRates) {
+    public void createMonthlyExchange(String month, List<CurrencyExchangeRate> exchangeRates) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
         try {
             if (listAuthorities.contains(AuthorityCode.CREATE_NEW_EXCHANGE.getValue())) {
                 // Delete all old monthly exchange rate if it's exists
-                this.deleteExchange(month);
+                this.deleteMonthlyExchange(month);
 
                 // Convert month string to LocalDate
                 MonthYearResult monthYearResult = this.splitMonthYearStr(month);
@@ -124,7 +126,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
 
     @Override
     @Transactional
-    public void deleteExchange(String monthYear) {
+    public void deleteMonthlyExchange(String monthYear) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         // Check authority or role
@@ -149,12 +151,6 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
                 if (!currencyExchangeRateRepository.existsById(exchangeRate.getId())) {
                     throw new ResourceNotFoundException("Not found any exchange have Id = " + exchangeRate.getId());
                 }
-
-                CurrencyExchangeRate updateExchange = currencyExchangeRateRepository.getReferenceById(exchangeRate.getId());
-
-                updateExchange.setAmount(exchangeRate.getAmount());
-
-                currencyExchangeRateRepository.save(updateExchange);
             } else {
                 throw new UnauthorizedException("Unauthorized to update exchange");
             }
@@ -164,14 +160,26 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
     }
 
     @Override
-    public List<CurrencyExchangeRate> getListExchange() {
-        // Get list authorities of this user
+    public void createExchange(String monthYear, Long currencyId, BigDecimal amount) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
-        if (listAuthorities.contains(AuthorityCode.VIEW_EXCHANGE.getValue())) {
-            return currencyExchangeRateRepository.findAll(Sort.by(Report_.ID).ascending());
-        } else {
-            throw new UnauthorizedException("Unauthorized to view list exchange");
+        try {
+            // Check authority or role
+            if (listAuthorities.contains(AuthorityCode.UPDATE_EXCHANGE.getValue())) {
+                MonthYearResult monthYearResult = this.splitMonthYearStr(monthYear);
+
+                Currency currency = currencyRepository.getReferenceById(currencyId);
+
+                CurrencyExchangeRate currencyExchangeRate = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(monthYearResult.getYear(), monthYearResult.getMonth(), 1))
+                        .currency(currency)
+                        .amount(amount)
+                        .build();
+
+                currencyExchangeRateRepository.save(currencyExchangeRate);
+            }
+        } catch (Exception e) {
+            throw new DuplicateKeyException("Duplicate name exchange");
         }
     }
 
