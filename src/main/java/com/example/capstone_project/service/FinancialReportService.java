@@ -6,6 +6,7 @@ import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.repository.result.YearDiagramResult;
+import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
@@ -34,9 +35,9 @@ public interface FinancialReportService {
 
     long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId);
 
-    BigDecimal calculateActualCostByReportId(Long reportId);
+    CostResult calculateActualCostByReportId(Long reportId) throws Exception;
 
-    BigDecimal calculateExpectedCostByReportId(Long reportId);
+    CostResult calculateExpectedCostByReportId(Long reportId) throws Exception;
 
     void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 

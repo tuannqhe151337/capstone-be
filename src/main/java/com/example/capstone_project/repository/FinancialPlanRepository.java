@@ -3,7 +3,8 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
-import com.example.capstone_project.utils.enums.PlanStatusCode;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,31 +32,24 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY file.plan.id ")
     List<PlanVersionResult> getListPlanVersion(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
-    @Query( " SELECT plan.id AS planId, plan.name AS name, MAX(expense.unitPrice * expense.amount) AS biggestExpenditure, " +
-            " SUM(expense.unitPrice * expense.amount) AS totalPlan," +
+    @Query(" SELECT distinct plan.id AS planId, plan.name AS name," +
             " term.id AS termId, term.name AS termName, term.startDate AS termStartDate, term.endDate AS termEndDate, term.reuploadStartDate AS termReuploadStartDate, term.reuploadEndDate AS termReuploadEndDate, term.finalEndTermDate AS termFinalEndTermDate, " +
             " plan.createdAt AS createdAt, " +
             " department.id AS departmentId, department.name AS departmentName, " +
-            " user.id AS userId , user.username AS username" +
+            " user.id AS userId , user.username AS username " +
             " FROM FinancialPlan plan " +
             " LEFT JOIN plan.term term " +
             " LEFT JOIN plan.department department " +
-            " LEFT JOIN plan.planFiles files" +
-            " LEFT JOIN files.planFileExpenses fileExpense " +
-            " LEFT JOIN fileExpense.planExpense expense " +
-            " LEFT JOIN files.user user" +
+            " LEFT JOIN plan.planFiles files " +
+            " LEFT JOIN files.user user " +
             " WHERE plan.id = :planId AND " +
             " files.id = (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
-            " (plan.isDelete = false OR plan.isDelete IS NULL) AND" +
-            " (expense.isDelete = false OR expense.isDelete IS NULL) " +
-            " GROUP BY plan.id, plan.name," +
-            " term.id, term.name, term.startDate, term.endDate, term.reuploadStartDate, term.reuploadEndDate, term.finalEndTermDate," +
-            " plan.createdAt, department.id, department.name, user.id, user.username " )
+            " (plan.isDelete = false OR plan.isDelete IS NULL) ")
     PlanDetailResult getFinancialPlanById(@Param("planId") Long planId);
 
     @Query(value = " SELECT count(distinct (file.id)) FROM FinancialPlanFile file " +
             " WHERE file.plan.id = :planId AND " +
-            " (file.isDelete = false OR file.isDelete is null) " )
+            " (file.isDelete = false OR file.isDelete is null) ")
     int getPlanVersionByPlanId(@Param("planId") Long planId);
 
     @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
@@ -105,4 +99,21 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " file.isDelete = false AND expenses.isDelete = false ")
     List<ExpenseResult> getListExpenseByPlanId(Long planId);
+
+    @Query(value = " SELECT currency.id AS currencyId, month (expenses.createdAt) AS month, year (expenses.createdAt) AS year ,sum(expenses.unitPrice * expenses.amount) AS totalCost FROM FinancialPlanExpense expenses " +
+            " LEFT JOIN expenses.files files " +
+            " LEFT JOIN files.file file " +
+            " LEFT JOIN file.plan plan " +
+            " LEFT JOIN plan.term terms " +
+            " LEFT JOIN plan.department departments " +
+            " LEFT JOIN expenses.costType costTypes " +
+            " LEFT JOIN expenses.status statuses " +
+            " LEFT JOIN expenses.currency currency " +
+            " WHERE plan.id = :planId AND " +
+            " (statuses.code = :statusCode OR :statusCode is null ) AND " +
+            " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
+            " file.isDelete = false AND expenses.isDelete = false " +
+            " GROUP BY currency.id, month (expenses.createdAt), year (expenses.createdAt)")
+    List<TotalCostByCurrencyResult> calculateCostByPlanId(Long planId, ExpenseStatusCode statusCode);
+
 }

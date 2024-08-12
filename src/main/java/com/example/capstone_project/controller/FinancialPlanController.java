@@ -10,8 +10,10 @@ import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
+import com.example.capstone_project.controller.responses.plan.CurrencyResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.plan.UserResponse;
+import com.example.capstone_project.controller.responses.plan.detail.CostResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
@@ -20,11 +22,11 @@ import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.UserDownloadResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
-import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.detail.PlanDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.plan.expenses.PlanExpenseResponseMapperImpl;
@@ -44,6 +46,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -187,12 +190,34 @@ public class FinancialPlanController {
             // Get data
             PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
 
+            CostResult actualCost = planService.calculateActualCostByPlanId(planId);
+
+            CostResult expectedCost = planService.calculateExpectedCostByPlanId(planId);
+
             // Response
             PlanDetailResponse response;
 
             // Mapping to PlanDetail Response
             response = new PlanDetailMapperImpl().mapToPlanDetailResponseMapping(plan);
             response.setVersion(planService.getPlanVersionById(planId));
+
+            response.setActualCost(CostResponse.builder()
+                    .cost(actualCost.getCost())
+                    .currency(CurrencyResponse.builder()
+                            .currencyId(actualCost.getCurrency().getId())
+                            .name(actualCost.getCurrency().getName())
+                            .symbol(actualCost.getCurrency().getSymbol())
+                            .affix(actualCost.getCurrency().getAffix())
+                            .build()).build());
+
+            response.setExpectedCost(CostResponse.builder()
+                    .cost(expectedCost.getCost())
+                    .currency(CurrencyResponse.builder()
+                            .currencyId(expectedCost.getCurrency().getId())
+                            .name(expectedCost.getCurrency().getName())
+                            .symbol(expectedCost.getCurrency().getSymbol())
+                            .affix(expectedCost.getCurrency().getAffix())
+                            .build()).build());
 
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException e) {
@@ -604,4 +629,6 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+
 }

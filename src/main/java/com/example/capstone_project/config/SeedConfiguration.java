@@ -58,7 +58,7 @@ public class SeedConfiguration {
             TermStatus termStatus = TermStatus.
                     builder()
                     .id(1L).
-                    name("Not started")
+                    name("New")
                     .code(TermCode.NEW).build();
 
             //Term Status - fixed code
@@ -1583,6 +1583,7 @@ public class SeedConfiguration {
                     .name("VND")
                     .symbol("₫")
                     .affix(Affix.SUFFIX)
+                    .isDefault(true)
                     .build();
 
             Currency currency2 = Currency.builder()
@@ -1621,6 +1622,7 @@ public class SeedConfiguration {
                 int randomProjectIndex = random.nextInt(6) + 1;
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
+                int randomCurrencyIndex = random.nextInt(4) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 1 -> expenseStatus1;
@@ -1668,6 +1670,14 @@ public class SeedConfiguration {
                     default -> user1; // Default case, should never be reached
                 };
 
+                Currency randomCurrency = switch (randomCurrencyIndex) {
+                    case 1 -> currency1;
+                    case 2 -> currency2;
+                    case 3 -> currency3;
+                    case 4 -> currency4;
+                    default -> currency1; // Default case, should never be reached
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
                         .name("Expense " + projectNameChar++)
@@ -1678,7 +1688,7 @@ public class SeedConfiguration {
                         .pic(randomPic)
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
-                        .currency(currency1)
+                        .currency(randomCurrency)
                         .build();
 
                 expenseList.add(expense);

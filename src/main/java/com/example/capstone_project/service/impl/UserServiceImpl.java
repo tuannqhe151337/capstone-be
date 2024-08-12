@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
         // Find user from database to track what field is changed
         User oldUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + user));
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + user.getId()));
 
         // Check email unique
         if (!oldUser.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail())) {
@@ -219,18 +219,24 @@ public class UserServiceImpl implements UserService {
         }
         //compare otp
         //get userid
-        String userId = otpTokenRepository.getUserID(authHeaderToken);
+        String userId_string = otpTokenRepository.getUserID(authHeaderToken);
 
-        if (userId == null) {
-            throw new InvalidDataAccessResourceUsageException("Invalid token, missing user id");
+        long userId;
+        try {
+            //if user id is format wrong or null
+            userId = Long.parseLong(userId_string);
+        }catch (Exception e){
+            throw new InvalidDataAccessResourceUsageException("Token and userID is invalid");
         }
         //Check user id existed
-        Optional<User> user = userRepository.findById(Long.parseLong(userId));
+        Optional<User> user = userRepository.findById(userId);
         if(user.isEmpty() || user.get().getIsDelete()) {
             throw new ResourceNotFoundException("User not found");
         }
+
+
         //get otp
-        String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, Long.parseLong(userId));
+        String savedOtp = otpTokenRepository.getOtpCode(authHeaderToken, userId);
         //compare
         if (!savedOtp.equals(otp.getOtp())) {
             throw new UnauthorizedException("Invalid OTP");
@@ -238,8 +244,7 @@ public class UserServiceImpl implements UserService {
         //gen new token
         String newTokenForUserId = jwtHelper.genBlankTokenOtp();
 
-        //save token with id
-        userIdTokenRepository.save(newTokenForUserId, Long.parseLong(userId), Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
+        userIdTokenRepository.save(newTokenForUserId, userId, Duration.ofMillis(Long.parseLong(BLANK_TOKEN_OTP_EXPIRATION)));
 
         //return token
         return newTokenForUserId;
