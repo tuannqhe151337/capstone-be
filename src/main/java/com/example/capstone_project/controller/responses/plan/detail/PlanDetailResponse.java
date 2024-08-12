@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 public class PlanDetailResponse {
     private Long id;
     private String name;
-    private BigDecimal biggestExpenditure;
-    private BigDecimal totalPlan;
+    private BigDecimal actualCost;
+    private BigDecimal expectedCost;
     private TermResponse term;
     private LocalDateTime createdAt;
     private DepartmentResponse department;

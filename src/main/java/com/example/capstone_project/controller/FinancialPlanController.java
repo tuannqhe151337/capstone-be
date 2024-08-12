@@ -18,6 +18,7 @@ import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.service.result.ActualCostResult;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -41,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,6 +184,10 @@ public class FinancialPlanController {
         try {
             // Get data
             PlanDetailResult plan = planService.getPlanDetailByPlanId(planId);
+
+            ActualCostResult actualCost = planService.calculateActualCostByPlanId(planId);
+
+            BigDecimal expectedCost = planService.calculateExpectedCostByPlanId(planId);
 
             // Response
             PlanDetailResponse response;
@@ -554,4 +560,6 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+
 }

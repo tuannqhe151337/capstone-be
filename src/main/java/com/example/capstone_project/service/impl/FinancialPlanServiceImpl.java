@@ -1,8 +1,8 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
@@ -11,8 +11,9 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.service.result.ActualCostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -1043,6 +1044,67 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         return out.toByteArray();
     }
+
+    @Override
+    public ActualCostResult calculateActualCostByPlanId(Long planId) throws Exception {
+        List<TotalCostByCurrencyResult> costByCurrencyResults = planRepository.calculateActualCostByPlanId(planId, ExpenseStatusCode.APPROVED);
+
+        try {
+            // Inner hashmap: map by currency id
+            HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+            Set<Integer> years = new HashSet<>();
+            Set<Integer> months = new HashSet<>();
+
+            costByCurrencyResults.forEach(costByCurrency -> {
+                fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+            });
+
+            costByCurrencyResults.forEach(costByCurrency -> {
+                fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            });
+
+            Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+
+            // Get list exchange rates
+            List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, 1L);
+
+            // Outer hashmap: map by date
+            HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+            exchangeRates.forEach(exchangeRate -> {
+                exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+            });
+
+            exchangeRates.forEach(exchangeRate -> {
+                exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+            });
+
+            BigDecimal actualCost = BigDecimal.valueOf(0);
+
+            for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+                for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                    BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getDate()).get(fromCurrencyId).longValue());
+                    BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getDate()).get(defaultCurrency.getId()).longValue());
+                    actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                }
+            }
+
+            return ActualCostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+
+        } catch (ArithmeticException e) {
+            throw new ArithmeticException("Can't divided by 0");
+        } catch (NullPointerException e) {
+            throw new Exception();
+        }
+    }
+
+    @Override
+    public BigDecimal calculateExpectedCostByPlanId(Long planId) {
+//        return planRepository.calculateExpectedCostByPlanId(planId);
+        return null;
+    }
+
 
     private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
         //Handle currency

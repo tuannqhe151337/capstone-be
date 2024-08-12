@@ -9,8 +9,6 @@ import org.mapstruct.Mapping;
 public interface PlanDetailMapper {
     @Mapping(expression = "java(planDetailResult.getPlanId())", target = "id")
     @Mapping(expression = "java(planDetailResult.getName())", target = "name")
-    @Mapping(expression = "java(planDetailResult.getBiggestExpenditure())", target = "biggestExpenditure")
-    @Mapping(expression = "java(planDetailResult.getTotalPlan())", target = "totalPlan")
     @Mapping(expression = "java(planDetailResult.getTermId())", target = "term.termId")
     @Mapping(expression = "java(planDetailResult.getTermName())", target = "term.name")
     @Mapping(expression = "java(planDetailResult.getTermStartDate())", target = "term.startDate")
