@@ -58,7 +58,7 @@ public class SeedConfiguration {
             TermStatus termStatus = TermStatus.
                     builder()
                     .id(1L).
-                    name("Not started")
+                    name("New")
                     .code(TermCode.NEW).build();
 
             //Term Status - fixed code
