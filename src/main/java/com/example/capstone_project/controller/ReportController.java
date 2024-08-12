@@ -8,6 +8,7 @@ import com.example.capstone_project.controller.body.report.delete.DeleteReportBo
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
+import com.example.capstone_project.controller.responses.report.CurrencyResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
@@ -21,6 +22,7 @@ import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -358,17 +360,21 @@ public class ReportController {
     ) throws Exception {
         try {
             // Get data
-            BigDecimal actualCost = reportService.calculateActualCostByReportId(reportId);
+            CostResult actualCost = reportService.calculateActualCostByReportId(reportId);
 
             // Response
             ReportActualCostResponse response = new ReportActualCostResponse();
 
             if (actualCost != null) {
                 // Mapping to report Detail Response
-                response.setActualCost(actualCost);
 
-            } else {
-                response.setActualCost(BigDecimal.valueOf(0L));
+                response.setCost(actualCost.getCost());
+                response.setCurrency(CurrencyResponse.builder()
+                        .currencyId(actualCost.getCurrency().getId())
+                        .name(actualCost.getCurrency().getName())
+                        .symbol(actualCost.getCurrency().getSymbol())
+                        .affix(actualCost.getCurrency().getAffix())
+                        .build());
             }
 
             return ResponseEntity.ok(response);
@@ -385,14 +391,20 @@ public class ReportController {
     ) throws Exception {
         try {
             // Get data
-            BigDecimal expectedCost = reportService.calculateExpectedCostByReportId(reportId);
+            CostResult expectedCost = reportService.calculateExpectedCostByReportId(reportId);
 
             // Response
             ReportExpectedCostResponse response = new ReportExpectedCostResponse();
 
             if (expectedCost != null) {
                 // Mapping to report Detail Response
-                response.setExpectedCost(expectedCost);
+                response.setCost(expectedCost.getCost());
+                response.setCurrency(CurrencyResponse.builder()
+                        .currencyId(expectedCost.getCurrency().getId())
+                        .name(expectedCost.getCurrency().getName())
+                        .symbol(expectedCost.getCurrency().getSymbol())
+                        .affix(expectedCost.getCurrency().getAffix())
+                        .build());
 
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

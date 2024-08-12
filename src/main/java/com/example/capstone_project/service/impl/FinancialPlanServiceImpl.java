@@ -1127,25 +1127,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     .build());
         });
 
-        System.out.println(monthYearSet);
-
-        System.out.println(fromCurrencyIdHashMap.keySet());
-        ;
-
         // Get list exchange rates
         List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
         currencyIds.add(defaultCurrency.getId());
 
         // Get list exchange rates
         List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
-        System.out.println("RUN1");
+
         // Outer hashmap: map by date
         HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
 
         exchangeRates.forEach(exchangeRate -> {
             exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
         });
-        System.out.println("RUN2");
 
         exchangeRates.forEach(exchangeRate -> {
             exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
@@ -1163,7 +1157,6 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
 
         return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
-
 
     }
 

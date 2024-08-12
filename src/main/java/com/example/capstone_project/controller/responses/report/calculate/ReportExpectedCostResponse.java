@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.responses.report.calculate;
 
+import com.example.capstone_project.controller.responses.report.CurrencyResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,5 +13,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportExpectedCostResponse {
-    BigDecimal expectedCost;
+    BigDecimal cost;
+    CurrencyResponse currency;
 }

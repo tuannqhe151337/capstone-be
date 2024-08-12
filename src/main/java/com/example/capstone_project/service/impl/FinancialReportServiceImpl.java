@@ -7,6 +7,8 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -249,9 +251,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     expenses.forEach(expense -> {
                         fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
                         monthYearSet.add(PaginateExchange.builder()
-                                        .month(expense.getCreatedAt().getMonthValue())
-                                        .year(expense.getCreatedAt().getYear())
-                                        .build());
+                                .month(expense.getCreatedAt().getMonthValue())
+                                .year(expense.getCreatedAt().getYear())
+                                .build());
                     });
 
                     // Get list exchange rates
@@ -308,8 +310,69 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
     }
 
+    private CostResult calculateCostByPlanIdAndStatusCode(Long reportId, ExpenseStatusCode statusCode) throws Exception {
+        List<TotalCostByCurrencyResult> costByCurrencyResults = financialReportRepository.calculateCostByReportIdAndStatus(reportId, statusCode);
+
+        Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                System.out.println(actualCost);
+            }
+        }
+
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+
+    }
+
     @Override
-    public BigDecimal calculateActualCostByReportId(Long reportId) {
+    public CostResult calculateActualCostByReportId(Long reportId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -318,14 +381,14 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return financialReportRepository.calculateActualCostByReportId(reportId, ExpenseStatusCode.APPROVED);
+            return calculateCostByPlanIdAndStatusCode(reportId, ExpenseStatusCode.APPROVED);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 
     @Override
-    public BigDecimal calculateExpectedCostByReportId(Long reportId) {
+    public CostResult calculateExpectedCostByReportId(Long reportId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -334,7 +397,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return financialReportRepository.calculateExpectedCostByReportId(reportId);
+            return calculateCostByPlanIdAndStatusCode(reportId, null);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
