@@ -6,11 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DeleteExchangeBody {
-    @NotNull(message = "Month can not be emptied")
+public class CreateMonthlyExchangeBody {
+    @NotNull(message = "Month can't be null.")
     private String month;
+
+    @NotNull(message = "List exchange can't be null.")
+    private List<ExchangeRateBody> exchangeRates;
 }
+
+
