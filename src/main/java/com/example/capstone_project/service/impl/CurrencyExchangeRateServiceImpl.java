@@ -39,14 +39,14 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
         // Check authority or role
         if (listAuthorities.contains(AuthorityCode.VIEW_EXCHANGE.getValue())) {
             // Get month and year
-            List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getExchangeWithPagination(year, pageable);
+            List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getMonthYearPaginated(year, pageable);
 
             if (paginateExchanges == null || paginateExchanges.isEmpty()) {
                 return new TreeMap<>();
             }
 
             // Get exchange rate list by month and year
-            List<CurrencyExchangeRate> exchangeRateList = currencyExchangeRateRepository.getListCurrencyExchangeRate(paginateExchanges);
+            List<CurrencyExchangeRate> exchangeRateList = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(paginateExchanges);
 
             HashMap<String, List<ExchangeResult>> exchangeHashMap = new HashMap<>();
 
@@ -86,7 +86,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
 
     @Override
     public long countDistinctListExchangePaging(Integer year, Pageable pageable) {
-        List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getExchangeWithPagination(year, pageable);
+        List<PaginateExchange> paginateExchanges = currencyExchangeRateRepository.getMonthYearPaginated(year, pageable);
         return currencyExchangeRateRepository.countDistinctListExchangePaging(year);
     }
 
