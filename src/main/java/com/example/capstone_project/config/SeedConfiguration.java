@@ -780,31 +780,6 @@ public class SeedConfiguration {
                     .authority(deleteCurrency)
                     .build();
 
-            RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(createTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority2 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(editTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority3 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(viewTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority4 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(startTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority5 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(deleteTerm)
-                    .build();
-
             RoleAuthority financialStaffAuthority6 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(importPlan)
@@ -855,14 +830,9 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
-            RoleAuthority financialStaffAuthority16 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(deleteReport)
-                    .build();
-
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17, accountantAuthority18, accountantAuthority19, accountantAuthority20, accountantAuthority21, accountantAuthority22, accountantAuthority23, accountantAuthority24, accountantAuthority25, accountantAuthority26, accountantAuthority27, accountantAuthority28, accountantAuthority29, accountantAuthority30, accountantAuthority31, accountantAuthority32, accountantAuthority33, accountantAuthority34, accountantAuthority35, accountantAuthority36,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
+                    financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
             // Report status
