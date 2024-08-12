@@ -28,25 +28,10 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " GROUP BY year ")
     AnnualReportResult getAnnualReport(LocalDate now);
 
-    @Query(value = " SELECT department.id AS departmentId, sum(expense.unitPrice*expense.amount) AS totalExpense, max(expense.unitPrice*expense.amount) AS biggestExpense, costType.id AS costTypeId FROM FinancialPlanExpense expense " +
-            " JOIN expense.files fileExpense " +
-            " JOIN fileExpense.file file " +
-            " JOIN file.plan plan " +
-            " JOIN plan.term term" +
-            " JOIN expense.status status " +
-            " JOIN plan.department department " +
-            " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
-            "                       JOIN file_2.plan plan_2 " +
-            "                       JOIN plan_2.term term_2 " +
-            "                       JOIN term_2.financialReports report_2 " +
-            "                       WHERE (report_2.isDelete = false OR report_2.isDelete is null)" +
-            "                       GROUP BY file_2.id) " +
-            " AND " +
-            " year(term.finalEndTermDate) = year(:now) AND " +
-            " status.code = :approved AND " +
-            " (expense.isDelete = false OR expense.isDelete is null) " +
+    @Query(value = " SELECT report.department.id AS departmentId, sum(report.totalExpense) AS totalExpense, max(report.biggestExpenditure) AS biggestExpense, report.costType.id AS costTypeId FROM ReportStatistical report " +
+            " WHERE year(report.createdAt) = year(:now) " +
             " GROUP BY departmentId, costTypeId ")
-    List<ReportResult> generateReport(LocalDate now, ExpenseStatusCode approved);
+    List<ReportResult> generateReport(LocalDate now);
 
     @Query(value = " SELECT count (distinct (report.id)) FROM Report report " +
             " JOIN report.annualReport annualReport " +

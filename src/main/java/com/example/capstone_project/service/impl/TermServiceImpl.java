@@ -2,10 +2,7 @@ package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.*;
 
-import com.example.capstone_project.repository.TermIntervalRepository;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.TermStatusRepository;
-import com.example.capstone_project.repository.UserRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
@@ -80,7 +77,7 @@ public class TermServiceImpl implements TermService {
             throw new UnauthorizedException("Unauthorized to update term");
         }
 
-        if(!term.isAllowReupload()){
+        if (!term.isAllowReupload()) {
             term.setReuploadStartDate(null);
             term.setReuploadEndDate(null);
         }
@@ -132,12 +129,6 @@ public class TermServiceImpl implements TermService {
 
     }
 
-    @Override
-    public void updateTermStatus(Term term, Long statusId) throws Exception {
-        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
-        term.setStatus(termStatus);
-        termRepository.save(term);
-    }
 
     @Override
     public void startTermManually(Long termId) throws Exception {
@@ -162,7 +153,7 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to create term");
         }
-        if(!term.isAllowReupload()){
+        if (!term.isAllowReupload()) {
             term.setReuploadStartDate(null);
             term.setReuploadEndDate(null);
         }
@@ -208,7 +199,7 @@ public class TermServiceImpl implements TermService {
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
         TermInterval termInterval = termIntervalRepository.getReferenceById(1);
         //check start term date must in 25
-        if(term.getStartDate().getDayOfMonth() != termInterval.getStartTermDate()) {
+        if (term.getStartDate().getDayOfMonth() != termInterval.getStartTermDate()) {
             throw new InvalidStartTermDateException("Start date must be in day " + termInterval.getStartTermDate());
         }
 
@@ -218,16 +209,15 @@ public class TermServiceImpl implements TermService {
 
         // throw exception if end date is before start date
         //after 5 days from start day - false
-       LocalDateTime boundaryEndDate = term.getStartDate().plusDays(termInterval.getEndTermInterval());
+        LocalDateTime boundaryEndDate = term.getStartDate().plusDays(termInterval.getEndTermInterval());
         if (!term.getEndDate().isAfter(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)
-                || term.getEndDate().isAfter(boundaryEndDate))
-        {
+                || term.getEndDate().isAfter(boundaryEndDate)) {
             throw new InvalidEndDateException("End date must be within " +
                     term.getStartDate().toLocalDate().plusDays(1) + " and " + boundaryEndDate.toLocalDate());
         }
         //throw exception if start reup date is before end date
         //before 20 days - false
-        if(term.isAllowReupload()) {
+        if (term.isAllowReupload()) {
             LocalDateTime boundaryStartReuploadDate = term.getStartDate().plusDays(termInterval.getStartReuploadInterval());
             if (!term.getReuploadStartDate().isAfter(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)
                     || term.getReuploadStartDate().isBefore(boundaryStartReuploadDate)) {

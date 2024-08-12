@@ -6,7 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(schema = "capstone_v2", name = "reports")
+@Table(schema = "capstone_v2", name = "report_statistical")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
