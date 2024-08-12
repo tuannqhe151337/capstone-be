@@ -10,6 +10,7 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.responses.currency.CurrencyPaginateResponse;
 import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.service.CurrencyService;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -134,6 +135,8 @@ public class CurrencyController {
             return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Delete").message("Delete successful").build());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Error exception").message("Unauthorized").build());
+        } catch (InvalidInputException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message(e.getMessage()).build());
         } catch (DuplicateKeyException | ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error exception").message("Not found any currency have id = " + deleteCurrencyBody.getCurrencyId()).build());
         }
