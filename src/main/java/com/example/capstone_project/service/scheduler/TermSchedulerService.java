@@ -39,7 +39,7 @@ public class TermSchedulerService {
     private final FinancialPlanExpenseRepository planExpenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
 
-    @Scheduled(cron = "*/120 * * * * *") // Execute at 12:00 AM every day
+    @Scheduled(cron = "0 0 0 25 12 ?") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void startTerm() throws Exception {
@@ -69,7 +69,7 @@ public class TermSchedulerService {
         }
     }
 
-    @Scheduled(cron = "*/180 * * * * *") // Execute at 12:00 AM every day
+    @Scheduled(cron = "0 0 0 25 12 ?") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void endTerm() throws Exception {
