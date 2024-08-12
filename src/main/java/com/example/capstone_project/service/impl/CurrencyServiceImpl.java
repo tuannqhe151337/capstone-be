@@ -6,6 +6,7 @@ import com.example.capstone_project.repository.CurrencyRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.CurrencyService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.UserHelper;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -75,11 +77,17 @@ public class CurrencyServiceImpl implements CurrencyService {
 
         // Check authority or role
         if (listAuthorities.contains(AuthorityCode.DELETE_CURRENCY.getValue())) {
-            if (!currencyRepository.existsById(currencyId)) {
+            Optional<Currency> currencyOptional = currencyRepository.findById(currencyId);
+
+            if (currencyOptional.isEmpty()) {
                 throw new ResourceNotFoundException("Not found any currency have Id = " + currencyId);
             }
 
-            Currency currency = currencyRepository.getReferenceById(currencyId);
+            Currency currency = currencyOptional.get();
+
+            if (!currency.isDefault()) {
+                throw new InvalidInputException("Can't delete default currency");
+            }
 
             currency.setDelete(true);
 
