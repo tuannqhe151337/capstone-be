@@ -24,4 +24,10 @@ public interface CurrencyRepository extends JpaRepository<Currency, Long>, Custo
             "WHERE currency.isDelete = false OR currency.isDelete IS NULL " +
             "ORDER BY currency.id desc")
     List<Currency> findAll();
+
+    @Query(" SELECT currency FROM Currency currency " +
+            " WHERE currency.isDefault = true AND " +
+            " (currency.isDelete = false OR currency.id is null)" +
+            " ORDER BY currency.id desc LIMIT 1 ")
+    Currency getDefaultCurrency();
 }

@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 public interface PlanDetailResult {
      Long getPlanId();
      String getName();
-     BigDecimal getBiggestExpenditure();
-     BigDecimal getTotalPlan();
      Long getTermId();
      String getTermName();
      LocalDateTime getTermStartDate();

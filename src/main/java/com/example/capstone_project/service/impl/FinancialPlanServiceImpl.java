@@ -1,6 +1,5 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.Currency;
@@ -12,8 +11,9 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -59,6 +59,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final SupplierRepository supplierRepository;
     private final UserRepository userRepository;
     private final CurrencyRepository currencyRepository;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
 
 
     @Override
@@ -1098,6 +1099,78 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         }
     }
 
+    private CostResult calculateCostByPlanIdAndStatusCode(Long planId, ExpenseStatusCode statusCode) throws Exception {
+        List<TotalCostByCurrencyResult> costByCurrencyResults = planRepository.calculateCostByPlanId(planId, statusCode);
+
+        Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                System.out.println(actualCost);
+            }
+        }
+
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+
+    }
+
+    @Override
+    public CostResult calculateActualCostByPlanId(Long planId) throws Exception {
+        return calculateCostByPlanIdAndStatusCode(planId, ExpenseStatusCode.APPROVED);
+    }
+
+    @Override
+    public CostResult calculateExpectedCostByPlanId(Long planId) throws Exception {
+        return calculateCostByPlanIdAndStatusCode(planId, null);
+    }
+
+
     private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
         //Handle currency
         if (toCurrencyId != null) {
@@ -1108,31 +1181,35 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 // Inner hashmap: map by currency id
                 HashMap<Long, List<FinancialPlanExpense>> fromCurrencyIdHashMap = new HashMap<>();
 
-                Set<Integer> years = new HashSet<>();
-                Set<Integer> months = new HashSet<>();
+                Set<PaginateExchange> monthYearSet = new HashSet<>();
 
                 expenses.forEach(expense -> {
                     fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
-                    years.add(expense.getCreatedAt().getYear());
-                    months.add(expense.getCreatedAt().getMonthValue());
                 });
 
                 expenses.forEach(expense -> {
                     fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                    monthYearSet.add(PaginateExchange.builder()
+                            .month(expense.getCreatedAt().getMonthValue())
+                            .year(expense.getCreatedAt().getYear())
+                            .build());
                 });
 
                 // Get list exchange rates
-                List<ExchangeRateResult> exchangeRates = currencyRepository.getListExchangeRate(fromCurrencyIdHashMap.keySet(), years, months, toCurrencyId);
+                List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+                currencyIds.add(toCurrencyId);
+
+                List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
 
                 // Outer hashmap: map by date
                 HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
 
                 exchangeRates.forEach(exchangeRate -> {
-                    exchangeRateHashMap.putIfAbsent(exchangeRate.getDate(), new HashMap<>());
+                    exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
                 });
 
                 exchangeRates.forEach(exchangeRate -> {
-                    exchangeRateHashMap.get(exchangeRate.getDate()).put(exchangeRate.getCurrencyId(), exchangeRate.getAmount());
+                    exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
                 });
 
                 fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
