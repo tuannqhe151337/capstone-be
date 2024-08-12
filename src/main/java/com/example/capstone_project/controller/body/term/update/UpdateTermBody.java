@@ -52,5 +52,8 @@ public class UpdateTermBody {
     @Column(name = "final_end_term")
     private LocalDateTime finalEndTermDate;
 
+    @NotNull(message = "allowReupload cannot be null")
+    private boolean allowReupload;
+
 
 }

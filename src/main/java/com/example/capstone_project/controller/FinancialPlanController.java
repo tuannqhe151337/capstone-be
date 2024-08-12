@@ -11,11 +11,13 @@ import com.example.capstone_project.controller.responses.Pagination;
 import com.example.capstone_project.controller.body.plan.submit.SubmitPlanBody;
 import com.example.capstone_project.controller.responses.expense.list.ExpenseResponse;
 import com.example.capstone_project.controller.responses.plan.StatusResponse;
+import com.example.capstone_project.controller.responses.plan.UserResponse;
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
+import com.example.capstone_project.repository.result.UserDownloadResult;
 import com.example.capstone_project.repository.result.VersionResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -39,10 +41,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/plan")
@@ -111,6 +115,7 @@ public class FinancialPlanController {
     @GetMapping("expenses")
     public ResponseEntity<ListPaginationResponse<ExpenseResponse>> getListExpense(
             @RequestParam(required = true) Long planId,
+            @RequestParam(required = false) Long currencyId,
             @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) Long costTypeId,
             @RequestParam(required = false) Long projectId,
@@ -136,7 +141,7 @@ public class FinancialPlanController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
+            List<FinancialPlanExpense> expenses = planService.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, currencyId, pageable);
 
             // Response
             ListPaginationResponse<ExpenseResponse> response = new ListPaginationResponse<>();
@@ -167,8 +172,10 @@ public class FinancialPlanController {
 
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | ArithmeticException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
 
@@ -370,6 +377,16 @@ public class FinancialPlanController {
     @PostMapping("/create")
     public ResponseEntity<ExceptionResponse> confirmExpenses(
             @Valid @RequestBody NewPlanBody planBody, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+        }
+
         try {
 
             // Mapping to planBody to FinancialPlan
@@ -389,6 +406,42 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized exception").message("User unauthorized").build());
         } catch (DuplicateKeyException | InvalidDateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Error Exception").message("").build());
+        }
+    }
+
+    @PostMapping("/check-user-exist")
+    public ResponseEntity<ListResponse<UserResponse>> checkUsernameExist(
+            @Valid @RequestBody List<String> listUsername, BindingResult bindingResult) throws Exception {
+
+        if (bindingResult.hasErrors()) {
+            // Xử lý lỗi validation và trả về phản hồi lỗi
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        try {
+
+            List<UserDownloadResult> checkUsernameExist = planService.checkUsernameExist(listUsername);
+
+            if (checkUsernameExist == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            ListResponse<UserResponse> userResponses = new ListResponse<>();
+            checkUsernameExist.forEach(user -> {
+                userResponses.getData().add(UserResponse.builder()
+                        .userId(user.getUserId())
+                        .username(user.getUserName())
+                        .build());
+            });
+
+            return ResponseEntity.status(HttpStatus.OK).body(userResponses);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (DuplicateKeyException | InvalidDateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 

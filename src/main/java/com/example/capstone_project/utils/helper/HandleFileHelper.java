@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 public class HandleFileHelper {
-    public byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses, List<Department> departments, List<CostType> costTypes, List<ExpenseStatus> expenseStatuses, List<Project> projects, List<Supplier> suppliers) throws IOException {
+    public byte[] fillDataToExcel(Workbook wb, List<ExpenseResult> expenses, List<Department> departments, List<CostType> costTypes, List<ExpenseStatus> expenseStatuses, List<Project> projects, List<Supplier> suppliers, List<Currency> currencies) throws IOException {
         Sheet sheet = wb.getSheet("Expense");
 
         Row row = null;
@@ -35,6 +35,7 @@ public class HandleFileHelper {
             row.getCell(colPosition++).setCellValue(expenseResult.getUnitPrice().doubleValue());
             row.getCell(colPosition++).setCellValue(expenseResult.getAmount());
             row.getCell(colPosition++).setCellValue(expenseResult.getTotal().doubleValue());
+            row.getCell(colPosition++).setCellValue(expenseResult.getCurrencyName());
             row.getCell(colPosition++).setCellValue(expenseResult.getProjectName());
             row.getCell(colPosition++).setCellValue(expenseResult.getSupplierName());
             row.getCell(colPosition++).setCellValue(expenseResult.getPicName());
@@ -106,6 +107,18 @@ public class HandleFileHelper {
             row.createCell(colPosition).setCellValue(supplier.getName());
         }
 
+        // Write currency
+        rowPosition = 2;
+
+        for (Currency currency : currencies) {
+            colPosition = 15;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(currency.getId());
+            row.createCell(colPosition).setCellValue(currency.getName());
+        }
+
         // Add validation
         sheet = wb.getSheet("Expense");
         // Add validation for department
@@ -119,7 +132,7 @@ public class HandleFileHelper {
 
         sheet.addValidationData(dataValidation);
 
-        // Add validation for department
+        // Add validation for cost type
 
         constraint = validationHelper.createFormulaListConstraint("List!$E$3:$E$" + (costTypes.size() + 2));
 
@@ -133,7 +146,7 @@ public class HandleFileHelper {
 
         constraint = validationHelper.createFormulaListConstraint("List!$H$3:$H$" + (expenseStatuses.size() + 2));
 
-        addressList = new CellRangeAddressList(2, expenses.size() + 2, 14, 14);
+        addressList = new CellRangeAddressList(2, expenses.size() + 2, 15, 15);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
@@ -143,7 +156,7 @@ public class HandleFileHelper {
 
         constraint = validationHelper.createFormulaListConstraint("List!$K$3:$K$" + (projects.size() + 2));
 
-        addressList = new CellRangeAddressList(2, projects.size() + 2, 10, 10);
+        addressList = new CellRangeAddressList(2, expenses.size() + 2, 11, 11);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
@@ -153,7 +166,17 @@ public class HandleFileHelper {
 
         constraint = validationHelper.createFormulaListConstraint("List!$N$3:$N$" + (suppliers.size() + 2));
 
-        addressList = new CellRangeAddressList(2, suppliers.size() + 2, 11, 11);
+        addressList = new CellRangeAddressList(2, expenses.size() + 2, 12, 12);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for currency
+
+        constraint = validationHelper.createFormulaListConstraint("List!$Q$3:$Q$" + (currencies.size() + 2));
+
+        addressList = new CellRangeAddressList(2, expenses.size() + 2, 10, 10);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 

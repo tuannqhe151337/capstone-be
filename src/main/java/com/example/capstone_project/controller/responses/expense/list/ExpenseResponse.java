@@ -1,5 +1,6 @@
 package com.example.capstone_project.controller.responses.expense.list;
 
+import com.example.capstone_project.controller.responses.expense.CurrencyResponse;
 import com.example.capstone_project.controller.responses.expense.CostTypeResponse;
 import com.example.capstone_project.controller.responses.expense.PicResponse;
 import com.example.capstone_project.controller.responses.expense.ProjectResponse;
@@ -10,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -26,4 +29,7 @@ public class ExpenseResponse {
     private PicResponse pic;
     private String notes;
     private StatusResponse status;
+    private CurrencyResponse currency;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

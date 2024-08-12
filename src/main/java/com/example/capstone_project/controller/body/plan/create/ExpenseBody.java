@@ -32,15 +32,19 @@ public class ExpenseBody {
     @Min(value = 0, message = "Amount can not be negative")
     private Integer amount;
 
-    @NotEmpty(message = "Project id can not be empty")
+    @NotNull(message = "Project id can not be empty")
     private Long projectId;
 
-    @NotEmpty(message = "Supplier id can not be empty")
+    @NotNull(message = "Supplier id can not be empty")
     private Long supplierId;
 
-    @NotEmpty(message = "PiC id can not be empty")
+    @NotNull(message = "PiC id can not be empty")
     private Long picId;
 
     @Size(max = 200, message = "Note must be less than 200 characters")
     private String notes;
+
+    @NotNull(message = "Currency id can not be empty")
+    private Long currencyId;
+
 }

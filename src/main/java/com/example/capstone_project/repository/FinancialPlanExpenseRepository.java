@@ -1,6 +1,5 @@
 package com.example.capstone_project.repository;
 
-import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
@@ -187,13 +186,13 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (expense.isDelete = false OR expense.isDelete is null) ")
     List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermCode termCode, LocalDateTime now);
 
-    @Query(" SELECT count(distinct expense.id) FROM FinancialPlanExpense expense " +
+    @Query(" SELECT expense.id AS expenseId, expense.planExpenseKey AS expenseCode FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +
             " JOIN fileExpense.file file " +
             " JOIN file.plan plan " +
             " JOIN plan.term term " +
             " JOIN term.status status " +
-            " WHERE expense.planExpenseKey IN (:listCodes) AND " +
+            " WHERE expense.id IN (:listExpenseId) AND " +
             " file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
@@ -205,12 +204,12 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (status.code = :termCode) AND " +
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
-    long countListExpenseInReportUpload(Long reportId, List<String> listCodes, TermCode termCode, LocalDateTime now);
+    List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<Long> listExpenseId, TermCode termCode, LocalDateTime now);
 
     @Query(" SELECT expense.id as expenseId, expense.planExpenseKey as expenseCode FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +
             " JOIN fileExpense.file file " +
-            " WHERE expense.planExpenseKey IN (:listCodes) AND " +
+            " WHERE expense.id IN (:listExpenseId) AND " +
             " file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
@@ -220,5 +219,5 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             "                       GROUP BY plan_2.id) " +
             " AND " +
             " expense.isDelete = false ")
-    List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<String> listCodes);
+    List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<Long> listExpenseId);
 }

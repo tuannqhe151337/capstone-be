@@ -44,6 +44,7 @@ public class SeedConfiguration {
             ReportRepository reportRepository,
             SupplierRepository supplierRepository,
             ProjectRepository projectRepository,
+            TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
             CurrencyExchangeRateRepository currencyExchangeRateRepository
 
@@ -75,6 +76,17 @@ public class SeedConfiguration {
                     .code(TermCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
+
+        // Term interval date
+            TermInterval termInterval = TermInterval
+                    .builder()
+                    .id(1L)
+                    .startTermDate(25)
+                    .endTermInterval(5)
+                    .startReuploadInterval(20)
+                    .endReuploadInterval(3)
+                    .build();
+            termIntervalRepository.save(termInterval);
 
             // Department
             Department itDepartment = Department.builder()
@@ -768,31 +780,6 @@ public class SeedConfiguration {
                     .authority(deleteCurrency)
                     .build();
 
-            RoleAuthority financialStaffAuthority1 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(createTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority2 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(editTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority3 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(viewTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority4 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(startTerm)
-                    .build();
-
-            RoleAuthority financialStaffAuthority5 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(deleteTerm)
-                    .build();
-
             RoleAuthority financialStaffAuthority6 = RoleAuthority.builder()
                     .role(financialStaff)
                     .authority(importPlan)
@@ -843,14 +830,9 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
-            RoleAuthority financialStaffAuthority16 = RoleAuthority.builder()
-                    .role(financialStaff)
-                    .authority(deleteReport)
-                    .build();
-
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17, accountantAuthority18, accountantAuthority19, accountantAuthority20, accountantAuthority21, accountantAuthority22, accountantAuthority23, accountantAuthority24, accountantAuthority25, accountantAuthority26, accountantAuthority27, accountantAuthority28, accountantAuthority29, accountantAuthority30, accountantAuthority31, accountantAuthority32, accountantAuthority33, accountantAuthority34, accountantAuthority35, accountantAuthority36,
-                    financialStaffAuthority1, financialStaffAuthority2, financialStaffAuthority3, financialStaffAuthority4, financialStaffAuthority5, financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
+                    financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
             ));
 
             // Report status
@@ -1595,7 +1577,37 @@ public class SeedConfiguration {
 
             financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1, financialPlanFile9_1, financialPlanFile10_1, financialPlanFile11_1, financialPlanFile12_1, financialPlanFile13_1, financialPlanFile14_1, financialPlanFile15_1));
 
-            //
+            // Create currency data
+            Currency currency1 = Currency.builder()
+                    .id(1L)
+                    .name("VND")
+                    .symbol("₫")
+                    .affix(Affix.SUFFIX)
+                    .build();
+
+            Currency currency2 = Currency.builder()
+                    .id(2L)
+                    .name("USD")
+                    .symbol("$")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            Currency currency3 = Currency.builder()
+                    .id(3L)
+                    .name("JPY")
+                    .symbol("¥")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            Currency currency4 = Currency.builder()
+                    .id(4L)
+                    .name("KRW")
+                    .symbol("₩")
+                    .affix(Affix.PREFIX)
+                    .build();
+
+            currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
+
 
             // Get 64 random expense
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
@@ -1658,7 +1670,7 @@ public class SeedConfiguration {
 
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
-                        .name("Expense " + projectNameChar)
+                        .name("Expense " + projectNameChar++)
                         .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 10000L))
                         .amount(random.nextInt(10) + 1)
                         .project(randomProject)
@@ -1666,6 +1678,7 @@ public class SeedConfiguration {
                         .pic(randomPic)
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
+                        .currency(currency1)
                         .build();
 
                 expenseList.add(expense);
@@ -2255,36 +2268,6 @@ public class SeedConfiguration {
 
             reportRepository.saveAll(reports);
 
-            Currency currency1 = Currency.builder()
-                    .id(1L)
-                    .name("VND")
-                    .symbol("₫")
-                    .affix(Affix.SUFFIX)
-                    .build();
-
-            Currency currency2 = Currency.builder()
-                    .id(2L)
-                    .name("USD")
-                    .symbol("$")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            Currency currency3 = Currency.builder()
-                    .id(3L)
-                    .name("JPY")
-                    .symbol("¥")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            Currency currency4 = Currency.builder()
-                    .id(4L)
-                    .name("KRW")
-                    .symbol("₩")
-                    .affix(Affix.PREFIX)
-                    .build();
-
-            currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
-
             CurrencyExchangeRate exchangeRate1_1 = CurrencyExchangeRate.builder()
                     .month(LocalDate.of(2020, 4, 17))
                     .currency(currency1)
@@ -2382,7 +2365,83 @@ public class SeedConfiguration {
                     .amount(BigDecimal.valueOf(1550))
                     .build();
 
-            currencyExchangeRateRepository.saveAll(List.of(exchangeRate1_1, exchangeRate1_2, exchangeRate1_3, exchangeRate1_4, exchangeRate2_1, exchangeRate2_2, exchangeRate2_3, exchangeRate2_4, exchangeRate3_1, exchangeRate3_2, exchangeRate3_3, exchangeRate3_4, exchangeRate4_1, exchangeRate4_2, exchangeRate4_3, exchangeRate4_4));
+            CurrencyExchangeRate exchangeRate5_1 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 17))
+                    .currency(currency1)
+                    .amount(BigDecimal.valueOf(25500))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_2 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 18))
+                    .currency(currency2)
+                    .amount(BigDecimal.valueOf(1))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_3 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 20))
+                    .currency(currency3)
+                    .amount(BigDecimal.valueOf(133))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate5_4 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 8, 25))
+                    .currency(currency4)
+                    .amount(BigDecimal.valueOf(1550))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_1 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 17))
+                    .currency(currency1)
+                    .amount(BigDecimal.valueOf(25500))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_2 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 18))
+                    .currency(currency2)
+                    .amount(BigDecimal.valueOf(1))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_3 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 20))
+                    .currency(currency3)
+                    .amount(BigDecimal.valueOf(133))
+                    .build();
+
+            CurrencyExchangeRate exchangeRate6_4 = CurrencyExchangeRate.builder()
+                    .month(LocalDate.of(2020, 9, 25))
+                    .currency(currency4)
+                    .amount(BigDecimal.valueOf(1550))
+                    .build();
+
+            for (int i = 0; i < 12; i++) {
+                CurrencyExchangeRate exchangeRate1 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency1)
+                        .amount(BigDecimal.valueOf(25500))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate2 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency2)
+                        .amount(BigDecimal.valueOf(1))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate3 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency3)
+                        .amount(BigDecimal.valueOf(133))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate4 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency4)
+                        .amount(BigDecimal.valueOf(1550))
+                        .build();
+
+                currencyExchangeRateRepository.saveAll(List.of(exchangeRate1, exchangeRate2, exchangeRate3, exchangeRate4));
+            }
+
+            currencyExchangeRateRepository.saveAll(List.of(exchangeRate1_1, exchangeRate1_2, exchangeRate1_3, exchangeRate1_4, exchangeRate2_1, exchangeRate2_2, exchangeRate2_3, exchangeRate2_4, exchangeRate3_1, exchangeRate3_2, exchangeRate3_3, exchangeRate3_4, exchangeRate4_1, exchangeRate4_2, exchangeRate4_3, exchangeRate4_4, exchangeRate5_1, exchangeRate5_2, exchangeRate5_3, exchangeRate5_4, exchangeRate6_1, exchangeRate6_2, exchangeRate6_3, exchangeRate6_4));
         };
     }
 }

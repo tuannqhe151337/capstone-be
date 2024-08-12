@@ -41,4 +41,7 @@ public class CreateTermBody {
     //end term date will calculate depending on start date [MONTHLY]
     @Future(message = "Final end term date must be in the future")
     private LocalDateTime finalEndTermDate;
+
+    @NotNull(message = "allowReupload cannot be null")
+    private boolean allowReupload;
 }

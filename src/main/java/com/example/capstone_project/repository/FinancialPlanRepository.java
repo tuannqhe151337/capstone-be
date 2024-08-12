@@ -61,7 +61,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
     @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
             " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
-            " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
+            " statuses.code AS statusCode, expenses.currency.name AS currencyName  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +
@@ -93,7 +93,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
     @Query(value = " SELECT expenses.id AS expenseId, expenses.planExpenseKey AS expenseCode, expenses.updatedAt AS date, terms.name AS termName, departments.name AS departmentName, expenses.name AS expenseName, " +
             " costTypes.name AS costTypeName, expenses.unitPrice AS unitPrice, expenses.amount AS amount, (expenses.unitPrice*expenses.amount) AS total," +
             " expenses.project.name AS projectName, expenses.supplier.name AS supplierName, expenses.pic.username AS picName, expenses.note AS note," +
-            " statuses.code AS statusCode  FROM FinancialPlanExpense expenses " +
+            " statuses.code AS statusCode, expenses.currency.name AS currencyName  FROM FinancialPlanExpense expenses " +
             " LEFT JOIN expenses.files files " +
             " LEFT JOIN files.file file " +
             " LEFT JOIN file.plan plan " +

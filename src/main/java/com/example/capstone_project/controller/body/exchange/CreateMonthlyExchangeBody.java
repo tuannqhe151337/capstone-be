@@ -6,19 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateExchangeBody {
+public class CreateMonthlyExchangeBody {
     @NotNull(message = "Month can't be null.")
     private String month;
 
-    @NotNull(message = "Currency id can't be null.")
-    private Long currencyId;
-
-    @NotNull(message = "Amount can't be null.")
-    private BigDecimal amount;
+    @NotNull(message = "List exchange can't be null.")
+    private List<ExchangeRateBody> exchangeRates;
 }
+
+

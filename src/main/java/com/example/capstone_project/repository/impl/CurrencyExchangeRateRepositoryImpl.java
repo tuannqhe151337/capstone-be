@@ -6,6 +6,7 @@ import com.example.capstone_project.repository.result.PaginateExchange;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -15,12 +16,13 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
     private EntityManager entityManager;
 
     @Override
-    public List<PaginateExchange> getExchangeWithPagination(Integer year, Pageable pageable) {
+    public List<PaginateExchange> getMonthYearPaginated(Integer year, Pageable pageable) {
         // HQL query
         String hql = " SELECT new com.example.capstone_project.repository.result.PaginateExchange (year(exchangeRate.month) , month(exchangeRate.month)) FROM CurrencyExchangeRate exchangeRate " +
                 " WHERE (year(exchangeRate.month) = :year OR :year is null) " +
-                " GROUP BY  month(exchangeRate.month), year(exchangeRate.month) " +
-                " ORDER BY month(exchangeRate.month) desc, year(exchangeRate.month) desc ";
+                " AND (exchangeRate.isDelete = false OR exchangeRate.isDelete IS NULL)" +
+                " GROUP BY month(exchangeRate.month), year(exchangeRate.month) " +
+                " ORDER BY year(exchangeRate.month) desc, month(exchangeRate.month) desc";
 
         // Run query
         return entityManager.createQuery(hql, PaginateExchange.class)
@@ -31,51 +33,91 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
     }
 
     @Override
-    public List<CurrencyExchangeRate> getListCurrencyExchangeRate(List<PaginateExchange> paginateExchanges) {
+    public List<CurrencyExchangeRate> getListCurrencyExchangeRateByMonthYear(List<PaginateExchange> paginateExchanges) {
         // HQL query
         String hql = "SELECT  exchangeRate FROM CurrencyExchangeRate exchangeRate " +
                 " LEFT JOIN exchangeRate.currency currency " +
-                " WHERE ";
+                " WHERE (exchangeRate.isDelete = false OR exchangeRate.isDelete IS NULL) ";
 
+        if (!paginateExchanges.isEmpty()) {
+            hql += " AND ";
+        }
 
         for (int i = 0; i < paginateExchanges.size(); i++) {
-            hql += " (year(exchangeRate.month) = " + paginateExchanges.get(i).getYear() + " AND month(exchangeRate.month) = " + paginateExchanges.get(i).getMonth() + ")";
+            hql += " (year(exchangeRate.month) = :year" + i + " AND month(exchangeRate.month) = :month" + i + ")";
             if (i != paginateExchanges.size() - 1) {
                 hql += " OR ";
-            } else {
-                hql += " ORDER BY month(exchangeRate.month) desc, currency.id asc ";
             }
         }
+
+        hql += " ORDER BY month(exchangeRate.month) desc, currency.id asc ";
 
         // Handling join
         EntityGraph<CurrencyExchangeRate> entityGraph = entityManager.createEntityGraph(CurrencyExchangeRate.class);
         entityGraph.addAttributeNodes(CurrencyExchangeRate_.CURRENCY);
 
         // Run query
-        return entityManager.createQuery(hql, CurrencyExchangeRate.class)
-                .setHint("jakarta.persistence.fetchgraph", entityGraph)
+        TypedQuery<CurrencyExchangeRate> typedQuery = entityManager.createQuery(hql, CurrencyExchangeRate.class);
+
+        for (int i = 0; i < paginateExchanges.size(); i++) {
+            typedQuery.setParameter("year" + i, paginateExchanges.get(i).getYear());
+            typedQuery.setParameter("month" + i, paginateExchanges.get(i).getMonth());
+        }
+
+        return typedQuery.setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
     }
 
     @Override
-    public long countDistinctListExchangePaging(List<PaginateExchange> paginateExchanges) {
+    public List<CurrencyExchangeRate> getListCurrencyExchangeRateByMonthYear(List<PaginateExchange> paginateExchanges, List<Long> currencyIds) {
         // HQL query
-        String hql = "SELECT distinct count(*) FROM CurrencyExchangeRate exchangeRate " +
+        String hql = "SELECT  exchangeRate FROM CurrencyExchangeRate exchangeRate " +
                 " LEFT JOIN exchangeRate.currency currency " +
-                " WHERE ";
+                " WHERE (exchangeRate.isDelete = false OR exchangeRate.isDelete IS NULL) " +
+                " AND currency.id IN (:currencyIds) ";
 
+        if (!paginateExchanges.isEmpty()) {
+            hql += " AND ";
+        }
 
         for (int i = 0; i < paginateExchanges.size(); i++) {
-            hql += " (year(exchangeRate.month) = " + paginateExchanges.get(i).getYear() + " AND month(exchangeRate.month) = " + paginateExchanges.get(i).getMonth() + ")";
+            hql += " (year(exchangeRate.month) = :year" + i + " AND month(exchangeRate.month) = :month" + i + ")";
             if (i != paginateExchanges.size() - 1) {
                 hql += " OR ";
-            } else {
-                hql += " GROUP BY currency.id ";
             }
         }
 
+        hql += " ORDER BY month(exchangeRate.month) desc, currency.id asc ";
+
+        // Handling join
+        EntityGraph<CurrencyExchangeRate> entityGraph = entityManager.createEntityGraph(CurrencyExchangeRate.class);
+        entityGraph.addAttributeNodes(CurrencyExchangeRate_.CURRENCY);
+
         // Run query
-        return (long) entityManager.createQuery(hql)
+        TypedQuery<CurrencyExchangeRate> typedQuery = entityManager.createQuery(hql, CurrencyExchangeRate.class);
+
+        for (int i = 0; i < paginateExchanges.size(); i++) {
+            typedQuery.setParameter("year" + i, paginateExchanges.get(i).getYear());
+            typedQuery.setParameter("month" + i, paginateExchanges.get(i).getMonth());
+        }
+
+        typedQuery.setParameter("currencyIds", currencyIds);
+
+        return typedQuery.setHint("jakarta.persistence.fetchgraph", entityGraph)
+                .getResultList();
+    }
+
+    @Override
+    public long countDistinctListExchangePaging(Integer year) {
+        // HQL query
+        String hql = "SELECT COUNT(DISTINCT(CONCAT(MONTH(currencyExchangeRate.month), '/', YEAR(currencyExchangeRate.month)))) " +
+                " FROM CurrencyExchangeRate currencyExchangeRate" +
+                " WHERE (currencyExchangeRate.isDelete = false OR currencyExchangeRate.isDelete IS NULL) AND " +
+                " (YEAR(currencyExchangeRate.month) = :year OR :year is null)";
+
+        // Run query
+        return (Long) entityManager.createQuery(hql)
+                .setParameter("year", year)
                 .getSingleResult();
     }
 }

@@ -15,12 +15,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NewCurrencyBody {
     @NotEmpty(message = "New currency name can't be empty")
-    @Pattern(regexp = "^[a-zA-ZÀ-ỹ]{3}(?: [a-zA-ZÀ-ỹ]+)*$", message = "Currency name must only contain 3 letters")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ]{1,50}(?: [a-zA-ZÀ-ỹ]+)*$", message = "Currency name must not exceed 50 letters")
     private String currencyName;
 
-    @NotEmpty(message = "Currency symbol can't be empty")
     private String currencySymbol;
 
-    @NotNull(message = "Currency affix can't be null")
     private Affix currencyAffix;
 }
