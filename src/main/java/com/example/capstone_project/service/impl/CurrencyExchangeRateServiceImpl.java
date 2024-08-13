@@ -111,7 +111,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
                 exchangeRates.forEach(exchangeRate ->
                 {
                     exchangeRate.setMonth(localDate);
-                    exchangeRate.setCurrency(currencyRepository.getReferenceById(exchangeRate.getCurrency().getId()));
+                    exchangeRate.setAmount(exchangeRate.getAmount());
                 });
 
                 currencyExchangeRateRepository.saveAll(exchangeRates);
