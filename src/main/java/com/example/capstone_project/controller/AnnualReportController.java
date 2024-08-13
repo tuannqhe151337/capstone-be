@@ -170,11 +170,11 @@ public class AnnualReportController {
 
     @GetMapping("/detail")
     public ResponseEntity<AnnualReportResponse> getAnnualReportDetail(
-            @RequestParam(required = true) Long annualReportId
+            @RequestParam(required = true) Integer year
     ) {
         try {
             // Get data
-            AnnualReport annualReport = annualReportService.getAnnualReportDetail(annualReportId);
+            AnnualReport annualReport = annualReportService.getAnnualReportDetail(year);
 
             // Response
             AnnualReportResponse response = null;

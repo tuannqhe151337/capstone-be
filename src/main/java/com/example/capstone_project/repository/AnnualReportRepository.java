@@ -59,4 +59,6 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " WHERE annualReport.id = :annualReportId AND " +
             " annualReport.isDelete = false ")
     String getYear(Long annualReportId);
+
+    AnnualReport findByYear(Integer year);
 }

@@ -111,7 +111,7 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
                 exchangeRates.forEach(exchangeRate ->
                 {
                     exchangeRate.setMonth(localDate);
-                    exchangeRate.setCurrency(currencyRepository.getReferenceById(exchangeRate.getCurrency().getId()));
+                    exchangeRate.setAmount(exchangeRate.getAmount());
                 });
 
                 currencyExchangeRateRepository.saveAll(exchangeRates);
@@ -151,6 +151,9 @@ public class CurrencyExchangeRateServiceImpl implements CurrencyExchangeRateServ
                 if (!currencyExchangeRateRepository.existsById(exchangeRate.getId())) {
                     throw new ResourceNotFoundException("Not found any exchange have Id = " + exchangeRate.getId());
                 }
+                CurrencyExchangeRate exchangeRateUpdate = currencyExchangeRateRepository.getReferenceById(exchangeRate.getId());
+                exchangeRateUpdate.setAmount(exchangeRate.getAmount());
+                currencyExchangeRateRepository.save(exchangeRateUpdate);
             } else {
                 throw new UnauthorizedException("Unauthorized to update exchange");
             }

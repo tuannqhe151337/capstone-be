@@ -40,7 +40,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
                 " WHERE (exchangeRate.isDelete = false OR exchangeRate.isDelete IS NULL) ";
 
         if (!paginateExchanges.isEmpty()) {
-            hql += " AND ";
+            hql += " AND (";
         }
 
         for (int i = 0; i < paginateExchanges.size(); i++) {
@@ -50,7 +50,7 @@ public class CurrencyExchangeRateRepositoryImpl implements CustomCurrencyExchang
             }
         }
 
-        hql += " ORDER BY month(exchangeRate.month) desc, currency.id asc ";
+        hql += ") ORDER BY month(exchangeRate.month) desc, currency.id asc ";
 
         // Handling join
         EntityGraph<CurrencyExchangeRate> entityGraph = entityManager.createEntityGraph(CurrencyExchangeRate.class);
