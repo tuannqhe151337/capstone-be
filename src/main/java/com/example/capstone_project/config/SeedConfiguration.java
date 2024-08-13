@@ -938,260 +938,260 @@ public class SeedConfiguration {
 
             Term term1 = Term.builder()
                     .id(1L)
-                    .name("Spring 2024")
+                    .name("January 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now().minusDays(3))
-                    .endDate(LocalDateTime.now().minusDays(3).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(3).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(3).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 1, 25, 0, 0, 0).minusDays(3))
+                    .endDate(LocalDateTime.of(2024, 1, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 1, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 1, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 1, 25, 0, 0, 0)))
                     .user(user3)
                     .status(termStatus2)
                     .build();
 
             Term term2 = Term.builder()
                     .id(2L)
-                    .name("Summer 2024")
+                    .name("February 2024")
                     .duration(TermDuration.QUARTERLY)
-                    .startDate(LocalDateTime.now().minusDays(15))
-                    .endDate(LocalDateTime.now().minusDays(15).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(15).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(15).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 2, 25, 0, 0, 0).minusDays(15))
+                    .endDate(LocalDateTime.of(2024, 2, 25, 0, 0, 0).minusDays(15).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 2, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 2, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 2, 25, 0, 0, 0).minusDays(15)))
                     .user(user3)
                     .status(termStatus2)
                     .build();
 
             Term term3 = Term.builder()
                     .id(3L)
-                    .name("Fall 2024")
+                    .name("March 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 3, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 3, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 3, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 3, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 3, 25, 0, 0, 0)))
                     .user(user3)
                     .status(termStatus3)
                     .build();
 
             Term term4 = Term.builder()
                     .id(4L)
-                    .name("Winter 2024")
+                    .name("April 2024")
                     .duration(TermDuration.HALF_YEARLY)
-                    .startDate(LocalDateTime.now().minusDays(2))
-                    .endDate(LocalDateTime.now().minusDays(2).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(2).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(2).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 4, 25, 0, 0, 0).minusDays(2))
+                    .endDate(LocalDateTime.of(2024, 4, 25, 0, 0, 0).minusDays(2).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 4, 25, 0, 0, 0).minusDays(2).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 4, 25, 0, 0, 0).minusDays(2).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 4, 25, 0, 0, 0).minusDays(2)))
                     .user(user3)
                     .status(termStatus)
                     .build();
 
             Term term5 = Term.builder()
                     .id(5L)
-                    .name("Spring 2025")
+                    .name("May 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now().minusDays(1))
-                    .endDate(LocalDateTime.now().minusDays(1).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(1).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(1).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 5, 25, 0, 0, 0).minusDays(1))
+                    .endDate(LocalDateTime.of(2024, 5, 25, 0, 0, 0).minusDays(1).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 5, 25, 0, 0, 0).minusDays(1).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 5, 25, 0, 0, 0).minusDays(1).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 5, 25, 0, 0, 0).minusDays(1)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term6 = Term.builder()
                     .id(6L)
-                    .name("Summer 2025")
+                    .name("June 2024")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .endDate(LocalDateTime.of(2024, 6, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 6, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 6, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 6, 25, 0, 0, 0).plusDays(5)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term7 = Term.builder()
                     .id(7L)
-                    .name("Fall 2025")
+                    .name("July 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 7, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 7, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 7, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 7, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 7, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term8 = Term.builder()
                     .id(8L)
-                    .name("Winter 2025")
+                    .name("August 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term9 = Term.builder()
                     .id(9L)
-                    .name("Spring 2026")
+                    .name("September 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term10 = Term.builder()
                     .id(10L)
-                    .name("Summer 2026")
+                    .name("October 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term11 = Term.builder()
                     .id(11L)
-                    .name("Fall 2026")
+                    .name("November 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 11, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2024, 11, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 11, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 11, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 11, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term12 = Term.builder()
                     .id(12L)
-                    .name("Winter 2026")
+                    .name("December 2024")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now().minusDays(10))
-                    .endDate(LocalDateTime.now().minusDays(10).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().minusDays(10).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().minusDays(10).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).minusDays(10))
+                    .endDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).minusDays(10).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).minusDays(10).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).minusDays(10).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).minusDays(10)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term13 = Term.builder()
                     .id(13L)
-                    .name("Spring 2027")
+                    .name("January 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2025, 1, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 1, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2025, 1, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2025, 1, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025, 1, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term14 = Term.builder()
                     .id(14L)
-                    .name("Summer 2027")
+                    .name("February 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2025, 2, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 2, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2025, 2, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2025, 2, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025, 2, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term15 = Term.builder()
                     .id(15L)
-                    .name("Autumn 2027")
+                    .name("March 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2025, 3, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 3, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2025, 3, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2025, 3, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025, 3, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus3)
                     .build();
 
             Term term16 = Term.builder()
                     .id(16L)
-                    .name("Winter 2027")
+                    .name("April 2025")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.now())
-                    .endDate(LocalDateTime.now().plusDays(5))
-                    .reuploadStartDate(LocalDateTime.now().plusDays(20))
-                    .reuploadEndDate(LocalDateTime.now().plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2025, 4, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2025, 4, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2025, 4, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2025, 4, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2025, 4, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus2)
                     .build();
 
             Term term17 = Term.builder()
                     .id(17L)
-                    .name("Spring 2023")
+                    .name("January 2023")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0))
                     .endDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(5))
                     .reuploadStartDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(20))
                     .reuploadEndDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus3)
                     .build();
 
             Term term18 = Term.builder()
                     .id(18L)
-                    .name("Summer 2023")
+                    .name("April 2023")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0))
                     .endDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(5))
                     .reuploadStartDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(20))
                     .reuploadEndDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus3)
                     .build();
 
             Term term19 = Term.builder()
                     .id(19L)
-                    .name("Autumn 2023")
+                    .name("July 2023")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.now())
                     .endDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(5))
                     .reuploadStartDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(20))
                     .reuploadEndDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(5)))
                     .user(user4)
                     .status(termStatus3)
                     .build();
 
             Term term20 = Term.builder()
                     .id(20L)
-                    .name("Winter 2023")
+                    .name("December 2023")
                     .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .startDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0)))
                     .user(user4)
                     .status(termStatus3)
                     .build();
@@ -2411,7 +2411,7 @@ public class SeedConfiguration {
             financialPlanFileExpenseRepository.saveAll(List.of(fileExpense1, fileExpense2, fileExpense3, fileExpense4, fileExpense5, fileExpense6, fileExpense7, fileExpense8, fileExpense9, fileExpense10, fileExpense11, fileExpense12, fileExpense13, fileExpense14, fileExpense15, fileExpense16, fileExpense17, fileExpense18, fileExpense19, fileExpense20, fileExpense21, fileExpense22, fileExpense23, fileExpense24, fileExpense25, fileExpense26, fileExpense27, fileExpense28, fileExpense29, fileExpense30, fileExpense31, fileExpense32, fileExpense33, fileExpense34, fileExpense35, fileExpense36, fileExpense37, fileExpense38, fileExpense39, fileExpense40, fileExpense41, fileExpense42, fileExpense43, fileExpense44, fileExpense45, fileExpense46, fileExpense47, fileExpense48, fileExpense49, fileExpense50, fileExpense51, fileExpense52, fileExpense53, fileExpense54, fileExpense55, fileExpense56, fileExpense57, fileExpense58, fileExpense59, fileExpense60, fileExpense61, fileExpense62, fileExpense63, fileExpense64));
 
             FinancialReport report1 = FinancialReport.builder()
-                    .name("Report Name 1")
+                    .name(term1.getName() + "_Report")
                     .month(LocalDate.of(2024, 1, 5))
                     .expectedCost(BigDecimal.valueOf(601660487L))
                     .actualCost(BigDecimal.valueOf(216579382))
@@ -2420,7 +2420,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report2 = FinancialReport.builder()
-                    .name("Report Name 2")
+                    .name(term2.getName() + "_Report")
                     .month(LocalDate.of(2024, 2, 5))
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(516579382))
@@ -2429,7 +2429,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report3 = FinancialReport.builder()
-                    .name("Report Name 3")
+                    .name(term3.getName() + "_Report")
                     .month(LocalDate.of(2024, 3, 5))
                     .expectedCost(BigDecimal.valueOf(1001660487L))
                     .actualCost(BigDecimal.valueOf(706579382))
@@ -2438,7 +2438,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report4 = FinancialReport.builder()
-                    .name("Report Name 4")
+                    .name(term4.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
                     .month(LocalDate.of(2024, 4, 5))
@@ -2447,7 +2447,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report5 = FinancialReport.builder()
-                    .name("Report Name 5")
+                    .name(term5.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(801660487L))
                     .actualCost(BigDecimal.valueOf(585579382))
                     .month(LocalDate.of(2024, 5, 5))
@@ -2456,7 +2456,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report6 = FinancialReport.builder()
-                    .name("Report Name 6")
+                    .name(term6.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(801660487L))
                     .actualCost(BigDecimal.valueOf(516579382))
                     .month(LocalDate.of(2024, 6, 5))
@@ -2465,7 +2465,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report7 = FinancialReport.builder()
-                    .name("Report Name 7")
+                    .name(term7.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(1001660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
                     .month(LocalDate.of(2024, 7, 5))
@@ -2474,7 +2474,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report8 = FinancialReport.builder()
-                    .name("Report Name 8")
+                    .name(term8.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(701660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
                     .month(LocalDate.of(2024, 8, 5))
@@ -2483,7 +2483,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report9 = FinancialReport.builder()
-                    .name("Report Name 9")
+                    .name(term9.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(401660487L))
                     .actualCost(BigDecimal.valueOf(316579382))
                     .month(LocalDate.of(2024, 9, 5))
@@ -2492,7 +2492,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report10 = FinancialReport.builder()
-                    .name("Report Name 10")
+                    .name(term10.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
                     .month(LocalDate.of(2024, 10, 5))
@@ -2501,7 +2501,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report11 = FinancialReport.builder()
-                    .name("Report Name 11")
+                    .name(term11.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(131660487L))
                     .actualCost(BigDecimal.valueOf(1216579382))
                     .month(LocalDate.of(2024, 11, 5))
@@ -2510,7 +2510,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report12 = FinancialReport.builder()
-                    .name("Report Name 12")
+                    .name(term12.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(151660487L))
                     .actualCost(BigDecimal.valueOf(1006579382))
                     .month(LocalDate.of(2024, 12, 5))
@@ -2537,7 +2537,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report15 = FinancialReport.builder()
-                    .name(term19.getName() + "Report")
+                    .name(term19.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(131660487L))
                     .actualCost(BigDecimal.valueOf(1216579382))
                     .month(term19.getFinalEndTermDate().toLocalDate())
@@ -2546,7 +2546,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport report16 = FinancialReport.builder()
-                    .name(term20.getName() + "Report")
+                    .name(term20.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(151660487L))
                     .actualCost(BigDecimal.valueOf(1006579382))
                     .month(term20.getFinalEndTermDate().toLocalDate())
@@ -2914,8 +2914,8 @@ public class SeedConfiguration {
             random = new Random();
             projectNameChar = 'A';
 
-            for (int i = 1; i <= 64; i++) {
-                int randomAnnualReportIndex = random.nextInt(13) + 1;
+            for (int i = 1; i <= 128; i++) {
+                int randomAnnualReportIndex = random.nextInt(16) + 1;
                 int randomCostTypeIndex = random.nextInt(6) + 1;
                 int randomDepartmentIndex = random.nextInt(6) + 1;
 
@@ -2933,6 +2933,9 @@ public class SeedConfiguration {
                     case 11 -> report11;
                     case 12 -> report12;
                     case 13 -> report13;
+                    case 14 -> report14;
+                    case 15 -> report15;
+                    case 16 -> report16;
                     default -> report1; // Default case, should never be reached
                 };
 

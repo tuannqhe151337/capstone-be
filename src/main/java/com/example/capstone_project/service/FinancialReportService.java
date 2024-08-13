@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public interface FinancialReportService {
     List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception;
@@ -51,6 +52,6 @@ public interface FinancialReportService {
 
     List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception;
 
-    HashMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
+    TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
 
 }

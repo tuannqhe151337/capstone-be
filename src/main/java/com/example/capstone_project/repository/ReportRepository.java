@@ -26,11 +26,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ORDER BY totalCost desc LIMIT 5")
     List<DepartmentDiagramResult> getDepartmentYearDiagram(Integer year);
 
-    @Query(value = " SELECT concat(month (report.createdAt), '/', year(report.createdAt)) AS month , report.costType.id AS costTypeId, report.costType.name AS costTypeName, sum(report.totalExpense) AS totalCost FROM ReportStatistical report " +
-            " WHERE year(report.createdAt) = :year AND " +
+    @Query(value = " SELECT concat(month (term.finalEndTermDate), '/', year(term.finalEndTermDate)) AS month , report.costType.id AS costTypeId, report.costType.name AS costTypeName, sum(report.totalExpense) AS totalCost FROM ReportStatistical report " +
+            " JOIN report.report financialReport " +
+            " JOIN financialReport.term term " +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
             " (report.department.id = :departmentId OR :departmentId is null) AND " +
             " report.isDelete = false " +
-            " GROUP BY costTypeId, costTypeName, concat(month (report.createdAt), '/', year(report.createdAt)) ")
+            " GROUP BY costTypeId, costTypeName, concat(month (term.finalEndTermDate), '/', year(term.finalEndTermDate)) ")
     List<CostTypeDiagramResult> getReportCostTypeDiagram(Integer year, Long departmentId);
 
 }

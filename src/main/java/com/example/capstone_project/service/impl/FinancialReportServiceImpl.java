@@ -8,6 +8,7 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.ExchangeResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -26,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -579,13 +582,17 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public HashMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception {
+    public TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception {
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
             List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
 
+            if (costTypeDiagramResultList == null) {
+                return new TreeMap<>();
+            }
+
             HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
 
             costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
@@ -596,12 +603,30 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
             });
 
-            return costTypeDiagramResultHashMap;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("M/yyyy");
+
+            // Sorting
+            TreeMap<String, List<CostTypeDiagramResult>> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            sortedMap.putAll(costTypeDiagramResultHashMap);
+
+            return sortedMap;
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
 
             List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
 
+            if (costTypeDiagramResultList == null) {
+                return new TreeMap<>();
+            }
+
             HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
 
             costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
@@ -611,7 +636,22 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
                 costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
             });
-            return costTypeDiagramResultHashMap;
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("M/yyyy");
+
+            // Sorting
+            TreeMap<String, List<CostTypeDiagramResult>> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            sortedMap.putAll(costTypeDiagramResultHashMap);
+
+            return sortedMap;
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
         }
