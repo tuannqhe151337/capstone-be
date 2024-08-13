@@ -2615,28 +2615,28 @@ public class SeedConfiguration {
                     .year(2020)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(1232212125))
-                    .totalDepartment(18)
+                    .totalDepartment(6)
                     .build();
 
             AnnualReport annualReport2 = AnnualReport.builder()
                     .year(2021)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(461321564))
-                    .totalDepartment(11)
+                    .totalDepartment(5)
                     .build();
 
             AnnualReport annualReport3 = AnnualReport.builder()
                     .year(2022)
                     .totalTerm(22)
                     .totalExpense(BigDecimal.valueOf(1231313213))
-                    .totalDepartment(8)
+                    .totalDepartment(3)
                     .build();
 
             AnnualReport annualReport4 = AnnualReport.builder()
                     .year(2023)
                     .totalTerm(12)
                     .totalExpense(BigDecimal.valueOf(905135545))
-                    .totalDepartment(9)
+                    .totalDepartment(6)
                     .build();
 
 //            AnnualReport annualReport5 = AnnualReport.builder()
@@ -2650,7 +2650,7 @@ public class SeedConfiguration {
                     .year(2025)
                     .totalTerm(6)
                     .totalExpense(BigDecimal.valueOf(354564895))
-                    .totalDepartment(12)
+                    .totalDepartment(4)
                     .build();
 
             annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport6));

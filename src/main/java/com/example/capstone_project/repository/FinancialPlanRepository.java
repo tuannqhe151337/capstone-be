@@ -25,7 +25,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.isDelete = false ")
     long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
-    @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
+    @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
