@@ -17,10 +17,12 @@ import com.example.capstone_project.controller.responses.plan.detail.CostRespons
 import com.example.capstone_project.controller.responses.plan.detail.PlanDetailResponse;
 import com.example.capstone_project.controller.responses.plan.list.PlanResponse;
 import com.example.capstone_project.controller.responses.plan.version.VersionResponse;
+import com.example.capstone_project.controller.responses.report.diagram.YearDiagramResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.UserDownloadResult;
 import com.example.capstone_project.repository.result.VersionResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -630,5 +632,34 @@ public class FinancialPlanController {
         }
     }
 
+    @GetMapping("/year-diagram")
+    public ResponseEntity<ListResponse<YearDiagramResponse>> getYearDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            List<YearDiagramResult> yearDiagramResults = planService.generateYearDiagram(year);
 
+            // Response
+            ListResponse<YearDiagramResponse> response = new ListResponse<>();
+
+            if (yearDiagramResults != null) {
+
+                yearDiagramResults.forEach(yearDiagramResult -> response.getData().add(YearDiagramResponse.builder()
+                        .month(yearDiagramResult.getMonth())
+                        .actualCost(yearDiagramResult.getActualCost())
+                        .expectedCost(yearDiagramResult.getExpectedCost())
+                        .build()));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 }

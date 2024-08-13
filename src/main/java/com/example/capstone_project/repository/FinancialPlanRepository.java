@@ -3,6 +3,7 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -116,4 +117,6 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY currency.id, month (expenses.createdAt), year (expenses.createdAt)")
     List<TotalCostByCurrencyResult> calculateCostByPlanId(Long planId, ExpenseStatusCode statusCode);
 
+    
+    List<YearDiagramResult> generateYearDiagram(Integer year);
 }

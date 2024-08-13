@@ -46,6 +46,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final SupplierRepository supplierRepository;
     private final CurrencyRepository currencyRepository;
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final ReportRepository reportRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -541,8 +542,66 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<YearDiagramResult> generateYearDiagram(Integer year) {
-        return financialReportRepository.generateYearDiagram(year);
+    public List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return financialReportRepository.generateYearDiagram(year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<CostTypeDiagramResult> getYearCostTypeDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        Long departmentId = null;
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return reportRepository.getCostTypeYearDiagram(year, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return reportRepository.getCostTypeYearDiagram(year, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return reportRepository.getDepartmentYearDiagram(year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<CostTypeDiagramResult> getReportCostTypeDiagram(Long reportId) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        Long departmentId = null;
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return reportRepository.getReportCostTypeDiagram(reportId, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return reportRepository.getReportCostTypeDiagram(reportId, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<DepartmentDiagramResult> getReportDepartmentDiagram(Long reportId) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return reportRepository.getReportDepartmentDiagram(reportId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
     }
 
     @Override

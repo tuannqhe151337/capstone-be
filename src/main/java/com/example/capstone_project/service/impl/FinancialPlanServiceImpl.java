@@ -1170,6 +1170,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         return calculateCostByPlanIdAndStatusCode(planId, null);
     }
 
+    @Override
+    public List<YearDiagramResult> generateYearDiagram(Integer year) {
+        return planRepository.generateYearDiagram(year);
+    }
+
 
     private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
         //Handle currency

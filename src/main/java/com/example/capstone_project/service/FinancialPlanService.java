@@ -4,6 +4,7 @@ import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanDetailResult;
 import com.example.capstone_project.repository.result.UserDownloadResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import org.springframework.data.domain.Pageable;
@@ -75,4 +76,6 @@ public interface FinancialPlanService {
     CostResult calculateActualCostByPlanId(Long planId) throws Exception;
 
     CostResult calculateExpectedCostByPlanId(Long planId) throws Exception;
+
+    List<YearDiagramResult> generateYearDiagram(Integer year);
 }
