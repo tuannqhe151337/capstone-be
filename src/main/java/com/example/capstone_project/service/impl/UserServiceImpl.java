@@ -343,7 +343,7 @@ public class UserServiceImpl implements UserService {
             }
 
             // Check department or position or role exist
-            CheckDepartmentRolePositionExistsResult result = this.checkDepartmentRolePositionExists(
+            this.checkDepartmentRolePositionExists(
                     user.getDepartment().getId(),
                     user.getRole().getId(),
                     user.getPosition().getId(),
@@ -354,12 +354,7 @@ public class UserServiceImpl implements UserService {
             String password = generatePassayPassword();
             user.setPassword(this.passwordEncoder.encode(password));
 
-            //remove punctation in full name
-            String normalized = Normalizer.normalize(user.getFullName(), Normalizer.Form.NFD);
-            // Remove diacritical marks (combining characters)
-            String fullname= normalized.replaceAll("\\p{M}", "");
-
-            user.setUsername(generateUsernameFromFullName(fullname));
+            user.setUsername(generateUsernameFromFullName(user.getFullName()));
             user.setIsDelete(false);
 
             userRepository.save(user);
@@ -457,6 +452,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private String generateUsernameFromFullName(String fullname) {
+        // Remove punctuation in full name
+        String normalized = Normalizer.normalize(fullname, Normalizer.Form.NFD);
+
+        // Remove diacritical marks (combining characters)
+        fullname= normalized.replaceAll("\\p{M}", "");
+
         String[] nameParts = fullname.trim().split("\\s+");
         // Tạo username từ tên và họ
         StringBuilder usernameBuilder = new StringBuilder();
