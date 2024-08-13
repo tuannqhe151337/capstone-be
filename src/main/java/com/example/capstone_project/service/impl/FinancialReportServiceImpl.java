@@ -579,26 +579,39 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<CostTypeDiagramResult> getReportCostTypeDiagram(Long reportId) throws Exception {
+    public HashMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception {
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            return reportRepository.getReportCostTypeDiagram(reportId, departmentId);
+            List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
+
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.putIfAbsent(costTypeDiagramResult.getMonth(), new ArrayList<>());
+            });
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
+            });
+
+            return costTypeDiagramResultHashMap;
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
-            return reportRepository.getReportCostTypeDiagram(reportId, departmentId);
-        } else {
-            throw new UnauthorizedException("Unauthorized to view diagram");
-        }
-    }
 
-    @Override
-    public List<DepartmentDiagramResult> getReportDepartmentDiagram(Long reportId) throws Exception {
-        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+            List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
 
-        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            return reportRepository.getReportDepartmentDiagram(reportId);
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.putIfAbsent(costTypeDiagramResult.getMonth(), new ArrayList<>());
+            });
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
+            });
+            return costTypeDiagramResultHashMap;
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
         }

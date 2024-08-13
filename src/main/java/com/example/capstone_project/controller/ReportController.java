@@ -15,6 +15,7 @@ import com.example.capstone_project.controller.responses.report.calculate.Report
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
 import com.example.capstone_project.controller.responses.report.diagram.DepartmentDiagramResponse;
+import com.example.capstone_project.controller.responses.report.diagram.YearCostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.report.diagram.YearDiagramResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
 import com.example.capstone_project.entity.ExpenseStatus;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -567,6 +569,8 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -639,70 +643,49 @@ public class ReportController {
     }
 
     @GetMapping("/cost-type-report-diagram")
-    public ResponseEntity<ListResponse<CostTypeDiagramResponse>> getCostTypeReportDiagram(
-            @RequestParam(required = true) Long reportId
+    public ResponseEntity<ListResponse<YearCostTypeDiagramResponse>> getCostTypeReportDiagram(
+            @RequestParam(required = true) Integer year
     ) {
         try {
             // Get data
-            List<CostTypeDiagramResult> costTypeDiagrams = reportService.getReportCostTypeDiagram(reportId);
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagrams = reportService.getReportCostTypeDiagram(year);
 
             // Response
-            ListResponse<CostTypeDiagramResponse> response = new ListResponse<>();
+            ListResponse<YearCostTypeDiagramResponse> response = new ListResponse<>();
 
             if (costTypeDiagrams != null) {
-
-                costTypeDiagrams.forEach(costTypeDiagram -> response.getData().add(CostTypeDiagramResponse.builder()
-                        .totalCost(costTypeDiagram.getTotalCost())
-                        .costType(CostTypeResponse.builder()
-                                .costTypeId(costTypeDiagram.getCostTypeId())
-                                .name(costTypeDiagram.getCostTypeName())
-                                .build()).build()));
-
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
-
-            return ResponseEntity.ok(response);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @GetMapping("/department-report-diagram")
-    public ResponseEntity<ListResponse<DepartmentDiagramResponse>> getDepartmentReportDiagram(
-            @RequestParam(required = true) Long reportId
-    ) {
-        try {
-            // Get data
-            List<DepartmentDiagramResult> departmentDiagramResults = reportService.getReportDepartmentDiagram(reportId);
-
-            // Response
-            ListResponse<DepartmentDiagramResponse> response = new ListResponse<>();
-
-            if (departmentDiagramResults != null) {
-
-                departmentDiagramResults.forEach(costTypeDiagram -> response.getData().add(DepartmentDiagramResponse.builder()
-                        .totalCost(costTypeDiagram.getTotalCost())
-                        .department(DepartmentResponse.builder()
-                                .departmentId(costTypeDiagram.getDepartmentId())
-                                .name(costTypeDiagram.getDepartmentName())
-                                .build()).build()));
+                costTypeDiagrams.forEach((month, costTypeDiagramResults) -> {
+                    List<CostTypeDiagramResponse> list = new ArrayList<>();
+                    YearCostTypeDiagramResponse yearCostTypeDiagramResponse = YearCostTypeDiagramResponse.builder()
+                            .month(month)
+                            .build();
+                    costTypeDiagramResults.forEach(costTypeDiagramResult -> {
+                        list.add(
+                                CostTypeDiagramResponse.builder()
+                                        .totalCost(costTypeDiagramResult.getTotalCost())
+                                        .costType(CostTypeResponse.builder()
+                                                .costTypeId(costTypeDiagramResult.getCostTypeId())
+                                                .name(costTypeDiagramResult.getCostTypeName())
+                                                .build()).build());
+                    });
+                    yearCostTypeDiagramResponse.setDiagramResponses(list);
+                    response.getData().add(yearCostTypeDiagramResponse);
+                });
 
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-
             return ResponseEntity.ok(response);
-        } catch (UnauthorizedException e) {
+        } catch (
+                UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e) {
+        } catch (
+                ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 }

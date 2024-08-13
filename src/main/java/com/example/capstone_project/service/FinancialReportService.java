@@ -7,6 +7,7 @@ import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 public interface FinancialReportService {
@@ -50,7 +51,6 @@ public interface FinancialReportService {
 
     List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception;
 
-    List<CostTypeDiagramResult> getReportCostTypeDiagram(Long reportId) throws Exception;
+    HashMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
 
-    List<DepartmentDiagramResult> getReportDepartmentDiagram(Long reportId) throws Exception;
 }

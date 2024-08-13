@@ -77,7 +77,7 @@ public class SeedConfiguration {
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
 
-        // Term interval date
+            // Term interval date
             TermInterval termInterval = TermInterval
                     .builder()
                     .id(1L)
@@ -166,10 +166,10 @@ public class SeedConfiguration {
                     .code(AuthorityCode.DEACTIVATE_USER)
                     .name("Deactivate user")
                     .build();
-//view user detail missing
+
             Authority viewUserDetail = Authority.builder()
                     .code(AuthorityCode.VIEW_USER_DETAILS)
-                    .name("view user detail")
+                    .name("View user detail")
                     .build();
 
             Authority createTerm = Authority.builder()
@@ -410,13 +410,12 @@ public class SeedConfiguration {
             // User
             User user1 = User.builder()
                     .id(1L)
-                    .username("Anurakk")
+                    .username("username1")
                     .fullName("Nutalomlok Nunu")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
-                    .department(accountingDepartment)
+                    .department(itDepartment)
                     .position(techlead)
-                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("giangdvhe163178@fpt.edu.vn")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -430,14 +429,13 @@ public class SeedConfiguration {
                     .fullName("Sitchana Jaejan")
                     .password(this.passwordEncoder.encode("password"))
                     .role(admin)
-                    .department(financeDepartment)
+                    .department(itDepartment)
                     .isDelete(false)
                     .phoneNumber("0999988877")
                     .position(techlead)
-                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .dob(LocalDateTime.of(2000, 4, 5, 0, 0))
                     .email("Emoaihl23@gmail.com")
-                    .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .address("Da Nang")
                     .build();
 
             User user3 = User.builder()
@@ -447,12 +445,11 @@ public class SeedConfiguration {
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
                     .department(financeDepartment)
-                    .position(juniorDev)
-                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .position(staff)
+                    .dob(LocalDateTime.of(1998, 4, 2, 2, 3))
                     .email("Emailh23@gmail.com")
                     .address("Ha Noi ")
                     .phoneNumber("0999988877")
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .isDelete(false)
                     .build();
 
@@ -462,14 +459,13 @@ public class SeedConfiguration {
                     .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(itDepartment)
-                    .position(juniorDev)
-                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .department(financeDepartment)
+                    .position(staff)
+                    .dob(LocalDateTime.of(1986, 12, 20, 0, 0))
                     .isDelete(false)
                     .email("Emaifl2h3@gmail.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
-                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
                     .build();
 
             User user5 = User.builder()
@@ -488,12 +484,88 @@ public class SeedConfiguration {
                     .isDelete(false)
                     .build();
 
-            userRepository.saveAll(List.of(user1, user2, user3, user4, user5));
+            User user6 = User.builder()
+                    .id(6L)
+                    .username("TuNM46")
+                    .fullName("Nguyen Manh Tu")
+                    .password(this.passwordEncoder.encode("password"))
+                    .role(financialStaff)
+                    .department(itDepartment)
+                    .position(juniorDev)
+                    .email("Email24u@gmail.com")
+                    .phoneNumber("0999988877")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2001, 11, 11, 0, 0, 0))
+                    .isDelete(false)
+                    .build();
+
+            User user7 = User.builder()
+                    .id(7L)
+                    .username("TuanNQ47")
+                    .fullName("Ngo Quoc Tuan")
+                    .password(this.passwordEncoder.encode("password"))
+                    .role(financialStaff)
+                    .department(itDepartment)
+                    .position(staff)
+                    .email("Email25u@gmail.com")
+                    .phoneNumber("0999988877")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2001, 9, 11, 0, 0, 0))
+                    .isDelete(false)
+                    .build();
+
+            User user8 = User.builder()
+                    .id(8L)
+                    .username("HoanNB3")
+                    .fullName("Nguyen Ba Hoan")
+                    .password(this.passwordEncoder.encode("password"))
+                    .role(financialStaff)
+                    .department(itDepartment)
+                    .position(staff)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .email("Email26u@gmail.com")
+                    .phoneNumber("0999988877")
+                    .address("Ha Noi ")
+                    .isDelete(false)
+                    .build();
+
+            User user9 = User.builder()
+                    .id(9L)
+                    .username("BaoNN15")
+                    .fullName("Nguyen Ngoc Bao")
+                    .password(this.passwordEncoder.encode("password"))
+                    .role(financialStaff)
+                    .department(itDepartment)
+                    .position(staff)
+                    .dob(LocalDateTime.of(1997, 4, 2, 2, 3))
+                    .email("Email27u@gmail.com")
+                    .phoneNumber("0999988877")
+                    .address("Ha Noi ")
+                    .isDelete(false)
+                    .build();
+
+            User user10 = User.builder()
+                    .id(10L)
+                    .username("GiangDV9")
+                    .fullName("Dang Van Giang")
+                    .password(this.passwordEncoder.encode("password"))
+                    .role(financialStaff)
+                    .department(itDepartment)
+                    .position(staff)
+                    .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
+                    .email("Email28u@gmail.com")
+                    .phoneNumber("0999988877")
+                    .address("Ha Noi ")
+                    .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
+                    .isDelete(false)
+                    .build();
+
+            userRepository.saveAll(List.of(user1, user2, user3, user4, user5, user6, user7, user8, user9, user10));
 
             // User setting
             UserSetting userSetting1 = UserSetting.builder()
                     .user(user1)
-                    .darkMode(true)
+                    .darkMode(false)
                     .theme("blue")
                     .language("vi")
                     .build();
@@ -509,21 +581,21 @@ public class SeedConfiguration {
                     .user(user3)
                     .darkMode(false)
                     .theme("green")
-                    .language("vi")
+                    .language("en")
                     .build();
 
             UserSetting userSetting4 = UserSetting.builder()
                     .user(user4)
-                    .darkMode(true)
+                    .darkMode(false)
                     .theme("teal")
                     .language("en")
                     .build();
 
             UserSetting userSetting5 = UserSetting.builder()
                     .user(user5)
-                    .darkMode(true)
+                    .darkMode(false)
                     .theme("teal")
-                    .language("vi")
+                    .language("en")
                     .build();
 
             userSettingRepository.saveAll(List.of(userSetting1, userSetting2, userSetting3, userSetting4, userSetting5));
@@ -872,7 +944,7 @@ public class SeedConfiguration {
                     .reuploadStartDate(LocalDateTime.now().minusDays(3).plusDays(20))
                     .reuploadEndDate(LocalDateTime.now().minusDays(3).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
-                    .user(user1)
+                    .user(user3)
                     .status(termStatus2)
                     .build();
 
@@ -885,7 +957,7 @@ public class SeedConfiguration {
                     .reuploadStartDate(LocalDateTime.now().minusDays(15).plusDays(20))
                     .reuploadEndDate(LocalDateTime.now().minusDays(15).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
-                    .user(user1)
+                    .user(user3)
                     .status(termStatus2)
                     .build();
 
@@ -898,7 +970,7 @@ public class SeedConfiguration {
                     .reuploadStartDate(LocalDateTime.now().plusDays(20))
                     .reuploadEndDate(LocalDateTime.now().plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
-                    .user(user2)
+                    .user(user3)
                     .status(termStatus3)
                     .build();
 
@@ -1055,7 +1127,7 @@ public class SeedConfiguration {
                     .reuploadEndDate(LocalDateTime.now().plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
                     .user(user4)
-                    .status(termStatus2)
+                    .status(termStatus3)
                     .build();
 
             Term term16 = Term.builder()
@@ -1071,7 +1143,59 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            termRepository.saveAll(List.of(term1, term2, term3, term4, term5, term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16));
+            Term term17 = Term.builder()
+                    .id(17L)
+                    .name("Spring 2023")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2023, 1, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus3)
+                    .build();
+
+            Term term18 = Term.builder()
+                    .id(18L)
+                    .name("Summer 2023")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2023, 4, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus3)
+                    .build();
+
+            Term term19 = Term.builder()
+                    .id(19L)
+                    .name("Autumn 2023")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2023, 7, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus3)
+                    .build();
+
+            Term term20 = Term.builder()
+                    .id(20L)
+                    .name("Winter 2023")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(5))
+                    .reuploadStartDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2023, 10, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.now()))
+                    .user(user4)
+                    .status(termStatus3)
+                    .build();
+
+            termRepository.saveAll(List.of(term1, term2, term3, term4, term5, term6, term7, term8, term9, term10, term11, term12, term13, term14, term15, term16, term17, term18, term19, term20));
 
             FinancialPlan financialPlan1 = FinancialPlan.builder()
                     .name("Financial Plan 1")
@@ -1158,12 +1282,30 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlan financialPlan15 = FinancialPlan.builder()
-                    .name("Financial Plan 15")
-                    .term(term12)
+                    .name(term17.getName() + "_" + itDepartment.getName() + "_Plan 1")
+                    .term(term17)
                     .department(itDepartment)
                     .build();
 
-            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5, financialPlan6, financialPlan7, financialPlan8, financialPlan9, financialPlan10, financialPlan11, financialPlan12, financialPlan13, financialPlan14, financialPlan15));
+            FinancialPlan financialPlan16 = FinancialPlan.builder()
+                    .name(term18.getName() + "_" + itDepartment.getName() + "_Plan 1")
+                    .term(term18)
+                    .department(itDepartment)
+                    .build();
+
+            FinancialPlan financialPlan17 = FinancialPlan.builder()
+                    .name(term19.getName() + "_" + hrDepartment.getName() + "_Plan 1")
+                    .term(term19)
+                    .department(hrDepartment)
+                    .build();
+
+            FinancialPlan financialPlan18 = FinancialPlan.builder()
+                    .name(term20.getName() + "_" + accountant.getName() + "_Plan 1")
+                    .term(term20)
+                    .department(accountingDepartment)
+                    .build();
+
+            planRepository.saveAll(List.of(financialPlan1, financialPlan2, financialPlan3, financialPlan4, financialPlan5, financialPlan6, financialPlan7, financialPlan8, financialPlan9, financialPlan10, financialPlan11, financialPlan12, financialPlan13, financialPlan14, financialPlan15, financialPlan16, financialPlan17, financialPlan18));
 
             CostType costType1 = CostType.builder()
                     .id(1L)
@@ -1219,64 +1361,64 @@ public class SeedConfiguration {
 
             Project project1 = Project.builder()
                     .id(1L)
-                    .name("Project Name 1")
+                    .name("Vega Insights")
                     .build();
 
             Project project2 = Project.builder()
                     .id(2L)
-                    .name("Project Name 2")
+                    .name("Nexus Analytics")
                     .build();
 
             Project project3 = Project.builder()
                     .id(3L)
-                    .name("Project Name 3")
+                    .name("Orion Data")
                     .build();
 
             Project project4 = Project.builder()
                     .id(4L)
-                    .name("Project Name 4")
+                    .name("Quantum Solutions")
                     .build();
 
             Project project5 = Project.builder()
                     .id(5L)
-                    .name("Project Name 5")
+                    .name("Astra Metrics")
                     .build();
 
             Project project6 = Project.builder()
                     .id(6L)
-                    .name("Project Name 6")
+                    .name("Luna Logic")
                     .build();
 
             projectRepository.saveAll(List.of(project1, project2, project3, project4, project5, project6));
 
             Supplier supplier1 = Supplier.builder()
                     .id(1L)
-                    .name("Supplier name 1")
+                    .name("VinaPro Co., Ltd")
                     .build();
 
             Supplier supplier2 = Supplier.builder()
                     .id(2L)
-                    .name("Supplier name 2")
+                    .name("SaigonTech Supply")
                     .build();
 
             Supplier supplier3 = Supplier.builder()
                     .id(3L)
-                    .name("Supplier name 3")
+                    .name("Hanoi Materials")
                     .build();
 
             Supplier supplier4 = Supplier.builder()
                     .id(4L)
-                    .name("Supplier name 4")
+                    .name("DongA Trading")
                     .build();
 
             Supplier supplier5 = Supplier.builder()
                     .id(5L)
-                    .name("Supplier name 5")
+                    .name("Mekong Distributors")
                     .build();
 
             Supplier supplier6 = Supplier.builder()
                     .id(6L)
-                    .name("Supplier name 6")
+                    .name("Lotus Supply Chain")
                     .build();
 
             supplierRepository.saveAll(List.of(supplier1, supplier2, supplier3, supplier4, supplier5, supplier6));
@@ -1569,13 +1711,31 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlanFile financialPlanFile15_1 = FinancialPlanFile.builder()
-                    .id(42L)
-                    .name("TERM-NAME3_PLAN-NAME5")
+                    .name(financialPlan15.getName())
                     .plan(financialPlan15)
-                    .user(user3)
+                    .plan(financialPlan15)
+                    .user(user8)
                     .build();
 
-            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1, financialPlanFile9_1, financialPlanFile10_1, financialPlanFile11_1, financialPlanFile12_1, financialPlanFile13_1, financialPlanFile14_1, financialPlanFile15_1));
+            FinancialPlanFile financialPlanFile16_1 = FinancialPlanFile.builder()
+                    .name(financialPlan16.getName())
+                    .plan(financialPlan16)
+                    .user(user6)
+                    .build();
+
+            FinancialPlanFile financialPlanFile17_1 = FinancialPlanFile.builder()
+                    .name(financialPlan17.getName())
+                    .plan(financialPlan17)
+                    .user(user6)
+                    .build();
+
+            FinancialPlanFile financialPlanFile18_1 = FinancialPlanFile.builder()
+                    .name(financialPlan18.getName())
+                    .plan(financialPlan18)
+                    .user(user7)
+                    .build();
+
+            financialPlanFileRepository.saveAll(List.of(financialPlanFile1_1, financialPlanFile1_2, financialPlanFile2_1, financialPlanFile2_2, financialPlanFile3_1, financialPlanFile3_2, financialPlanFile4_1, financialPlanFile4_2, financialPlanFile5_1, financialPlanFile5_2, financialPlanFile5_3, financialPlanFile5_4, financialPlanFile5_5, financialPlanFile5_6, financialPlanFile5_7, financialPlanFile5_8, financialPlanFile5_9, financialPlanFile5_10, financialPlanFile5_11, financialPlanFile5_12, financialPlanFile5_13, financialPlanFile5_14, financialPlanFile5_15, financialPlanFile5_16, financialPlanFile5_17, financialPlanFile5_18, financialPlanFile5_19, financialPlanFile5_20, financialPlanFile5_21, financialPlanFile5_22, financialPlanFile5_23, financialPlanFile5_24, financialPlanFile6_1, financialPlanFile7_1, financialPlanFile8_1, financialPlanFile9_1, financialPlanFile10_1, financialPlanFile11_1, financialPlanFile12_1, financialPlanFile13_1, financialPlanFile14_1, financialPlanFile15_1, financialPlanFile16_1, financialPlanFile17_1, financialPlanFile18_1));
 
             // Create currency data
             Currency currency1 = Currency.builder()
@@ -1609,12 +1769,213 @@ public class SeedConfiguration {
 
             currencyRepository.saveAll(List.of(currency1, currency2, currency3, currency4));
 
-
-            // Get 64 random expense
+            // Get 64 random eppense vnd for plan 15, 16, 17, 18
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
             Random random = new Random();
             char projectNameChar = 'A';
-            char supplierNameChar = 'A';
+
+            for (int i = 1; i <= 64; i++) {
+                int randomStatusIndex = random.nextInt(4) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomProjectIndex = random.nextInt(6) + 1;
+                int randomSupplierIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(5) + 1;
+                int randomCurrencyIndex = random.nextInt(4) + 1;
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 2 -> expenseStatus2;
+                    case 3 -> expenseStatus3;
+                    default -> expenseStatus2; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Project randomProject = switch (randomProjectIndex) {
+                    case 1 -> project1;
+                    case 2 -> project2;
+                    case 3 -> project3;
+                    case 4 -> project4;
+                    case 5 -> project5;
+                    case 6 -> project6;
+                    default -> project1; // Default case, should never be reached
+                };
+
+                Supplier randomSupplier = switch (randomSupplierIndex) {
+                    case 1 -> supplier1;
+                    case 2 -> supplier2;
+                    case 3 -> supplier3;
+                    case 4 -> supplier4;
+                    case 5 -> supplier5;
+                    case 6 -> supplier6;
+                    default -> supplier1; // Default case, should never be reached
+                };
+
+                User randomPic = switch (randomPicIndex) {
+                    case 1 -> user6;
+                    case 2 -> user7;
+                    case 3 -> user8;
+                    case 4 -> user9;
+                    case 5 -> user10;
+                    default -> user6; // Default case, should never be reached
+                };
+
+                Currency randomCurrency = switch (randomCurrencyIndex) {
+                    case 1 -> currency1;
+                    default -> currency1; // Default case, should never be reached
+                };
+
+                FinancialPlanExpense expense = FinancialPlanExpense.builder()
+                        .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
+                        .name("Expense " + projectNameChar++)
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
+                        .amount(random.nextInt(10) + 1)
+                        .project(randomProject)
+                        .supplier(randomSupplier)
+                        .pic(randomPic)
+                        .status(randomExpenseStatus)
+                        .costType(randomCostType)
+                        .currency(randomCurrency)
+                        .build();
+
+                expenseList.add(expense);
+            }
+
+            financialPlanExpenseRepository.saveAll(expenseList);
+
+            // Mapping expense to plan
+            List<FinancialPlanFileExpense> fileExpenses = new ArrayList<>();
+            for (FinancialPlanExpense expense : expenseList) {
+                int randomFilePlanIndex = random.nextInt(4) + 1;
+                FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
+                    case 1 -> financialPlanFile15_1;
+                    case 2 -> financialPlanFile16_1;
+                    case 3 -> financialPlanFile17_1;
+                    case 4 -> financialPlanFile18_1;
+                    default -> financialPlanFile15_1; // Default case, should never be reached
+                };
+
+                fileExpenses.add(FinancialPlanFileExpense.builder()
+                        .file(randomFile)
+                        .planExpense(expense)
+                        .build());
+
+            }
+
+            financialPlanFileExpenseRepository.saveAll(fileExpenses);
+
+            // Get 64 random expense usd for plan 15, 16, 17, 18
+            random = new Random();
+            projectNameChar = 'A';
+
+            for (int i = 1; i <= 64; i++) {
+                int randomStatusIndex = random.nextInt(4) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomProjectIndex = random.nextInt(6) + 1;
+                int randomSupplierIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(5) + 1;
+                int randomCurrencyIndex = random.nextInt(4) + 1;
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 2 -> expenseStatus2;
+                    case 3 -> expenseStatus3;
+                    default -> expenseStatus2; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Project randomProject = switch (randomProjectIndex) {
+                    case 1 -> project1;
+                    case 2 -> project2;
+                    case 3 -> project3;
+                    case 4 -> project4;
+                    case 5 -> project5;
+                    case 6 -> project6;
+                    default -> project1; // Default case, should never be reached
+                };
+
+                Supplier randomSupplier = switch (randomSupplierIndex) {
+                    case 1 -> supplier1;
+                    case 2 -> supplier2;
+                    case 3 -> supplier3;
+                    case 4 -> supplier4;
+                    case 5 -> supplier5;
+                    case 6 -> supplier6;
+                    default -> supplier1; // Default case, should never be reached
+                };
+
+                User randomPic = switch (randomPicIndex) {
+                    case 1 -> user6;
+                    case 2 -> user7;
+                    case 3 -> user8;
+                    case 4 -> user9;
+                    case 5 -> user10;
+                    default -> user6; // Default case, should never be reached
+                };
+
+                Currency randomCurrency = switch (randomCurrencyIndex) {
+                    case 1 -> currency2;
+                    default -> currency2; // Default case, should never be reached
+                };
+
+                FinancialPlanExpense expense = FinancialPlanExpense.builder()
+                        .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
+                        .name("Expense " + projectNameChar++)
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
+                        .amount(random.nextInt(10) + 1)
+                        .project(randomProject)
+                        .supplier(randomSupplier)
+                        .pic(randomPic)
+                        .status(randomExpenseStatus)
+                        .costType(randomCostType)
+                        .currency(randomCurrency)
+                        .build();
+
+                expenseList.add(expense);
+            }
+
+            financialPlanExpenseRepository.saveAll(expenseList);
+
+            // Mapping expense to plan
+            fileExpenses = new ArrayList<>();
+            for (FinancialPlanExpense expense : expenseList) {
+                int randomFilePlanIndex = random.nextInt(4) + 1;
+                FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
+                    case 1 -> financialPlanFile15_1;
+                    case 2 -> financialPlanFile16_1;
+                    case 3 -> financialPlanFile17_1;
+                    case 4 -> financialPlanFile18_1;
+                    default -> financialPlanFile15_1; // Default case, should never be reached
+                };
+
+                fileExpenses.add(FinancialPlanFileExpense.builder()
+                        .file(randomFile)
+                        .planExpense(expense)
+                        .build());
+
+            }
+
+            financialPlanFileExpenseRepository.saveAll(fileExpenses);
+
+            // Get 64 random expense
+            expenseList = new ArrayList<>();
+            random = new Random();
+            projectNameChar = 'A';
 
             for (int i = 1; i <= 64; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
@@ -1681,7 +2042,7 @@ public class SeedConfiguration {
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .planExpenseKey(financialPlanFile1_2.getName() + "_V_" + i)
                         .name("Expense " + projectNameChar++)
-                        .unitPrice(BigDecimal.valueOf(random.nextInt(5000000) + 10000L))
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
                         .amount(random.nextInt(10) + 1)
                         .project(randomProject)
                         .supplier(randomSupplier)
@@ -2128,7 +2489,43 @@ public class SeedConfiguration {
                     .term(term12)
                     .build();
 
-            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6, report7, report8, report9, report10, report11, report12));
+            FinancialReport report13 = FinancialReport.builder()
+                    .name(term17.getName() + "_Report")
+                    .expectedCost(BigDecimal.valueOf(401660487L))
+                    .actualCost(BigDecimal.valueOf(316579382))
+                    .month(term17.getFinalEndTermDate().toLocalDate())
+                    .status(closedReportStatus)
+                    .term(term17)
+                    .build();
+
+            FinancialReport report14 = FinancialReport.builder()
+                    .name(term18.getName() + "_Report")
+                    .expectedCost(BigDecimal.valueOf(901660487L))
+                    .actualCost(BigDecimal.valueOf(616579382))
+                    .month(term18.getFinalEndTermDate().toLocalDate())
+                    .status(closedReportStatus)
+                    .term(term18)
+                    .build();
+
+            FinancialReport report15 = FinancialReport.builder()
+                    .name(term19.getName() + "Report")
+                    .expectedCost(BigDecimal.valueOf(131660487L))
+                    .actualCost(BigDecimal.valueOf(1216579382))
+                    .month(term19.getFinalEndTermDate().toLocalDate())
+                    .status(closedReportStatus)
+                    .term(term19)
+                    .build();
+
+            FinancialReport report16 = FinancialReport.builder()
+                    .name(term20.getName() + "Report")
+                    .expectedCost(BigDecimal.valueOf(151660487L))
+                    .actualCost(BigDecimal.valueOf(1006579382))
+                    .month(term20.getFinalEndTermDate().toLocalDate())
+                    .status(closedReportStatus)
+                    .term(term20)
+                    .build();
+
+            financialReportRepository.saveAll(List.of(report1, report2, report3, report4, report5, report6, report7, report8, report9, report10, report11, report12, report13, report14, report15, report16));
 
             // Get 15 random expense
 //            List<FinancialReportExpense> reportExpenseList = new ArrayList<>();
@@ -2232,7 +2629,6 @@ public class SeedConfiguration {
             List<Report> reports = new ArrayList<>();
             random = new Random();
             projectNameChar = 'A';
-            supplierNameChar = 'A';
 
             for (int i = 1; i <= 15; i++) {
                 int randomAnnualReportIndex = random.nextInt(6) + 1;
@@ -2444,6 +2840,34 @@ public class SeedConfiguration {
 
                 CurrencyExchangeRate exchangeRate4 = CurrencyExchangeRate.builder()
                         .month(LocalDate.of(2024, i + 1, 23))
+                        .currency(currency4)
+                        .amount(BigDecimal.valueOf(1550))
+                        .build();
+
+                currencyExchangeRateRepository.saveAll(List.of(exchangeRate1, exchangeRate2, exchangeRate3, exchangeRate4));
+            }
+
+            for (int i = 0; i < 12; i++) {
+                CurrencyExchangeRate exchangeRate1 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2023, i + 1, 23))
+                        .currency(currency1)
+                        .amount(BigDecimal.valueOf(25500))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate2 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2023, i + 1, 23))
+                        .currency(currency2)
+                        .amount(BigDecimal.valueOf(1))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate3 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2023, i + 1, 23))
+                        .currency(currency3)
+                        .amount(BigDecimal.valueOf(133))
+                        .build();
+
+                CurrencyExchangeRate exchangeRate4 = CurrencyExchangeRate.builder()
+                        .month(LocalDate.of(2023, i + 1, 23))
                         .currency(currency4)
                         .amount(BigDecimal.valueOf(1550))
                         .build();

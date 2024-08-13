@@ -11,7 +11,6 @@ import org.mapstruct.Mapping;
 public interface AnnualReportMapper {
     @Mapping(expression = "java(annualReportResult.getYear())",target = "year")
     @Mapping(expression = "java(annualReportResult.getTotalTerm())",target = "totalTerm")
-    @Mapping(expression = "java(annualReportResult.getTotalExpense())",target = "totalExpense")
     @Mapping(expression = "java(annualReportResult.getTotalDepartment())",target = "totalDepartment")
     AnnualReport mapToAnnualReportMapping(AnnualReportResult annualReportResult);
 

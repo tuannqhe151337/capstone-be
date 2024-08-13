@@ -1171,8 +1171,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<YearDiagramResult> generateYearDiagram(Integer year) {
-        return planRepository.generateYearDiagram(year);
+    public List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        Long departmentId = null;
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
     }
 
 

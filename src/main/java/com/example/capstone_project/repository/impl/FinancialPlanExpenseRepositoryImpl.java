@@ -47,7 +47,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " LEFT JOIN expense.supplier supplier " +
                 " LEFT JOIN expense.pic pic " +
                 " WHERE :planId = plan.id AND " +
-                " expense.name like :query AND " +
+                " (expense.name like :query OR expense.planExpenseKey like :query ) AND " +
                 " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
                 " (:statusId IS NULL OR status.id = :statusId) AND " +
@@ -147,7 +147,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 "                       (report_2.isDelete = false OR report_2.isDelete is null)" +
                 "                       GROUP BY plan_2.id)" +
                 " AND " +
-                " expense.name like :query AND " +
+                " (expense.name like :query OR expense.planExpenseKey like :query) AND " +
                 " (:departmentId IS NULL OR department.id = :departmentId) AND " +
                 " (:costTypeId IS NULL OR costType.id = :costTypeId) AND " +
                 " (:statusId IS NULL OR status.id = :statusId) AND " +

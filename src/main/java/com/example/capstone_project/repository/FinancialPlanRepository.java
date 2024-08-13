@@ -117,6 +117,12 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY currency.id, month (expenses.createdAt), year (expenses.createdAt)")
     List<TotalCostByCurrencyResult> calculateCostByPlanId(Long planId, ExpenseStatusCode statusCode);
 
-    
-    List<YearDiagramResult> generateYearDiagram(Integer year);
+    @Query(" SELECT month (term.finalEndTermDate) AS month, plan.actualCost AS actualCost, plan.expectedCost AS expectedCost FROM FinancialPlan plan " +
+            " JOIN plan.term term" +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " (plan.department.id = :departmentId OR :departmentId is null ) " +
+            " ORDER BY month (term.finalEndTermDate) ASC ")
+    List<YearDiagramResult> generateYearDiagram(Integer year, Long departmentId);
+
+    List<FinancialPlan> getReferenceByTermId(Long termId);
 }

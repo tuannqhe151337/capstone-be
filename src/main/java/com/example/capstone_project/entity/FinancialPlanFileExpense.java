@@ -19,7 +19,7 @@ public class FinancialPlanFileExpense extends BaseEntity {
     @JoinColumn(name = "file_id")
     private FinancialPlanFile file;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "expense_id")
     private FinancialPlanExpense planExpense;
 

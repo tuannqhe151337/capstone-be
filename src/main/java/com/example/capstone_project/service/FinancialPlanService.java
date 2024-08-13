@@ -77,5 +77,5 @@ public interface FinancialPlanService {
 
     CostResult calculateExpectedCostByPlanId(Long planId) throws Exception;
 
-    List<YearDiagramResult> generateYearDiagram(Integer year);
+    List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception;
 }

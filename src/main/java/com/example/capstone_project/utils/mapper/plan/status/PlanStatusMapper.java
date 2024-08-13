@@ -14,6 +14,6 @@ public interface PlanStatusMapper {
     StatusResponse mapToStatusResponseMapping(ReportStatus reportStatus);
 
     @Mapping(source = "id", target = "statusId")
-    @Mapping(source = "code.value", target = "code")
+    @Mapping(source = "code", target = "code")
     StatusResponse mapExpenseStatusToStatusResponseMapping(ExpenseStatus expenseStatus);
 }
