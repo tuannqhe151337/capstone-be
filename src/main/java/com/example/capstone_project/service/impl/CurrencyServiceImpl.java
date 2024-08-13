@@ -85,7 +85,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
             Currency currency = currencyOptional.get();
 
-            if (!currency.isDefault()) {
+            if (currency.isDefault()) {
                 throw new InvalidInputException("Can't delete default currency");
             }
 

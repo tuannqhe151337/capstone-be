@@ -7,20 +7,21 @@ import com.example.capstone_project.controller.body.expense.UploadReportExpenses
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
-import com.example.capstone_project.controller.responses.annualReport.diagram.CostTypeDiagramResponse;
+import com.example.capstone_project.controller.responses.report.CostTypeResponse;
+import com.example.capstone_project.controller.responses.report.DepartmentResponse;
+import com.example.capstone_project.controller.responses.report.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.report.CurrencyResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportExpectedCostResponse;
 import com.example.capstone_project.controller.responses.report.detail.ReportDetailResponse;
+import com.example.capstone_project.controller.responses.report.diagram.DepartmentDiagramResponse;
+import com.example.capstone_project.controller.responses.report.diagram.YearCostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.report.diagram.YearDiagramResponse;
 import com.example.capstone_project.controller.responses.report.expenses.ExpenseResponse;
 import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.repository.result.CostTypeDiagramResult;
-import com.example.capstone_project.repository.result.ReportDetailResult;
-import com.example.capstone_project.repository.result.ReportExpenseResult;
-import com.example.capstone_project.repository.result.YearDiagramResult;
+import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -567,6 +569,123 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
+
+    @GetMapping("/cost-type-year-diagram")
+    public ResponseEntity<ListResponse<CostTypeDiagramResponse>> getCostTypeYearDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            List<CostTypeDiagramResult> costTypeDiagrams = reportService.getYearCostTypeDiagram(year);
+
+            // Response
+            ListResponse<CostTypeDiagramResponse> response = new ListResponse<>();
+
+            if (costTypeDiagrams != null) {
+
+                costTypeDiagrams.forEach(costTypeDiagram -> response.getData().add(CostTypeDiagramResponse.builder()
+                        .totalCost(costTypeDiagram.getTotalCost())
+                        .costType(CostTypeResponse.builder()
+                                .costTypeId(costTypeDiagram.getCostTypeId())
+                                .name(costTypeDiagram.getCostTypeName())
+                                .build()).build()));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/department-year-diagram")
+    public ResponseEntity<ListResponse<DepartmentDiagramResponse>> getDepartmentYearDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            List<DepartmentDiagramResult> departmentDiagramResults = reportService.getYearDepartmentDiagram(year);
+
+            // Response
+            ListResponse<DepartmentDiagramResponse> response = new ListResponse<>();
+
+            if (departmentDiagramResults != null) {
+
+                departmentDiagramResults.forEach(costTypeDiagram -> response.getData().add(DepartmentDiagramResponse.builder()
+                        .totalCost(costTypeDiagram.getTotalCost())
+                        .department(DepartmentResponse.builder()
+                                .departmentId(costTypeDiagram.getDepartmentId())
+                                .name(costTypeDiagram.getDepartmentName())
+                                .build()).build()));
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/cost-type-report-diagram")
+    public ResponseEntity<ListResponse<YearCostTypeDiagramResponse>> getCostTypeReportDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagrams = reportService.getReportCostTypeDiagram(year);
+
+            // Response
+            ListResponse<YearCostTypeDiagramResponse> response = new ListResponse<>();
+
+            if (costTypeDiagrams != null) {
+                costTypeDiagrams.forEach((month, costTypeDiagramResults) -> {
+                    List<CostTypeDiagramResponse> list = new ArrayList<>();
+                    YearCostTypeDiagramResponse yearCostTypeDiagramResponse = YearCostTypeDiagramResponse.builder()
+                            .month(month)
+                            .build();
+                    costTypeDiagramResults.forEach(costTypeDiagramResult -> {
+                        list.add(
+                                CostTypeDiagramResponse.builder()
+                                        .totalCost(costTypeDiagramResult.getTotalCost())
+                                        .costType(CostTypeResponse.builder()
+                                                .costTypeId(costTypeDiagramResult.getCostTypeId())
+                                                .name(costTypeDiagramResult.getCostTypeName())
+                                                .build()).build());
+                    });
+                    yearCostTypeDiagramResponse.setDiagramResponses(list);
+                    response.getData().add(yearCostTypeDiagramResponse);
+                });
+
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            return ResponseEntity.ok(response);
+        } catch (
+                UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (
+                ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (
+                Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -556,17 +556,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.DOWNLOAD_PLAN.getValue())) {
-            long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
-
-            // Check department
-            if (departmentId == userDetail.getDepartmentId()) {
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    return planRepository.getListExpenseByFileId(fileId);
+                } else {
+                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+                }
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 return planRepository.getListExpenseByFileId(fileId);
-            } else {
-                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
             }
-        } else {
-            throw new UnauthorizedException("Unauthorized to download plan");
         }
+        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
@@ -774,18 +776,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             if (!planRepository.existsById(planId)) {
                 throw new ResourceNotFoundException("Not found any plan have id = " + planId);
             }
-
-            long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
-
-            // Check department
-            if (departmentId == userDetail.getDepartmentId()) {
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 return planRepository.getListExpenseByPlanId(planId);
-            } else {
-                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    return planRepository.getListExpenseByPlanId(planId);
+                } else {
+                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+                }
             }
-        } else {
-            throw new UnauthorizedException("Unauthorized to download plan");
         }
+        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
@@ -1168,6 +1172,23 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     @Override
     public CostResult calculateExpectedCostByPlanId(Long planId) throws Exception {
         return calculateCostByPlanIdAndStatusCode(planId, null);
+    }
+
+    @Override
+    public List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        Long departmentId = null;
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
     }
 
 

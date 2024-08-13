@@ -39,7 +39,7 @@ public class TermSchedulerService {
     private final FinancialPlanExpenseRepository planExpenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
 
-    @Scheduled(cron = "0 0 0 25 12 ?") // Execute at 12:00 AM every day
+    @Scheduled(cron = "0 00 00 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void startTerm() throws Exception {
@@ -69,7 +69,7 @@ public class TermSchedulerService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 25 12 ?") // Execute at 12:00 AM every day
+    @Scheduled(cron = "0 00 00 * * *") // Execute at 12:00 AM every day
     @Transactional
     @Async
     public void endTerm() throws Exception {
@@ -102,35 +102,51 @@ public class TermSchedulerService {
 
                 });
 
-                generateActualCostAndExpectedCost(term.getId());
-                generateReportStatistical(term.getId());
+                Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+                generateActualCostAndExpectedCostForPlan(term.getId(), defaultCurrency);
+                generateActualCostAndExpectedCostForReport(term.getId(), defaultCurrency);
+                generateReportStatistical(term.getId(), defaultCurrency);
             }
         }
     }
 
-    private void generateActualCostAndExpectedCost(Long termId) {
+    private void generateActualCostAndExpectedCostForPlan(Long termId, Currency defaultCurrency) {
+        List<FinancialPlan> plans = planRepository.getReferenceByTermId(termId);
+        List<FinancialPlan> savePlan = new ArrayList<>();
+        if (plans != null) {
+            plans.forEach(plan -> {
+                plan.setExpectedCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), null), defaultCurrency).getCost());
+
+                plan.setActualCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
+                savePlan.add(plan);
+            });
+
+            planRepository.saveAll(plans);
+        }
+    }
+
+
+    private void generateActualCostAndExpectedCostForReport(Long termId, Currency defaultCurrency) {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
         if (report != null) {
             financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null);
+            ;
 
-            report.setExpectedCost(calculateCostByPlanIdAndStatusCode(report.getId(), null).getCost());
+            report.setExpectedCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null), defaultCurrency).getCost());
 
-            report.setActualCost(calculateCostByPlanIdAndStatusCode(report.getId(), ExpenseStatusCode.APPROVED).getCost());
+            report.setActualCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
             financialReportRepository.save(report);
         }
     }
 
-    private void generateReportStatistical(Long termId) {
+    private void generateReportStatistical(Long termId, Currency defaultCurrency) {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
         if (report != null) {
 
             List<CostStatisticalByCurrencyResult> costStaticalByCurrencies = reportStatisticalRepository.getListCostStatistical(report.getId(), ExpenseStatusCode.APPROVED);
 
-
-            if (costStaticalByCurrencies == null) {
+            if (costStaticalByCurrencies != null) {
                 List<ReportStatistical> reportStatistics = new ArrayList<>();
-
-                Currency defaultCurrency = currencyRepository.getDefaultCurrency();
 
                 // Inner hashmap: map by currency id
                 HashMap<String, HashMap<Long, List<CostStatisticalByCurrencyResult>>> fromCurrencyIdHashMap = new HashMap<>();
@@ -160,6 +176,8 @@ public class TermSchedulerService {
                 for (String depIdCostId : fromCurrencyIdHashMap.keySet()) {
                     currencyIds.addAll(fromCurrencyIdHashMap.get(depIdCostId).keySet());
                 }
+
+                currencyIds.add(defaultCurrency.getId());
 
                 // Get list exchange rates
                 List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds.stream().toList());
@@ -202,16 +220,23 @@ public class TermSchedulerService {
                             toAmount = exchangeRateHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
                                     .get(costStatisticalByCurrency.getMonth() + "/" + costStatisticalByCurrency.getYear())
                                     .get(defaultCurrency.getId());
-                            if (costStatisticalByCurrency.getCost() != null)
+                            System.out.println("BUG____REPORT");
+                            System.out.println(costStatisticalByCurrency.getCost());
+                            System.out.println(toAmount);
+                            System.out.println(formAmount);
+                            if (costStatisticalByCurrency.getCost() != null && toAmount != null && formAmount != null) {
                                 totalCost = totalCost.add(costStatisticalByCurrency.getCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
-
-                            if (costStatisticalByCurrency.getBiggestCost() != null)
-                                biggestCost = costStatisticalByCurrency.getBiggestCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING);
-
-                            if (maxBiggestCost.longValue() < biggestCost.longValue()) {
-                                maxBiggestCost = costStatisticalByCurrency.getBiggestCost();
                             }
 
+                            if (costStatisticalByCurrency.getBiggestCost() != null && toAmount != null && formAmount != null) {
+                                biggestCost = costStatisticalByCurrency.getBiggestCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING);
+                            }
+
+                            if (biggestCost != null) {
+                                if (maxBiggestCost.longValue() < biggestCost.longValue()) {
+                                    maxBiggestCost = costStatisticalByCurrency.getBiggestCost();
+                                }
+                            }
                         }
                     }
                     // Split the string using the "_" delimiter
@@ -236,10 +261,8 @@ public class TermSchedulerService {
         }
     }
 
-    private CostResult calculateCostByPlanIdAndStatusCode(Long reportId, ExpenseStatusCode statusCode) {
-        List<TotalCostByCurrencyResult> costByCurrencyResults = financialReportRepository.calculateCostByReportIdAndStatus(reportId, statusCode);
+    private CostResult calculateCost(List<TotalCostByCurrencyResult> costByCurrencyResults, Currency defaultCurrency) {
 
-        Currency defaultCurrency = currencyRepository.getDefaultCurrency();
 
         if (costByCurrencyResults == null) {
             return CostResult.builder().cost(BigDecimal.valueOf(0))

@@ -3,6 +3,7 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -24,7 +25,7 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " plan.isDelete = false ")
     long countDistinct(@Param("query") String query, @Param("termId") Long termId, @Param("departmentId") Long departmentId);
 
-    @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.plan.id)) AS version FROM FinancialPlanFile file " +
+    @Query(value = "SELECT file.plan.id AS planId ,count(distinct (file.id)) AS version FROM FinancialPlanFile file " +
             " WHERE file.plan.name LIKE %:query% AND " +
             " (:termId IS NULL OR file.plan.term.id = :termId) AND " +
             " (:departmentId IS NULL OR file.plan.department.id = :departmentId) AND " +
@@ -116,4 +117,12 @@ public interface FinancialPlanRepository extends JpaRepository<FinancialPlan, Lo
             " GROUP BY currency.id, month (expenses.createdAt), year (expenses.createdAt)")
     List<TotalCostByCurrencyResult> calculateCostByPlanId(Long planId, ExpenseStatusCode statusCode);
 
+    @Query(" SELECT month (term.finalEndTermDate) AS month, plan.actualCost AS actualCost, plan.expectedCost AS expectedCost FROM FinancialPlan plan " +
+            " JOIN plan.term term" +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " (plan.department.id = :departmentId OR :departmentId is null ) " +
+            " ORDER BY month (term.finalEndTermDate) ASC ")
+    List<YearDiagramResult> generateYearDiagram(Integer year, Long departmentId);
+
+    List<FinancialPlan> getReferenceByTermId(Long termId);
 }

@@ -2,14 +2,12 @@ package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.ReportDetailResult;
-import com.example.capstone_project.repository.result.ReportExpenseResult;
-import com.example.capstone_project.repository.result.YearDiagramResult;
+import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 public interface FinancialReportService {
@@ -47,5 +45,12 @@ public interface FinancialReportService {
 
     void uploadReportExpenses(Long reportId, List<FinancialPlanExpense> rawExpenses) throws Exception;
 
-    List<YearDiagramResult> generateYearDiagram(Integer year);
+    List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception;
+
+    List<CostTypeDiagramResult> getYearCostTypeDiagram(Integer year) throws Exception;
+
+    List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception;
+
+    HashMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
+
 }
