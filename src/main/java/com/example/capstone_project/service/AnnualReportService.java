@@ -20,7 +20,7 @@ public interface AnnualReportService {
 
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
 
-    AnnualReport getAnnualReportDetail(Long annualReportId);
+    AnnualReport getAnnualReportDetail(Integer year);
 
     byte[] getBodyFileExcelXLSX(Long annualReportId) throws IOException;
 
