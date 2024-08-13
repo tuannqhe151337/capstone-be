@@ -15,7 +15,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (report.department.id = :departmentId OR :departmentId is null) AND " +
             " annualReport.isDelete = false AND report.isDelete = false " +
             " GROUP BY costTypeId, costTypeName " +
-            " ORDER BY totalCost desc LIMIT 5")
+            " ORDER BY totalCost ")
     List<CostTypeDiagramResult> getCostTypeYearDiagram(Integer year, Long departmentId);
 
     @Query(value = " SELECT report.department.id AS departmentId, report.department.name AS departmentName, sum(report.totalExpense) AS totalCost FROM AnnualReport annualReport " +
