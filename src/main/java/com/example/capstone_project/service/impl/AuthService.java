@@ -41,9 +41,9 @@ public class AuthService {
 
     private final UserDetailRepository userDetailRepository;
 
-    public LoginResult login(String username, String password) throws Exception {
+    public LoginResult login(String email, String password) throws Exception {
         // Login using authentication provider
-        Authentication usernamePasswordAuthenticationToken = this.authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        Authentication usernamePasswordAuthenticationToken = this.authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
         if (usernamePasswordAuthenticationToken == null || usernamePasswordAuthenticationToken.getPrincipal() == null) {
             throw new Exception();

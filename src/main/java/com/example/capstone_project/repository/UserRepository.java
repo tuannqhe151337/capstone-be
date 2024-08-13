@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     @Query(value = "select user from User user where user.username = :username and (user.isDelete = false or user.isDelete is null)")
     Optional<User> findActiveUserByUsername(String username);
 
+    @Query(value = "select user from User user where user.email = :email and (user.isDelete = false or user.isDelete is null)")
+    Optional<User> findActiveUserByEmail(String email);
+
     @Query(value = "select user from User user " +
             "join fetch user.role " +
             "join fetch user.department " +

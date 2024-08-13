@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class LoginRequestBody {
     @NotBlank
-    private String username;
+    private String email;
 
     @NotBlank
     private String password;

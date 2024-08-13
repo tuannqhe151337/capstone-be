@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 
+import com.example.capstone_project.controller.body.plan.checkUserExist.CheckUserExistBody;
 import com.example.capstone_project.controller.body.plan.create.NewPlanBody;
 import com.example.capstone_project.controller.body.plan.reupload.ListReUploadExpenseBody;
 import com.example.capstone_project.controller.body.plan.delete.DeletePlanBody;
@@ -436,7 +437,7 @@ public class FinancialPlanController {
 
     @PostMapping("/check-user-exist")
     public ResponseEntity<ListResponse<UserResponse>> checkUsernameExist(
-            @Valid @RequestBody List<String> listUsername, BindingResult bindingResult) throws Exception {
+            @Valid @RequestBody CheckUserExistBody checkUserExistBody, BindingResult bindingResult) throws Exception {
 
         if (bindingResult.hasErrors()) {
             // Xử lý lỗi validation và trả về phản hồi lỗi
@@ -447,8 +448,7 @@ public class FinancialPlanController {
         }
 
         try {
-
-            List<UserDownloadResult> checkUsernameExist = planService.checkUsernameExist(listUsername);
+            List<UserDownloadResult> checkUsernameExist = planService.checkUsernameExist(checkUserExistBody.getUsernameList());
 
             if (checkUsernameExist == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
