@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -648,7 +649,7 @@ public class ReportController {
     ) {
         try {
             // Get data
-            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagrams = reportService.getReportCostTypeDiagram(year);
+            TreeMap<String, List<CostTypeDiagramResult>> costTypeDiagrams = reportService.getReportCostTypeDiagram(year);
 
             // Response
             ListResponse<YearCostTypeDiagramResponse> response = new ListResponse<>();
