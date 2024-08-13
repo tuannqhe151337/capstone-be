@@ -13,6 +13,7 @@ public interface ReportDetailMapper {
     @Mapping(expression = "java(reportDetailResult.getTermName())", target = "term.name")
     @Mapping(expression = "java(reportDetailResult.getStartDate())", target = "term.startDate")
     @Mapping(expression = "java(reportDetailResult.getEndDate())", target = "term.endDate")
+    @Mapping(expression = "java(reportDetailResult.isAllowReupload())", target = "term.allowReupload")
     @Mapping(expression = "java(reportDetailResult.getReuploadStartDate())", target = "term.reuploadStartDate")
     @Mapping(expression = "java(reportDetailResult.getReuploadEndDate())", target = "term.reuploadEndDate")
     @Mapping(expression = "java(reportDetailResult.getFinalEndTermDate())", target = "term.finalEndTermDate")
