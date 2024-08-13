@@ -46,7 +46,8 @@ public class SeedConfiguration {
             ProjectRepository projectRepository,
             TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
-            CurrencyExchangeRateRepository currencyExchangeRateRepository
+            CurrencyExchangeRateRepository currencyExchangeRateRepository,
+            ReportStatisticalRepository reportStatisticalRepository
 
     ) {
         return args -> {
@@ -1201,17 +1202,23 @@ public class SeedConfiguration {
                     .name("Financial Plan 1")
                     .term(term1)
                     .department(itDepartment)
+                    .expectedCost(BigDecimal.valueOf(1214456313L))
+                    .actualCost(BigDecimal.valueOf(614456313L))
                     .build();
 
             FinancialPlan financialPlan2 = FinancialPlan.builder()
                     .name("Financial Plan 2")
                     .term(term2)
                     .department(itDepartment)
+                    .expectedCost(BigDecimal.valueOf(914456313L))
+                    .actualCost(BigDecimal.valueOf(524456313L))
                     .build();
 
             FinancialPlan financialPlan3 = FinancialPlan.builder()
                     .name("Financial Plan 3")
                     .term(term1)
+                    .expectedCost(BigDecimal.valueOf(2214456313L))
+                    .actualCost(BigDecimal.valueOf(1614456313L))
                     .department(accountingDepartment)
                     .build();
 
@@ -1219,65 +1226,87 @@ public class SeedConfiguration {
                     .name("Financial Plan 4")
                     .department(financeDepartment)
                     .term(term1)
+                    .expectedCost(BigDecimal.valueOf(1214456313L))
+                    .actualCost(BigDecimal.valueOf(114456313L))
                     .build();
 
             FinancialPlan financialPlan5 = FinancialPlan.builder()
                     .name("Financial Plan 5")
                     .term(term2)
+                    .expectedCost(BigDecimal.valueOf(1514456313L))
+                    .actualCost(BigDecimal.valueOf(1004456313L))
                     .department(accountingDepartment)
                     .build();
 
             FinancialPlan financialPlan6 = FinancialPlan.builder()
                     .name("Financial Plan 6")
                     .term(term3)
+                    .expectedCost(BigDecimal.valueOf(1214456313L))
+                    .actualCost(BigDecimal.valueOf(404456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan7 = FinancialPlan.builder()
                     .name("Financial Plan 7")
                     .term(term4)
+                    .expectedCost(BigDecimal.valueOf(1914456313L))
+                    .actualCost(BigDecimal.valueOf(1514456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan8 = FinancialPlan.builder()
                     .name("Financial Plan 8")
                     .term(term5)
+                    .expectedCost(BigDecimal.valueOf(1614456313L))
+                    .actualCost(BigDecimal.valueOf(1414456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan9 = FinancialPlan.builder()
                     .name("Financial Plan 9")
                     .term(term6)
+                    .expectedCost(BigDecimal.valueOf(2014456313L))
+                    .actualCost(BigDecimal.valueOf(154456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan10 = FinancialPlan.builder()
                     .name("Financial Plan 10")
                     .term(term7)
+                    .expectedCost(BigDecimal.valueOf(1914456313L))
+                    .actualCost(BigDecimal.valueOf(1004456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan11 = FinancialPlan.builder()
                     .name("Financial Plan 11")
                     .term(term8)
+                    .expectedCost(BigDecimal.valueOf(1914456313L))
+                    .actualCost(BigDecimal.valueOf(124456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan12 = FinancialPlan.builder()
                     .name("Financial Plan 12")
                     .term(term9)
+                    .expectedCost(BigDecimal.valueOf(1214456313L))
+                    .actualCost(BigDecimal.valueOf(614456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan13 = FinancialPlan.builder()
                     .name("Financial Plan 13")
                     .term(term10)
+                    .expectedCost(BigDecimal.valueOf(1314456313L))
+                    .actualCost(BigDecimal.valueOf(704456313L))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan14 = FinancialPlan.builder()
                     .name("Financial Plan 14")
                     .term(term11)
+                    .expectedCost(BigDecimal.valueOf(1514456313L))
+                    .actualCost(BigDecimal.valueOf(914456313L))
                     .department(itDepartment)
                     .build();
 
@@ -2630,10 +2659,10 @@ public class SeedConfiguration {
             random = new Random();
             projectNameChar = 'A';
 
-            for (int i = 1; i <= 15; i++) {
+            for (int i = 1; i <= 30; i++) {
                 int randomAnnualReportIndex = random.nextInt(6) + 1;
                 int randomCostTypeIndex = random.nextInt(6) + 1;
-                int randomDepartmentIndex = random.nextInt(3) + 1;
+                int randomDepartmentIndex = random.nextInt(6) + 1;
 
                 AnnualReport randomAnnualReport = switch (randomAnnualReportIndex) {
                     case 1 -> annualReport1;
@@ -2658,6 +2687,9 @@ public class SeedConfiguration {
                     case 1 -> accountingDepartment;
                     case 2 -> financeDepartment;
                     case 3 -> itDepartment;
+                    case 4 -> communicationDepartment;
+                    case 5 -> hrDepartment;
+                    case 6 -> marketingDepartment;
                     default -> accountingDepartment; // Default case, should never be reached
                 };
 
@@ -2876,6 +2908,66 @@ public class SeedConfiguration {
             }
 
             currencyExchangeRateRepository.saveAll(List.of(exchangeRate1_1, exchangeRate1_2, exchangeRate1_3, exchangeRate1_4, exchangeRate2_1, exchangeRate2_2, exchangeRate2_3, exchangeRate2_4, exchangeRate3_1, exchangeRate3_2, exchangeRate3_3, exchangeRate3_4, exchangeRate4_1, exchangeRate4_2, exchangeRate4_3, exchangeRate4_4, exchangeRate5_1, exchangeRate5_2, exchangeRate5_3, exchangeRate5_4, exchangeRate6_1, exchangeRate6_2, exchangeRate6_3, exchangeRate6_4));
+
+
+            List<ReportStatistical> statistics = new ArrayList<>();
+            random = new Random();
+            projectNameChar = 'A';
+
+            for (int i = 1; i <= 64; i++) {
+                int randomAnnualReportIndex = random.nextInt(13) + 1;
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomDepartmentIndex = random.nextInt(6) + 1;
+
+                FinancialReport randomReport = switch (randomAnnualReportIndex) {
+                    case 1 -> report1;
+                    case 2 -> report2;
+                    case 3 -> report3;
+                    case 4 -> report4;
+                    case 5 -> report5;
+                    case 6 -> report6;
+                    case 7 -> report7;
+                    case 8 -> report8;
+                    case 9 -> report9;
+                    case 10 -> report10;
+                    case 11 -> report11;
+                    case 12 -> report12;
+                    case 13 -> report13;
+                    default -> report1; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Department randomDepartment = switch (randomDepartmentIndex) {
+                    case 1 -> accountingDepartment;
+                    case 2 -> financeDepartment;
+                    case 3 -> itDepartment;
+                    case 4 -> communicationDepartment;
+                    case 5 -> hrDepartment;
+                    case 6 -> marketingDepartment;
+                    default -> accountingDepartment; // Default case, should never be reached
+                };
+
+                ReportStatistical report = ReportStatistical.builder()
+                        .totalExpense(BigDecimal.valueOf(random.nextInt(5000000) + 2000000))
+                        .biggestExpenditure(BigDecimal.valueOf(random.nextInt(1500000) + 100000))
+                        .report(randomReport)
+                        .department(randomDepartment)
+                        .costType(randomCostType)
+                        .build();
+
+                statistics.add(report);
+            }
+
+            reportStatisticalRepository.saveAll(statistics);
         };
     }
 }
