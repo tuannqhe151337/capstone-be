@@ -25,11 +25,11 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " LEFT JOIN term.financialPlans plan" +
             " WHERE term.name like %:query% AND " +
             " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
-            " term.status.name != :close AND " +
-            " term.endDate >= :now AND " +
+            " term.status.code != :close AND " +
+            " (term.startDate <= :now AND term.endDate >= :now) AND " +
             " term.isDelete = false ")
     long countDistinctListTermWhenCreatePlan(@Param("query") String query,
-                                             @Param("close") String close, @Param("now") LocalDateTime now,
+                                             @Param("close") TermCode close, @Param("now") LocalDateTime now,
                                              @Param("departmentId") Long departmentId);
 
     @Query(value = "SELECT count(distinct (term.id)) FROM Term term " +
