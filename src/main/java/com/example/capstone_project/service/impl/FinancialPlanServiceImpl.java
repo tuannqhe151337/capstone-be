@@ -60,6 +60,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final UserRepository userRepository;
     private final CurrencyRepository currencyRepository;
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository;
 
 
     @Override
@@ -196,6 +197,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             throw new InvalidDateException("Plan due date of this term was expired");
         }
 
+        plan.setActualCost(BigDecimal.valueOf(0));
+        plan.setExpectedCost(BigDecimal.valueOf(0));
+
+        FinancialPlan savedPlan = planRepository.save(plan);
         // Map plan
         plan.setDepartment(departmentRepository.getReferenceById(userDetail.getDepartmentId()));
         // Get expense status new
@@ -210,6 +215,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             expense.setStatus(status);
         });
 
+        expenseRepository.saveAll(expenses);
+
         List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
 
         FinancialPlanFile file = FinancialPlanFile.builder()
@@ -219,6 +226,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                 .planFileExpenses(expenseFile)
                 .build();
 
+        financialPlanFileRepository.save(file);
+
         expenses.forEach(expense -> {
             expenseFile.add(FinancialPlanFileExpense.builder()
                     .planExpense(expense)
@@ -226,13 +235,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     .build());
         });
 
-        List<FinancialPlanFile> files = new ArrayList<>();
+        financialPlanFileExpenseRepository.saveAll(expenseFile);
 
-        files.add(file);
-
-        plan.setPlanFiles(files);
-
-        return planRepository.save(plan);
+        return savedPlan;
     }
 
     public UserDetail getUserDetail() throws Exception {

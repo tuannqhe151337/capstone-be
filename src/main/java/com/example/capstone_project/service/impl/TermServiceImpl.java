@@ -198,8 +198,9 @@ public class TermServiceImpl implements TermService {
         LocalDateTime finalEndTermDate;
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
         TermInterval termInterval = termIntervalRepository.getReferenceById(1);
-        //check start term date must in 25
-        if (term.getStartDate().getDayOfMonth() != termInterval.getStartTermDate()) {
+        //check start term date must in 25-30
+        if (!(term.getStartDate().getDayOfMonth() >= termInterval.getStartTermDate()) &&
+                (term.getStartDate().getDayOfMonth() <= (termInterval.getStartTermDate() + termInterval.getEndTermInterval()))) {
             throw new InvalidStartTermDateException("Start date must be in day " + termInterval.getStartTermDate());
         }
 

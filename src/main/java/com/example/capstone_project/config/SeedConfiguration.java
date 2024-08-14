@@ -493,7 +493,7 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(marketingDepartment)
                     .position(juniorDev)
-                    .email("Email24u@gmail.com")
+                    .email("TuNM46@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2001, 11, 11, 0, 0, 0))
@@ -508,7 +508,7 @@ public class SeedConfiguration {
                     .role(financialStaff)
                     .department(itDepartment)
                     .position(staff)
-                    .email("Email25u@gmail.com")
+                    .email("TuanNQ47@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2001, 9, 11, 0, 0, 0))
@@ -524,7 +524,7 @@ public class SeedConfiguration {
                     .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email26u@gmail.com")
+                    .email("HoanNB3@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .isDelete(false)
@@ -539,7 +539,7 @@ public class SeedConfiguration {
                     .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(1997, 4, 2, 2, 3))
-                    .email("Email27u@gmail.com")
+                    .email("BaoNN15@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .isDelete(false)
@@ -554,7 +554,7 @@ public class SeedConfiguration {
                     .department(itDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("Email28u@gmail.com")
+                    .email("GiangDV9@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -599,7 +599,42 @@ public class SeedConfiguration {
                     .language("en")
                     .build();
 
-            userSettingRepository.saveAll(List.of(userSetting1, userSetting2, userSetting3, userSetting4, userSetting5));
+            UserSetting userSetting6 = UserSetting.builder()
+                    .user(user6)
+                    .darkMode(false)
+                    .theme("teal")
+                    .language("en")
+                    .build();
+
+            UserSetting userSetting7 = UserSetting.builder()
+                    .user(user7)
+                    .darkMode(false)
+                    .theme("teal")
+                    .language("en")
+                    .build();
+
+            UserSetting userSetting8 = UserSetting.builder()
+                    .user(user8)
+                    .darkMode(false)
+                    .theme("teal")
+                    .language("en")
+                    .build();
+
+            UserSetting userSetting9 = UserSetting.builder()
+                    .user(user9)
+                    .darkMode(false)
+                    .theme("teal")
+                    .language("en")
+                    .build();
+
+            UserSetting userSetting10 = UserSetting.builder()
+                    .user(user10)
+                    .darkMode(false)
+                    .theme("teal")
+                    .language("en")
+                    .build();
+
+            userSettingRepository.saveAll(List.of(userSetting1, userSetting2, userSetting3, userSetting4, userSetting5, userSetting6, userSetting7, userSetting8, userSetting9, userSetting10));
 
             // Role authorities
             RoleAuthority adminAuthority1 = RoleAuthority.builder()
@@ -903,9 +938,14 @@ public class SeedConfiguration {
                     .authority(viewPlan)
                     .build();
 
+            RoleAuthority financialStaffAuthority16 = RoleAuthority.builder()
+                    .role(financialStaff)
+                    .authority(viewCurrency)
+                    .build();
+
             roleAuthorityRepository.saveAll(List.of(adminAuthority1, adminAuthority2, adminAuthority3, adminAuthority4, adminAuthority5, adminAuthority6, adminAuthority7, adminAuthority8, adminAuthority9, adminAuthority10, adminAuthority14, adminAuthority15, adminAuthority16, adminAuthority17,
                     accountantAuthority1, accountantAuthority2, accountantAuthority3, accountantAuthority4, accountantAuthority5, accountantAuthority6, accountantAuthority7, accountantAuthority8, accountantAuthority9, accountantAuthority10, accountantAuthority11, accountantAuthority12, accountantAuthority13, accountantAuthority14, accountantAuthority15, accountantAuthority16, accountantAuthority17, accountantAuthority18, accountantAuthority19, accountantAuthority20, accountantAuthority21, accountantAuthority22, accountantAuthority23, accountantAuthority24, accountantAuthority25, accountantAuthority26, accountantAuthority27, accountantAuthority28, accountantAuthority29, accountantAuthority30, accountantAuthority31, accountantAuthority32, accountantAuthority33, accountantAuthority34, accountantAuthority35, accountantAuthority36,
-                    financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15
+                    financialStaffAuthority6, financialStaffAuthority7, financialStaffAuthority8, financialStaffAuthority9, financialStaffAuthority10, financialStaffAuthority11, financialStaffAuthority12, financialStaffAuthority13, financialStaffAuthority14, financialStaffAuthority15, financialStaffAuthority16
             ));
 
             // Report status
@@ -1352,24 +1392,32 @@ public class SeedConfiguration {
             FinancialPlan financialPlan15 = FinancialPlan.builder()
                     .name(term17.getName() + "_" + itDepartment.getName() + "_Plan 1")
                     .term(term17)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan16 = FinancialPlan.builder()
                     .name(term18.getName() + "_" + itDepartment.getName() + "_Plan 1")
                     .term(term18)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan17 = FinancialPlan.builder()
                     .name(term19.getName() + "_" + hrDepartment.getName() + "_Plan 1")
                     .term(term19)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(hrDepartment)
                     .build();
 
             FinancialPlan financialPlan18 = FinancialPlan.builder()
                     .name(term20.getName() + "_" + accountant.getName() + "_Plan 1")
                     .term(term20)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(accountingDepartment)
                     .build();
 
@@ -1377,11 +1425,15 @@ public class SeedConfiguration {
                     .name(termTester3.getName() + "_" + hrDepartment.getName() + "_Plan 1")
                     .term(termTester3)
                     .department(hrDepartment)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .build();
 
             FinancialPlan planTester2 = FinancialPlan.builder()
                     .name(termTester3.getName() + "_" + accountant.getName() + "_Plan 1")
                     .term(termTester3)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(accountingDepartment)
                     .build();
 
@@ -2759,7 +2811,7 @@ public class SeedConfiguration {
                     .year(2024)
                     .totalTerm(9)
                     .totalExpense(BigDecimal.valueOf(843513112))
-                    .totalDepartment(18)
+                    .totalDepartment(5)
                     .build();
 
             AnnualReport annualReport6 = AnnualReport.builder()
