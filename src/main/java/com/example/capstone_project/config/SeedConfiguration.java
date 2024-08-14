@@ -1352,24 +1352,32 @@ public class SeedConfiguration {
             FinancialPlan financialPlan15 = FinancialPlan.builder()
                     .name(term17.getName() + "_" + itDepartment.getName() + "_Plan 1")
                     .term(term17)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan16 = FinancialPlan.builder()
                     .name(term18.getName() + "_" + itDepartment.getName() + "_Plan 1")
                     .term(term18)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(itDepartment)
                     .build();
 
             FinancialPlan financialPlan17 = FinancialPlan.builder()
                     .name(term19.getName() + "_" + hrDepartment.getName() + "_Plan 1")
                     .term(term19)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(hrDepartment)
                     .build();
 
             FinancialPlan financialPlan18 = FinancialPlan.builder()
                     .name(term20.getName() + "_" + accountant.getName() + "_Plan 1")
                     .term(term20)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(accountingDepartment)
                     .build();
 
@@ -1377,11 +1385,15 @@ public class SeedConfiguration {
                     .name(termTester3.getName() + "_" + hrDepartment.getName() + "_Plan 1")
                     .term(termTester3)
                     .department(hrDepartment)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .build();
 
             FinancialPlan planTester2 = FinancialPlan.builder()
                     .name(termTester3.getName() + "_" + accountant.getName() + "_Plan 1")
                     .term(termTester3)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
                     .department(accountingDepartment)
                     .build();
 
@@ -2755,12 +2767,12 @@ public class SeedConfiguration {
                     .totalDepartment(6)
                     .build();
 
-//            AnnualReport annualReport5 = AnnualReport.builder()
-//                    .year(2024)
-//                    .totalTerm(9)
-//                    .totalExpense(BigDecimal.valueOf(843513112))
-//                    .totalDepartment(18)
-//                    .build();
+            AnnualReport annualReport5 = AnnualReport.builder()
+                    .year(2024)
+                    .totalTerm(9)
+                    .totalExpense(BigDecimal.valueOf(843513112))
+                    .totalDepartment(5)
+                    .build();
 
             AnnualReport annualReport6 = AnnualReport.builder()
                     .year(2025)
@@ -2769,7 +2781,7 @@ public class SeedConfiguration {
                     .totalDepartment(4)
                     .build();
 
-            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport6));
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4,annualReport5, annualReport6));
 
             List<Report> reports = new ArrayList<>();
             random = new Random();
