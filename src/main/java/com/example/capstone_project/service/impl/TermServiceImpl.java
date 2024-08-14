@@ -43,7 +43,7 @@ public class TermServiceImpl implements TermService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TermServiceImpl implements TermService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override

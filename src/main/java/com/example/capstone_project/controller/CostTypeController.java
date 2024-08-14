@@ -121,7 +121,7 @@ public class CostTypeController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<ExceptionResponse> updateCostType(
             @Valid @RequestBody UpdateCostTypeBody updateCostTypeBody, BindingResult bindingResult
     ) {
