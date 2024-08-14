@@ -2781,7 +2781,7 @@ public class SeedConfiguration {
                     .totalDepartment(4)
                     .build();
 
-            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4,annualReport5, annualReport6));
+            annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport5, annualReport6));
 
             List<Report> reports = new ArrayList<>();
             random = new Random();
