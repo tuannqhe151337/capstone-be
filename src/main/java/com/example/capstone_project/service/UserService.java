@@ -7,7 +7,10 @@ import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPa
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
+import com.example.capstone_project.controller.responses.user.diagram.UserOverTimeDiagramResponse;
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.repository.result.UserDepartmentDiagramResult;
+import com.example.capstone_project.repository.result.UserOverTimeDiagramResult;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -38,4 +41,9 @@ public interface UserService {
     String otpValidate(OTPBody otp, String authHeader) throws Exception;
 
     long countDistinct(String query, Long roleId, Long departmentId, Long positionId);
+
+    List<UserOverTimeDiagramResponse> getUserCreatedOverTimeDiagram(Integer year) throws Exception;
+
+    List<UserDepartmentDiagramResult> getNumberUserOfDepartmentDiagram() throws Exception;
+
 }

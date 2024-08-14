@@ -7,6 +7,7 @@ import com.example.capstone_project.controller.body.user.forgotPassword.ForgetPa
 import com.example.capstone_project.controller.body.user.otp.OTPBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.body.user.resetPassword.ResetPasswordBody;
+import com.example.capstone_project.controller.responses.user.diagram.UserOverTimeDiagramResponse;
 import com.example.capstone_project.entity.User;
 import com.example.capstone_project.entity.UserSetting;
 import com.example.capstone_project.entity.*;
@@ -16,9 +17,13 @@ import com.example.capstone_project.repository.redis.OTPTokenRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.redis.UserIdTokenRepository;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.repository.result.UpdateUserDataOption;
+import com.example.capstone_project.repository.result.UserDepartmentDiagramResult;
+import com.example.capstone_project.repository.result.UserOverTimeDiagramResult;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -43,14 +48,13 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.passay.DigestDictionaryRule.ERROR_CODE;
 
 import java.text.Normalizer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.Duration;
-import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_LIST_USERS.getValue())) {
             return userRepository.getUserWithPagination(roleId, departmentId, positionId, query, pageable);
-        }else{
+        } else {
             throw new UnauthorizedException("Unauthorized to view all users");
         }
     }
@@ -197,8 +201,7 @@ public class UserServiceImpl implements UserService {
         String newPassword = changePasswordBody.getNewPassword();
         long userId = UserHelper.getUserId();
         User user = userRepository.getReferenceById(userId);
-        if(user.getIsDelete())
-        {
+        if (user.getIsDelete()) {
             throw new ResourceNotFoundException("User not exist");
         }
         if (this.passwordEncoder.matches(oldPassword, user.getPassword())) {
@@ -225,12 +228,12 @@ public class UserServiceImpl implements UserService {
         try {
             //if user id is format wrong or null
             userId = Long.parseLong(userId_string);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new InvalidDataAccessResourceUsageException("Token and userID is invalid");
         }
         //Check user id existed
         Optional<User> user = userRepository.findById(userId);
-        if(user.isEmpty() || user.get().getIsDelete()) {
+        if (user.isEmpty() || user.get().getIsDelete()) {
             throw new ResourceNotFoundException("User not found");
         }
 
@@ -249,7 +252,6 @@ public class UserServiceImpl implements UserService {
         //return token
         return newTokenForUserId;
     }
-
 
 
     @Override
@@ -294,12 +296,64 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody){
+    public List<UserOverTimeDiagramResponse> getUserCreatedOverTimeDiagram(Integer year) throws Exception {
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ADMIN.getValue())) {
+            List<UserOverTimeDiagramResult> created = userRepository.getUserCreatedOverTimeDiagram(year);
+            List<UserOverTimeDiagramResult> deleted = userRepository.getUserDeletedOverTimeDiagram(year);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("M/yyyy");
+
+            // Sorting
+            TreeMap<String, UserOverTimeDiagramResponse> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            for (int i = 1; i < 13; i++) {
+                sortedMap.putIfAbsent(i + "/" + year, UserOverTimeDiagramResponse.builder().month(i + "/" + year).build());
+            }
+
+            created.forEach(diagram -> {
+                sortedMap.get(diagram.getMonth()).setNumberUserCreated(diagram.getNumberUser());
+            });
+
+            deleted.forEach(diagram -> {
+                sortedMap.get(diagram.getMonth()).setNumberUserDeleted(diagram.getNumberUser());
+            });
+
+            return sortedMap.values().stream().toList();
+        } else {
+            throw new UnauthorizedException("User unauthorized");
+        }
+
+    }
+
+    @Override
+    public List<UserDepartmentDiagramResult> getNumberUserOfDepartmentDiagram() throws Exception {
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ADMIN.getValue())) {
+            return userRepository.getNumberUserOfDepartmentDiagram();
+        } else {
+            throw new UnauthorizedException("User unauthorized");
+        }
+    }
+
+    @Override
+    public void resetPassword(String authHeader, ResetPasswordBody resetPasswordBody) {
         //get new password
         String newPassword = resetPasswordBody.getNewPassword();
         //get id from header to find that user
         String userId = userIdTokenRepository.find(authHeader);
-        if(userId == null || userId.isEmpty()){
+        if (userId == null || userId.isEmpty()) {
             throw new InvalidDataAccessResourceUsageException("UserId not found");
         }
         Optional<User> user = userRepository.findUserById(Long.parseLong(userId));
@@ -456,7 +510,7 @@ public class UserServiceImpl implements UserService {
         String normalized = Normalizer.normalize(fullname, Normalizer.Form.NFD);
 
         // Remove diacritical marks (combining characters)
-        fullname= normalized.replaceAll("\\p{M}", "");
+        fullname = normalized.replaceAll("\\p{M}", "");
 
         String[] nameParts = fullname.trim().split("\\s+");
         // Tạo username từ tên và họ
