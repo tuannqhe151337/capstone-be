@@ -26,26 +26,26 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     Optional<User> findActiveUserByEmail(String email);
 
     @Query(value = "select user from User user " +
-            "join fetch user.role " +
-            "join fetch user.department " +
-            "join fetch user.position " +
-            "join fetch user.userSetting " +
+            "left join fetch user.role " +
+            "left join fetch user.department " +
+            "left join fetch user.position " +
+            "left join fetch user.userSetting " +
             "where user.username = :username and (user.isDelete = false or user.isDelete is null)")
     Optional<User> findUserDetailedByUsername(String username);
 
     Optional<User> findUserById(Long userId);
 
     @Query(value = "select user from User user " +
-            "join fetch user.role " +
-            "join fetch user.department " +
-            "join fetch user.position " +
-            "join fetch user.userSetting " +
+            "left join fetch user.role " +
+            "left join fetch user.department " +
+            "left join fetch user.position " +
+            "left join fetch user.userSetting " +
             "where user.id = :userId")
     Optional<User> findUserDetailedById(Long userId);
 
     @Query(value = "select user from User user " +
-            "join fetch user.role " +
-            "join fetch user.department " +
+            "left join fetch user.role " +
+            "left join fetch user.department " +
             "where user.id = :userId and (user.isDelete = false or user.isDelete is null)"
     )
     Optional<User> findUserWithRoleAndDepartmentById(Long userId);
