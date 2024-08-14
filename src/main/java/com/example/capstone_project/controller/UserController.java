@@ -11,11 +11,20 @@ import com.example.capstone_project.controller.body.user.update.UpdateUserBody;
 import com.example.capstone_project.controller.body.user.updateUserSetting.UpdateUserSettingBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
+import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
+import com.example.capstone_project.controller.responses.report.CostTypeResponse;
+import com.example.capstone_project.controller.responses.report.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.token.Token;
+import com.example.capstone_project.controller.responses.user.DepartmentResponse;
+import com.example.capstone_project.controller.responses.user.diagram.UserDepartmentResponse;
+import com.example.capstone_project.controller.responses.user.diagram.UserOverTimeDiagramResponse;
 import com.example.capstone_project.controller.responses.user.list.UserResponse;
 import com.example.capstone_project.controller.responses.user.detail.UserDetailResponse;
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.repository.result.CostTypeDiagramResult;
+import com.example.capstone_project.repository.result.UserDepartmentDiagramResult;
+import com.example.capstone_project.repository.result.UserOverTimeDiagramResult;
 import com.example.capstone_project.service.UserService;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -121,10 +130,10 @@ public class UserController {
         } catch (InvalidDepartmentIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("department").message("Department does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch (InvalidPositionIdException e){
+        } catch (InvalidPositionIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("position").message("Position does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
-        } catch(InvalidRoleIdException e) {
+        } catch (InvalidRoleIdException e) {
             ExceptionResponse exObject = ExceptionResponse.builder().field("role").message("Role does not exist").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exObject);
         } catch (Exception e) {
@@ -140,11 +149,11 @@ public class UserController {
             User user = userService.getUserById(userid);
             UserDetailResponse userDetailResponse = new DetailUserResponseMapperImpl().mapToUserDetail(user);
             return ResponseEntity.status(HttpStatus.OK).body(userDetailResponse);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e ){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -194,12 +203,12 @@ public class UserController {
     public ResponseEntity<Object> activeUser(@Valid @RequestBody ActivateUserBody activateUserBody, BindingResult bindingResult) {
         try {
             userService.activateUser(activateUserBody);
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        } catch (ResourceNotFoundException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+        } catch (ResourceNotFoundException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("User not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
@@ -214,13 +223,12 @@ public class UserController {
             userService.changePassword(changePasswordBody);
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (IllegalArgumentException e) {
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Old password does not match").build();
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("Old password does not match").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch(ResourceNotFoundException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("User not found").build();
+        } catch (ResourceNotFoundException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("User not found").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
@@ -234,7 +242,7 @@ public class UserController {
         } catch (ResourceNotFoundException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("User not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
-        } catch (InvalidDataAccessResourceUsageException e){
+        } catch (InvalidDataAccessResourceUsageException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("UserID cannot be retrieved from AuthHeader").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
@@ -249,7 +257,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/forgot-password")
-    public ResponseEntity<Object> receiveEmail(@Valid  @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
+    public ResponseEntity<Object> receiveEmail(@Valid @RequestBody ForgetPasswordEmailBody forgetPasswordEmailBody, BindingResult bindingResult) {
         //return token   user:otp:absodjfaod, {userId: 1, otp: 374923}.
         String token = null;
         try {
@@ -257,13 +265,14 @@ public class UserController {
             Token tokenString = Token.builder().token(token).build();
             return ResponseEntity.status(HttpStatus.OK).body(tokenString);
         } catch (ResourceNotFoundException e) {
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message("Email not found").build();
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message("Email not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
+
     @PostMapping("/auth/otp")
     public ResponseEntity<Object> OTPValidate(@Valid @RequestHeader("Authorization") String authHeader, @Valid @RequestBody OTPBody otpBody, BindingResult bindingResult) {
         //return  Token  user:dnfpajsdfhp...:id, 6.
@@ -271,14 +280,74 @@ public class UserController {
             String token = userService.otpValidate(otpBody, authHeader);
             Token tokenString = Token.builder().token(token).build();
             return ResponseEntity.status(HttpStatus.OK).body(tokenString);
-        }catch (DataIntegrityViolationException | InvalidDataAccessResourceUsageException | ResourceNotFoundException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message(e.getMessage()).build();
+        } catch (DataIntegrityViolationException | InvalidDataAccessResourceUsageException |
+                 ResourceNotFoundException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch (UnauthorizedException e){
-            ExceptionResponse exceptionResponse =  ExceptionResponse.builder().field("error").message(e.getMessage()).build();
+        } catch (UnauthorizedException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse.builder().field("error").message(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/user-created-over-time-diagram")
+    public ResponseEntity<ListResponse<UserOverTimeDiagramResponse>> getUserCreatedOverTimeDiagram(
+            @RequestParam(required = true) Integer year
+    ) {
+        try {
+            // Get data
+            List<UserOverTimeDiagramResponse> diagramResults = userService.getUserCreatedOverTimeDiagram(year);
+
+            // Response
+            ListResponse<UserOverTimeDiagramResponse> response = new ListResponse<>();
+
+            if (diagramResults != null) {
+                response.setData(diagramResults);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/number-user-of-department-diagram")
+    public ResponseEntity<ListResponse<UserDepartmentResponse>> getNumberUserOfDepartmentDiagram() {
+        try {
+            // Get data
+            List<UserDepartmentDiagramResult> diagramResults = userService.getNumberUserOfDepartmentDiagram();
+
+            // Response
+            ListResponse<UserDepartmentResponse> response = new ListResponse<>();
+
+            if (diagramResults != null) {
+                diagramResults.forEach(userDepartmentDiagramResult -> {
+                    response.getData().add(UserDepartmentResponse.builder()
+                            .department(DepartmentResponse.builder().id(userDepartmentDiagramResult.getDepartmentId())
+                                    .name(userDepartmentDiagramResult.getDepartmentName())
+                                    .build())
+                            .numberUser(userDepartmentDiagramResult.getNumberUser())
+                            .build());
+                });
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

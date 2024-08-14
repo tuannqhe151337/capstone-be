@@ -1,6 +1,9 @@
 package com.example.capstone_project.repository;
+
 import com.example.capstone_project.entity.User;
+import com.example.capstone_project.repository.result.UserDepartmentDiagramResult;
 import com.example.capstone_project.repository.result.UserDownloadResult;
+import com.example.capstone_project.repository.result.UserOverTimeDiagramResult;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +55,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     long countDistinct(String query);
 
     @Query(value = "select count(distinct(user.id)) from User user " +
-            "where user.username like %:query% AND "+
+            "where user.username like %:query% AND " +
             " (:roleId IS NULL OR user.role.id = :roleId) AND " +
             " (:departmentId IS NULL OR user.department.id = :departmentId) AND " +
             " (:positionId IS NULL OR user.position.id = :positionId)")
@@ -60,7 +63,6 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
                        @Param("departmentId") Long departmentId,
                        @Param("positionId") Long positionId,
                        @Param("query") String query);
-
 
 
     @Query(value = "select user from User user " +
@@ -91,4 +93,24 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             " WHERE user.username IN :listUsername AND " +
             " (user.isDelete = false OR user.isDelete is null )")
     List<UserDownloadResult> checkUsernameExist(List<String> listUsername);
+
+    @Query(" SELECT concat(month (user.createdAt),'/', year(user.createdAt)) as month, count(distinct user.id) as numberUser FROM User user " +
+            " WHERE year (user.createdAt) = :year " +
+            " GROUP BY month")
+    List<UserOverTimeDiagramResult> getUserCreatedOverTimeDiagram(Integer year);
+
+    @Query(" SELECT concat(month (user.updatedAt),'/', year(user.updatedAt)) as month, count(distinct user.id) as numberUser FROM User user " +
+            " WHERE year (user.createdAt) = :year AND " +
+            " user.isDelete = true " +
+            " GROUP BY month ")
+    List<UserOverTimeDiagramResult> getUserDeletedOverTimeDiagram(Integer year);
+
+
+    @Query(" SELECT count ( distinct user.id) as numberUser, department.id as departmentId, department.name as departmentName  FROM User user " +
+            " JOIN user.department department " +
+            " WHERE user.isDelete = false AND department.isDelete = false " +
+            " GROUP BY department.id , department.name " +
+            " ORDER BY numberUser desc ")
+    List<UserDepartmentDiagramResult> getNumberUserOfDepartmentDiagram();
+
 }
