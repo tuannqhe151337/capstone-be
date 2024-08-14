@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
@@ -659,7 +660,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
     @Override
     @Transactional
-    public void approvalExpenses(Long reportId, List<Long> listExpenseId) throws Exception {
+    public List<ExpenseCodeResponse> approvalExpenses(Long reportId, List<Long> listExpenseId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -692,12 +693,13 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
                 // Get report of this list expense
                 FinancialReport report = financialReportRepository.findById(reportId).get();
-
+                List<ExpenseCodeResponse> list = new ArrayList<>();
                 for (Long expenseId : listExpenseId) {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expenseId);
 
                     if (updateExpense.getPlanExpenseKey() == null || updateExpense.getPlanExpenseKey().isEmpty()) {
                         updateExpense.setPlanExpenseKey(report.getName() + "_" + (++index));
+                        list.add(ExpenseCodeResponse.builder().expenseId(expenseId).expenseCode(updateExpense.getPlanExpenseKey()).build());
                     }
 
                     updateExpense.setStatus(approval);
@@ -713,6 +715,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 financialReportRepository.save(report);
 
                 expenseRepository.saveAll(expenses);
+
+                return list;
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }

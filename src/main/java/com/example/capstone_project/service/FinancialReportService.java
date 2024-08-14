@@ -1,5 +1,6 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
 import com.example.capstone_project.repository.result.*;
@@ -38,7 +39,7 @@ public interface FinancialReportService {
 
     CostResult calculateExpectedCostByReportId(Long reportId) throws Exception;
 
-    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+    List<ExpenseCodeResponse>  approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 

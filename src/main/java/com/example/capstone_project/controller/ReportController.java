@@ -9,6 +9,7 @@ import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.report.CostTypeResponse;
 import com.example.capstone_project.controller.responses.report.DepartmentResponse;
+import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.controller.responses.report.diagram.CostTypeDiagramResponse;
 import com.example.capstone_project.controller.responses.report.CurrencyResponse;
 import com.example.capstone_project.controller.responses.report.calculate.ReportActualCostResponse;
@@ -424,7 +425,7 @@ public class ReportController {
     }
 
     @PutMapping("/expense-approval")
-    public ResponseEntity<ExceptionResponse> approvalExpenses(
+    public ResponseEntity<ListResponse<ExpenseCodeResponse>> approvalExpenses(
             @Valid @RequestBody ApprovalExpenseBody body, BindingResult bindingResult) throws Exception {
 
         if (bindingResult.hasErrors()) {
@@ -432,21 +433,21 @@ public class ReportController {
             String errorMessage = bindingResult.getAllErrors().stream()
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.joining(", "));
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ExceptionResponse.builder().field("Validation Error").message(errorMessage).build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         try {
+            ListResponse<ExpenseCodeResponse> response = new ListResponse<>();
+            List<ExpenseCodeResponse> codeResponses = reportService.approvalExpenses(body.getReportId(), body.getListExpenseId());
 
-            reportService.approvalExpenses(body.getReportId(), body.getListExpenseId());
-
-            return ResponseEntity.status(HttpStatus.OK).body(ExceptionResponse.builder().field("Update Successful").message("Approval expense successful.").build());
+            if (codeResponses != null) {
+                response.setData(codeResponses);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse.builder().field("Unauthorized Error").message("User not allowed to approval expense").build());
-        } catch (InvalidInputException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Your list expense id invalid or can not re-upload plan in this time period").build());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Validation Error").message("Not found any report have id = " + body.getReportId() + " or list expense is empty").build());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (InvalidInputException | ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
