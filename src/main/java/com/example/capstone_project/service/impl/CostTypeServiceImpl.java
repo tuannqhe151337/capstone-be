@@ -71,6 +71,8 @@ public class CostTypeServiceImpl implements CostTypeService {
             }
             CostType updateCostType = costTypeRepository.getReferenceById(costType.getId());
 
+            updateCostType.setName(updateCostType.getName());
+
             costTypeRepository.save(updateCostType);
         } else {
             throw new UnauthorizedException("Unauthorized to update cost type");
