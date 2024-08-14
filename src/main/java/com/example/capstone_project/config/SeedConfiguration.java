@@ -2553,7 +2553,7 @@ public class SeedConfiguration {
 
             FinancialReport report1 = FinancialReport.builder()
                     .name(term1.getName() + "_Report")
-                    .month(LocalDate.of(2024, 1, 5))
+                    .month(term1.getFinalEndTermDate().toLocalDate())
                     .expectedCost(BigDecimal.valueOf(601660487L))
                     .actualCost(BigDecimal.valueOf(216579382))
                     .status(newReportStatus)
@@ -2562,7 +2562,7 @@ public class SeedConfiguration {
 
             FinancialReport report2 = FinancialReport.builder()
                     .name(term2.getName() + "_Report")
-                    .month(LocalDate.of(2024, 2, 5))
+                    .month(term2.getFinalEndTermDate().toLocalDate())
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(516579382))
                     .status(waitingForApprovalReportStatus)
@@ -2571,7 +2571,7 @@ public class SeedConfiguration {
 
             FinancialReport report3 = FinancialReport.builder()
                     .name(term3.getName() + "_Report")
-                    .month(LocalDate.of(2024, 3, 5))
+                    .month(term3.getFinalEndTermDate().toLocalDate())
                     .expectedCost(BigDecimal.valueOf(1001660487L))
                     .actualCost(BigDecimal.valueOf(706579382))
                     .status(waitingForApprovalReportStatus)
@@ -2582,7 +2582,7 @@ public class SeedConfiguration {
                     .name(term4.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
-                    .month(LocalDate.of(2024, 4, 5))
+                    .month(term4.getFinalEndTermDate().toLocalDate())
                     .status(reviewedReportStatus)
                     .term(term4)
                     .build();
@@ -2591,7 +2591,7 @@ public class SeedConfiguration {
                     .name(term5.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(801660487L))
                     .actualCost(BigDecimal.valueOf(585579382))
-                    .month(LocalDate.of(2024, 5, 5))
+                    .month(term5.getFinalEndTermDate().toLocalDate())
                     .status(reviewedReportStatus)
                     .term(term5)
                     .build();
@@ -2600,7 +2600,7 @@ public class SeedConfiguration {
                     .name(term6.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(801660487L))
                     .actualCost(BigDecimal.valueOf(516579382))
-                    .month(LocalDate.of(2024, 6, 5))
+                    .month(term6.getFinalEndTermDate().toLocalDate())
                     .status(closedReportStatus)
                     .term(term6)
                     .build();
@@ -2609,7 +2609,7 @@ public class SeedConfiguration {
                     .name(term7.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(1001660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
-                    .month(LocalDate.of(2024, 7, 5))
+                    .month(term7.getFinalEndTermDate().toLocalDate())
                     .status(newReportStatus)
                     .term(term7)
                     .build();
@@ -2618,7 +2618,7 @@ public class SeedConfiguration {
                     .name(term8.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(701660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
-                    .month(LocalDate.of(2024, 8, 5))
+                    .month(term8.getFinalEndTermDate().toLocalDate())
                     .status(waitingForApprovalReportStatus)
                     .term(term8)
                     .build();
@@ -2627,7 +2627,7 @@ public class SeedConfiguration {
                     .name(term9.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(401660487L))
                     .actualCost(BigDecimal.valueOf(316579382))
-                    .month(LocalDate.of(2024, 9, 5))
+                    .month(term9.getFinalEndTermDate().toLocalDate())
                     .status(waitingForApprovalReportStatus)
                     .term(term9)
                     .build();
@@ -2636,7 +2636,7 @@ public class SeedConfiguration {
                     .name(term10.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
-                    .month(LocalDate.of(2024, 10, 5))
+                    .month(term10.getFinalEndTermDate().toLocalDate())
                     .status(newReportStatus)
                     .term(term10)
                     .build();
@@ -2645,7 +2645,7 @@ public class SeedConfiguration {
                     .name(term11.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(131660487L))
                     .actualCost(BigDecimal.valueOf(1216579382))
-                    .month(LocalDate.of(2024, 11, 5))
+                    .month(term11.getFinalEndTermDate().toLocalDate())
                     .status(closedReportStatus)
                     .term(term11)
                     .build();
@@ -2654,7 +2654,7 @@ public class SeedConfiguration {
                     .name(term12.getName() + "_Report")
                     .expectedCost(BigDecimal.valueOf(151660487L))
                     .actualCost(BigDecimal.valueOf(1006579382))
-                    .month(LocalDate.of(2024, 12, 5))
+                    .month(term12.getFinalEndTermDate().toLocalDate())
                     .status(waitingForApprovalReportStatus)
                     .term(term12)
                     .build();

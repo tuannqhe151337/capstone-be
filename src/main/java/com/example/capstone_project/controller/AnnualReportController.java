@@ -195,7 +195,7 @@ public class AnnualReportController {
         }
     }
 
-    @PostMapping("/download-xlsx")
+    @GetMapping("/download-xlsx")
     public ResponseEntity<byte[]> generateXlsxReport(
             @RequestParam(required = true) Long annualReportId
     ) throws Exception {
