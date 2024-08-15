@@ -1843,6 +1843,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlanFile financialPlanFile15_1 = FinancialPlanFile.builder()
+                    .id(42L)
                     .name(financialPlan15.getName())
                     .plan(financialPlan15)
                     .plan(financialPlan15)
@@ -1850,36 +1851,42 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlanFile financialPlanFile16_1 = FinancialPlanFile.builder()
+                    .id(43L)
                     .name(financialPlan16.getName())
                     .plan(financialPlan16)
                     .user(user6)
                     .build();
 
             FinancialPlanFile financialPlanFile17_1 = FinancialPlanFile.builder()
+                    .id(44L)
                     .name(financialPlan17.getName())
                     .plan(financialPlan17)
                     .user(user6)
                     .build();
 
             FinancialPlanFile financialPlanFile18_1 = FinancialPlanFile.builder()
+                    .id(45L)
                     .name(financialPlan18.getName())
                     .plan(financialPlan18)
                     .user(user7)
                     .build();
 
             FinancialPlanFile planTester1_1 = FinancialPlanFile.builder()
+                    .id(46L)
                     .name(planTester1.getName())
                     .plan(planTester1)
                     .user(user7)
                     .build();
 
             FinancialPlanFile planTester1_2 = FinancialPlanFile.builder()
+                    .id(47L)
                     .name(planTester1.getName())
                     .plan(planTester1)
                     .user(user6)
                     .build();
 
             FinancialPlanFile planTester1_3 = FinancialPlanFile.builder()
+                    .id(48L)
                     .name(planTester1.getName())
                     .plan(planTester1)
                     .user(user6)
@@ -2046,6 +2053,7 @@ public class SeedConfiguration {
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
             // Get 64 random expense usd for plan 15, 16, 17, 18
+            expenseList = new ArrayList<>();
             random = new Random();
             projectNameChar = 'A';
 

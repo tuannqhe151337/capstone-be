@@ -35,14 +35,14 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     long countListExpenseInReport(Long reportId, List<Long> listExpensesId, TermCode inProgress, LocalDateTime now);
 
     @Query(" SELECT count(distinct (expense.id)) FROM FinancialPlanExpense expense " +
-            " LEFT JOIN expense.files files " +
-            " LEFT JOIN files.file file " +
-            " LEFT JOIN file.plan plan " +
-            " LEFT JOIN expense.status status " +
-            " LEFT JOIN expense.costType costType " +
-            " LEFT JOIN expense.project project " +
-            " LEFT JOIN expense.supplier supplier " +
-            " LEFT JOIN expense.pic pic " +
+            " JOIN expense.files files " +
+            " JOIN files.file file " +
+            " JOIN file.plan plan " +
+            " JOIN expense.status status " +
+            " JOIN expense.costType costType " +
+            " JOIN expense.project project " +
+            " JOIN expense.supplier supplier " +
+            " JOIN expense.pic pic " +
             " WHERE plan.id = :planId AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.name like %:query% AND " +
@@ -87,9 +87,9 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
 
     @Query(value = "SELECT expenses FROM FinancialPlanExpense expenses " +
-            " LEFT JOIN expenses.files files " +
-            " LEFT JOIN files.file file " +
-            " LEFT JOIN file.plan plan " +
+            " JOIN expenses.files files " +
+            " JOIN files.file file " +
+            " JOIN file.plan plan " +
             " WHERE plan.id = :planId AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " file.isDelete = false AND expenses.isDelete = false ")
@@ -118,15 +118,15 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     List<FinancialPlanExpense> getListExpenseLastVersionByPlanId(Long planId);
 
     @Query(" SELECT count(distinct(expense.id)) FROM FinancialPlanExpense expense " +
-            " LEFT JOIN expense.files files " +
-            " LEFT JOIN files.file file " +
-            " LEFT JOIN file.plan plan " +
-            " LEFT JOIN plan.department department " +
-            " LEFT JOIN expense.status status " +
-            " LEFT JOIN expense.costType costType " +
-            " LEFT JOIN expense.project project " +
-            " LEFT JOIN expense.supplier supplier " +
-            " LEFT JOIN expense.pic pic " +
+            " JOIN expense.files files " +
+            " JOIN files.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.department department " +
+            " JOIN expense.status status " +
+            " JOIN expense.costType costType " +
+            " JOIN expense.project project " +
+            " JOIN expense.supplier supplier " +
+            " JOIN expense.pic pic " +
             " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
@@ -147,13 +147,13 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     @Query(" SELECT expense.id AS expenseId, expense.planExpenseKey AS expenseCode, expense.createdAt AS date, term.name AS termName, department.name AS departmentName, expense.name AS expenseName," +
             " costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount,(expense.unitPrice*expense.amount) AS total ,expense.project.name AS projectName, expense.supplier.name AS supplierName, expense.pic.username AS picName," +
             " expense.note AS note, status.code AS statusCode, expense.currency.name AS currencyName FROM FinancialPlanExpense expense " +
-            " LEFT JOIN expense.files files " +
-            " LEFT JOIN files.file file " +
-            " LEFT JOIN file.plan plan " +
-            " LEFT JOIN plan.term term " +
-            " LEFT JOIN plan.department department " +
-            " LEFT JOIN expense.status status " +
-            " LEFT JOIN expense.costType costType " +
+            " JOIN expense.files files " +
+            " JOIN files.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN plan.department department " +
+            " JOIN expense.status status " +
+            " JOIN expense.costType costType " +
             " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
@@ -166,13 +166,13 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
     List<ExpenseResult> getListExpenseByReportId(Long reportId);
 
     @Query(" SELECT expense FROM FinancialPlanExpense expense " +
-            " LEFT JOIN expense.files files " +
-            " LEFT JOIN files.file file " +
-            " LEFT JOIN file.plan plan " +
-            " LEFT JOIN plan.term term " +
-            " LEFT JOIN plan.department department " +
-            " LEFT JOIN expense.status status " +
-            " LEFT JOIN expense.costType costType " +
+            " JOIN expense.files files " +
+            " JOIN files.file file " +
+            " JOIN file.plan plan " +
+            " JOIN plan.term term " +
+            " JOIN plan.department department " +
+            " JOIN expense.status status " +
+            " JOIN expense.costType costType " +
             " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
             "                       JOIN file_2.plan plan_2 " +
             "                       JOIN plan_2.term term_2 " +
