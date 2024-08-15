@@ -126,19 +126,19 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
     @Override
     public List<ReportExpenseResult> getListExpenseForReport(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Pageable pageable) {
         // HQL query
-        String hql = " SELECT new com.example.capstone_project.repository.result.ReportExpenseResult " +
+        String hql = " SELECT DISTINCT new com.example.capstone_project.repository.result.ReportExpenseResult " +
                 " (expense.id AS expenseId, expense.planExpenseKey AS expenseCode, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
                 " expense.supplier.id AS supplierId, expense.supplier.name AS supplierName, expense.pic.id AS picId, expense.pic.username AS picName, expense.note AS note, status.id AS statusId, cast(status.code AS string) AS statusCode ,status.name AS statusName, department.id AS departmentId, department.name AS departmentName, " +
                 " expense.currency AS currency, expense.createdAt, expense.updatedAt) FROM FinancialPlanExpense expense " +
-                " LEFT JOIN expense.files files " +
-                " LEFT JOIN files.file file " +
-                " LEFT JOIN file.plan plan " +
-                " LEFT JOIN plan.department department " +
-                " LEFT JOIN expense.status status " +
-                " LEFT JOIN expense.costType costType " +
-                " LEFT JOIN expense.project project " +
-                " LEFT JOIN expense.supplier supplier " +
-                " LEFT JOIN expense.pic pic " +
+                " JOIN expense.files files " +
+                " JOIN files.file file " +
+                " JOIN file.plan plan " +
+                " JOIN plan.department department " +
+                " JOIN expense.status status " +
+                " JOIN expense.costType costType " +
+                " JOIN expense.project project " +
+                " JOIN expense.supplier supplier " +
+                " JOIN expense.pic pic " +
                 " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
                 "                       JOIN file_2.plan plan_2 " +
                 "                       JOIN plan_2.term term_2 " +
