@@ -71,7 +71,7 @@ public class CostTypeServiceImpl implements CostTypeService {
             }
             CostType updateCostType = costTypeRepository.getReferenceById(costType.getId());
 
-            updateCostType.setName(updateCostType.getName());
+            updateCostType.setName(costType.getName());
 
             costTypeRepository.save(updateCostType);
         } else {
