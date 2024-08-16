@@ -1,7 +1,6 @@
 package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.utils.enums.TermCode;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

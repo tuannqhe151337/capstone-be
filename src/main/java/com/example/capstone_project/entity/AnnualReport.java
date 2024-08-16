@@ -2,12 +2,8 @@ package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -37,6 +33,6 @@ public class AnnualReport extends BaseEntity{
     @Column(name = "is_delete",columnDefinition = "bit default 0")
     private boolean isDelete;
 
-    @OneToMany(mappedBy = Report_.ANNUAL_REPORT)
-    private List<Report> reports;
+    @OneToMany(mappedBy = MonthlyReportSummary_.ANNUAL_REPORT)
+    private List<MonthlyReportSummary> monthlyReportSummaries;
 }

@@ -1,11 +1,10 @@
 package com.example.capstone_project.service;
 
 import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.MonthlyReportSummary;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.domain.Pageable;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface AnnualReportService {
 
     long countDistinctListAnnualReportPaging(String year);
 
-    List<Report> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable);
+    List<MonthlyReportSummary> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable);
 
     long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId);
 

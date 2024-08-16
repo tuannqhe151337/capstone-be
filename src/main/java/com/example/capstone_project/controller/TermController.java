@@ -17,25 +17,19 @@ import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.entity.TermInterval;
 import com.example.capstone_project.service.TermIntervalService;
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
-
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTermEntityMapperImpl;
-import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapper;
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 
 
 import com.example.capstone_project.utils.mapper.term.termInterval.TermIntervalMapperImpl;
-import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermEntityMapper;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermEntityMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,15 +1,16 @@
-package com.example.capstone_project.controller.body.report.delete;
+package com.example.capstone_project.controller.body.report.completeReview;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class DeleteReportBody {
+@NoArgsConstructor
+public class CompleteReviewReportBody {
     @NotNull(message = "Report id can't be null")
-    private Long reportId;
+    private long reportId;
 }

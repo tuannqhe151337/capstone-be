@@ -2,19 +2,17 @@ package com.example.capstone_project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 @Entity
-@Table(schema = "capstone_v2",name = "reports")
+@Table(schema = "capstone_v2",name = "monthly_report_summaries")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
-public class Report extends BaseEntity{
+public class MonthlyReportSummary extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
