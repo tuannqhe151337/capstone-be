@@ -15,7 +15,8 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " WHEN EXISTS (SELECT 1 FROM Term term " +
             " JOIN term.financialPlans plan " +
             " WHERE term.id = :termId AND " +
-            " plan.department.id = :departmentId) " +
+            " plan.department.id = :departmentId AND " +
+            " plan.isDelete = false )" +
             " THEN true " +
             " ELSE false " +
             " END ")

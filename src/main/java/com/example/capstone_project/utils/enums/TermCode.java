@@ -1,5 +1,8 @@
 package com.example.capstone_project.utils.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum TermCode {
 
     IN_PROGRESS("IN PROGRESS"),
@@ -10,10 +13,6 @@ public enum TermCode {
 
     TermCode(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
 }

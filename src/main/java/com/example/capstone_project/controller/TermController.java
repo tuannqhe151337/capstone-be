@@ -294,6 +294,11 @@ public class TermController {
                     .builder().field("error").message("Term not found")
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (InvalidDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("error").message("Only can delete term when status is new")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }

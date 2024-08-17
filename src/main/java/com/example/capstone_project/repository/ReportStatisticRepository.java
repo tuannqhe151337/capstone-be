@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ReportStatisticalRepository extends JpaRepository<ReportStatistical, Long> {
+public interface ReportStatisticRepository extends JpaRepository<ReportStatistical, Long> {
     @Query(" SELECT expense.currency.id AS currencyId, month(expense.createdAt) AS month, year(expense.createdAt) AS year, sum(expense.unitPrice*expense.amount) AS cost, max(expense.unitPrice*expense.amount) as biggestCost, plan.department.id AS departmentId, expense.costType.id AS costTypeId FROM FinancialPlanExpense expense " +
             " LEFT JOIN expense.files files " +
             " LEFT JOIN files.file file " +
