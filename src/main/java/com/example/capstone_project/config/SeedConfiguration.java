@@ -1259,6 +1259,7 @@ public class SeedConfiguration {
                     .reuploadEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0)))
                     .user(user4)
+                    .allowReupload(true)
                     .status(termStatus2)
                     .build();
 
