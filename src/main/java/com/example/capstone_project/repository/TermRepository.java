@@ -1,7 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +30,7 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " (term.startDate <= :now AND term.endDate >= :now) AND " +
             " term.isDelete = false ")
     long countDistinctListTermWhenCreatePlan(@Param("query") String query,
-                                             @Param("close") TermCode close, @Param("now") LocalDateTime now,
+                                             @Param("close") TermStatusCode close, @Param("now") LocalDateTime now,
                                              @Param("departmentId") Long departmentId);
 
     @Query(value = "SELECT count(distinct (term.id)) FROM Term term " +
@@ -57,13 +57,13 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " WHERE term.status.code = :termCode AND " +
             " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
-    List<Term> getListTermNeedToStart(TermCode termCode, LocalDateTime now);
+    List<Term> getListTermNeedToStart(TermStatusCode termCode, LocalDateTime now);
 
     @Query(value = " SELECT term FROM Term term " +
             " WHERE term.status.code = :termCode AND " +
             " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
-    List<Term> getListTermNeedToClose(TermCode termCode, LocalDateTime now);
+    List<Term> getListTermNeedToClose(TermStatusCode termCode, LocalDateTime now);
 
     @Query( " SELECT term FROM FinancialPlan plan " +
             " JOIN plan.term term " +

@@ -3,22 +3,17 @@ package term;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Set;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 
-import com.example.capstone_project.service.TermIntervalService;
 import com.example.capstone_project.service.impl.TermServiceImpl;
-import com.example.capstone_project.service.impl.UserServiceImpl;
 import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.enums.TermDuration;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.helper.UserHelper;
@@ -28,10 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -109,7 +102,7 @@ public class TermServiceTest {
                 builder()
                 .id(1L).
                 name("Not started")
-                .code(TermCode.NEW).build();
+                .code(TermStatusCode.NEW).build();
 
         // Mock the SecurityContextHolder to return a valid user ID
         SecurityContext securityContext = mock(SecurityContext.class);

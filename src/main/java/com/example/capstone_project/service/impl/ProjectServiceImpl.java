@@ -1,7 +1,7 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.entity.MonthlyReportSummary_;
 import com.example.capstone_project.entity.Project;
-import com.example.capstone_project.entity.Report_;
 import com.example.capstone_project.repository.ProjectRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.service.ProjectService;
@@ -114,7 +114,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (listAuthorities.contains(AuthorityCode.VIEW_PROJECT.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_PLAN.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            return projectRepository.findAll(Sort.by(Report_.ID).ascending());
+            return projectRepository.findAll(Sort.by(MonthlyReportSummary_.ID).ascending());
         } else {
             throw new UnauthorizedException("Unauthorized to view list project");
         }

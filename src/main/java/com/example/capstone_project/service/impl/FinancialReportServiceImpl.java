@@ -9,7 +9,6 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.service.result.CostResult;
-import com.example.capstone_project.service.result.ExchangeResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
@@ -18,6 +17,9 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -50,7 +52,8 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final SupplierRepository supplierRepository;
     private final CurrencyRepository currencyRepository;
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
-    private final ReportRepository reportRepository;
+    private final MonthlyReportSummaryRepository monthlyReportSummaryRepository;
+    private final FirebaseMessaging firebaseMessaging;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -434,7 +437,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseToApprovedByReportId(reportId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseToApprovedByReportId(reportId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
             if (expenses == null || expenses.isEmpty()) {
                 throw new ResourceNotFoundException("Not exist report id = " + reportId + " or list expense is empty");
             }
@@ -483,7 +486,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense in one report
-            List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
 
             if (listExpenseId.size() == expenseResults.size()) {
 
@@ -562,10 +565,10 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            return reportRepository.getCostTypeYearDiagram(year, departmentId);
+            return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
-            return reportRepository.getCostTypeYearDiagram(year, departmentId);
+            return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
         }
@@ -576,7 +579,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            return reportRepository.getDepartmentYearDiagram(year);
+            return monthlyReportSummaryRepository.getDepartmentYearDiagram(year);
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
         }
@@ -588,7 +591,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
+            List<CostTypeDiagramResult> costTypeDiagramResultList = monthlyReportSummaryRepository.getReportCostTypeDiagram(year, departmentId);
 
             if (costTypeDiagramResultList == null) {
                 return new TreeMap<>();
@@ -622,7 +625,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
 
-            List<CostTypeDiagramResult> costTypeDiagramResultList = reportRepository.getReportCostTypeDiagram(year, departmentId);
+            List<CostTypeDiagramResult> costTypeDiagramResultList = monthlyReportSummaryRepository.getReportCostTypeDiagram(year, departmentId);
 
             if (costTypeDiagramResultList == null) {
                 return new TreeMap<>();
@@ -673,7 +676,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense exist in one report
-            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenseId.size() == totalExpense) {
 
                 // Get approval status
@@ -698,7 +701,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expenseId);
 
                     if (updateExpense.getPlanExpenseKey() == null || updateExpense.getPlanExpenseKey().isEmpty()) {
-                        updateExpense.setPlanExpenseKey(report.getName() + "_" + (++index));
+                        // Convert ' ' to '_'
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                         list.add(ExpenseCodeResponse.builder().expenseId(expenseId).expenseCode(updateExpense.getPlanExpenseKey()).build());
                     }
 
@@ -708,9 +713,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
 
                 // Change status to Reviewed
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
-
-                report.setStatus(reviewedReportStatus);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//
+//                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
 
@@ -741,7 +746,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense exist in one report
-            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenseId.size() == totalExpense) {
 
                 // Get deny status
@@ -756,19 +761,70 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 });
 
                 // Get report of this list expense
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
+//                FinancialReport report = financialReportRepository.getReferenceById(reportId);
+
                 // Change status to Reviewed
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
 
-                report.setStatus(reviewedReportStatus);
+//                report.setStatus(reviewedReportStatus);
 
-                financialReportRepository.save(report);
+//                financialReportRepository.save(report);
                 expenseRepository.saveAll(expenses);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
         } else {
             throw new UnauthorizedException("Unauthorized to approval expense");
+        }
+    }
+
+    @Override
+    public void markReportAsReviewed(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            // Update status report to reviewed
+            ReportStatus reviewedStatus = this.reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+
+            Optional<FinancialReport> reportOptional = this.financialReportRepository.getFinancialReportWithTerm(reportId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
+            if (reportOptional.isEmpty()) {
+                throw new ResourceNotFoundException("Report not found or it's not the right time to review");
+            }
+
+            FinancialReport report = reportOptional.get();
+            report.setStatus(reviewedStatus);
+            this.financialReportRepository.save(report);
+
+            // Get list FCM Tokens to send to user
+            List<String> fcmTokens = this.financialReportRepository.getFCMTokensOfFinancialStaffOfReport(List.of(reportId));
+
+            List<Message> messages = new ArrayList<>();
+            for (String fcmToken : fcmTokens) {
+                Notification notification = Notification
+                        .builder()
+                        .setTitle("Plan reviewed")
+                        .setBody("Your department's plan in term \"" + report.getTerm().getName() + "\" has been reviewed")
+                        .build();
+
+                Message message = Message.builder()
+                        .setToken(fcmToken)
+                        .setNotification(notification)
+                        .build();
+
+                messages.add(message);
+            }
+
+            // We won't do anything if sending notification failed
+            try {
+                if(!messages.isEmpty()) {
+                    firebaseMessaging.sendEach(messages);
+                }
+            } catch (Exception ignored) {}
         }
     }
 }

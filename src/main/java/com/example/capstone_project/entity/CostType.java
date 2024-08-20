@@ -1,6 +1,5 @@
 package com.example.capstone_project.entity;
 
-import com.example.capstone_project.utils.enums.CostTypeCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +20,8 @@ public class CostType extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = Report_.COST_TYPE)
-    private List<Report> reports;
+    @OneToMany(mappedBy = MonthlyReportSummary_.COST_TYPE)
+    private List<MonthlyReportSummary> monthlyReportSummaries;
 
     @OneToMany(mappedBy = FinancialPlanExpense_.COST_TYPE)
     private List<FinancialPlanExpense> planExpenses;

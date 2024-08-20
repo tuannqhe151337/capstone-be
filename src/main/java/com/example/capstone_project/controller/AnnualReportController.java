@@ -1,6 +1,5 @@
 package com.example.capstone_project.controller;
 
-import com.example.capstone_project.controller.body.annual.AnnualReportDownloadBody;
 import com.example.capstone_project.controller.responses.ListPaginationResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.Pagination;
@@ -8,7 +7,7 @@ import com.example.capstone_project.controller.responses.annualReport.diagram.Co
 import com.example.capstone_project.controller.responses.annualReport.list.AnnualReportResponse;
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
 import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.MonthlyReportSummary;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
@@ -17,7 +16,6 @@ import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportExpenseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -54,20 +52,20 @@ public class AnnualReportController {
             Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
 
             // Get data
-            List<Report> reports = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
+            List<MonthlyReportSummary> monthlyReportSummaries = annualReportService.getListExpenseWithPaginate(annualReportId, costTypeId, departmentId, pageable);
 
             // Response
             ListPaginationResponse<AnnualReportExpenseResponse> response = new ListPaginationResponse<>();
 
             long count = 0;
 
-            if (reports != null) {
+            if (monthlyReportSummaries != null) {
 
                 // Count total record
                 count = annualReportService.countDistinctListExpenseWithPaginate(annualReportId, costTypeId, departmentId);
 
                 // Mapping to TermPaginateResponse
-                reports.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
+                monthlyReportSummaries.forEach(report -> response.getData().add(new AnnualReportExpenseMapperImpl().mapToAnnualReportExpenseResponseMapping(report)));
 
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

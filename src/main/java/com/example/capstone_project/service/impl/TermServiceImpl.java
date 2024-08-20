@@ -7,25 +7,16 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -43,7 +34,7 @@ public class TermServiceImpl implements TermService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermStatusCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -51,7 +42,7 @@ public class TermServiceImpl implements TermService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermStatusCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -110,7 +101,7 @@ public class TermServiceImpl implements TermService {
         Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
 
-        if(!currentTerm.getStatus().getCode().equals(TermCode.NEW)) {
+        if(!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
             throw new InvalidDateException("Only can delete term when status is new");
         }
         currentTerm.setDelete(true);

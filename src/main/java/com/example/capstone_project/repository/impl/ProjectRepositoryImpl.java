@@ -7,9 +7,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class ProjectRepositoryImpl implements CustomProjectRepository {
     @PersistenceContext
     private EntityManager entityManager;

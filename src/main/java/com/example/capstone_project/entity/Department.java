@@ -22,8 +22,8 @@ public class Department extends BaseEntity {
     @OneToMany(mappedBy = User_.DEPARTMENT)
     private List<User> users;
 
-    @OneToMany(mappedBy = Report_.DEPARTMENT)
-    private List<Report> reports;
+    @OneToMany(mappedBy = MonthlyReportSummary_.DEPARTMENT)
+    private List<MonthlyReportSummary> monthlyReportSummaries;
 
     @OneToMany(mappedBy = FinancialPlan_.DEPARTMENT)
     private List<FinancialPlan> plans;
