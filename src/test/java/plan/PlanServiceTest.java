@@ -1,4 +1,4 @@
-package service;
+package plan;
 
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.*;
@@ -116,7 +116,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -267,7 +267,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -514,7 +514,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
 
             term = Term.builder()
@@ -673,7 +673,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             term = Term.builder()
                     .id(8L)
@@ -814,7 +814,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -922,7 +922,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             term = Term.builder()
                     .id(8L)
@@ -1294,7 +1294,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -1424,7 +1424,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -1486,7 +1486,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -1742,7 +1742,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -1829,7 +1829,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -1977,7 +1977,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -2056,7 +2056,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -2160,7 +2160,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
@@ -2269,7 +2269,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             term = Term.builder()
                     .id(8L)
@@ -2453,7 +2453,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             term = Term.builder()
                     .id(8L)
@@ -2529,7 +2529,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             term = Term.builder()
                     .id(8L)
@@ -2630,7 +2630,7 @@ public class PlanServiceTest {
                     builder()
                     .id(1L).
                     name("Not started")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             Term term8 = Term.builder()
                     .id(8L)
