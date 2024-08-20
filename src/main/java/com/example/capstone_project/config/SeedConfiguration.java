@@ -47,7 +47,7 @@ public class SeedConfiguration {
             TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
             CurrencyExchangeRateRepository currencyExchangeRateRepository,
-            ReportStatisticalRepository reportStatisticalRepository
+            ReportStatisticRepository reportStatisticRepository
 
     ) {
         return args -> {
@@ -3202,7 +3202,7 @@ public class SeedConfiguration {
                 statistics.add(report);
             }
 
-            reportStatisticalRepository.saveAll(statistics);
+            reportStatisticRepository.saveAll(statistics);
         };
     }
 }

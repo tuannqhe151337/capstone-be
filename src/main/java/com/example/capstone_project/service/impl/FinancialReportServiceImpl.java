@@ -701,7 +701,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expenseId);
 
                     if (updateExpense.getPlanExpenseKey() == null || updateExpense.getPlanExpenseKey().isEmpty()) {
-                        updateExpense.setPlanExpenseKey(report.getName() + "_" + (++index));
+                        // Convert ' ' to '_'
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                         list.add(ExpenseCodeResponse.builder().expenseId(expenseId).expenseCode(updateExpense.getPlanExpenseKey()).build());
                     }
 
