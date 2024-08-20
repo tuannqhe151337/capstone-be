@@ -1,12 +1,9 @@
 package com.example.capstone_project.entity;
 
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -26,7 +23,7 @@ public class TermStatus extends BaseEntity{
 
     @Column(name = "icon_code")
     @Enumerated(EnumType.STRING)
-    private TermCode code;
+    private TermStatusCode code;
 
     @OneToMany(mappedBy = "status")
     private List<Term> terms;

@@ -1,15 +1,16 @@
 package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.Currency;
-import com.example.capstone_project.entity.Project;
 import com.example.capstone_project.repository.CustomCurrencyRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class CurrencyRepositoryImpl implements CustomCurrencyRepository {
     @PersistenceContext
     private EntityManager entityManager;

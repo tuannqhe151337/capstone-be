@@ -81,6 +81,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = Term_.USER, fetch = FetchType.LAZY)
     private List<Term> terms;
 
+    @OneToMany(mappedBy = FCMToken_.USER, fetch = FetchType.LAZY)
+    private List<FCMToken> fcmTokens;
+
     @OneToMany(mappedBy = FinancialPlanFile_.USER, fetch = FetchType.LAZY)
     private List<FinancialPlanFile> financialPlanFiles;
 

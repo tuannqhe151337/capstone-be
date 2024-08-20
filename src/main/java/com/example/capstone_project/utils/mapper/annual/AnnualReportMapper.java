@@ -1,7 +1,7 @@
 package com.example.capstone_project.utils.mapper.annual;
 
 import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.MonthlyReportSummary;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
 import org.mapstruct.Mapper;
@@ -18,5 +18,5 @@ public interface AnnualReportMapper {
     @Mapping(expression = "java(reportResult.getTotalExpense())",target = "totalExpense")
     @Mapping(expression = "java(reportResult.getBiggestExpense())",target = "biggestExpenditure")
     @Mapping(expression = "java(reportResult.getCostTypeId())",target = "costType.id")
-    Report mapToReportMapping(ReportResult reportResult);
+    MonthlyReportSummary mapToReportMapping(ReportResult reportResult);
 }
