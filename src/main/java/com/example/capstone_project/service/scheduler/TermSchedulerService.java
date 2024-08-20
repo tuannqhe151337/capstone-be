@@ -9,7 +9,7 @@ import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.utils.enums.ReportStatusCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.scheduling.annotation.Async;
@@ -44,11 +44,11 @@ public class TermSchedulerService {
     @Async
     public void startTerm() throws Exception {
         //START TERM
-        List<Term> terms = termRepository.getListTermNeedToStart(TermCode.NEW, LocalDateTime.now());
+        List<Term> terms = termRepository.getListTermNeedToStart(TermStatusCode.NEW, LocalDateTime.now());
         //change status to 2 (IN_PROGRESS)
         if (terms != null) {
             for (Term term : terms) {
-                TermStatus inProgressStatus = termStatusRepository.findByCode(TermCode.IN_PROGRESS);
+                TermStatus inProgressStatus = termStatusRepository.findByCode(TermStatusCode.IN_PROGRESS);
                 term.setStatus(inProgressStatus);
                 termRepository.save(term);
 
@@ -74,12 +74,12 @@ public class TermSchedulerService {
     @Async
     public void endTerm() throws Exception {
         //START TERM
-        List<Term> terms = termRepository.getListTermNeedToClose(TermCode.IN_PROGRESS, LocalDateTime.now());
+        List<Term> terms = termRepository.getListTermNeedToClose(TermStatusCode.IN_PROGRESS, LocalDateTime.now());
         //change status to CLOSED
         if (terms != null) {
             for (Term term : terms) {
 
-                TermStatus closedStatus = termStatusRepository.findByCode(TermCode.CLOSED);
+                TermStatus closedStatus = termStatusRepository.findByCode(TermStatusCode.CLOSED);
                 term.setStatus(closedStatus);
                 termRepository.save(term);
 

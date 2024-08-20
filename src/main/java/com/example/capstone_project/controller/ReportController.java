@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.expense.ApprovalAllExpenseBo
 import com.example.capstone_project.controller.body.expense.ApprovalExpenseBody;
 import com.example.capstone_project.controller.body.expense.DenyExpenseBody;
 import com.example.capstone_project.controller.body.expense.UploadReportExpenses;
+import com.example.capstone_project.controller.body.report.completeReview.CompleteReviewReportBody;
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
@@ -30,7 +31,6 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
-import com.example.capstone_project.utils.mapper.annual.CostTypeDiagramMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
@@ -50,9 +50,7 @@ import com.example.capstone_project.controller.responses.report.list.ReportRespo
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -690,4 +688,21 @@ public class ReportController {
         }
     }
 
+    @PostMapping("/complete-review")
+    public ResponseEntity<Object> markReportAsReviewed(
+            @Valid @RequestBody CompleteReviewReportBody body, BindingResult bindingResult
+    ) {
+        try {
+            this.reportService.markReportAsReviewed(body.getReportId());
+            return ResponseEntity.ok().body(null);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder()
+                    .field("error")
+                    .message(e.getMessage())
+                    .build()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

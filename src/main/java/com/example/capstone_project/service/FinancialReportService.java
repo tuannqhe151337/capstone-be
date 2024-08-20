@@ -55,4 +55,5 @@ public interface FinancialReportService {
 
     TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
 
+    void markReportAsReviewed(Long reportId) throws Exception;
 }

@@ -41,7 +41,7 @@ public class SeedConfiguration {
             FinancialPlanExpenseRepository financialPlanExpenseRepository,
             FinancialReportRepository financialReportRepository,
             AnnualReportRepository annualReportRepository,
-            ReportRepository reportRepository,
+            MonthlyReportSummaryRepository monthlyReportSummaryRepository,
             SupplierRepository supplierRepository,
             ProjectRepository projectRepository,
             TermIntervalRepository termIntervalRepository,
@@ -60,21 +60,21 @@ public class SeedConfiguration {
                     builder()
                     .id(1L).
                     name("New")
-                    .code(TermCode.NEW).build();
+                    .code(TermStatusCode.NEW).build();
 
             //Term Status - fixed code
             TermStatus termStatus2 = TermStatus.
                     builder()
                     .id(2L).
                     name("In progress")
-                    .code(TermCode.IN_PROGRESS).build();
+                    .code(TermStatusCode.IN_PROGRESS).build();
 
             //Term Status - fixed code
             TermStatus termStatus3 = TermStatus.
                     builder()
                     .id(3L).
                     name("Closed")
-                    .code(TermCode.CLOSED).build();
+                    .code(TermStatusCode.CLOSED).build();
 
             termStatusRepository.saveAll(List.of(termStatus, termStatus2, termStatus3));
 
@@ -460,7 +460,7 @@ public class SeedConfiguration {
                     .fullName("Choi Woo je")
                     .password(this.passwordEncoder.encode("password"))
                     .role(accountant)
-                    .department(financeDepartment)
+                    .department(accountingDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(1986, 12, 20, 0, 0))
                     .isDelete(false)
@@ -1255,6 +1255,7 @@ public class SeedConfiguration {
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0))
                     .endDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0).plusDays(5))
+                    .allowReupload(true)
                     .reuploadStartDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0).plusDays(20))
                     .reuploadEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0)))
@@ -2840,7 +2841,7 @@ public class SeedConfiguration {
 
             annualReportRepository.saveAll(List.of(annualReport1, annualReport2, annualReport3, annualReport4, annualReport5, annualReport6));
 
-            List<Report> reports = new ArrayList<>();
+            List<MonthlyReportSummary> monthlyReportSummaries = new ArrayList<>();
             random = new Random();
             projectNameChar = 'A';
 
@@ -2878,7 +2879,7 @@ public class SeedConfiguration {
                     default -> accountingDepartment; // Default case, should never be reached
                 };
 
-                Report report = Report.builder()
+                MonthlyReportSummary monthlyReportSummary = MonthlyReportSummary.builder()
                         .totalExpense(BigDecimal.valueOf(random.nextInt(5000000) + 2000000))
                         .biggestExpenditure(BigDecimal.valueOf(random.nextInt(1500000) + 100000))
                         .annualReport(randomAnnualReport)
@@ -2886,10 +2887,10 @@ public class SeedConfiguration {
                         .costType(randomCostType)
                         .build();
 
-                reports.add(report);
+                monthlyReportSummaries.add(monthlyReportSummary);
             }
 
-            reportRepository.saveAll(reports);
+            monthlyReportSummaryRepository.saveAll(monthlyReportSummaries);
 
             CurrencyExchangeRate exchangeRate1_1 = CurrencyExchangeRate.builder()
                     .month(LocalDate.of(2020, 4, 17))

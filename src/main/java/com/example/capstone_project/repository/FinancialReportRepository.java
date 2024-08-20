@@ -1,18 +1,23 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.entity.TermStatus;
 import com.example.capstone_project.repository.result.ReportDetailResult;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface FinancialReportRepository extends JpaRepository<FinancialReport, Long>, CustomFinancialReportRepository {
     @Query(value = " SELECT DISTINCT count(report.id) FROM FinancialReport report " +
@@ -113,6 +118,22 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " GROUP BY currencyId, month, year ")
     List<TotalCostByCurrencyResult> calculateCostByReportIdAndStatus(Long reportId, ExpenseStatusCode statusCode);
 
+    @Query(value = "SELECT fcmToken.token FROM FCMToken fcmToken" +
+            " JOIN fcmToken.user user " +
+            " JOIN user.department department " +
+            " JOIN department.plans plan " +
+            " JOIN plan.term term " +
+            " JOIN term.financialReports report ON report.id IN (:reportIds)")
+    List<String> getFCMTokensOfFinancialStaffOfReport(List<Long> reportIds);
+
+    @Query(value = "SELECT financialReport FROM FinancialReport financialReport " +
+            " LEFT JOIN FETCH financialReport.term " +
+            " WHERE financialReport.id = :reportId AND " +
+            " (financialReport.term.status.code = :inProgress) AND " +
+            " ((:now BETWEEN financialReport.term.endDate AND financialReport.term.reuploadStartDate) OR (:now BETWEEN financialReport.term.reuploadEndDate AND financialReport.term.finalEndTermDate)) AND " +
+            " (financialReport.isDelete = false OR financialReport.isDelete IS NULL)"
+    )
+    Optional<FinancialReport> getFinancialReportWithTerm(@NonNull Long reportId, TermStatusCode inProgress, LocalDateTime now);
 
 //    @Query(value = " SELECT expenses FROM FinancialReportExpense expenses " +
 //            " JOIN expenses.financialReport report " +

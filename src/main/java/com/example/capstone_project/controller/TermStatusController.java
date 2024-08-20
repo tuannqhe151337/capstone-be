@@ -4,17 +4,13 @@ package com.example.capstone_project.controller;
 import com.example.capstone_project.controller.responses.ListResponse;
 import com.example.capstone_project.controller.responses.term.getStatus.TermStatusResponse;
 import com.example.capstone_project.service.TermStatusService;
-import com.example.capstone_project.utils.enums.TermCode;
-import com.example.capstone_project.utils.mapper.termStatus.TermStatusToTermStatusResponseMapper;
 import com.example.capstone_project.utils.mapper.termStatus.TermStatusToTermStatusResponseMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor

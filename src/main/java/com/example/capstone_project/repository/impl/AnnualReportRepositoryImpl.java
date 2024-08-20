@@ -59,8 +59,8 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
     }
 
     @Override
-    public List<Report> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable) {
-        String hql = " SELECT report FROM Report report " +
+    public List<MonthlyReportSummary> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable) {
+        String hql = " SELECT report FROM MonthlyReportSummary report " +
                 " JOIN report.annualReport annualReport " +
                 " JOIN report.costType costType " +
                 " JOIN report.department department " +
@@ -100,11 +100,11 @@ public class AnnualReportRepositoryImpl implements CustomAnnualReportRepository 
         }
 
         // Handling join
-        EntityGraph<Report> entityGraph = entityManager.createEntityGraph(Report.class);
-        entityGraph.addAttributeNodes(Report_.COST_TYPE);
-        entityGraph.addAttributeNodes(Report_.DEPARTMENT);
+        EntityGraph<MonthlyReportSummary> entityGraph = entityManager.createEntityGraph(MonthlyReportSummary.class);
+        entityGraph.addAttributeNodes(MonthlyReportSummary_.COST_TYPE);
+        entityGraph.addAttributeNodes(MonthlyReportSummary_.DEPARTMENT);
 
-        return entityManager.createQuery(hql, Report.class)
+        return entityManager.createQuery(hql, MonthlyReportSummary.class)
                 .setParameter("annualReportId", annualReportId)
                 .setParameter("departmentId", departmentId)
                 .setParameter("costTypeId", costTypeId)

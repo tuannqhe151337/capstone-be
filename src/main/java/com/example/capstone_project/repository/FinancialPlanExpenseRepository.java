@@ -3,7 +3,7 @@ package com.example.capstone_project.repository;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.repository.result.ExpenseResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,7 +32,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (status.code = :inProgress) AND " +
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
-    long countListExpenseInReport(Long reportId, List<Long> listExpensesId, TermCode inProgress, LocalDateTime now);
+    long countListExpenseInReport(Long reportId, List<Long> listExpensesId, TermStatusCode inProgress, LocalDateTime now);
 
     @Query(" SELECT count(distinct (expense.id)) FROM FinancialPlanExpense expense " +
             " JOIN expense.files files " +
@@ -84,7 +84,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " term.endDate >= :now AND " +
             " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
             " expense.isDelete = false ")
-    List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermCode inProgress, LocalDateTime now);
+    List<FinancialPlanExpense> getListExpenseByPlanId(Long planId, TermStatusCode inProgress, LocalDateTime now);
 
     @Query(value = "SELECT expenses FROM FinancialPlanExpense expenses " +
             " JOIN expenses.files files " +
@@ -184,7 +184,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " (term.status.code = :termCode) AND " +
             " (expense.isDelete = false OR expense.isDelete is null) ")
-    List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermCode termCode, LocalDateTime now);
+    List<FinancialPlanExpense> getListExpenseToApprovedByReportId(Long reportId, TermStatusCode termCode, LocalDateTime now);
 
     @Query(" SELECT expense.id AS expenseId, expense.planExpenseKey AS expenseCode FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +
@@ -204,7 +204,7 @@ public interface FinancialPlanExpenseRepository extends JpaRepository<FinancialP
             " (status.code = :termCode) AND " +
             " ((:now BETWEEN term.endDate AND term.reuploadStartDate) OR (:now BETWEEN term.reuploadEndDate AND term.finalEndTermDate)) AND " +
             " expense.isDelete = false ")
-    List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<Long> listExpenseId, TermCode termCode, LocalDateTime now);
+    List<ExpenseResult> getListExpenseInReportUpload(Long reportId, List<Long> listExpenseId, TermStatusCode termCode, LocalDateTime now);
 
     @Query(" SELECT expense.id as expenseId, expense.planExpenseKey as expenseCode FROM FinancialPlanExpense expense " +
             " JOIN expense.files fileExpense " +

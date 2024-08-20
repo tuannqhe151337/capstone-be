@@ -4,7 +4,6 @@ import com.example.capstone_project.entity.AnnualReport;
 import com.example.capstone_project.repository.result.AnnualReportExpenseResult;
 import com.example.capstone_project.repository.result.AnnualReportResult;
 import com.example.capstone_project.repository.result.ReportResult;
-import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,7 +32,7 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " GROUP BY departmentId, costTypeId ")
     List<ReportResult> generateReport(LocalDate now);
 
-    @Query(value = " SELECT count (distinct (report.id)) FROM Report report " +
+    @Query(value = " SELECT count (distinct (report.id)) FROM MonthlyReportSummary report " +
             " JOIN report.annualReport annualReport " +
             " JOIN report.costType costType " +
             " JOIN report.department department " +
@@ -43,16 +42,16 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " report.isDelete = false OR report.isDelete is null ")
     long countDistinctListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId);
 
-    @Query(value = " SELECT report.costType.id AS costTypeId, report.costType.name AS costTypeName, sum(report.totalExpense) AS totalCost FROM AnnualReport annualReport " +
-            " JOIN annualReport.reports report " +
+    @Query(value = " SELECT monthlyReportSummaries.costType.id AS costTypeId, monthlyReportSummaries.costType.name AS costTypeName, sum(monthlyReportSummaries.totalExpense) AS totalCost FROM AnnualReport annualReport " +
+            " JOIN annualReport.monthlyReportSummaries monthlyReportSummaries " +
             " WHERE annualReport.id = :annualReportId AND " +
-            " annualReport.isDelete = false AND report.isDelete = false " +
+            " annualReport.isDelete = false AND monthlyReportSummaries.isDelete = false " +
             " GROUP BY costTypeId, costTypeName ")
     List<CostTypeDiagramResult> getAnnualReportCostTypeDiagram(Long annualReportId);
 
-    @Query(value = " SELECT report.department.name AS department, report.totalExpense AS totalExpense, report.biggestExpenditure AS biggestExpenditure, report.costType.name AS costType FROM Report report " +
-            " WHERE report.annualReport.id = :annualReportId AND " +
-            " report.isDelete = false ")
+    @Query(value = " SELECT monthlyReportSummary.department.name AS department, monthlyReportSummary.totalExpense AS totalExpense, monthlyReportSummary.biggestExpenditure AS biggestExpenditure, monthlyReportSummary.costType.name AS costType FROM MonthlyReportSummary monthlyReportSummary " +
+            " WHERE monthlyReportSummary.annualReport.id = :annualReportId AND " +
+            " monthlyReportSummary.isDelete = false ")
     List<AnnualReportExpenseResult> getListExpenseByAnnualReportId(Long annualReportId);
 
     @Query(value = " SELECT annualReport.year FROM AnnualReport annualReport " +

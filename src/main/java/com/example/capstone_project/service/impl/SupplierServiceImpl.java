@@ -1,6 +1,6 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.Report_;
+import com.example.capstone_project.entity.MonthlyReportSummary_;
 import com.example.capstone_project.entity.Supplier;
 import com.example.capstone_project.repository.SupplierRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
@@ -113,7 +113,7 @@ public class SupplierServiceImpl implements SupplierService {
         if (listAuthorities.contains(AuthorityCode.VIEW_SUPPLIER.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_PLAN.getValue())
                 || listAuthorities.contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            return supplierRepository.findAll(Sort.by(Report_.ID).ascending());
+            return supplierRepository.findAll(Sort.by(MonthlyReportSummary_.ID).ascending());
         } else {
             throw new UnauthorizedException("Unauthorized to view list supplier");
         }
