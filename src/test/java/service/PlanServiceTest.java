@@ -5,12 +5,14 @@ import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.ExpenseResult;
+import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.PlanVersionResult;
 import com.example.capstone_project.service.impl.FinancialPlanServiceImpl;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.*;
 public class PlanServiceTest {
     @Mock
     private FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository;
+    @Mock
+    private HandleFileHelper handleFileHelper;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -1337,6 +1341,49 @@ public class PlanServiceTest {
             verify(planRepository, never()).getReferenceById(anyLong());
         }
 
+        @Test
+        public void getListVersionWithPaginate_Admin_Successful() throws Exception {
+            long planId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.VIEW_PLAN.getValue()));
+
+            planService.getListVersionWithPaginate(planId, Pageable.unpaged());
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, times(1)).getListVersionWithPaginate(anyLong(), any(Pageable.class));
+            verify(planRepository, never()).getReferenceById(anyLong());
+        }
+
+        @Test
+        public void getListVersionWithPaginate_Staff_Successful() throws Exception {
+            long planId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(staffId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(staffId.intValue());
+            when(userDetailRepository.get(staffId)).thenReturn(staffDetail);
+            when(userAuthorityRepository.get(staffId)).thenReturn(Set.of(AuthorityCode.VIEW_PLAN.getValue()));
+            when(planRepository.getReferenceById(planId)).thenReturn(plan);
+
+            planService.getListVersionWithPaginate(planId, Pageable.unpaged());
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, times(1)).getListVersionWithPaginate(anyLong(), any(Pageable.class));
+            verify(planRepository, times(1)).getReferenceById(anyLong());
+        }
+
     }
 
     @Nested
@@ -1486,6 +1533,175 @@ public class PlanServiceTest {
             verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
         }
 
+        @Test
+        public void getBodyFileExcelXLS_InvalidDepartment() throws Exception {
+            long fileId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+
+            Exception exception = assertThrows(UnauthorizedException.class, () -> {
+                planService.getBodyFileExcelXLS(fileId);
+            });
+
+            assertEquals("User can't download this plan because departmentId of plan not equal with departmentId of user", exception.getMessage());
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, never()).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, times(1)).getDepartmentIdByFileId(anyLong());
+        }
+
+        @Test
+        public void getBodyFileExcelXLS_ResourceNotFoundException() throws Exception {
+            long fileId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+            when(departmentRepository.getDepartmentIdByFileId(fileId)).thenReturn(2L);
+
+            Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+                planService.getBodyFileExcelXLS(fileId);
+            });
+
+            assertEquals("Not exist file = " + fileId + " or list expenses is empty", exception.getMessage());
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, times(1)).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, times(1)).getDepartmentIdByFileId(anyLong());
+        }
+
+        @Test
+        public void getBodyFileExcelXLS_Successful() throws Exception {
+            long fileId = 1L;
+
+            ExpenseResult expenseResult = new ExpenseResult() {
+                @Override
+                public String getExpenseCode() {
+                    return null;
+                }
+
+                @Override
+                public String getExpenseName() {
+                    return null;
+                }
+
+                @Override
+                public LocalDateTime getDate() {
+                    return null;
+                }
+
+                @Override
+                public String getTermName() {
+                    return null;
+                }
+
+                @Override
+                public String getDepartmentName() {
+                    return null;
+                }
+
+                @Override
+                public String getCostTypeName() {
+                    return null;
+                }
+
+                @Override
+                public BigDecimal getUnitPrice() {
+                    return null;
+                }
+
+                @Override
+                public Integer getAmount() {
+                    return null;
+                }
+
+                @Override
+                public BigDecimal getTotal() {
+                    return null;
+                }
+
+                @Override
+                public String getProjectName() {
+                    return null;
+                }
+
+                @Override
+                public String getSupplierName() {
+                    return null;
+                }
+
+                @Override
+                public String getPicName() {
+                    return null;
+                }
+
+                @Override
+                public String getNote() {
+                    return null;
+                }
+
+                @Override
+                public Long getExpenseId() {
+                    return null;
+                }
+
+                @Override
+                public ExpenseStatusCode getStatusCode() {
+                    return null;
+                }
+
+                @Override
+                public Long getDepartmentId() {
+                    return null;
+                }
+
+                @Override
+                public Long getCostTypeId() {
+                    return null;
+                }
+
+                @Override
+                public Long getStatusId() {
+                    return null;
+                }
+
+                @Override
+                public String getCurrencyName() {
+                    return null;
+                }
+            };
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+            when(departmentRepository.getDepartmentIdByFileId(fileId)).thenReturn(2L);
+            when(planRepository.getListExpenseByFileId(fileId)).thenReturn(List.of(expenseResult));
+
+            planService.getBodyFileExcelXLS(fileId);
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, times(1)).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, times(1)).getDepartmentIdByFileId(anyLong());
+        }
     }
 
     @Nested
@@ -1652,6 +1868,75 @@ public class PlanServiceTest {
             verify(financialPlanFileRepository, times(1)).generateFileName(anyInt());
         }
 
+        @Test
+        public void generateXLSXFileName_Accountant_Successful() {
+            long fileId = 1L;
+            int planId = 3;
+            FileNameResult fileNameResult = new FileNameResult() {
+                @Override
+                public Long getFileId() {
+                    return 1L;
+                }
+
+                @Override
+                public String getTermName() {
+                    return "Term Name";
+                }
+
+                @Override
+                public String getPlanName() {
+                    return "Plan Name";
+                }
+
+                @Override
+                public String getVersion() {
+                    return "2";
+                }
+            };
+
+            when(planRepository.getPlanIdByFileId(fileId)).thenReturn(planId);
+            when(financialPlanFileRepository.generateFileName(planId)).thenReturn(List.of(fileNameResult));
+
+            planService.generateXLSXFileName(fileId);
+
+            verify(planRepository, times(1)).getPlanIdByFileId(anyLong());
+            verify(financialPlanFileRepository, times(1)).generateFileName(anyInt());
+        }
+
+        @Test
+        public void generateXLSXFileName_Staff_Successful() {
+            long fileId = 1L;
+            int planId = 3;
+            FileNameResult fileNameResult = new FileNameResult() {
+                @Override
+                public Long getFileId() {
+                    return 1L;
+                }
+
+                @Override
+                public String getTermName() {
+                    return "Term Name";
+                }
+
+                @Override
+                public String getPlanName() {
+                    return "Plan Name";
+                }
+
+                @Override
+                public String getVersion() {
+                    return "2";
+                }
+            };
+
+            when(planRepository.getPlanIdByFileId(fileId)).thenReturn(planId);
+            when(financialPlanFileRepository.generateFileName(planId)).thenReturn(List.of(fileNameResult));
+
+            planService.generateXLSXFileName(fileId);
+
+            verify(planRepository, times(1)).getPlanIdByFileId(anyLong());
+            verify(financialPlanFileRepository, times(1)).generateFileName(anyInt());
+        }
     }
 
     @Nested
@@ -1911,6 +2196,39 @@ public class PlanServiceTest {
             verify(financialPlanFileRepository, times(1)).getLastVersionFileName(anyLong());
         }
 
+        @Test
+        public void generateXLSFileNameByPlanId_Successful() {
+            long planId = 3;
+
+            FileNameResult fileNameResult = new FileNameResult() {
+                @Override
+                public Long getFileId() {
+                    return 2L;
+                }
+
+                @Override
+                public String getTermName() {
+                    return "Term Name";
+                }
+
+                @Override
+                public String getPlanName() {
+                    return "Plan Name";
+                }
+
+                @Override
+                public String getVersion() {
+                    return "2";
+                }
+            };
+
+            when(financialPlanFileRepository.getLastVersionFileName(planId)).thenReturn(fileNameResult);
+
+            planService.generateXLSFileNameByPlanId(planId);
+
+            verify(financialPlanFileRepository, times(1)).getLastVersionFileName(anyLong());
+        }
+
     }
 
     @Nested
@@ -1998,6 +2316,103 @@ public class PlanServiceTest {
             verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
         }
 
+        @Test
+        public void getLastVersionBodyFileExcelXLSX_ResourceNotFoundException() throws Exception {
+            long fileId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+
+            Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+                planService.getLastVersionBodyFileExcelXLSX(fileId);
+            });
+
+            assertEquals("Not found any plan have id = " + fileId, exception.getMessage());
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, never()).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
+        }
+
+        @Test
+        public void getLastVersionBodyFileExcelXLSX_Accountant_Successful() throws Exception {
+            long fileId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(accountantId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(accountantId.intValue());
+            when(userDetailRepository.get(accountantId)).thenReturn(accountantDetail);
+            when(userAuthorityRepository.get(accountantId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+            when(planRepository.existsById(fileId)).thenReturn(true);
+
+            planService.getLastVersionBodyFileExcelXLSX(fileId);
+
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, never()).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
+        }
+
+        @Test
+        public void getLastVersionBodyFileExcelXLSX_Staff_InvalidDepartment() throws Exception {
+            long fileId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(staffId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(staffId.intValue());
+            when(userDetailRepository.get(staffId)).thenReturn(staffDetail);
+            when(userAuthorityRepository.get(staffId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+            when(planRepository.existsById(fileId)).thenReturn(true);
+
+            Exception exception = assertThrows(UnauthorizedException.class, () -> {
+                planService.getLastVersionBodyFileExcelXLSX(fileId);
+            });
+
+            assertEquals("User can't download this plan because departmentId of plan not equal with departmentId of user", exception.getMessage());
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, never()).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
+        }
+
+        @Test
+        public void getLastVersionBodyFileExcelXLSX_Staff_Successful() throws Exception {
+            long planId = 1L;
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(staffId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(staffId.intValue());
+            when(userDetailRepository.get(staffId)).thenReturn(staffDetail);
+            when(userAuthorityRepository.get(staffId)).thenReturn(Set.of(AuthorityCode.DOWNLOAD_PLAN.getValue()));
+            when(planRepository.existsById(planId)).thenReturn(true);
+            when(departmentRepository.getDepartmentIdByPlanId(planId)).thenReturn(1L);
+            when(planRepository.getListExpenseByPlanId(planId)).thenReturn(List.of());
+
+            planService.getLastVersionBodyFileExcelXLSX(planId);
+
+            verify(userDetailRepository, times(1)).get(anyLong());
+            verify(userAuthorityRepository, times(1)).get(anyLong());
+            verify(planRepository, never()).getListExpenseByFileId(anyLong());
+            verify(departmentRepository, never()).getDepartmentIdByFileId(anyLong());
+        }
     }
 
     @Nested
@@ -2254,6 +2669,26 @@ public class PlanServiceTest {
             assertEquals(7L, result);
 
             verify(expenseRepository, times(1)).countDistinctListExpenseWithPaginate(anyString(), anyLong(), anyLong(), anyLong(), anyLong(), anyLong(), anyLong());
+        }
+
+        @Test
+        public void countDistinctListExpenseWithPaginate_Unauthorized() throws Exception {
+            // Mock the SecurityContextHolder to return a valid user ID
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getPrincipal()).thenReturn(adminId);
+
+            SecurityContextHolder.setContext(securityContext);
+
+            when(UserHelper.getUserId()).thenReturn(adminId.intValue());
+            when(userAuthorityRepository.get(adminId)).thenReturn(Set.of());
+
+            Exception exception = assertThrows(UnauthorizedException.class, () -> {
+                long result = planService.countDistinctListExpenseWithPaginate("query", 1L, 1L, 1L, 1L, 1L, 1L);
+            });
+
+            assertEquals("Unauthorized to view plan", exception.getMessage());
+
+            verify(expenseRepository, never()).countDistinctListExpenseWithPaginate(anyString(), anyLong(), anyLong(), anyLong(), anyLong(), anyLong(), anyLong());
         }
     }
 
