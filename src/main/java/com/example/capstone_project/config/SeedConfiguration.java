@@ -1,9 +1,14 @@
 package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.result.AnnualReportResult;
+import com.example.capstone_project.repository.result.CostStatisticalByCurrencyResult;
+import com.example.capstone_project.repository.result.PaginateExchange;
 import com.example.capstone_project.repository.result.ReportResult;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.service.scheduler.TermSchedulerService;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportMapperImpl;
@@ -14,16 +19,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Configuration
 @RequiredArgsConstructor
 public class SeedConfiguration {
     private final PasswordEncoder passwordEncoder;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final FinancialPlanRepository planRepository;
+    private final ReportStatisticRepository reportStatisticRepository;
+    private final DepartmentRepository departmentRepository;
+    private final CostTypeRepository costTypeRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     @Bean
     public CommandLineRunner commandLineRunner(
@@ -50,9 +61,7 @@ public class SeedConfiguration {
             ProjectRepository projectRepository,
             TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
-            CurrencyExchangeRateRepository currencyExchangeRateRepository,
-            ReportStatisticRepository reportStatisticRepository,
-            TermSchedulerService termSchedulerService
+            CurrencyExchangeRateRepository currencyExchangeRateRepository
 
     ) {
         return args -> {
@@ -3179,9 +3188,9 @@ public class SeedConfiguration {
                     });
 
                     Currency defaultCurrency = currencyRepository.getDefaultCurrency();
-                    termSchedulerService.generateActualCostAndExpectedCostForPlan(term.getId(), defaultCurrency);
-                    termSchedulerService.generateActualCostAndExpectedCostForReport(term.getId(), defaultCurrency);
-                    termSchedulerService.generateReportStatistical(term.getId(), defaultCurrency);
+                    generateActualCostAndExpectedCostForPlan(term.getId(), defaultCurrency);
+                    generateActualCostAndExpectedCostForReport(term.getId(), defaultCurrency);
+                    generateReportStatistical(term.getId(), defaultCurrency);
                 }
             }
 
@@ -3240,8 +3249,208 @@ public class SeedConfiguration {
                 annualReportRepository.save(annualReport);
                 monthlyReportSummaryRepository.saveAll(monthlyReportSummaries);
             }
-
         };
     }
 
+    public void generateActualCostAndExpectedCostForPlan(Long termId, Currency defaultCurrency) {
+        List<FinancialPlan> plans = planRepository.getReferenceByTermId(termId);
+        List<FinancialPlan> savePlan = new ArrayList<>();
+        if (plans != null) {
+            plans.forEach(plan -> {
+                plan.setExpectedCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), null), defaultCurrency).getCost());
+
+                plan.setActualCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
+                savePlan.add(plan);
+            });
+
+            planRepository.saveAll(plans);
+        }
+    }
+
+
+    public void generateActualCostAndExpectedCostForReport(Long termId, Currency defaultCurrency) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        if (report != null) {
+            financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null);
+            ;
+
+            report.setExpectedCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null), defaultCurrency).getCost());
+
+            report.setActualCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
+            financialReportRepository.save(report);
+        }
+    }
+
+    public void generateReportStatistical(Long termId, Currency defaultCurrency) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        if (report != null) {
+
+            List<CostStatisticalByCurrencyResult> costStaticalByCurrencies = reportStatisticRepository.getListCostStatistical(report.getId(), ExpenseStatusCode.APPROVED);
+
+            if (costStaticalByCurrencies != null) {
+                List<ReportStatistical> reportStatistics = new ArrayList<>();
+
+                // Inner hashmap: map by currency id
+                HashMap<String, HashMap<Long, List<CostStatisticalByCurrencyResult>>> fromCurrencyIdHashMap = new HashMap<>();
+
+                Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.putIfAbsent(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId(), new HashMap<>());
+                    monthYearSet.add(PaginateExchange.builder()
+                            .month(costStatisticalByCurrency.getMonth())
+                            .year(costStatisticalByCurrency.getYear())
+                            .build());
+                });
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                            .putIfAbsent(costStatisticalByCurrency.getCurrencyId(), new ArrayList<>());
+                });
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                            .get(costStatisticalByCurrency.getCurrencyId()).add(costStatisticalByCurrency);
+                });
+
+                // Get list exchange rates
+                Set<Long> currencyIds = new HashSet<>();
+                for (String depIdCostId : fromCurrencyIdHashMap.keySet()) {
+                    currencyIds.addAll(fromCurrencyIdHashMap.get(depIdCostId).keySet());
+                }
+
+                currencyIds.add(defaultCurrency.getId());
+
+                // Get list exchange rates
+                List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds.stream().toList());
+
+                // Outer hashmap: map by string (department id + cost type id), date, currency id
+                HashMap<String, HashMap<String, HashMap<Long, BigDecimal>>> exchangeRateHashMap = new HashMap<>();
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrencyResult -> {
+                    exchangeRateHashMap.putIfAbsent(costStatisticalByCurrencyResult.getDepartmentId() + "_" + costStatisticalByCurrencyResult.getCostTypeId(), new HashMap<>());
+                });
+
+                exchangeRateHashMap.keySet().forEach(depIdCostId -> {
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(depIdCostId).putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+                    });
+                });
+
+                exchangeRateHashMap.keySet().forEach(depIdCostId -> {
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(depIdCostId).get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+                    });
+                });
+
+                for (String depIdCostId : fromCurrencyIdHashMap.keySet()) {
+                    BigDecimal totalCost = BigDecimal.valueOf(0);
+                    BigDecimal formAmount = null;
+                    BigDecimal toAmount = null;
+                    BigDecimal biggestCost = null;
+                    BigDecimal maxBiggestCost = BigDecimal.valueOf(0);
+                    HashMap<Long, List<CostStatisticalByCurrencyResult>> depIdCostIdHashMap = fromCurrencyIdHashMap.get(depIdCostId);
+
+                    for (Long fromCurrencyId : depIdCostIdHashMap.keySet()) {
+
+                        for (CostStatisticalByCurrencyResult costStatisticalByCurrency : depIdCostIdHashMap.get(fromCurrencyId)) {
+
+                            formAmount = exchangeRateHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                                    .get(costStatisticalByCurrency.getMonth() + "/" + costStatisticalByCurrency.getYear())
+                                    .get(fromCurrencyId);
+
+                            toAmount = exchangeRateHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                                    .get(costStatisticalByCurrency.getMonth() + "/" + costStatisticalByCurrency.getYear())
+                                    .get(defaultCurrency.getId());
+
+                            if (costStatisticalByCurrency.getCost() != null && toAmount != null && formAmount != null) {
+                                totalCost = totalCost.add(costStatisticalByCurrency.getCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+                            }
+
+                            if (costStatisticalByCurrency.getBiggestCost() != null && toAmount != null && formAmount != null) {
+                                biggestCost = costStatisticalByCurrency.getBiggestCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING);
+                            }
+
+                            if (biggestCost != null) {
+                                if (maxBiggestCost.longValue() < biggestCost.longValue()) {
+                                    maxBiggestCost = biggestCost;
+                                }
+                            }
+                        }
+                    }
+                    // Split the string using the "_" delimiter
+                    String[] parts = depIdCostId.split("_");
+
+                    // Parse the parts to Long
+                    Long departmentId = Long.parseLong(parts[0]);
+                    Long costTypeId = Long.parseLong(parts[1]);
+
+
+                    reportStatistics.add(
+                            ReportStatistical.builder()
+                                    .report(report)
+                                    .totalExpense(totalCost)
+                                    .biggestExpenditure(maxBiggestCost)
+                                    .department(departmentRepository.getReferenceById(departmentId))
+                                    .costType(costTypeRepository.getReferenceById(costTypeId))
+                                    .build());
+                }
+                reportStatisticRepository.saveAll(reportStatistics);
+            }
+        }
+    }
+
+    private CostResult calculateCost(List<TotalCostByCurrencyResult> costByCurrencyResults, Currency defaultCurrency) {
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+            }
+        }
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+    }
 }
