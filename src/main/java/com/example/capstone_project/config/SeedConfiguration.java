@@ -51,6 +51,7 @@ public class SeedConfiguration {
             TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
             CurrencyExchangeRateRepository currencyExchangeRateRepository,
+            ReportStatisticRepository reportStatisticRepository,
             TermSchedulerService termSchedulerService
 
     ) {

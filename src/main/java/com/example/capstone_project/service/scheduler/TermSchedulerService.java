@@ -34,7 +34,7 @@ public class TermSchedulerService {
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
     private final DepartmentRepository departmentRepository;
     private final CostTypeRepository costTypeRepository;
-    private final ReportStatisticalRepository reportStatisticalRepository;
+    private final ReportStatisticRepository reportStatisticRepository;
     private final FinancialPlanRepository planRepository;
     private final FinancialPlanExpenseRepository planExpenseRepository;
     private final ExpenseStatusRepository expenseStatusRepository;
@@ -143,7 +143,7 @@ public class TermSchedulerService {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
         if (report != null) {
 
-            List<CostStatisticalByCurrencyResult> costStaticalByCurrencies = reportStatisticalRepository.getListCostStatistical(report.getId(), ExpenseStatusCode.APPROVED);
+            List<CostStatisticalByCurrencyResult> costStaticalByCurrencies = reportStatisticRepository.getListCostStatistical(report.getId(), ExpenseStatusCode.APPROVED);
 
             if (costStaticalByCurrencies != null) {
                 List<ReportStatistical> reportStatistics = new ArrayList<>();
@@ -253,7 +253,7 @@ public class TermSchedulerService {
                                     .costType(costTypeRepository.getReferenceById(costTypeId))
                                     .build());
                 }
-                reportStatisticalRepository.saveAll(reportStatistics);
+                reportStatisticRepository.saveAll(reportStatistics);
             }
         }
     }
