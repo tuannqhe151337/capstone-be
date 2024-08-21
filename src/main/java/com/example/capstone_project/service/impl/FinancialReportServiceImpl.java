@@ -285,7 +285,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                         fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
                             BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
                             BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
-                            expense.setUnitPrice(expense.getUnitPrice().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                            expense.setUnitPrice(expense.getUnitPrice().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
                             expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
                         });
                     });
