@@ -27,8 +27,10 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
             " GROUP BY year ")
     AnnualReportResult getAnnualReport(LocalDate now);
 
-    @Query(value = " SELECT report.department.id AS departmentId, sum(report.totalExpense) AS totalExpense, max(report.biggestExpenditure) AS biggestExpense, report.costType.id AS costTypeId FROM ReportStatistical report " +
-            " WHERE year(report.createdAt) = year(:now) " +
+    @Query(value = " SELECT reportStatictical.department.id AS departmentId, sum(reportStatictical.totalExpense) AS totalExpense, max(reportStatictical.biggestExpenditure) AS biggestExpense, reportStatictical.costType.id AS costTypeId FROM ReportStatistical reportStatictical " +
+            " JOIN reportStatictical.report report " +
+            " JOIN report.term term" +
+            " WHERE year(term.finalEndTermDate) = year(:now) " +
             " GROUP BY departmentId, costTypeId ")
     List<ReportResult> generateReport(LocalDate now);
 
@@ -60,4 +62,5 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
     String getYear(Long annualReportId);
 
     AnnualReport findByYear(Integer year);
+
 }

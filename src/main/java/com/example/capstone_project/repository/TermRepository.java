@@ -70,4 +70,14 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " WHERE plan.id = :planId AND " +
             " term.isDelete = false OR term.isDelete is null ")
     Term getTermByPlanId(Long planId);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE cast(term.startDate as localdate) <= cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToStartForSeed(LocalDateTime now);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE cast(term.startDate as localdate) <= cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToCloseForSeed(LocalDateTime now);
 }
