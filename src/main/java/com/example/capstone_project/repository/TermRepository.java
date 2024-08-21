@@ -1,7 +1,7 @@
 package com.example.capstone_project.repository;
 
 import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +15,8 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " WHEN EXISTS (SELECT 1 FROM Term term " +
             " JOIN term.financialPlans plan " +
             " WHERE term.id = :termId AND " +
-            " plan.department.id = :departmentId) " +
+            " plan.department.id = :departmentId AND " +
+            " plan.isDelete = false )" +
             " THEN true " +
             " ELSE false " +
             " END ")
@@ -25,11 +26,11 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " LEFT JOIN term.financialPlans plan" +
             " WHERE term.name like %:query% AND " +
             " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
-            " term.status.name != :close AND " +
-            " term.endDate >= :now AND " +
+            " term.status.code != :close AND " +
+            " (term.startDate <= :now AND term.endDate >= :now) AND " +
             " term.isDelete = false ")
     long countDistinctListTermWhenCreatePlan(@Param("query") String query,
-                                             @Param("close") String close, @Param("now") LocalDateTime now,
+                                             @Param("close") TermStatusCode close, @Param("now") LocalDateTime now,
                                              @Param("departmentId") Long departmentId);
 
     @Query(value = "SELECT count(distinct (term.id)) FROM Term term " +
@@ -56,17 +57,27 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
             " WHERE term.status.code = :termCode AND " +
             " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
-    List<Term> getListTermNeedToStart(TermCode termCode, LocalDateTime now);
+    List<Term> getListTermNeedToStart(TermStatusCode termCode, LocalDateTime now);
 
     @Query(value = " SELECT term FROM Term term " +
             " WHERE term.status.code = :termCode AND " +
             " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
-    List<Term> getListTermNeedToClose(TermCode termCode, LocalDateTime now);
+    List<Term> getListTermNeedToClose(TermStatusCode termCode, LocalDateTime now);
 
     @Query( " SELECT term FROM FinancialPlan plan " +
             " JOIN plan.term term " +
             " WHERE plan.id = :planId AND " +
             " term.isDelete = false OR term.isDelete is null ")
     Term getTermByPlanId(Long planId);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE cast(term.startDate as localdate) <= cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToStartForSeed(LocalDateTime now);
+
+    @Query(value = " SELECT term FROM Term term " +
+            " WHERE cast(term.startDate as localdate) <= cast(:now as localdate) AND " +
+            " term.isDelete = false ")
+    List<Term> getListTermNeedToCloseForSeed(LocalDateTime now);
 }

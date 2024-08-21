@@ -24,6 +24,8 @@ public interface ReportDetailResult {
 
     LocalDateTime getEndDate();
 
+    boolean isAllowReupload();
+
     LocalDateTime getReuploadStartDate();
 
     LocalDateTime getReuploadEndDate();

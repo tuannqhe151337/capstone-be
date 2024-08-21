@@ -1,11 +1,15 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -13,6 +17,9 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -22,10 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +48,12 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final ExpenseStatusRepository expenseStatusRepository;
     private final ReportStatusRepository reportStatusRepository;
     private final HandleFileHelper handleFileHelper;
+    private final ProjectRepository projectRepository;
+    private final SupplierRepository supplierRepository;
+    private final CurrencyRepository currencyRepository;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final MonthlyReportSummaryRepository monthlyReportSummaryRepository;
+    private final FirebaseMessaging firebaseMessaging;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
@@ -156,12 +171,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expenses is empty");
         }
@@ -186,12 +204,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("List expense is null or empty");
         }
@@ -209,7 +230,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable) {
+    public List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Long toCurrencyId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -218,15 +239,71 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, pageable);
+            List<ReportExpenseResult> expenses = expenseRepository.getListExpenseForReport(reportId, query, departmentId, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
+            //Handle currency
+            if (toCurrencyId != null) {
+                if (!currencyRepository.existsById(toCurrencyId)) {
+                    throw new ResourceNotFoundException("Currency id not exist id = " + toCurrencyId);
+                }
+                try {
+                    // Inner hashmap: map by currency id
+                    HashMap<Long, List<ReportExpenseResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+                    Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+                    expenses.forEach(expense -> {
+                        fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
+                    });
+
+                    expenses.forEach(expense -> {
+                        fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                        monthYearSet.add(PaginateExchange.builder()
+                                .month(expense.getCreatedAt().getMonthValue())
+                                .year(expense.getCreatedAt().getYear())
+                                .build());
+                    });
+
+                    // Get list exchange rates
+                    List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+                    currencyIds.add(toCurrencyId);
+
+                    List<CurrencyExchangeRate> exchangeRates = this.currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+                    // Outer hashmap: map by date
+                    HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+                    });
+
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+                    });
+
+                    fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
+                        fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
+                            BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
+                            BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
+                            expense.setUnitPrice(expense.getUnitPrice().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+                            expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
+                        });
+                    });
+                } catch (ArithmeticException e) {
+                    throw new ArithmeticException("Can't divided by 0");
+                } catch (NullPointerException e) {
+                    throw new Exception();
+                }
+            }
+
+            return expenses;
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 
     @Override
-    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId) {
+    public long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -235,14 +312,91 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId);
+            return expenseRepository.countDistinctListExpenseForReport(query, reportId, departmentId, statusId, costTypeId, projectId, supplierId, picId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
+        }
+    }
+
+    private CostResult calculateCostByPlanIdAndStatusCode(Long reportId, ExpenseStatusCode statusCode) throws Exception {
+        List<TotalCostByCurrencyResult> costByCurrencyResults = financialReportRepository.calculateCostByReportIdAndStatus(reportId, statusCode);
+
+        Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                System.out.println(actualCost);
+            }
+        }
+
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+
+    }
+
+    @Override
+    public CostResult calculateActualCostByReportId(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            if (!financialReportRepository.existsById(reportId)) {
+                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
+            }
+            return calculateCostByPlanIdAndStatusCode(reportId, ExpenseStatusCode.APPROVED);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 
     @Override
-    public BigDecimal calculateActualCostByReportId(Long reportId) {
+    public CostResult calculateExpectedCostByReportId(Long reportId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -251,23 +405,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             if (!financialReportRepository.existsById(reportId)) {
                 throw new ResourceNotFoundException("Not found any report have id = " + reportId);
             }
-            return financialReportRepository.calculateActualCostByReportId(reportId, ExpenseStatusCode.APPROVED);
-        } else {
-            throw new UnauthorizedException("Unauthorized to view report");
-        }
-    }
-
-    @Override
-    public BigDecimal calculateExpectedCostByReportId(Long reportId) {
-        // Get userId from token
-        long userId = UserHelper.getUserId();
-
-        // Check authority
-        if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
-            if (!financialReportRepository.existsById(reportId)) {
-                throw new ResourceNotFoundException("Not found any report have id = " + reportId);
-            }
-            return financialReportRepository.calculateExpectedCostByReportId(reportId);
+            return calculateCostByPlanIdAndStatusCode(reportId, null);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
         }
@@ -299,7 +437,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseToApprovedByReportId(reportId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseToApprovedByReportId(reportId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
             if (expenses == null || expenses.isEmpty()) {
                 throw new ResourceNotFoundException("Not exist report id = " + reportId + " or list expense is empty");
             }
@@ -340,35 +478,61 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
 
-            List<String> listCodes = new ArrayList<>();
+            List<Long> listExpenseId = new ArrayList<>();
 
             for (FinancialPlanExpense expense : rawExpenses) {
-                listCodes.add(expense.getPlanExpenseKey());
+                listExpenseId.add(expense.getId());
             }
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            long totalExpense = expenseRepository.countListExpenseInReportUpload(reportId, listCodes, TermCode.IN_PROGRESS, LocalDateTime.now());
-            if (listCodes.size() == totalExpense) {
-                List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listCodes);
+            // Check list expense in one report
+            List<ExpenseResult> expenseResults = expenseRepository.getListExpenseInReportUpload(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
 
-                HashMap<String, Long> codeAndId = new HashMap<>();
-                for (ExpenseResult expenseResult : expenseResults) {
-                    codeAndId.put(expenseResult.getExpenseCode(), expenseResult.getExpenseId());
+            if (listExpenseId.size() == expenseResults.size()) {
+
+                // Get last code in this report
+                String lastCode = financialReportRepository.getLastCodeInReport(reportId);
+                int index = 0;
+
+                // If list expense not have any expense have code then index start from 1
+                if (lastCode != null) {
+                    // Split the string by the underscore character
+                    String[] parts = lastCode.split("_");
+
+                    // Get last index
+                    index = Integer.parseInt(parts[parts.length - 1]);
                 }
 
-                rawExpenses.forEach(expense -> {
+                HashMap<Long, String> idAndCode = new HashMap<>();
 
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(codeAndId.get(expense.getPlanExpenseKey()));
+                for (ExpenseResult expenseResult : expenseResults) {
+                    idAndCode.put(expenseResult.getExpenseId(), expenseResult.getExpenseCode());
+                }
 
-                    updateExpense.setStatus(expenseStatusRepository.getReferenceById(expense.getStatus().getId()));
+                ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
+                ExpenseStatus denied = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
+
+                // Get report of this list expense to generate expense code
+                FinancialReport report = financialReportRepository.findById(reportId).get();
+
+                for (FinancialPlanExpense expense : rawExpenses) {
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense.getId());
+
+                    // Generate code for approved expense not have code
+                    if (idAndCode.get(expense.getId()) != null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                        updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
+                    }
+                    // Update status for expense
+                    if (expense.getStatus().getCode().equals(approval.getCode())) {
+                        updateExpense.setStatus(approval);
+                    } else {
+                        updateExpense.setStatus(denied);
+
+                    }
 
                     expenses.add(updateExpense);
+                }
 
-                });
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
                 ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
 
@@ -385,13 +549,121 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     }
 
     @Override
-    public List<YearDiagramResult> generateYearDiagram(Integer year) {
-        return financialReportRepository.generateYearDiagram(year);
+    public List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return financialReportRepository.generateYearDiagram(year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<CostTypeDiagramResult> getYearCostTypeDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        Long departmentId = null;
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return monthlyReportSummaryRepository.getDepartmentYearDiagram(year);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+    @Override
+    public TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception {
+        UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
+
+        Long departmentId = null;
+        if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            List<CostTypeDiagramResult> costTypeDiagramResultList = monthlyReportSummaryRepository.getReportCostTypeDiagram(year, departmentId);
+
+            if (costTypeDiagramResultList == null) {
+                return new TreeMap<>();
+            }
+
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.putIfAbsent(costTypeDiagramResult.getMonth(), new ArrayList<>());
+            });
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
+            });
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("M/yyyy");
+
+            // Sorting
+            TreeMap<String, List<CostTypeDiagramResult>> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            sortedMap.putAll(costTypeDiagramResultHashMap);
+
+            return sortedMap;
+        } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+
+            List<CostTypeDiagramResult> costTypeDiagramResultList = monthlyReportSummaryRepository.getReportCostTypeDiagram(year, departmentId);
+
+            if (costTypeDiagramResultList == null) {
+                return new TreeMap<>();
+            }
+
+            HashMap<String, List<CostTypeDiagramResult>> costTypeDiagramResultHashMap = new HashMap<>();
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.putIfAbsent(costTypeDiagramResult.getMonth(), new ArrayList<>());
+            });
+
+            costTypeDiagramResultList.forEach(costTypeDiagramResult -> {
+                costTypeDiagramResultHashMap.get(costTypeDiagramResult.getMonth()).add(costTypeDiagramResult);
+            });
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("M/yyyy");
+
+            // Sorting
+            TreeMap<String, List<CostTypeDiagramResult>> sortedMap = new TreeMap<>((key1, key2) -> {
+                try {
+
+                    return dateFormat.parse(key1).compareTo(dateFormat.parse(key2));
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+
+            sortedMap.putAll(costTypeDiagramResultHashMap);
+
+            return sortedMap;
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
     }
 
     @Override
     @Transactional
-    public void approvalExpenses(Long reportId, List<Long> listExpenses) throws Exception {
+    public List<ExpenseCodeResponse> approvalExpenses(Long reportId, List<Long> listExpenseId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -400,35 +672,56 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-            listExpenses = RemoveDuplicateHelper.removeDuplicates(listExpenses);
+            listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenses, TermCode.IN_PROGRESS, LocalDateTime.now());
-            if (listExpenses.size() == totalExpense) {
+            // Check list expense exist in one report
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
+            if (listExpenseId.size() == totalExpense) {
 
                 // Get approval status
                 ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
 
-                listExpenses.forEach(expense -> {
-                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
+                String lastCode = financialReportRepository.getLastCodeInReport(reportId);
+                int index = 0;
+
+                if (lastCode != null) {
+                    // Split the string by the underscore character
+                    String[] parts = lastCode.split("_");
+
+                    // Get last index
+                    index = Integer.parseInt(parts[parts.length - 1]);
+
+                }
+
+                // Get report of this list expense
+                FinancialReport report = financialReportRepository.findById(reportId).get();
+                List<ExpenseCodeResponse> list = new ArrayList<>();
+                for (Long expenseId : listExpenseId) {
+                    FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expenseId);
+
+                    if (updateExpense.getPlanExpenseKey() == null || updateExpense.getPlanExpenseKey().isEmpty()) {
+                        // Convert ' ' to '_'
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
+                        list.add(ExpenseCodeResponse.builder().expenseId(expenseId).expenseCode(updateExpense.getPlanExpenseKey()).build());
+                    }
+
                     updateExpense.setStatus(approval);
                     expenses.add(updateExpense);
-                });
+                }
 
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
 
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
                 // Change status to Reviewed
-
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
-
-                report.setStatus(reviewedReportStatus);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//
+//                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
 
                 expenseRepository.saveAll(expenses);
+
+                return list;
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
@@ -452,11 +745,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
-            // Check list expense in one file
-            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermCode.IN_PROGRESS, LocalDateTime.now());
+            // Check list expense exist in one report
+            long totalExpense = expenseRepository.countListExpenseInReport(reportId, listExpenseId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
             if (listExpenseId.size() == totalExpense) {
 
-                // Get approval status
+                // Get deny status
                 ExpenseStatus denyStatus = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
 
                 listExpenseId.forEach(expense -> {
@@ -465,23 +758,73 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     updateExpense.setStatus(denyStatus);
                     expenses.add(updateExpense);
 
-
                 });
-                expenseRepository.saveAll(expenses);
-                // Get plan of this list expense
-                FinancialReport report = financialReportRepository.getReferenceById(reportId);
+
+                // Get report of this list expense
+//                FinancialReport report = financialReportRepository.getReferenceById(reportId);
+
                 // Change status to Reviewed
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
 
-                report.setStatus(reviewedReportStatus);
+//                report.setStatus(reviewedReportStatus);
 
-                financialReportRepository.save(report);
+//                financialReportRepository.save(report);
                 expenseRepository.saveAll(expenses);
             } else {
                 throw new InvalidInputException("List expense Id invalid ");
             }
         } else {
             throw new UnauthorizedException("Unauthorized to approval expense");
+        }
+    }
+
+    @Override
+    public void markReportAsReviewed(Long reportId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            // Update status report to reviewed
+            ReportStatus reviewedStatus = this.reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+
+            Optional<FinancialReport> reportOptional = this.financialReportRepository.getFinancialReportWithTerm(reportId, TermStatusCode.IN_PROGRESS, LocalDateTime.now());
+            if (reportOptional.isEmpty()) {
+                throw new ResourceNotFoundException("Report not found or it's not the right time to review");
+            }
+
+            FinancialReport report = reportOptional.get();
+            report.setStatus(reviewedStatus);
+            this.financialReportRepository.save(report);
+
+            // Get list FCM Tokens to send to user
+            List<String> fcmTokens = this.financialReportRepository.getFCMTokensOfFinancialStaffOfReport(List.of(reportId));
+
+            List<Message> messages = new ArrayList<>();
+            for (String fcmToken : fcmTokens) {
+                Notification notification = Notification
+                        .builder()
+                        .setTitle("Plan reviewed")
+                        .setBody("Your department's plan in term \"" + report.getTerm().getName() + "\" has been reviewed")
+                        .build();
+
+                Message message = Message.builder()
+                        .setToken(fcmToken)
+                        .setNotification(notification)
+                        .build();
+
+                messages.add(message);
+            }
+
+            // We won't do anything if sending notification failed
+            try {
+                if(!messages.isEmpty()) {
+                    firebaseMessaging.sendEach(messages);
+                }
+            } catch (Exception ignored) {}
         }
     }
 }

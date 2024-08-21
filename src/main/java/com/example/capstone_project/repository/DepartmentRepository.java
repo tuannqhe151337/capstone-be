@@ -16,6 +16,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long>, C
             " WHERE file.id = :fileId AND " +
             " file.isDelete = false ")
     long getDepartmentIdByFileId(Long fileId);
+
     @Query(value = " SELECT DISTINCT department.id FROM Department department " +
             " JOIN department.plans plan " +
             " WHERE plan.id = :planId AND " +

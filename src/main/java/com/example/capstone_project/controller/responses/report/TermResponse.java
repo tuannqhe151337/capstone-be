@@ -16,6 +16,7 @@ public class TermResponse {
     private String name;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private boolean allowReupload;
     private LocalDateTime reuploadStartDate;
     private LocalDateTime reuploadEndDate;
     private LocalDateTime finalEndTermDate;

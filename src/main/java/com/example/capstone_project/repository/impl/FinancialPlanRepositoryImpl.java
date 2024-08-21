@@ -67,7 +67,8 @@ public class FinancialPlanRepositoryImpl implements CustomFinancialPlanRepositor
                 hql += " ";
             }
         }
-
+        System.out.println("BUG___Plan");
+        System.out.println(hql);
         // Handling join
         EntityGraph<FinancialPlan> entityGraph = entityManager.createEntityGraph(FinancialPlan.class);
         entityGraph.addAttributeNodes(FinancialPlan_.TERM);

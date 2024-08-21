@@ -28,7 +28,7 @@ public interface ExpenseResult {
 
     String getSupplierName();
 
-    String getPic();
+    String getPicName();
 
     String getNote();
 
@@ -41,4 +41,6 @@ public interface ExpenseResult {
     Long getCostTypeId();
 
     Long getStatusId();
+
+    String getCurrencyName();
 }

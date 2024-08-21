@@ -8,7 +8,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(schema = "capstone_v2",name = "plan_status")
+@Table(schema = "capstone_v2",name = "report_status")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

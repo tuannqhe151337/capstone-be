@@ -3,6 +3,7 @@ package com.example.capstone_project.utils.mapper.plan.reupload;
 import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.repository.result.PlanVersionResult;
+import com.example.capstone_project.utils.enums.ExpenseStatusCode;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -11,32 +12,35 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ReUploadExpensesMapper {
-
-    @Mapping(source = "expenseCode", target = "planExpenseKey")
+    @Mapping(source = "expenseId", target = "id")
     @Mapping(source = "expenseName", target = "name")
     @Mapping(source = "costTypeId", target = "costType.id")
     @Mapping(source = "unitPrice", target = "unitPrice")
     @Mapping(source = "amount", target = "amount")
-    @Mapping(source = "projectName", target = "projectName")
-    @Mapping(source = "supplierName", target = "supplierName")
-    @Mapping(source = "pic", target = "pic")
+    @Mapping(source = "projectId", target = "project.id")
+    @Mapping(source = "supplierId", target = "supplier.id")
+    @Mapping(source = "picId", target = "pic.id")
     @Mapping(source = "notes", target = "note")
-    @Mapping(constant = "1L", target = "status.id")
+    @Mapping(source = "currencyId", target = "currency.id")
     FinancialPlanExpense mapUpdateExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody);
 
-    default FinancialPlanExpense newExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody, StringBuilder prefixExpenseKey, Integer version, Integer lastIndexCode) {
+    default FinancialPlanExpense newExpenseToPlanExpense(ReUploadExpenseBody reUploadExpenseBody) {
         return FinancialPlanExpense.builder()
-                .planExpenseKey(prefixExpenseKey + "v" + version + "_" + lastIndexCode)
                 .name(reUploadExpenseBody.getExpenseName())
                 .costType(CostType.builder()
                         .id(reUploadExpenseBody.getCostTypeId())
                         .build())
-                .status(ExpenseStatus.builder().id(1L).build())
                 .unitPrice(reUploadExpenseBody.getUnitPrice())
                 .amount(reUploadExpenseBody.getAmount())
-                .projectName(reUploadExpenseBody.getProjectName())
-                .supplierName(reUploadExpenseBody.getSupplierName())
-                .pic(reUploadExpenseBody.getPic())
+                .project(Project.builder()
+                        .id(reUploadExpenseBody.getProjectId())
+                        .build())
+                .supplier(Supplier.builder()
+                        .id(reUploadExpenseBody.getSupplierId())
+                        .build())
+                .pic(User.builder()
+                        .id(reUploadExpenseBody.getPicId())
+                        .build())
                 .note(reUploadExpenseBody.getNotes()
                 ).build();
     }

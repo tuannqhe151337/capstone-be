@@ -1,7 +1,7 @@
 package com.example.capstone_project.utils.mapper.annual;
 
 import com.example.capstone_project.controller.responses.annualReport.expenses.AnnualReportExpenseResponse;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.MonthlyReportSummary;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -14,5 +14,5 @@ public interface AnnualReportExpenseMapper {
     @Mapping(source = "biggestExpenditure", target = "biggestExpenditure")
     @Mapping(source = "costType.id", target = "costType.costTypeId")
     @Mapping(source = "costType.name", target = "costType.name")
-    AnnualReportExpenseResponse mapToAnnualReportExpenseResponseMapping(Report report);
+    AnnualReportExpenseResponse mapToAnnualReportExpenseResponseMapping(MonthlyReportSummary monthlyReportSummary);
 }

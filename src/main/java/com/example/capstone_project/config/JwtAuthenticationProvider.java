@@ -28,11 +28,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         // Get username and password
-        final String username = authentication.getPrincipal().toString();
+        final String email = authentication.getPrincipal().toString();
         final String password = authentication.getCredentials().toString();
 
         // Check if user exists in the database
-        Optional<User> optionalUser = this.userRepository.findActiveUserByUsername(username);
+        Optional<User> optionalUser = this.userRepository.findActiveUserByEmail(email);
         if (optionalUser.isEmpty()) {
             return null;
         }

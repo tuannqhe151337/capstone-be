@@ -1,22 +1,19 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.controller.body.plan.reupload.ReUploadExpenseBody;
 import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.entity.FinancialPlan;
 import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.UserDetail;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.FileNameResult;
-import com.example.capstone_project.repository.result.PlanDetailResult;
-import com.example.capstone_project.repository.result.PlanVersionResult;
-import com.example.capstone_project.repository.result.VersionResult;
+import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialPlanService;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
-import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
@@ -38,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -55,6 +55,12 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     private final DepartmentRepository departmentRepository;
     private final CostTypeRepository costTypeRepository;
     private final HandleFileHelper handleFileHelper;
+    private final ProjectRepository projectRepository;
+    private final SupplierRepository supplierRepository;
+    private final UserRepository userRepository;
+    private final CurrencyRepository currencyRepository;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final FinancialPlanFileExpenseRepository financialPlanFileExpenseRepository;
 
 
     @Override
@@ -168,7 +174,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan createPlan(FinancialPlan plan, Term term) throws Exception {
+    public FinancialPlan createPlan(FinancialPlan plan, List<FinancialPlanExpense> expenses, String fileName, Long termId) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
@@ -183,10 +189,55 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         if (termRepository.existsPlanOfDepartmentInTerm(userDetail.getDepartmentId(), plan.getTerm().getId())) {
             throw new DuplicateKeyException("This term already have plan of department id = " + userDetail.getDepartmentId());
         }
-        if (!LocalDateTime.now().isBefore(term.getEndDate())) {
+
+        // Get term
+        Term term = termRepository.getReferenceById(termId);
+
+        if (!(LocalDateTime.now().isBefore(term.getEndDate()) && LocalDateTime.now().isAfter(term.getStartDate()))) {
             throw new InvalidDateException("Plan due date of this term was expired");
         }
-        return planRepository.save(plan);
+
+        plan.setActualCost(BigDecimal.valueOf(0));
+        plan.setExpectedCost(BigDecimal.valueOf(0));
+
+        FinancialPlan savedPlan = planRepository.save(plan);
+        // Map plan
+        plan.setDepartment(departmentRepository.getReferenceById(userDetail.getDepartmentId()));
+        // Get expense status new
+        ExpenseStatus status = expenseStatusRepository.getReferenceByCode(ExpenseStatusCode.NEW);
+        // Mapping list expense
+        expenses.forEach(expense -> {
+            expense.setCostType(costTypeRepository.getReferenceById(expense.getCostType().getId()));
+            expense.setProject(projectRepository.getReferenceById(expense.getProject().getId()));
+            expense.setSupplier(supplierRepository.getReferenceById(expense.getSupplier().getId()));
+            expense.setPic(userRepository.getReferenceById(expense.getPic().getId()));
+            expense.setCurrency(currencyRepository.getReferenceById(expense.getCurrency().getId()));
+            expense.setStatus(status);
+        });
+
+        expenseRepository.saveAll(expenses);
+
+        List<FinancialPlanFileExpense> expenseFile = new ArrayList<>();
+
+        FinancialPlanFile file = FinancialPlanFile.builder()
+                .plan(plan)
+                .name(fileName)
+                .user(userRepository.getReferenceById(userId))
+                .planFileExpenses(expenseFile)
+                .build();
+
+        financialPlanFileRepository.save(file);
+
+        expenses.forEach(expense -> {
+            expenseFile.add(FinancialPlanFileExpense.builder()
+                    .planExpense(expense)
+                    .file(file)
+                    .build());
+        });
+
+        financialPlanFileExpenseRepository.saveAll(expenseFile);
+
+        return savedPlan;
     }
 
     public UserDetail getUserDetail() throws Exception {
@@ -203,9 +254,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan deletePlan(long planId) {
+    public FinancialPlan deletePlan(long planId) throws InvalidDateException {
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
+
+            Term term = termRepository.getTermByPlanId(planId);
+
+            if (!(LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))) {
+                throw new InvalidDateException("Can not delete plan in this time period");
+            }
 
             FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
                     new ResourceNotFoundException("Not found any plan have id = " + planId));
@@ -315,7 +372,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Pageable pageable) throws Exception {
+    public List<FinancialPlanExpense> getListExpenseWithPaginate(Long planId, String query, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId, Long toCurrencyId, Pageable pageable) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
         // Get user detail
@@ -330,15 +387,21 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             // Checkout role, accountant can view all plan
             if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+                // Handle exchange money
+                handleCurrencyExchange(toCurrencyId, expenses);
 
+                return expenses;
                 // But financial staff can only view plan of their department
             } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
-
                 if (userDetail.getDepartmentId() == planRepository.getDepartmentIdByPlanId(planId)) {
+                    List<FinancialPlanExpense> expenses = expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, projectId, supplierId, picId, pageable);
 
-                    return expenseRepository.getListExpenseWithPaginate(planId, query, statusId, costTypeId, pageable);
+                    // Handle exchange money
+                    handleCurrencyExchange(toCurrencyId, expenses);
+
+                    return expenses;
                 } else {
                     throw new UnauthorizedException("User can't view this department because departmentId of plan not equal with departmentId of user");
                 }
@@ -348,13 +411,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId) {
+    public long countDistinctListExpenseWithPaginate(String query, Long planId, Long statusId, Long costTypeId, Long projectId, Long supplierId, Long picId) {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())) {
-            return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId);
+            return expenseRepository.countDistinctListExpenseWithPaginate(query, planId, statusId, costTypeId, projectId, supplierId, picId);
         } else {
             throw new UnauthorizedException("Unauthorized to view plan");
         }
@@ -452,12 +515,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -472,12 +538,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist file = " + fileId + " or list expenses is empty");
         }
@@ -492,17 +561,19 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.DOWNLOAD_PLAN.getValue())) {
-            long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
-
-            // Check department
-            if (departmentId == userDetail.getDepartmentId()) {
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByFileId(fileId);
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    return planRepository.getListExpenseByFileId(fileId);
+                } else {
+                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+                }
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
                 return planRepository.getListExpenseByFileId(fileId);
-            } else {
-                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
             }
-        } else {
-            throw new UnauthorizedException("Unauthorized to download plan");
         }
+        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
@@ -516,7 +587,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
-                return fileName.getTermName() + "_v" + fileName.getVersion() + ".xlsx";
+                return fileName.getTermName() + "_" + fileName.getPlanName() + "_v" + fileName.getVersion() + ".xlsx";
             }
         }
 
@@ -534,14 +605,14 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         for (FileNameResult fileName : fileNameResultList) {
             if (Objects.equals(fileName.getFileId(), fileId)) {
-                return fileName.getTermName() + "_v" + fileName.getVersion() + ".xls";
+                return fileName.getTermName() + "_" + fileName.getPlanName() + "_v" + fileName.getVersion() + ".xls";
             }
         }
         return null;
     }
 
     @Override
-    public FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<ReUploadExpenseBody> expenseBodies) throws Exception {
+    public FinancialPlan convertListExpenseAndMapToPlan(Long planId, List<FinancialPlanExpense> reUploadExpenses) throws Exception {
 
         // Get userId from token
         long userId = UserHelper.getUserId();
@@ -560,8 +631,17 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             Term term = termRepository.getTermByPlanId(planId);
 
-            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))
-                    || (LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
+            boolean isAllowToReupload = false;
+
+            if ((LocalDateTime.now().isAfter(term.getStartDate()) && LocalDateTime.now().isBefore(term.getEndDate()))) {
+                isAllowToReupload = true;
+            } else if (term.isAllowReupload()) {
+                if ((LocalDateTime.now().isAfter(term.getReuploadStartDate()) && LocalDateTime.now().isBefore(term.getReuploadEndDate()))) {
+                    isAllowToReupload = true;
+                }
+            }
+
+            if (isAllowToReupload) {
                 long departmentId = planRepository.getDepartmentIdByPlanId(planId);
                 // Check department
                 if (departmentId == userDetail.getDepartmentId()) {
@@ -573,20 +653,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     }
 
                     // Handle list expense
-                    HashMap<String, ExpenseStatusCode> hashMapExpense = new HashMap<>();
+                    HashMap<Long, ExpenseStatusCode> hashMapExpense = new HashMap<>();
                     List<FinancialPlanExpense> listExpense = new ArrayList<>();
 
-                    // Get last code of expense by plan Id
-                    String lastExpenseCode = expenseRepository.getLastExpenseCode(planId);
-                    String[] parts = lastExpenseCode.split("_");
+//                    // Get last code of expense by plan Id
+//                    String lastExpenseCode = expenseRepository.getLastExpenseCode(planId);
+//                    String[] parts = lastExpenseCode.split("_");
 
-                    // Create prefix expense code
-                    StringBuilder prefixExpenseKey = new StringBuilder();
-                    for (int i = 0; i < parts.length - 2; i++) {
-                        prefixExpenseKey.append(parts[i] + "_");
-                    }
+//                    // Create prefix expense code
+//                    StringBuilder prefixExpenseKey = new StringBuilder();
+//                    for (int i = 0; i < parts.length - 2; i++) {
+//                        prefixExpenseKey.append(parts[i] + "_");
+//                    }
 
-                    int lastIndexCode = Integer.parseInt(parts[parts.length - 1]);
+//                    int lastIndexCode = Integer.parseInt(parts[parts.length - 1]);
 
                     // Get current version by plan Id
                     PlanVersionResult version = planRepository.getCurrentVersionByPlanId(planId);
@@ -594,29 +674,52 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
                     // Split list expense depend on status code
                     for (ExpenseResult expenseResult : listExpenseCreate) {
                         if (expenseResult.getStatusCode().equals(ExpenseStatusCode.APPROVED)) {
-                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.APPROVED);
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseId(), ExpenseStatusCode.APPROVED);
 
-                            // Add old expenses had approved in old version
+                            // Add old expenses had approved in old version to new version
                             listExpense.add(expenseRepository.getReferenceById(expenseResult.getExpenseId()));
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.NEW)) {
-                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.NEW);
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseId(), ExpenseStatusCode.NEW);
                         } else if (expenseResult.getStatusCode().equals(ExpenseStatusCode.DENIED)) {
-                            hashMapExpense.putIfAbsent(expenseResult.getExpenseCode(), ExpenseStatusCode.DENIED);
+                            hashMapExpense.putIfAbsent(expenseResult.getExpenseId(), ExpenseStatusCode.DENIED);
                         }
                     }
+                    ExpenseStatus status = expenseStatusRepository.findByCode(ExpenseStatusCode.NEW);
 
                     // Handle new expenses need to re-upload
-                    for (ReUploadExpenseBody expenseBody : expenseBodies) {
+                    for (FinancialPlanExpense expense : reUploadExpenses) {
 
-                        // If exist expense code and status not approve, update expense
-                        if (hashMapExpense.containsKey(expenseBody.getExpenseCode()) &&
-                                !hashMapExpense.get(expenseBody.getExpenseCode()).getValue().equals(ExpenseStatusCode.APPROVED.getValue())
+                        // If exist expense code and status not approve, create new expense with new information and map to plan in database
+                        if (hashMapExpense.containsKey(expense.getId()) &&
+                                !hashMapExpense.get(expense.getId()).equals(ExpenseStatusCode.APPROVED)
                         ) {
-                            listExpense.add(new ReUploadExpensesMapperImpl().mapUpdateExpenseToPlanExpense(expenseBody));
+                            FinancialPlanExpense updateExpense = FinancialPlanExpense.builder()
+                                    .name(expense.getName())
+                                    .unitPrice(expense.getUnitPrice())
+                                    .amount(expense.getAmount())
+                                    .costType(costTypeRepository.getReferenceById(expense.getCostType().getId()))
+                                    .project(projectRepository.getReferenceById(expense.getProject().getId()))
+                                    .supplier(supplierRepository.getReferenceById(expense.getSupplier().getId()))
+                                    .pic(userRepository.getReferenceById(expense.getPic().getId()))
+                                    .currency(currencyRepository.getReferenceById(expense.getCurrency().getId()))
+                                    .status(status)
+                                    .build();
 
-                            // If not exist expense code, create new expense
-                        } else if (!hashMapExpense.containsKey(expenseBody.getExpenseCode())) {
-                            listExpense.add(new ReUploadExpensesMapperImpl().newExpenseToPlanExpense(expenseBody, prefixExpenseKey, version.getVersion(), ++lastIndexCode));
+                            listExpense.add(updateExpense);
+
+                            // If not exist expense id, create new expense
+                        } else if (!hashMapExpense.containsKey(expense.getId())) {
+                            listExpense.add(FinancialPlanExpense.builder()
+                                    .name(expense.getName())
+                                    .unitPrice(expense.getUnitPrice())
+                                    .amount(expense.getAmount())
+                                    .costType(costTypeRepository.getReferenceById(expense.getCostType().getId()))
+                                    .project(projectRepository.getReferenceById(expense.getProject().getId()))
+                                    .supplier(supplierRepository.getReferenceById(expense.getSupplier().getId()))
+                                    .pic(userRepository.getReferenceById(expense.getPic().getId()))
+                                    .currency(currencyRepository.getReferenceById(expense.getCurrency().getId()))
+                                    .status(status)
+                                    .build());
                         }
                     }
 
@@ -651,12 +754,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
             FileInputStream file = new FileInputStream(fileLocation);
             HSSFWorkbook wb = new HSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expenses is empty");
         }
@@ -675,18 +781,20 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             if (!planRepository.existsById(planId)) {
                 throw new ResourceNotFoundException("Not found any plan have id = " + planId);
             }
-
-            long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
-
-            // Check department
-            if (departmentId == userDetail.getDepartmentId()) {
+            if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
                 return planRepository.getListExpenseByPlanId(planId);
-            } else {
-                throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+
+            } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+                long departmentId = departmentRepository.getDepartmentIdByPlanId(planId);
+                // Check department
+                if (departmentId == userDetail.getDepartmentId()) {
+                    return planRepository.getListExpenseByPlanId(planId);
+                } else {
+                    throw new UnauthorizedException("User can't download this plan because departmentId of plan not equal with departmentId of user");
+                }
             }
-        } else {
-            throw new UnauthorizedException("Unauthorized to download plan");
         }
+        throw new UnauthorizedException("Unauthorized to download plan");
     }
 
     @Override
@@ -694,7 +802,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_v" + fileNameResult.getVersion() + ".xls";
+            return fileNameResult.getTermName() + "_" + fileNameResult.getPlanName() + "_v" + fileNameResult.getVersion() + ".xls";
         } else {
             throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }
@@ -709,12 +817,15 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Department> departments = departmentRepository.findAll();
             List<CostType> costTypes = costTypeRepository.findAll();
             List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+            List<Project> projects = projectRepository.findAll();
+            List<Supplier> suppliers = supplierRepository.findAll();
+            List<Currency> currencies = currencyRepository.findAll();
 
             String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
             FileInputStream file = new FileInputStream(fileLocation);
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
-            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses);
+            return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
             throw new ResourceNotFoundException("Not exist plan id = " + planId + " or list expenses is empty");
         }
@@ -725,7 +836,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         FileNameResult fileNameResult = financialPlanFileRepository.getLastVersionFileName(planId);
 
         if (fileNameResult != null) {
-            return fileNameResult.getTermName() + "_v" + fileNameResult.getVersion() + ".xlsx";
+            return fileNameResult.getTermName() + "_" + fileNameResult.getPlanName() + "_v" + fileNameResult.getVersion() + ".xlsx";
         } else {
             throw new ResourceNotFoundException("Not found any file of plan have id = " + planId);
         }
@@ -815,6 +926,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
         List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
+        List<Project> projects = projectRepository.findAll();
+        List<Supplier> suppliers = supplierRepository.findAll();
+        List<Currency> currencies = currencyRepository.findAll();
 
         String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
         FileInputStream file = new FileInputStream(fileLocation);
@@ -862,6 +976,43 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             row.createCell(colPosition).setCellValue(status.getCode().toString());
         }
 
+
+        // Write project
+        rowPosition = 2;
+
+        for (Project project : projects) {
+            colPosition = 9;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(project.getId());
+            row.createCell(colPosition).setCellValue(project.getName());
+        }
+
+        // Write supplier
+        rowPosition = 2;
+
+        for (Supplier supplier : suppliers) {
+            colPosition = 12;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(supplier.getId());
+            row.createCell(colPosition).setCellValue(supplier.getName());
+        }
+
+        // Write currency
+        rowPosition = 2;
+
+        for (Currency currency : currencies) {
+            colPosition = 15;
+            if (sheet.getRow(rowPosition) == null)
+                row = sheet.createRow(rowPosition++);
+            else row = sheet.getRow(rowPosition++);
+            row.createCell(colPosition++).setCellValue(currency.getId());
+            row.createCell(colPosition).setCellValue(currency.getName());
+        }
+
         // Add validation
         sheet = wb.getSheet("Expense");
         // Add validation for department
@@ -869,7 +1020,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         DataValidationHelper validationHelper = sheet.getDataValidationHelper();
         DataValidationConstraint constraint = validationHelper.createFormulaListConstraint("List!$B$3:$B$" + (departments.size() + 2));
 
-        CellRangeAddressList addressList = new CellRangeAddressList(2, 100, 3, 3);
+        CellRangeAddressList addressList = new CellRangeAddressList(2, 100, 4, 4);
         DataValidation dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
@@ -879,7 +1030,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         constraint = validationHelper.createFormulaListConstraint("List!$E$3:$E$" + (costTypes.size() + 2));
 
-        addressList = new CellRangeAddressList(2, 100, 5, 5);
+        addressList = new CellRangeAddressList(2, 100, 6, 6);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
@@ -889,11 +1040,47 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
         constraint = validationHelper.createFormulaListConstraint("List!$H$3:$H$" + (expenseStatuses.size() + 2));
 
-        addressList = new CellRangeAddressList(2, 100, 13, 13);
+        addressList = new CellRangeAddressList(2, 100, 14, 14);
         dataValidation = validationHelper.createValidation(constraint, addressList);
         dataValidation.setShowErrorBox(true);
 
         sheet.addValidationData(dataValidation);
+
+        // Add validation for project
+
+        constraint = validationHelper.createFormulaListConstraint("List!$K$3:$K$" + (projects.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 11, 11);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for supplier
+
+        constraint = validationHelper.createFormulaListConstraint("List!$N$3:$N$" + (suppliers.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 12, 12);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Add validation for currency
+
+        constraint = validationHelper.createFormulaListConstraint("List!$Q$3:$Q$" + (currencies.size() + 2));
+
+        addressList = new CellRangeAddressList(2, 100, 10, 10);
+        dataValidation = validationHelper.createValidation(constraint, addressList);
+        dataValidation.setShowErrorBox(true);
+
+        sheet.addValidationData(dataValidation);
+
+        // Back to default open is sheet expense
+        sheet = wb.getSheet("Expense");
+        int sheetIndex = wb.getSheetIndex(sheet);
+        wb.setActiveSheet(sheetIndex);
+        wb.setSelectedTab(sheetIndex);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
@@ -901,5 +1088,169 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         out.close();
 
         return out.toByteArray();
+    }
+
+    @Override
+    public List<UserDownloadResult> checkUsernameExist(List<String> listUsername) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
+        // Check authority or role
+        if (userAuthorityRepository.get(userId).contains(AuthorityCode.RE_UPLOAD_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.IMPORT_PLAN.getValue())
+                || userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue())) {
+            return userRepository.checkUsernameExist(listUsername);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view plan");
+        }
+    }
+
+    private CostResult calculateCostByPlanIdAndStatusCode(Long planId, ExpenseStatusCode statusCode) throws Exception {
+        List<TotalCostByCurrencyResult> costByCurrencyResults = planRepository.calculateCostByPlanId(planId, statusCode);
+
+        Currency defaultCurrency = currencyRepository.getDefaultCurrency();
+
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                System.out.println(actualCost);
+            }
+        }
+
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+
+    }
+
+    @Override
+    public CostResult calculateActualCostByPlanId(Long planId) throws Exception {
+        return calculateCostByPlanIdAndStatusCode(planId, ExpenseStatusCode.APPROVED);
+    }
+
+    @Override
+    public CostResult calculateExpectedCostByPlanId(Long planId) throws Exception {
+        return calculateCostByPlanIdAndStatusCode(planId, null);
+    }
+
+    @Override
+    public List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+        Long departmentId = null;
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+        if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
+            departmentId = userDetail.getDepartmentId();
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            return planRepository.generateYearDiagram(year, departmentId);
+        } else {
+            throw new UnauthorizedException("Unauthorized to view diagram");
+        }
+    }
+
+
+    private void handleCurrencyExchange(Long toCurrencyId, List<FinancialPlanExpense> expenses) throws Exception {
+        //Handle currency
+        if (toCurrencyId != null) {
+            if (!currencyRepository.existsById(toCurrencyId)) {
+                throw new ResourceNotFoundException("Currency id not exist id = " + toCurrencyId);
+            }
+            try {
+                // Inner hashmap: map by currency id
+                HashMap<Long, List<FinancialPlanExpense>> fromCurrencyIdHashMap = new HashMap<>();
+
+                Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.putIfAbsent(expense.getCurrency().getId(), new ArrayList<>());
+                });
+
+                expenses.forEach(expense -> {
+                    fromCurrencyIdHashMap.get(expense.getCurrency().getId()).add(expense);
+                    monthYearSet.add(PaginateExchange.builder()
+                            .month(expense.getCreatedAt().getMonthValue())
+                            .year(expense.getCreatedAt().getYear())
+                            .build());
+                });
+
+                // Get list exchange rates
+                List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+                currencyIds.add(toCurrencyId);
+
+                List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+                // Outer hashmap: map by date
+                HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+                });
+
+                exchangeRates.forEach(exchangeRate -> {
+                    exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+                });
+
+                fromCurrencyIdHashMap.keySet().forEach(fromCurrencyId -> {
+                    fromCurrencyIdHashMap.get(fromCurrencyId).forEach(expense -> {
+                        BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(fromCurrencyId).longValue());
+                        BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(expense.getCreatedAt().format(DateTimeFormatter.ofPattern("M/yyyy"))).get(toCurrencyId).longValue());
+                        expense.setUnitPrice(expense.getUnitPrice().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+                        expense.setCurrency(currencyRepository.getReferenceById(toCurrencyId));
+                    });
+                });
+            } catch (ArithmeticException e) {
+                throw new ArithmeticException("Can't divided by 0");
+            } catch (NullPointerException e) {
+                throw new Exception();
+            }
+        }
     }
 }

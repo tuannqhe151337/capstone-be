@@ -38,3 +38,6 @@ out/
 
 ### Deploy ###
 /src/main/resources/application-prod.properties
+
+### Firebase ###
+/src/main/resources/firebase-service-account.json

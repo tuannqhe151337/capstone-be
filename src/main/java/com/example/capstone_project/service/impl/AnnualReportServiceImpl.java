@@ -1,13 +1,11 @@
 package com.example.capstone_project.service.impl;
 
 import com.example.capstone_project.entity.AnnualReport;
-import com.example.capstone_project.entity.Report;
+import com.example.capstone_project.entity.MonthlyReportSummary;
 import com.example.capstone_project.repository.AnnualReportRepository;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.result.AnnualReportExpenseResult;
 import com.example.capstone_project.repository.result.CostTypeDiagramResult;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.service.AnnualReportService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
@@ -25,10 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -62,7 +58,7 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     }
 
     @Override
-    public List<Report> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable) {
+    public List<MonthlyReportSummary> getListExpenseWithPaginate(Long annualReportId, Long costTypeId, Long departmentId, Pageable pageable) {
         // Get list authorities of this user
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
@@ -106,14 +102,15 @@ public class AnnualReportServiceImpl implements AnnualReportService {
     }
 
     @Override
-    public AnnualReport getAnnualReportDetail(Long annualReportId) {
+    public AnnualReport getAnnualReportDetail(Integer year) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            if (!annualReportRepository.existsById(annualReportId)) {
-                throw new ResourceNotFoundException("Not found any term have id = " + annualReportId);
+            AnnualReport annualReport = annualReportRepository.findByYear(year);
+            if (annualReport == null) {
+                throw new ResourceNotFoundException("Not found any term have year = " + year);
             }
-            return annualReportRepository.getReferenceById(annualReportId);
+            return annualReport;
         } else {
             throw new UnauthorizedException("Unauthorized to view annual report");
         }

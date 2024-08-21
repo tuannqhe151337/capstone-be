@@ -64,19 +64,18 @@ public class CostTypeServiceImpl implements CostTypeService {
     public void updateCostType(CostType costType) {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
-        try {
-            // Check authority or role
-            if (listAuthorities.contains(AuthorityCode.UPDATE_COST_TYPE.getValue())) {
-                if (!costTypeRepository.existsById(costType.getId())) {
-                    throw new ResourceNotFoundException("Not found any cost type have Id = " + costType.getId());
-                }
-
-                costTypeRepository.save(costType);
-            } else {
-                throw new UnauthorizedException("Unauthorized to update cost type");
+        // Check authority or role
+        if (listAuthorities.contains(AuthorityCode.UPDATE_COST_TYPE.getValue())) {
+            if (!costTypeRepository.existsById(costType.getId())) {
+                throw new ResourceNotFoundException("Not found any cost type have Id = " + costType.getId());
             }
-        } catch (Exception e) {
-            throw new DuplicateKeyException("Duplicate name cost type");
+            CostType updateCostType = costTypeRepository.getReferenceById(costType.getId());
+
+            updateCostType.setName(costType.getName());
+
+            costTypeRepository.save(updateCostType);
+        } else {
+            throw new UnauthorizedException("Unauthorized to update cost type");
         }
     }
 

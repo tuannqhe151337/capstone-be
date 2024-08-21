@@ -11,14 +11,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReUploadExpenseBody {
-    @NotEmpty(message = "Expense code can't be empty.")
-    @Size(max = 100, message = "Expense code must be less than 100 characters")
-    private String expenseCode;
+    private Long expenseId;
 
     @NotEmpty(message = "Expense name can't be empty.")
     @Size(max = 100, message = "Expense name must be less than 100 characters")
@@ -35,18 +34,18 @@ public class ReUploadExpenseBody {
     @Min(value = 0, message = "Amount can't be negative")
     private Integer amount;
 
-    @NotEmpty(message = "Project name can't be empty.")
-    @Size(max = 100, message = "Project name must be less than 100 characters")
-    private String projectName;
+    @NotNull(message = "Project name can't be empty.")
+    private Long projectId;
 
-    @NotEmpty(message = "Supplier name can't be empty.")
-    @Size(max = 100, message = "Supplier name must be less than 100 characters")
-    private String supplierName;
+    @NotNull(message = "Supplier name can't be empty.")
+    private Long supplierId;
 
-    @NotEmpty(message = "PIC can't be empty.")
-    @Size(max = 100, message = "PIC must be less than 100 characters")
-    private String pic;
+    @NotNull(message = "PIC can't be empty.")
+    private Long picId;
 
-    @Size(max = 200, message = "Notes must be less than 100 characters")
+    @Size(max = 200, message = "Notes must be less than 200 characters")
     private String notes;
+
+    @NotNull(message = "Currency id can't be empty.")
+    private Long currencyId;
 }

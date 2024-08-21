@@ -11,27 +11,25 @@ import com.example.capstone_project.controller.responses.term.getReports.TermRep
 import com.example.capstone_project.controller.responses.term.getTermDetail.TermDetailResponse;
 
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
+import com.example.capstone_project.controller.responses.term.termInterval.TermIntervalResponse;
 import com.example.capstone_project.entity.Term;
 
+import com.example.capstone_project.entity.TermInterval;
+import com.example.capstone_project.service.TermIntervalService;
 import com.example.capstone_project.service.TermService;
-import com.example.capstone_project.utils.enums.TermCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
-
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
 
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.term.create.CreateTermBodyToTermEntityMapperImpl;
-import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapper;
 import com.example.capstone_project.utils.mapper.term.detail.TermToTermDetailResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.paginate.TermPaginateResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.term.selectWhenCreatePlan.TermWhenCreatePlanMapperImpl;
 
 
-import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermEntityMapper;
+import com.example.capstone_project.utils.mapper.term.termInterval.TermIntervalMapperImpl;
 import com.example.capstone_project.utils.mapper.term.update.UpdateTermBodyToTermEntityMapperImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +58,7 @@ import java.util.*;
 @Validated
 public class TermController {
     private final TermService termService;
+    private final TermIntervalService termIntervalService;
 
 
     @GetMapping("/report")
@@ -215,17 +214,22 @@ public class TermController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
         } catch (InvalidEndDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("endDate").message("End date invalid")
+                    .builder().field("endDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (InvalidEndReupDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("reuploadEndDate").message("Re-up end date invalid")
+                    .builder().field("reuploadEndDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (InvalidStartReupDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("reuploadStartDate").message("Re-up start date invalid")
+                    .builder().field("reuploadStartDate").message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (InvalidStartTermDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("startDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
@@ -240,25 +244,30 @@ public class TermController {
         //map create term body to term entity
         Term term = new UpdateTermBodyToTermEntityMapperImpl().mapUpdateTermBodyToTermEntity(updateTermBody);
         try {
-            term =  termService.updateTerm(term);
+            term = termService.updateTerm(term);
             //map term to term detail response
-            TermDetailResponse  termDetailResponse = new TermToTermDetailResponseMapperImpl().mapTermToTermDetailResponse(term);
+            TermDetailResponse termDetailResponse = new TermToTermDetailResponseMapperImpl().mapTermToTermDetailResponse(term);
             return ResponseEntity.status(HttpStatus.OK).body(termDetailResponse);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (InvalidEndDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("endDate").message("Invalid end date")
+                    .builder().field("endDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch (InvalidEndReupDateException e) {
+        } catch (InvalidEndReupDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("reuploadEndDate").message("Invalid re-upload end date")
+                    .builder().field("reuploadEndDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-        }catch (InvalidStartReupDateException e){
+        } catch (InvalidStartReupDateException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
-                    .builder().field("reuploadStartDate").message("Invalid re-upload start date")
+                    .builder().field("reuploadStartDate").message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (InvalidStartTermDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("startDate").message(e.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
@@ -277,6 +286,11 @@ public class TermController {
         } catch (ResourceNotFoundException e) {
             ExceptionResponse exceptionResponse = ExceptionResponse
                     .builder().field("error").message("Term not found")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+        } catch (InvalidDateException e) {
+            ExceptionResponse exceptionResponse = ExceptionResponse
+                    .builder().field("error").message("Only can delete term when status is new")
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
         } catch (Exception e) {
@@ -319,7 +333,7 @@ public class TermController {
             count = termService.countDistinctListTermPaging(statusId, query);
 
             // Mapping to TermPaginateResponse
-            terms.forEach(term -> response.getData().add( new TermPaginateResponseMapperImpl().mapToTermPaginateResponseMapper(term)));
+            terms.forEach(term -> response.getData().add(new TermPaginateResponseMapperImpl().mapToTermPaginateResponseMapper(term)));
 
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -405,5 +419,12 @@ public class TermController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/termInterval")
+    public ResponseEntity<Object> getTermInterval() {
+        TermInterval termInterval = termIntervalService.getTermInterval();
+        TermIntervalResponse termIntervalResponse = new TermIntervalMapperImpl().mapToTermIntervalResponse(termInterval);
+        return ResponseEntity.status(HttpStatus.OK).body(termIntervalResponse);
     }
 }

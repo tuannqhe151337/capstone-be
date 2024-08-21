@@ -23,7 +23,6 @@ public interface TermService {
 
     Term findTermById(Long id) throws Exception;
     void deleteTerm(Long id) throws Exception;
-    void updateTermStatus(Term term, Long statusId) throws Exception;
     Term updateTerm(Term term) throws Exception;
     void startTermManually(Long termId) throws Exception;
 

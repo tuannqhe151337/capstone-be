@@ -1,36 +1,22 @@
 package com.example.capstone_project.service.impl;
 
-import com.example.capstone_project.entity.TermStatus;
-import com.example.capstone_project.entity.User;
-import com.example.capstone_project.entity.UserDetail;
+import com.example.capstone_project.entity.*;
 
-import com.example.capstone_project.entity.Term;
-import com.example.capstone_project.repository.TermRepository;
-import com.example.capstone_project.repository.TermStatusRepository;
-import com.example.capstone_project.repository.UserRepository;
+import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.ResourceNotFoundException;
-import com.example.capstone_project.utils.exception.UnauthorizedException;
-import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -41,13 +27,14 @@ public class TermServiceImpl implements TermService {
     private final UserAuthorityRepository userAuthorityRepository;
     private final UserRepository userRepository;
     private final TermStatusRepository termStatusRepository;
+    private final TermIntervalRepository termIntervalRepository;
 
     @Override
     public long countDistinct(String query) throws Exception {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermStatusCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -55,7 +42,7 @@ public class TermServiceImpl implements TermService {
         // Get user detail
         UserDetail userDetail = userDetailRepository.get(UserHelper.getUserId());
 
-        return termRepository.countDistinctListTermWhenCreatePlan(query, TermCode.CLOSED.getValue(), LocalDateTime.now(), userDetail.getDepartmentId());
+        return termRepository.countDistinctListTermWhenCreatePlan(query, TermStatusCode.CLOSED, LocalDateTime.now(), userDetail.getDepartmentId());
     }
 
     @Override
@@ -80,29 +67,21 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.EDIT_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to update term");
         }
+
+        if (!term.isAllowReupload()) {
+            term.setReuploadStartDate(null);
+            term.setReuploadEndDate(null);
+        }
+
+        checkValidDateOfTerm(term);
+
+        //calculate final end term date
         LocalDateTime startDate = term.getStartDate();
-        //get current term to extract its status
+        LocalDateTime finalEndTermDate = term.getDuration().calculateEndDate(startDate);
+        term.setFinalEndTermDate(finalEndTermDate);
 
         Term currentterm = termRepository.findById(term.getId()).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + term.getId()));
-
-        LocalDateTime finalEndTermDate;
-        finalEndTermDate = term.getDuration().calculateEndDate(startDate);
-        term.setFinalEndTermDate(finalEndTermDate);
-
-        //throw exception if end date is before start date ,
-        if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
-            throw new InvalidEndDateException("End date must be in the future and after start date");
-        }
-        //throw exception if start reup date is before end date
-        if (term.getReuploadStartDate().isBefore(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)) {
-            throw new InvalidStartReupDateException("Re-upload start date must be in the future and after end date");
-        }
-        //throw ex if end reup date is before start reup date
-        if (term.getReuploadEndDate().isBefore(term.getReuploadStartDate()) || term.getReuploadEndDate().isAfter(finalEndTermDate)) {
-            throw new InvalidEndReupDateException("Re-upload end date must be in the future and after re-up start date");
-        }
-
         //status
         term.setStatus(currentterm.getStatus());
 
@@ -121,6 +100,10 @@ public class TermServiceImpl implements TermService {
         }
         Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
+
+        if(!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
+            throw new InvalidDateException("Only can delete term when status is new");
+        }
         currentTerm.setDelete(true);
         termRepository.save(currentTerm);
 
@@ -141,12 +124,6 @@ public class TermServiceImpl implements TermService {
 
     }
 
-    @Override
-    public void updateTermStatus(Term term, Long statusId) throws Exception {
-        TermStatus termStatus = termStatusRepository.getReferenceById(statusId);
-        term.setStatus(termStatus);
-        termRepository.save(term);
-    }
 
     @Override
     public void startTermManually(Long termId) throws Exception {
@@ -171,27 +148,16 @@ public class TermServiceImpl implements TermService {
         if (!userAuthorityRepository.get(userId).contains(AuthorityCode.CREATE_TERM.getValue())) {
             throw new UnauthorizedException("Unauthorized to create term");
         }
+        if (!term.isAllowReupload()) {
+            term.setReuploadStartDate(null);
+            term.setReuploadEndDate(null);
+        }
+
+        checkValidDateOfTerm(term);
+
         LocalDateTime finalEndTermDate;
         finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
         term.setFinalEndTermDate(finalEndTermDate);
-
-        if (finalEndTermDate.isBefore(LocalDateTime.now())) {
-            throw new InvalidEndDateException("Final end date must be in the future");
-        }
-
-        //throw exception if end date is before start date ,
-        if (term.getEndDate().isBefore(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)) {
-            throw new InvalidEndDateException("End date must be in the future and after start date");
-        }
-        //throw exception if start reup date is before end date
-        if (term.getReuploadStartDate().isBefore(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)) {
-            throw new InvalidStartReupDateException("Re-upload start date must be in the future and after end date");
-        }
-        //throw ex if end reup date is before start reup date
-        if (term.getReuploadEndDate().isBefore(term.getReuploadStartDate()) || term.getReuploadEndDate().isAfter(finalEndTermDate)) {
-            throw new InvalidEndReupDateException("Re-upload end date must be in the future and after re-up start date");
-        }
-
         //status-id , create-by
         TermStatus status = termStatusRepository.getReferenceById(1L);
         term.setStatus(status);
@@ -221,7 +187,51 @@ public class TermServiceImpl implements TermService {
     public long countDistinctListTermPaging(Long statusId, String query) {
         return termRepository.countDistinctListTermPaging(statusId, query);
     }
-    //start term change status of this term
+
+    // Check valid date of term
+    public void checkValidDateOfTerm(Term term) throws Exception {
+        LocalDateTime finalEndTermDate;
+        finalEndTermDate = term.getDuration().calculateEndDate(term.getStartDate());
+        TermInterval termInterval = termIntervalRepository.getReferenceById(1);
+        //check start term date must in 25-30
+        if (!(term.getStartDate().getDayOfMonth() >= termInterval.getStartTermDate()) &&
+                (term.getStartDate().getDayOfMonth() <= (termInterval.getStartTermDate() + termInterval.getEndTermInterval()))) {
+            throw new InvalidStartTermDateException("Start date must be in day " + termInterval.getStartTermDate());
+        }
+
+        if (finalEndTermDate.isBefore(LocalDateTime.now())) {
+            throw new InvalidEndDateException("Final end date must be in the future");
+        }
+
+        // throw exception if end date is before start date
+        //after 5 days from start day - false
+        LocalDateTime boundaryEndDate = term.getStartDate().plusDays(termInterval.getEndTermInterval());
+        if (!term.getEndDate().isAfter(term.getStartDate()) || term.getEndDate().isAfter(finalEndTermDate)
+                || term.getEndDate().isAfter(boundaryEndDate)) {
+            throw new InvalidEndDateException("End date must be within " +
+                    term.getStartDate().toLocalDate().plusDays(1) + " and " + boundaryEndDate.toLocalDate());
+        }
+        //throw exception if start reup date is before end date
+        //before 20 days - false
+        if (term.isAllowReupload()) {
+            LocalDateTime boundaryStartReuploadDate = term.getStartDate().plusDays(termInterval.getStartReuploadInterval());
+            if (!term.getReuploadStartDate().isAfter(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)
+                    || term.getReuploadStartDate().isBefore(boundaryStartReuploadDate)) {
+                throw new InvalidStartReupDateException("Re-upload start date must be within "
+                        + boundaryStartReuploadDate.toLocalDate() + " and " +
+                        boundaryStartReuploadDate.plusDays(termInterval.getEndReuploadInterval()).toLocalDate());
+            }
+            //throw ex if end reup date is before start reup date
+            //after 3 days vs start re up date - false
+            LocalDateTime boundaryReuploadEndDate = term.getReuploadStartDate().plusDays(termInterval.getEndReuploadInterval());
+            if (!term.getReuploadEndDate().isAfter(term.getReuploadStartDate()) ||
+                    term.getReuploadEndDate().isAfter(finalEndTermDate) ||
+                    term.getReuploadEndDate().isAfter(boundaryReuploadEndDate)) {
+                throw new InvalidEndReupDateException("Re-upload end date must be within " +
+                        boundaryStartReuploadDate.toLocalDate().plusDays(1) + " and " + boundaryReuploadEndDate.toLocalDate());
+            }
+        }
+    }
 
 
 }

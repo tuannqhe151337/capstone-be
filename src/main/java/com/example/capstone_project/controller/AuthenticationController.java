@@ -1,6 +1,7 @@
 package com.example.capstone_project.controller;
 
 import com.example.capstone_project.controller.body.LoginRequestBody;
+import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.auth.LoginResponse;
 import com.example.capstone_project.controller.body.RefreshTokenBody;
 import com.example.capstone_project.controller.responses.auth.UserDataResponse;
@@ -23,18 +24,20 @@ public class AuthenticationController {
     private final AuthService authService;
 
     @PostMapping("login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequestBody body) {
-        final String username = body.getUsername();
+    public ResponseEntity<Object> login(@RequestBody LoginRequestBody body) {
+        final String email = body.getEmail();
         final String password = body.getPassword();
 
         try {
-            LoginResult loginResult = this.authService.login(username, password);
+            LoginResult loginResult = this.authService.login(email, password);
 
             return ResponseEntity.ok(
                     new LoginResultResponseMapperImpl().mapToLoginResponse(loginResult)
             );
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExceptionResponse
+                    .builder().field("error").message("Invalid credentials")
+                    .build());
         }
     }
 

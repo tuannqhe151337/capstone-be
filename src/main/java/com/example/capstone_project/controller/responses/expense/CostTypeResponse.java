@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CostTypeResponse {
-    private long costTypeId;
+    private Long costTypeId;
     private String name;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

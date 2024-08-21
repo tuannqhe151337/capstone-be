@@ -2,9 +2,8 @@ package com.example.capstone_project.repository.impl;
 
 import com.example.capstone_project.entity.Term;
 import com.example.capstone_project.entity.Term_;
-import com.example.capstone_project.entity.User_;
 import com.example.capstone_project.repository.CustomTermRepository;
-import com.example.capstone_project.utils.enums.TermCode;
+import com.example.capstone_project.utils.enums.TermStatusCode;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -28,7 +27,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
                 " WHERE term.name LIKE :query AND " +
                 " term.id NOT IN (SELECT t.id FROM Term t JOIN t.financialPlans p WHERE p.department.id = :departmentId) AND " +
                 " term.status.code != :close AND " +
-                " term.startDate <= :now AND term.endDate >= :now AND " +
+                " (term.startDate <= :now AND term.endDate >= :now) AND " +
                 " term.isDelete = false " +
                 " ORDER BY ";
 
@@ -71,7 +70,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
         // Run query
         return entityManager.createQuery(hql, Term.class)
                 .setParameter("query", "%" + query + "%")
-                .setParameter("close", TermCode.CLOSED)
+                .setParameter("close", TermStatusCode.CLOSED)
                 .setParameter("now", LocalDateTime.now())
                 .setParameter("departmentId", departmentId)
                 .setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize()) // We can't use pagable.getOffset() since they calculate offset by taking pageNumber * pageSize, we need (pageNumber - 1) * pageSize

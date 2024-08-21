@@ -1,15 +1,16 @@
 package com.example.capstone_project.service;
 
+import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
-import com.example.capstone_project.repository.result.ExpenseResult;
-import com.example.capstone_project.repository.result.ReportDetailResult;
-import com.example.capstone_project.repository.result.ReportExpenseResult;
-import com.example.capstone_project.repository.result.YearDiagramResult;
+import com.example.capstone_project.repository.result.*;
+import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public interface FinancialReportService {
     List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception;
@@ -30,15 +31,15 @@ public interface FinancialReportService {
 
     String generateXLSFileName(Long reportId);
 
-    List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Pageable pageable);
+    List<ReportExpenseResult> getListExpenseWithPaginate(Long reportId, String query, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId, Long currencyId, Pageable pageable) throws Exception;
 
-    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId);
+    long countDistinctListExpenseWithPaginate(String query, Long reportId, Integer departmentId, Integer statusId, Integer costTypeId, Integer projectId, Integer supplierId, Integer picId);
 
-    BigDecimal calculateActualCostByReportId(Long reportId);
+    CostResult calculateActualCostByReportId(Long reportId) throws Exception;
 
-    BigDecimal calculateExpectedCostByReportId(Long reportId);
+    CostResult calculateExpectedCostByReportId(Long reportId) throws Exception;
 
-    void approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+    List<ExpenseCodeResponse>  approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
@@ -46,5 +47,13 @@ public interface FinancialReportService {
 
     void uploadReportExpenses(Long reportId, List<FinancialPlanExpense> rawExpenses) throws Exception;
 
-    List<YearDiagramResult> generateYearDiagram(Integer year);
+    List<YearDiagramResult> generateYearDiagram(Integer year) throws Exception;
+
+    List<CostTypeDiagramResult> getYearCostTypeDiagram(Integer year) throws Exception;
+
+    List<DepartmentDiagramResult> getYearDepartmentDiagram(Integer year) throws Exception;
+
+    TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
+
+    void markReportAsReviewed(Long reportId) throws Exception;
 }
