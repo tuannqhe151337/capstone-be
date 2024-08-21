@@ -1,6 +1,6 @@
 package com.example.capstone_project.service;
 
-public interface GenerateAnnualReportService {
+public interface AnnualReportScheduleService {
     void generateAnnualReport();
 
 }

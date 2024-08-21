@@ -100,6 +100,10 @@ public class TermServiceImpl implements TermService {
         }
         Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
+
+        if(!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
+            throw new InvalidDateException("Only can delete term when status is new");
+        }
         currentTerm.setDelete(true);
         termRepository.save(currentTerm);
 
