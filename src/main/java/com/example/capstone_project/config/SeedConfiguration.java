@@ -1622,84 +1622,88 @@ public class SeedConfiguration {
             List<FinancialPlan> plans2022 = new ArrayList<>();
 
             for (Term term : term2022List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
-                        .build();
+                for (int i = 0; i < randomNumberDepartment; i++) {
+                    int randomIndexDepartment = random.nextInt(6) + 1;
+                    if (randomIndexDepartment >= departments.size()) {
+                        randomIndexDepartment = departments.size() - 1;
+                    }
 
-                plans2022.add(financialPlan);
+                    Department randomDepartment = departments.get(randomIndexDepartment);
+
+                    FinancialPlan financialPlan = FinancialPlan.builder()
+                            .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                            .term(term)
+                            .department(randomDepartment)
+                            .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                            .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                            .build();
+
+                    departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                    plans2022.add(financialPlan);
+                }
             }
 
             List<FinancialPlan> plans2023 = new ArrayList<>();
 
             for (Term term : term2023List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2100000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1300000000))
-                        .build();
+                for (int i = 0; i < randomNumberDepartment; i++) {
+                    int randomIndexDepartment = random.nextInt(6) + 1;
+                    if (randomIndexDepartment >= departments.size()) {
+                        randomIndexDepartment = departments.size() - 1;
+                    }
 
-                plans2023.add(financialPlan);
+                    Department randomDepartment = departments.get(randomIndexDepartment);
+
+                    FinancialPlan financialPlan = FinancialPlan.builder()
+                            .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                            .term(term)
+                            .department(randomDepartment)
+                            .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                            .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                            .build();
+
+                    departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                    plans2023.add(financialPlan);
+                }
             }
 
             List<FinancialPlan> plans2024 = new ArrayList<>();
 
             for (Term term : term2024List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 1800000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1300000000))
-                        .build();
+                for (int i = 0; i < randomNumberDepartment; i++) {
+                    int randomIndexDepartment = random.nextInt(6) + 1;
+                    if (randomIndexDepartment >= departments.size()) {
+                        randomIndexDepartment = departments.size() - 1;
+                    }
 
-                if (term.getFinalEndTermDate().getMonthValue() < LocalDateTime.now().getMonthValue()) {
-                    financialPlan.setActualCost(BigDecimal.valueOf(0));
-                    financialPlan.setExpectedCost(BigDecimal.valueOf(0));
+                    Department randomDepartment = departments.get(randomIndexDepartment);
+
+                    FinancialPlan financialPlan = FinancialPlan.builder()
+                            .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                            .term(term)
+                            .department(randomDepartment)
+                            .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                            .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                            .build();
+
+                    departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                    plans2024.add(financialPlan);
                 }
-
-                plans2024.add(financialPlan);
             }
 
 
@@ -2090,7 +2094,7 @@ public class SeedConfiguration {
 
             currencyRepository.saveAll(List.of(vndCurrency, usdCurrency, jpyCurrency, krwCurrency, eurCurrency));
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2022
+            // Get 512 random expenses vnd, krw, jpy for plan 2022
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
             String[] listExpenseName = {
                     "Travel Expenses",
@@ -2214,10 +2218,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2022
+            // Get 512 random expense usd and euro for plan 2022
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2312,9 +2316,9 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2023
+            // Get 512 random expenses vnd, krw, jpy for plan 2023
             expenseList = new ArrayList<>();
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2413,10 +2417,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2023
+            // Get 512 random expense usd and euro for plan 2023
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2512,9 +2516,9 @@ public class SeedConfiguration {
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2024
+            // Get 512 random expenses vnd, krw, jpy for plan 2024
             expenseList = new ArrayList<>();
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2613,10 +2617,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2024
+            // Get 512 random expense usd and euro for plan 2024
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;

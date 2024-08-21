@@ -520,8 +520,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense.getId());
 
                     // Generate code for approved expense not have code
-                    if (idAndCode.get(expense.getId()) != null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
-                        updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
+                    if (idAndCode.get(expense.getId()) == null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                     }
                     // Update status for expense
                     if (expense.getStatus().getCode().equals(approval.getCode())) {
