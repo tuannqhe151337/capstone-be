@@ -743,7 +743,7 @@ public class PlanServiceTest {
         }
 
         @Test
-        public void deletePlan_Successful() throws InvalidDateException {
+        public void deletePlan_Successful() throws Exception {
 
             term = Term.builder()
                     .id(21L)

@@ -26,7 +26,7 @@ public interface FinancialPlanService {
 
     List<ReportStatus> getListPlanStatus();
 
-    FinancialPlan deletePlan(long planId) throws InvalidDateException;
+    FinancialPlan deletePlan(long planId) throws Exception;
 
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 

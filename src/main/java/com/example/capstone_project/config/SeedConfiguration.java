@@ -9,7 +9,6 @@ import com.example.capstone_project.repository.result.PaginateExchange;
 import com.example.capstone_project.repository.result.ReportResult;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
-import com.example.capstone_project.service.scheduler.TermSchedulerService;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportMapperImpl;
 import lombok.RequiredArgsConstructor;
@@ -3252,7 +3251,7 @@ public class SeedConfiguration {
         };
     }
 
-    public void generateActualCostAndExpectedCostForPlan(Long termId, Currency defaultCurrency) {
+    private void generateActualCostAndExpectedCostForPlan(Long termId, Currency defaultCurrency) {
         List<FinancialPlan> plans = planRepository.getReferenceByTermId(termId);
         List<FinancialPlan> savePlan = new ArrayList<>();
         if (plans != null) {
@@ -3268,7 +3267,7 @@ public class SeedConfiguration {
     }
 
 
-    public void generateActualCostAndExpectedCostForReport(Long termId, Currency defaultCurrency) {
+    private void generateActualCostAndExpectedCostForReport(Long termId, Currency defaultCurrency) {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
         if (report != null) {
             financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null);
@@ -3281,7 +3280,7 @@ public class SeedConfiguration {
         }
     }
 
-    public void generateReportStatistical(Long termId, Currency defaultCurrency) {
+    private void generateReportStatistical(Long termId, Currency defaultCurrency) {
         FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
         if (report != null) {
 
