@@ -3,6 +3,7 @@ package com.example.capstone_project.service;
 import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.entity.ReportStatus;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
@@ -56,4 +57,6 @@ public interface FinancialReportService {
     TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
 
     void markReportAsReviewed(Long reportId) throws Exception;
+
+    List<ReportStatus> getListReportStatus();
 }
