@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -519,8 +520,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense.getId());
 
                     // Generate code for approved expense not have code
-                    if (idAndCode.get(expense.getId()) != null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
-                        updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
+                    if (idAndCode.get(expense.getId()) == null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                     }
                     // Update status for expense
                     if (expense.getStatus().getCode().equals(approval.getCode())) {
@@ -565,9 +567,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            if (LocalDate.now().getYear() == year) {
+                return monthlyReportSummaryRepository.getCostTypeYearDiagramForCurrentYear(year, departmentId);
+            }
             return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+            if (LocalDate.now().getYear() == year) {
+                return monthlyReportSummaryRepository.getCostTypeYearDiagramForCurrentYear(year, departmentId);
+            }
             return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
@@ -821,10 +829,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             // We won't do anything if sending notification failed
             try {
-                if(!messages.isEmpty()) {
+                if (!messages.isEmpty()) {
                     firebaseMessaging.sendEach(messages);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 }

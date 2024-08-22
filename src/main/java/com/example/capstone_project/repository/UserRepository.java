@@ -113,4 +113,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             " ORDER BY numberUser desc ")
     List<UserDepartmentDiagramResult> getNumberUserOfDepartmentDiagram();
 
+    @Query(value = "select count(distinct(user.id)) from User user " +
+            "where user.username like %:query% and (user.isDelete = false)")
+    long getTotalEmployee(String query);
 }

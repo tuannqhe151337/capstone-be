@@ -7,6 +7,7 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
 import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
@@ -28,6 +29,8 @@ public class TermServiceImpl implements TermService {
     private final UserRepository userRepository;
     private final TermStatusRepository termStatusRepository;
     private final TermIntervalRepository termIntervalRepository;
+    private final ReportStatusRepository reportStatusRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     @Override
     public long countDistinct(String query) throws Exception {
@@ -101,7 +104,7 @@ public class TermServiceImpl implements TermService {
         Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
 
-        if(!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
+        if (!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
             throw new InvalidDateException("Only can delete term when status is new");
         }
         currentTerm.setDelete(true);
@@ -135,10 +138,26 @@ public class TermServiceImpl implements TermService {
         if (term == null) {
             throw new ResourceNotFoundException("Term not found");
         }
-        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+
+        TermStatus termStatus = termStatusRepository.findByCode(TermStatusCode.IN_PROGRESS);
+
         term.setStatus(termStatus);
         term.setStartDate(LocalDateTime.now());
         termRepository.save(term);
+
+        ReportStatus newStatus = reportStatusRepository.findByCode(ReportStatusCode.NEW);
+
+        // Create new report
+        FinancialReport report = FinancialReport.builder()
+                .name(term.getName() + "_" + "Report")
+                .month(term.getFinalEndTermDate().toLocalDate())
+                .term(term)
+                .status(newStatus)
+                .build();
+
+        // Generate report
+        financialReportRepository.save(report);
+
     }
 
 
