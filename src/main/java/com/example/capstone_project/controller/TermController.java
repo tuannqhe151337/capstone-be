@@ -4,6 +4,7 @@ import com.example.capstone_project.controller.body.plan.start.StartTermBody;
 import com.example.capstone_project.controller.body.term.create.CreateTermBody;
 import com.example.capstone_project.controller.body.term.delete.DeleteTermBody;
 import com.example.capstone_project.controller.body.term.update.UpdateTermBody;
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.PlanStatusResponse;
 import com.example.capstone_project.controller.responses.term.getPlans.TermPlanDetailResponse;
@@ -12,11 +13,13 @@ import com.example.capstone_project.controller.responses.term.getTermDetail.Term
 
 import com.example.capstone_project.controller.responses.term.selectWhenCreatePlan.TermWhenCreatePlanResponse;
 import com.example.capstone_project.controller.responses.term.termInterval.TermIntervalResponse;
+import com.example.capstone_project.entity.FinancialPlan_;
 import com.example.capstone_project.entity.Term;
 
 import com.example.capstone_project.entity.TermInterval;
 import com.example.capstone_project.service.TermIntervalService;
 import com.example.capstone_project.service.TermService;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 
@@ -316,11 +319,8 @@ public class TermController {
             query = "";
         }
 
-        // Handling pagination
-        Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
         // Get data
-        List<Term> terms = termService.getListTermPaging(statusId, query, pageable);
+        List<Term> terms = termService.getListTermPaging(statusId, query, pageInt, sizeInt, sortBy, sortType);
 
         // Response
         ListPaginationResponse<TermPaginateResponse> response = new ListPaginationResponse<>();

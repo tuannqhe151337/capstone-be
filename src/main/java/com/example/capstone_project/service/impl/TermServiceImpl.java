@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 
 import com.example.capstone_project.repository.*;
@@ -8,10 +9,12 @@ import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
 import com.example.capstone_project.utils.enums.ReportStatusCode;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -190,11 +193,33 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Integer pageInt, Integer sizeInt, String sortBy, String sortType) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
+            Pageable pageable = null;
+            if (sortBy == null || sortBy.isEmpty()) {
+                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                        CustomSort.builder().sortBy(Term_.STATUS).sortType("asc").build(),
+                        CustomSort.builder().sortBy(Term_.START_DATE).sortType("desc").build(),
+                        CustomSort.builder().sortBy(Term_.ID).sortType("desc").build()
+                ));
+            } else {
+                // Sort by request
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(Term_.ID).sortType("desc").build()
+                    ));
+                }
+            }
             return termRepository.getListTermPaging(statusId, query, pageable);
 
         }

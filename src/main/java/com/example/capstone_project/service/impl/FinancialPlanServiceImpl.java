@@ -1171,7 +1171,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
                 BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
                 BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
-                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
                 System.out.println(actualCost);
             }
         }

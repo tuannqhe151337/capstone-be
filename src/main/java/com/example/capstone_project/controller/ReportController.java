@@ -171,11 +171,8 @@ public class ReportController {
                 query = "";
             }
 
-            // Handling pagination
-            Pageable pageable = PaginationHelper.handlingPagination(pageInt, sizeInt, sortBy, sortType);
-
             // Get data
-            List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageable);
+            List<FinancialReport> reports = reportService.getListReportPaginate(query, termId, departmentId, statusId, pageInt, sizeInt, sortBy, sortType);
 
             // Response
             ListPaginationResponse<ReportResponse> response = new ListPaginationResponse<>();
