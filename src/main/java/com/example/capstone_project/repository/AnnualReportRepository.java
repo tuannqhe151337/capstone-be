@@ -8,6 +8,7 @@ import com.example.capstone_project.repository.result.CostTypeDiagramResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -63,4 +64,21 @@ public interface AnnualReportRepository extends JpaRepository<AnnualReport, Long
 
     AnnualReport findByYear(Integer year);
 
+    @Query(value = " SELECT sum(reportStatistic.totalExpense) AS totalExpense FROM ReportStatistical reportStatistic " +
+            " JOIN reportStatistic.report report " +
+            " JOIN report.term term " +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " report.isDelete = false AND term.isDelete = false ")
+    BigDecimal getTotalExpenseByYear(Integer year);
+
+    @Query(value = " SELECT count( distinct term.id) FROM Term term " +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " term.isDelete = false ")
+    int getTotalTermByYear(Integer year);
+
+    @Query(value = " SELECT count( distinct plan.department.id) FROM FinancialPlan plan " +
+            " JOIN plan.term term " +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " term.isDelete = false AND plan.isDelete = false ")
+    int getTotalDepartmentByYear(Integer year);
 }

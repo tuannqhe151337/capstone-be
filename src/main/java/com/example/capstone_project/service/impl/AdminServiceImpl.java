@@ -40,7 +40,7 @@ public class AdminServiceImpl implements AdminService {
             throw new UnauthorizedException("Unauthorized");
         }
 
-        return this.userRepository.countDistinct("");
+        return this.userRepository.getTotalEmployee("");
     }
 
     public long getTotalPosition() throws Exception {

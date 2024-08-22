@@ -16,6 +16,7 @@ import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -254,7 +255,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan deletePlan(long planId) throws InvalidDateException {
+    public FinancialPlan deletePlan(long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
 
@@ -266,6 +273,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
                     new ResourceNotFoundException("Not found any plan have id = " + planId));
+
+            if (financialPlan.getDepartment().getId() != userDetail.getDepartmentId()) {
+                throw new InvalidDepartmentIdException("User can't delete plan of other department");
+            }
 
             financialPlan.setDelete(true);
 

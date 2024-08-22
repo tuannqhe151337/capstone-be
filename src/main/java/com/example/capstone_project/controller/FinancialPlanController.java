@@ -28,6 +28,7 @@ import com.example.capstone_project.service.FinancialPlanService;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.mapper.plan.create.CreatePlanMapperImpl;
@@ -376,6 +377,10 @@ public class FinancialPlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Not exist exception").message("Not found any plan have id = " + planBody.getPlanId()).build());
         } catch (InvalidDateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Invalid time").message("Can not delete plan in this time period").build());
+        } catch (InvalidDepartmentIdException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.builder().field("Invalid department id").message("User can't delete plan of other department").build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
     }

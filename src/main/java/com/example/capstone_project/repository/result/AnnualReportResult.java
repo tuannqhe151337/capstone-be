@@ -8,4 +8,6 @@ public interface AnnualReportResult {
     Integer getTotalTerm();
 
     Integer getTotalDepartment();
+
+    BigDecimal getTotalExpense();
 }
