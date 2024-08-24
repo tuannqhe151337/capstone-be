@@ -21,7 +21,7 @@ public class FinancialPlanFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @OneToMany(mappedBy = FinancialPlanFileExpense_.FILE, cascade = CascadeType.ALL)

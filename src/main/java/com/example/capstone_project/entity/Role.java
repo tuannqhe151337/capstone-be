@@ -22,7 +22,7 @@ public class Role extends BaseEntity {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @OneToMany(mappedBy = "role")

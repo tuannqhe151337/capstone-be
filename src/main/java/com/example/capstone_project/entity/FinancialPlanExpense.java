@@ -18,10 +18,10 @@ public class FinancialPlanExpense extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "financial_plan_expense_key")
+    @Column(name = "financial_plan_expense_key", columnDefinition = "NVARCHAR(255)")
     private String planExpenseKey;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Column(name = "unit_price")
