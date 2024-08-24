@@ -8,6 +8,7 @@ import com.example.capstone_project.controller.body.report.completeReview.Comple
 import com.example.capstone_project.controller.body.report.delete.DeleteReportBody;
 import com.example.capstone_project.controller.responses.ExceptionResponse;
 import com.example.capstone_project.controller.responses.ListResponse;
+import com.example.capstone_project.controller.responses.plan.StatusResponse;
 import com.example.capstone_project.controller.responses.report.CostTypeResponse;
 import com.example.capstone_project.controller.responses.report.DepartmentResponse;
 import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
@@ -23,6 +24,7 @@ import com.example.capstone_project.controller.responses.report.expenses.Expense
 import com.example.capstone_project.entity.ExpenseStatus;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.entity.ReportStatus;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.FinancialReportService;
 import com.example.capstone_project.service.result.CostResult;
@@ -31,6 +33,7 @@ import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
+import com.example.capstone_project.utils.mapper.plan.status.PlanStatusMapperImpl;
 import com.example.capstone_project.utils.mapper.report.detail.ReportDetailMapperImpl;
 import com.example.capstone_project.utils.mapper.report.expenses.ReportExpenseResponseMapperImpl;
 import com.example.capstone_project.utils.mapper.report.list.ReportPaginateResponseMapperImpl;
@@ -700,6 +703,31 @@ public class ReportController {
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/report-status")
+    public ResponseEntity<Object> getAllReportStatus() {
+        try {
+            // Get data
+            List<ReportStatus> costTypes = this.reportService.getListReportStatus();
+
+            // Response
+            ListResponse<StatusResponse> responses = new ListResponse<>();
+
+            if (costTypes != null) {
+                // Mapping to CostTypeResponse
+                responses.setData(costTypes.stream().map(status -> {
+                    return new PlanStatusMapperImpl().mapToStatusResponseMapping(status);
+                }).toList());
+            } else {
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            return ResponseEntity.ok(responses);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 }

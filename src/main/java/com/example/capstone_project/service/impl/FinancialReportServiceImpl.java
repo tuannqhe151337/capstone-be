@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -858,6 +859,21 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 }
             } catch (Exception ignored) {
             }
+        }
+    }
+
+    @Override
+    public List<ReportStatus> getListReportStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_REPORT.getValue())) {
+
+            return this.reportStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 }
