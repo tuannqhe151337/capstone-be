@@ -13,7 +13,7 @@ public interface TermService {
 
     List<Term> getListTermWhenCreatePlan(String query, Pageable pageable) throws Exception;
 
-    List<Term> getListTermPaging(Long statusId, String query, Pageable pageable);
+    List<Term> getListTermPaging(Long statusId, String query, Integer pageInt, Integer sizeInt, String sortBy, String sortType);
 
     long countDistinctListTermPaging(Long statusId, String query);
 
@@ -22,8 +22,11 @@ public interface TermService {
     void createTerm(Term term) throws Exception;
 
     Term findTermById(Long id) throws Exception;
+
     void deleteTerm(Long id) throws Exception;
+
     Term updateTerm(Term term) throws Exception;
+
     void startTermManually(Long termId) throws Exception;
 
 

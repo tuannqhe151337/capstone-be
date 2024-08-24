@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Repository
 public class TermRepositoryImpl implements CustomTermRepository {
     @PersistenceContext
@@ -83,7 +84,7 @@ public class TermRepositoryImpl implements CustomTermRepository {
     public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
         // HQL query
         String hql = " SELECT term FROM Term term " +
-                " LEFT JOIN term.status " +
+                " LEFT JOIN term.status status " +
                 " WHERE term.name LIKE :query AND " +
                 "(:statusId IS NULL OR term.status.id = :statusId) AND " +
                 " term.isDelete = false " +
@@ -100,12 +101,16 @@ public class TermRepositoryImpl implements CustomTermRepository {
                     hql += "term.name " + sortType;
                     break;
                 case "status", "term_status":
-                    hql += "term.status.id " + sortType;
+                    hql += "case when status.code = 'IN_PROGRESS' then 1\n" +
+                            "              when status.code = 'NEW' then 2\n" +
+                            "              when status.code = 'CLOSED' then 3\n" +
+                            "              else 4\n" +
+                            "         end " + sortType;
                     break;
                 case "duration", "term_duration":
                     hql += "term.duration " + sortType;
                     break;
-                case "start_date", "start":
+                case "start_date", "start", "startdate":
                     hql += "term.startDate " + sortType;
                     break;
                 case "end_date", "end":

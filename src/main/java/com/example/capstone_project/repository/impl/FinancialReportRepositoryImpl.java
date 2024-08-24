@@ -42,7 +42,11 @@ public class FinancialReportRepositoryImpl implements CustomFinancialReportRepos
                     hql += "report.name " + sortType;
                     break;
                 case "status", "status_id", "status.id":
-                    hql += "status.id " + sortType;
+                    hql += "case when status.code = 'WAITING_FOR_APPROVAL' then 1\n" +
+                            "              when status.code = 'NEW' then 2\n" +
+                            "              when status.code = 'REVIEWED' then 3\n" +
+                            "              else 4\n" +
+                            "         end " + sortType;
                     break;
                 case "term.id", "term_id", "term":
                     hql += "term.id " + sortType;

@@ -55,7 +55,7 @@ public interface TermRepository extends JpaRepository<Term, Long>, CustomTermRep
 
     @Query(value = " SELECT term FROM Term term " +
             " WHERE term.status.code = :termCode AND " +
-            " cast(term.startDate as localdate) = cast(:now as localdate) AND " +
+            " cast(term.endDate as localdate) = cast(:now as localdate) AND " +
             " term.isDelete = false ")
     List<Term> getListTermNeedToStart(TermStatusCode termCode, LocalDateTime now);
 

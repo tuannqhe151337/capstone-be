@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 public interface FinancialReportService {
-    List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception;
+    List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception;
 
     long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception;
 
@@ -40,7 +40,7 @@ public interface FinancialReportService {
 
     CostResult calculateExpectedCostByReportId(Long reportId) throws Exception;
 
-    List<ExpenseCodeResponse>  approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+    List<ExpenseCodeResponse> approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 

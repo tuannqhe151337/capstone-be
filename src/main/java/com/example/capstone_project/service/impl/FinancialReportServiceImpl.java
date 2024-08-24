@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.Currency;
@@ -15,6 +16,7 @@ import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -58,12 +60,34 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final FirebaseMessaging firebaseMessaging;
 
     @Override
-    public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
+    public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            Pageable pageable = null;
+            if (sortBy == null || sortBy.isEmpty()) {
+                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                        CustomSort.builder().sortBy(FinancialReport_.STATUS).sortType("asc").build(),
+                        CustomSort.builder().sortBy(FinancialReport_.CREATED_AT).sortType("desc").build(),
+                        CustomSort.builder().sortBy(FinancialReport_.ID).sortType("desc").build()
+                ));
+            } else {
+                // Sort by request
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(FinancialReport_.ID).sortType("desc").build()
+                    ));
+                }
+            }
             return financialReportRepository.getReportWithPagination(query, termId, statusId, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
@@ -372,7 +396,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
                 BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
                 BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
-                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
                 System.out.println(actualCost);
             }
         }
@@ -537,9 +561,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 }
 
                 // Change status to Reviewed
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
-
-                report.setStatus(reviewedReportStatus);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//
+//                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
                 expenseRepository.saveAll(expenses);
