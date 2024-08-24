@@ -24,7 +24,7 @@ public class Term extends BaseEntity{
     private Long id;
 
     @NotEmpty(message = "Name cannot be empty")
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @NotNull(message = "Duration cannot be empty")

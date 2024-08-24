@@ -21,10 +21,10 @@ public class Authority extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
-    @Column(name = "code")
+    @Column(name = "code", columnDefinition = "NVARCHAR(255)")
     @Enumerated(EnumType.STRING)
     private AuthorityCode code;
 
