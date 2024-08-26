@@ -1530,19 +1530,7 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            Term term24_8 = Term.builder()
-                    .name("September 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus2)
-                    .build();
-
-            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7, term24_8));
+            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7));
 
 
             Term termTester1 = Term.builder()
@@ -2102,8 +2090,8 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlanFile planTester7_1 = FinancialPlanFile.builder()
-                    .name(planTester6.getName())
-                    .plan(planTester6)
+                    .name(planTester7.getName())
+                    .plan(planTester7)
                     .user(user12)
                     .build();
 

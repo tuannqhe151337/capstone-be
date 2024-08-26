@@ -46,6 +46,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " LEFT JOIN expense.project project " +
                 " LEFT JOIN expense.supplier supplier " +
                 " LEFT JOIN expense.pic pic " +
+                " LEFT JOIN expense.approvedBy approvedBy " +
                 " WHERE :planId = plan.id AND " +
                 " (expense.name like :query OR expense.planExpenseKey like :query ) AND " +
                 " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
@@ -107,6 +108,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         entityGraph.addAttributeNodes(FinancialPlanExpense_.PROJECT);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.SUPPLIER);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.PIC);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.APPROVED_BY);
 
         // Run query
         return entityManager.createQuery(hql, FinancialPlanExpense.class)
@@ -139,6 +141,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " JOIN expense.project project " +
                 " JOIN expense.supplier supplier " +
                 " JOIN expense.pic pic " +
+                " LEFT JOIN expense.approvedBy approvedBy " +
                 " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
                 "                       JOIN file_2.plan plan_2 " +
                 "                       JOIN plan_2.term term_2 " +
