@@ -5,6 +5,7 @@ import com.example.capstone_project.controller.responses.expense.CostTypeRespons
 import com.example.capstone_project.controller.responses.expense.PicResponse;
 import com.example.capstone_project.controller.responses.expense.ProjectResponse;
 import com.example.capstone_project.controller.responses.expense.SupplierResponse;
+import com.example.capstone_project.controller.responses.expense.ApprovedByResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class ExpenseResponse {
     private String notes;
     private StatusResponse status;
     private CurrencyResponse currency;
+    private ApprovedByResponse approvedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

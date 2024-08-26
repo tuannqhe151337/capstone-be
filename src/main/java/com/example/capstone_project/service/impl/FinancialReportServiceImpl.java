@@ -57,6 +57,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
     private final MonthlyReportSummaryRepository monthlyReportSummaryRepository;
     private final FirebaseMessaging firebaseMessaging;
+    private final UserRepository userRepository;
 
     @Override
     public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception {
@@ -537,6 +538,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
                 ExpenseStatus denied = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
 
+                // Get user approved by
+                User approvedBy = userRepository.getReferenceById(userId);
+
                 // Get report of this list expense to generate expense code
                 FinancialReport report = financialReportRepository.findById(reportId).get();
 
@@ -548,9 +552,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                         String prefixCode = report.getName().replace(" ", "_");
                         updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                     }
+
                     // Update status for expense
                     if (expense.getStatus().getCode().equals(approval.getCode())) {
                         updateExpense.setStatus(approval);
+                        updateExpense.setApprovedBy(approvedBy);
                     } else {
                         updateExpense.setStatus(denied);
 
@@ -726,6 +732,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
                 }
 
+                // Get user approved expense
+                User approvedBy = userRepository.getReferenceById(userId);
+
                 // Get report of this list expense
                 FinancialReport report = financialReportRepository.findById(reportId).get();
                 List<ExpenseCodeResponse> list = new ArrayList<>();
@@ -740,6 +749,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     }
 
                     updateExpense.setStatus(approval);
+                    updateExpense.setApprovedBy(approvedBy);
                     expenses.add(updateExpense);
                 }
 

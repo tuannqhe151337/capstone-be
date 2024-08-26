@@ -60,6 +60,10 @@ public class FinancialPlanExpense extends BaseEntity {
     @JoinColumn(name = "currency_id")
     private Currency currency;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
+
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;
 

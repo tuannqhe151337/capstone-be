@@ -15,5 +15,7 @@ public interface PlanExpenseResponseMapper {
     @Mapping(source = "pic.id", target = "pic.picId")
     @Mapping(source = "pic.username", target = "pic.name")
     @Mapping(source = "currency.id", target = "currency.currencyId")
+    @Mapping(source = "approvedBy.id", target = "approvedBy.approvedById")
+    @Mapping(source = "approvedBy.username", target = "approvedBy.name")
     ExpenseResponse mapToExpenseResponseMapping(FinancialPlanExpense financialPlanExpense);
 }
