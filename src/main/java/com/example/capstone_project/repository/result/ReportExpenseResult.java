@@ -33,6 +33,8 @@ public class ReportExpenseResult {
     long departmentId;
     String departmentName;
     Currency currency;
+    Long approvedById;
+    String approvedByName;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

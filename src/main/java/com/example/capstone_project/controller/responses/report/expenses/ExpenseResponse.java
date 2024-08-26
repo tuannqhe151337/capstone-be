@@ -28,6 +28,7 @@ public class ExpenseResponse {
     private String notes;
     private StatusResponse status;
     private CurrencyResponse currency;
+    private ApprovedByResponse approvedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

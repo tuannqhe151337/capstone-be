@@ -312,6 +312,7 @@ public class ReportController {
             // Handling page and pageSize
             Integer pageInt = PaginationHelper.convertPageToInteger(page);
             Integer sizeInt = PaginationHelper.convertPageSizeToInteger(size);
+            
             // Handling query
             if (query == null) {
                 query = "";

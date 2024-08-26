@@ -448,7 +448,7 @@ public class SeedConfiguration {
                     .phoneNumber("0999988877")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 5, 0, 0))
-                    .email("username2@email.com")
+                    .email("admin@email.com")
                     .address("Da Nang")
                     .build();
 
@@ -477,7 +477,7 @@ public class SeedConfiguration {
                     .position(staff)
                     .dob(LocalDateTime.of(1986, 12, 20, 0, 0))
                     .isDelete(false)
-                    .email("username4@email.com")
+                    .email("accountant@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .build();
@@ -491,7 +491,7 @@ public class SeedConfiguration {
                     .department(communicationDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("username5@email.com")
+                    .email("staff@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -1530,43 +1530,7 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            Term term24_8 = Term.builder()
-                    .name("September 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus2)
-                    .build();
-
-            Term term24_9 = Term.builder()
-                    .name("October 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus)
-                    .build();
-
-            Term term24_10 = Term.builder()
-                    .name("November 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus)
-                    .build();
-
-            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7, term24_8, term24_9, term24_10));
+            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7));
 
 
             Term termTester1 = Term.builder()
@@ -2053,6 +2017,7 @@ public class SeedConfiguration {
                             case 3 -> user13;
                             default -> user5; // Default case, should never be reached
                         };
+
                     } else if (plan.getDepartment().getName().equals(financeDepartment.getName())) {
                         randomUser = switch (randomIndexUser) {
                             case 1 -> user3;
@@ -2125,8 +2090,8 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlanFile planTester7_1 = FinancialPlanFile.builder()
-                    .name(planTester6.getName())
-                    .plan(planTester6)
+                    .name(planTester7.getName())
+                    .plan(planTester7)
                     .user(user12)
                     .build();
 
@@ -2138,7 +2103,7 @@ public class SeedConfiguration {
             // Create currency data
             Currency vndCurrency = Currency.builder()
                     .id(1L)
-                    .name("VNĐ")
+                    .name("VND")
                     .symbol("₫")
                     .affix(Affix.SUFFIX)
                     .isDefault(true)
@@ -2207,6 +2172,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2260,6 +2226,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2270,6 +2243,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2309,6 +2283,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2361,6 +2336,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2371,6 +2353,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
                 expenseList.add(expense);
             }
@@ -2406,6 +2389,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2459,6 +2443,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2469,6 +2460,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2508,6 +2500,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2560,6 +2553,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2570,7 +2570,9 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
+
                 expenseList.add(expense);
             }
 
@@ -2606,6 +2608,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2659,6 +2662,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2669,6 +2679,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2708,6 +2719,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2760,6 +2772,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2770,6 +2789,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
                 expenseList.add(expense);
             }
@@ -2805,6 +2825,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 1 -> expenseStatus1;
@@ -2859,6 +2880,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2869,6 +2897,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2918,6 +2947,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2970,6 +3000,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2980,7 +3017,9 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
+
                 expenseList.add(expense);
             }
 
@@ -3085,6 +3124,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(null)
                         .build();
 
                 expenseList.add(expense);
@@ -3189,7 +3229,9 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(null)
                         .build();
+
                 expenseList.add(expense);
             }
 

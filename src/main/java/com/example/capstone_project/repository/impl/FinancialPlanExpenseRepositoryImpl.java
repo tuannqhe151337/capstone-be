@@ -46,6 +46,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " LEFT JOIN expense.project project " +
                 " LEFT JOIN expense.supplier supplier " +
                 " LEFT JOIN expense.pic pic " +
+                " LEFT JOIN expense.approvedBy approvedBy " +
                 " WHERE :planId = plan.id AND " +
                 " (expense.name like :query OR expense.planExpenseKey like :query ) AND " +
                 " file.createdAt = (SELECT MAX(file_2.createdAt) FROM FinancialPlanFile file_2 WHERE file_2.plan.id = :planId) AND " +
@@ -107,6 +108,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         entityGraph.addAttributeNodes(FinancialPlanExpense_.PROJECT);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.SUPPLIER);
         entityGraph.addAttributeNodes(FinancialPlanExpense_.PIC);
+        entityGraph.addAttributeNodes(FinancialPlanExpense_.APPROVED_BY);
 
         // Run query
         return entityManager.createQuery(hql, FinancialPlanExpense.class)
@@ -129,7 +131,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
         String hql = " SELECT DISTINCT new com.example.capstone_project.repository.result.ReportExpenseResult " +
                 " (expense.id AS expenseId, expense.planExpenseKey AS expenseCode, expense.name AS expenseName, costType.id AS costTypeId ,costType.name AS costTypeName, expense.unitPrice AS unitPrice, expense.amount AS amount, expense.project.id AS projectId , expense.project.name AS projectName, " +
                 " expense.supplier.id AS supplierId, expense.supplier.name AS supplierName, expense.pic.id AS picId, expense.pic.username AS picName, expense.note AS note, status.id AS statusId, cast(status.code AS string) AS statusCode ,status.name AS statusName, department.id AS departmentId, department.name AS departmentName, " +
-                " expense.currency AS currency, expense.createdAt, expense.updatedAt) FROM FinancialPlanExpense expense " +
+                " expense.currency AS currency, expense.approvedBy.id AS approvedById, expense.approvedBy.username AS approvedByName, expense.createdAt, expense.updatedAt) FROM FinancialPlanExpense expense " +
                 " JOIN expense.files files " +
                 " JOIN files.file file " +
                 " JOIN file.plan plan " +
@@ -139,6 +141,7 @@ public class FinancialPlanExpenseRepositoryImpl implements CustomFinancialPlanEx
                 " JOIN expense.project project " +
                 " JOIN expense.supplier supplier " +
                 " JOIN expense.pic pic " +
+                " LEFT JOIN expense.approvedBy approvedBy " +
                 " WHERE file.id IN (SELECT MAX(file_2.id) FROM FinancialPlanFile file_2 " +
                 "                       JOIN file_2.plan plan_2 " +
                 "                       JOIN plan_2.term term_2 " +
