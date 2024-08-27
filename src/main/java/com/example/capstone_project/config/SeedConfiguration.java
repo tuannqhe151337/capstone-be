@@ -488,7 +488,7 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(communicationDepartment)
+                    .department(hrDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
                     .email("staff@email.com")
