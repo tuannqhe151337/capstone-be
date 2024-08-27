@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -258,7 +260,10 @@ public class TermServiceImpl implements TermService {
         //throw exception if start reup date is before end date
         //before 20 days - false
         if (term.isAllowReupload()) {
-            LocalDateTime boundaryStartReuploadDate = term.getStartDate().plusDays(termInterval.getStartReuploadInterval());
+            LocalDate date = LocalDate.of(term.getStartDate().getYear(), term.getStartDate().getMonth(), termInterval.getStartTermDate());
+            LocalTime time = LocalTime.of(term.getStartDate().getHour(), term.getStartDate().getMinute());
+            LocalDateTime startdate = LocalDateTime.of(date, time);
+            LocalDateTime boundaryStartReuploadDate = startdate.plusDays(termInterval.getStartReuploadInterval());
             if (!term.getReuploadStartDate().isAfter(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)
                     || term.getReuploadStartDate().isBefore(boundaryStartReuploadDate)) {
                 throw new InvalidStartReupDateException("Re-upload start date must be within "

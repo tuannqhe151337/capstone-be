@@ -783,9 +783,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-
-
             listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
+
+            User denyUser = this.userRepository.getReferenceById(userId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense exist in one report
@@ -799,6 +799,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
                     updateExpense.setStatus(denyStatus);
+                    updateExpense.setApprovedBy(denyUser);
                     expenses.add(updateExpense);
 
                 });
