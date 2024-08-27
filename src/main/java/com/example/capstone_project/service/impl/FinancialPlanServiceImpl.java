@@ -24,6 +24,8 @@ import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -32,8 +34,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.util.ResourceUtils;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -530,9 +533,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            HSSFWorkbook wb = new HSSFWorkbook(POIFSFileSystem.create(file));
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -553,8 +557,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
@@ -769,9 +774,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            HSSFWorkbook wb = new HSSFWorkbook(POIFSFileSystem.create(file));
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -832,8 +838,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
@@ -933,7 +940,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public byte[] getTemplateData() throws IOException {
+    public byte[] getTemplateData() throws IOException, InvalidFormatException {
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
         List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
@@ -941,8 +948,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<Supplier> suppliers = supplierRepository.findAll();
         List<Currency> currencies = currencyRepository.findAll();
 
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
+//        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//        FileInputStream file = new FileInputStream(fileLocation);
+        File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
         XSSFWorkbook wb = new XSSFWorkbook(file);
 
 

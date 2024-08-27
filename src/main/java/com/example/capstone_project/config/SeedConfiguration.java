@@ -1574,7 +1574,7 @@ public class SeedConfiguration {
                     .name("Available To Reviewing New")
                     .duration(TermDuration.MONTHLY)
                     .startDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().minusDays(1))
                     .reuploadStartDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(20))
                     .reuploadEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(21))
                     .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0)))
@@ -1734,10 +1734,42 @@ public class SeedConfiguration {
                     .department(itDepartment)
                     .build();
 
+            FinancialPlan planTester8 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + accountingDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(accountingDepartment)
+                    .build();
+
+            FinancialPlan planTester9 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + hrDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(hrDepartment)
+                    .build();
+
+            FinancialPlan planTester10 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + communicationDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(communicationDepartment)
+                    .build();
+
+            FinancialPlan planTester11 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + marketingDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(marketingDepartment)
+                    .build();
+
             planRepository.saveAll(plans2022);
             planRepository.saveAll(plans2023);
             planRepository.saveAll(plans2024);
-            planRepository.saveAll(List.of(planTester1, planTester2, planTester3, planTester4, planTester5, planTester6, planTester7));
+            planRepository.saveAll(List.of(planTester1, planTester2, planTester3, planTester4, planTester5, planTester6, planTester7, planTester8, planTester9, planTester10, planTester11));
 
             CostType costType1 = CostType.builder()
                     .id(1L)
@@ -2095,10 +2127,34 @@ public class SeedConfiguration {
                     .user(user12)
                     .build();
 
+            FinancialPlanFile planTester8_1 = FinancialPlanFile.builder()
+                    .name(planTester8.getName())
+                    .plan(planTester8)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester9_1 = FinancialPlanFile.builder()
+                    .name(planTester9.getName())
+                    .plan(planTester9)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester10_1 = FinancialPlanFile.builder()
+                    .name(planTester10.getName())
+                    .plan(planTester10)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester11_1 = FinancialPlanFile.builder()
+                    .name(planTester11.getName())
+                    .plan(planTester11)
+                    .user(user11)
+                    .build();
+
             financialPlanFileRepository.saveAll(planFiles2022);
             financialPlanFileRepository.saveAll(planFiles2023);
             financialPlanFileRepository.saveAll(planFiles2024);
-            financialPlanFileRepository.saveAll(List.of(planTester1_1, planTester1_2, planTester1_3, planTester2_1, planTester2_2, planTester3_1, planTester4_1, planTester5_1, planTester6_1, planTester7_1));
+            financialPlanFileRepository.saveAll(List.of(planTester1_1, planTester1_2, planTester1_3, planTester2_1, planTester2_2, planTester3_1, planTester4_1, planTester5_1, planTester6_1, planTester7_1, planTester8_1, planTester9_1, planTester10_1, planTester11_1));
 
             // Create currency data
             Currency vndCurrency = Currency.builder()
@@ -3054,7 +3110,7 @@ public class SeedConfiguration {
 
             // Get 32 random expenses vnd, krw, jpy for test plan
             expenseList = new ArrayList<>();
-            for (int i = 1; i <= 32; i++) {
+            for (int i = 1; i <= 128; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -3135,10 +3191,14 @@ public class SeedConfiguration {
             index = 0;
             fileExpenses = new ArrayList<>();
             for (FinancialPlanExpense expense : expenseList) {
-                int randomFilePlanIndex = random.nextInt(2) + 1;
+                int randomFilePlanIndex = random.nextInt(6) + 1;
                 FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
                     case 1 -> planTester6_1;
                     case 2 -> planTester7_1;
+                    case 3 -> planTester8_1;
+                    case 4 -> planTester9_1;
+                    case 5 -> planTester10_1;
+                    case 6 -> planTester11_1;
                     default -> planTester6_1; // Default case, should never be reached
                 };
 
@@ -3160,7 +3220,7 @@ public class SeedConfiguration {
             // Get 32 random expense usd and euro for test plan
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i < 32; i++) {
+            for (int i = 1; i < 128; i++) {
                 int randomStatusIndex = random.nextInt(2) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -3239,11 +3299,15 @@ public class SeedConfiguration {
             fileExpenses = new ArrayList<>();
             for (FinancialPlanExpense expense : expenseList) {
 
-                int randomFilePlanIndex = random.nextInt(2) + 1;
+                int randomFilePlanIndex = random.nextInt(6) + 1;
 
                 FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
                     case 1 -> planTester6_1;
                     case 2 -> planTester7_1;
+                    case 3 -> planTester8_1;
+                    case 4 -> planTester9_1;
+                    case 5 -> planTester10_1;
+                    case 6 -> planTester11_1;
                     default -> planTester6_1; // Default case, should never be reached
                 };
                 if (expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {

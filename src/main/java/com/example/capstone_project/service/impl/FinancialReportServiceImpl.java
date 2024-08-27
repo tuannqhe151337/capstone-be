@@ -24,12 +24,15 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -202,8 +205,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
             XSSFWorkbook wb = new XSSFWorkbook(file);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
@@ -235,9 +239,10 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            HSSFWorkbook wb = new HSSFWorkbook(POIFSFileSystem.create(file));
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
