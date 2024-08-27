@@ -536,7 +536,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 //            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
 //            FileInputStream file = new FileInputStream(fileLocation);
             File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
-            HSSFWorkbook wb = new HSSFWorkbook(POIFSFileSystem.create(file));
+            FileInputStream fileInputStream = new FileInputStream(file);
+            HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -560,7 +561,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 //            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
 //            FileInputStream file = new FileInputStream(fileLocation);
             File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+            FileInputStream fileInputStream = new FileInputStream(file);
+            XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -777,7 +779,8 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 //            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
 //            FileInputStream file = new FileInputStream(fileLocation);
             File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
-            HSSFWorkbook wb = new HSSFWorkbook(POIFSFileSystem.create(file));
+            FileInputStream fileInputStream = new FileInputStream(file);
+            HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -840,8 +843,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
 //            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
 //            FileInputStream file = new FileInputStream(fileLocation);
-            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -950,8 +954,9 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
 //        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
 //        FileInputStream file = new FileInputStream(fileLocation);
-        File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
-        XSSFWorkbook wb = new XSSFWorkbook(file);
+        File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+        FileInputStream fileInputStream = new FileInputStream(file);
+        XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
 
         Sheet sheet = wb.getSheet("List");
