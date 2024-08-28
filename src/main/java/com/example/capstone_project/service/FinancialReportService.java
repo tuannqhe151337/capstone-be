@@ -3,6 +3,7 @@ package com.example.capstone_project.service;
 import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.FinancialPlanExpense;
 import com.example.capstone_project.entity.FinancialReport;
+import com.example.capstone_project.entity.ReportStatus;
 import com.example.capstone_project.repository.result.*;
 import com.example.capstone_project.service.result.CostResult;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 public interface FinancialReportService {
-    List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception;
+    List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception;
 
     long countDistinctListReportPaginate(String query, Long termId, Long statusId) throws Exception;
 
@@ -39,7 +40,7 @@ public interface FinancialReportService {
 
     CostResult calculateExpectedCostByReportId(Long reportId) throws Exception;
 
-    List<ExpenseCodeResponse>  approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
+    List<ExpenseCodeResponse> approvalExpenses(Long planId, List<Long> listExpenses) throws Exception;
 
     void denyExpenses(Long planId, List<Long> listExpenseId) throws Exception;
 
@@ -56,4 +57,6 @@ public interface FinancialReportService {
     TreeMap<String, List<CostTypeDiagramResult>> getReportCostTypeDiagram(Integer year) throws Exception;
 
     void markReportAsReviewed(Long reportId) throws Exception;
+
+    List<ReportStatus> getListReportStatus();
 }

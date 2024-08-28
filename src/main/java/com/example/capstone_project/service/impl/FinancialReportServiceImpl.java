@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.controller.responses.report.approval.ExpenseCodeResponse;
 import com.example.capstone_project.entity.*;
 import com.example.capstone_project.entity.Currency;
@@ -15,6 +16,7 @@ import com.example.capstone_project.utils.exception.InvalidInputException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.RemoveDuplicateHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -22,16 +24,21 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -54,14 +61,37 @@ public class FinancialReportServiceImpl implements FinancialReportService {
     private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
     private final MonthlyReportSummaryRepository monthlyReportSummaryRepository;
     private final FirebaseMessaging firebaseMessaging;
+    private final UserRepository userRepository;
 
     @Override
-    public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Pageable pageable) throws Exception {
+    public List<FinancialReport> getListReportPaginate(String query, Long termId, Long departmentId, Long statusId, Integer pageInt, Integer sizeInt, String sortBy, String sortType) throws Exception {
         // Get userId from token
         long userId = UserHelper.getUserId();
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_REPORT.getValue())) {
+            Pageable pageable = null;
+            if (sortBy == null || sortBy.isEmpty()) {
+                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                        CustomSort.builder().sortBy(FinancialReport_.STATUS).sortType("asc").build(),
+                        CustomSort.builder().sortBy(FinancialReport_.CREATED_AT).sortType("desc").build(),
+                        CustomSort.builder().sortBy(FinancialReport_.ID).sortType("desc").build()
+                ));
+            } else {
+                // Sort by request
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(FinancialReport_.ID).sortType("desc").build()
+                    ));
+                }
+            }
             return financialReportRepository.getReportWithPagination(query, termId, statusId, pageable);
         } else {
             throw new UnauthorizedException("Unauthorized to view report");
@@ -175,9 +205,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -208,9 +240,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             List<Currency> currencies = currencyRepository.findAll();
             List<Supplier> suppliers = supplierRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -370,7 +404,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
             for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
                 BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
                 BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
-                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
                 System.out.println(actualCost);
             }
         }
@@ -512,6 +546,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 ExpenseStatus approval = expenseStatusRepository.findByCode(ExpenseStatusCode.APPROVED);
                 ExpenseStatus denied = expenseStatusRepository.findByCode(ExpenseStatusCode.DENIED);
 
+                // Get user approved by
+                User approvedBy = userRepository.getReferenceById(userId);
+
                 // Get report of this list expense to generate expense code
                 FinancialReport report = financialReportRepository.findById(reportId).get();
 
@@ -519,12 +556,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense.getId());
 
                     // Generate code for approved expense not have code
-                    if (idAndCode.get(expense.getId()) != null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
-                        updateExpense.setPlanExpenseKey(report.getName() + "_" + ++index);
+                    if (idAndCode.get(expense.getId()) == null && expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                        String prefixCode = report.getName().replace(" ", "_");
+                        updateExpense.setPlanExpenseKey(prefixCode + "_" + (++index));
                     }
+
                     // Update status for expense
                     if (expense.getStatus().getCode().equals(approval.getCode())) {
                         updateExpense.setStatus(approval);
+                        updateExpense.setApprovedBy(approvedBy);
                     } else {
                         updateExpense.setStatus(denied);
 
@@ -534,9 +574,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 }
 
                 // Change status to Reviewed
-                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
-
-                report.setStatus(reviewedReportStatus);
+//                ReportStatus reviewedReportStatus = reportStatusRepository.findByCode(ReportStatusCode.REVIEWED);
+//
+//                report.setStatus(reviewedReportStatus);
 
                 financialReportRepository.save(report);
                 expenseRepository.saveAll(expenses);
@@ -565,9 +605,15 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         Long departmentId = null;
         if (userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
+            if (LocalDate.now().getYear() == year) {
+                return monthlyReportSummaryRepository.getCostTypeYearDiagramForCurrentYear(year, departmentId);
+            }
             return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else if (userDetail.getRoleCode().equals(RoleCode.FINANCIAL_STAFF.getValue())) {
             departmentId = userDetail.getDepartmentId();
+            if (LocalDate.now().getYear() == year) {
+                return monthlyReportSummaryRepository.getCostTypeYearDiagramForCurrentYear(year, departmentId);
+            }
             return monthlyReportSummaryRepository.getCostTypeYearDiagram(year, departmentId);
         } else {
             throw new UnauthorizedException("Unauthorized to view diagram");
@@ -694,6 +740,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
                 }
 
+                // Get user approved expense
+                User approvedBy = userRepository.getReferenceById(userId);
+
                 // Get report of this list expense
                 FinancialReport report = financialReportRepository.findById(reportId).get();
                 List<ExpenseCodeResponse> list = new ArrayList<>();
@@ -708,6 +757,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                     }
 
                     updateExpense.setStatus(approval);
+                    updateExpense.setApprovedBy(approvedBy);
                     expenses.add(updateExpense);
                 }
 
@@ -740,9 +790,9 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
         // Check authority
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.APPROVE_PLAN.getValue()) && userDetail.getRoleCode().equals(RoleCode.ACCOUNTANT.getValue())) {
-
-
             listExpenseId = RemoveDuplicateHelper.removeDuplicates(listExpenseId);
+
+            User denyUser = this.userRepository.getReferenceById(userId);
 
             List<FinancialPlanExpense> expenses = new ArrayList<>();
             // Check list expense exist in one report
@@ -756,6 +806,7 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
                     FinancialPlanExpense updateExpense = expenseRepository.getReferenceById(expense);
                     updateExpense.setStatus(denyStatus);
+                    updateExpense.setApprovedBy(denyUser);
                     expenses.add(updateExpense);
 
                 });
@@ -821,10 +872,26 @@ public class FinancialReportServiceImpl implements FinancialReportService {
 
             // We won't do anything if sending notification failed
             try {
-                if(!messages.isEmpty()) {
+                if (!messages.isEmpty()) {
                     firebaseMessaging.sendEach(messages);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    @Override
+    public List<ReportStatus> getListReportStatus() {
+        // Get list authorities of user
+        Set<String> authorities = userAuthorityRepository.get(UserHelper.getUserId());
+
+        // Check authorization
+        if (authorities.contains(AuthorityCode.VIEW_REPORT.getValue())) {
+
+            return this.reportStatusRepository.findAll(Sort.by(CostType_.ID).ascending());
+
+        } else {
+            throw new UnauthorizedException("Unauthorized to view report");
         }
     }
 }

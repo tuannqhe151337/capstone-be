@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -106,11 +108,24 @@ public class AnnualReportServiceImpl implements AnnualReportService {
         Set<String> listAuthorities = userAuthorityRepository.get(UserHelper.getUserId());
 
         if (listAuthorities.contains(AuthorityCode.VIEW_ANNUAL_REPORT.getValue())) {
-            AnnualReport annualReport = annualReportRepository.findByYear(year);
-            if (annualReport == null) {
-                throw new ResourceNotFoundException("Not found any term have year = " + year);
+            if (LocalDate.now().getYear() == year) {
+                int totalDepartment = annualReportRepository.getTotalDepartmentByYear(year);
+                int totalTerm = annualReportRepository.getTotalTermByYear(year);
+                BigDecimal totalExpense = annualReportRepository.getTotalExpenseByYear(year);
+
+                return AnnualReport.builder()
+                        .year(year)
+                        .totalDepartment(totalDepartment)
+                        .totalTerm(totalTerm)
+                        .totalExpense(totalExpense)
+                        .build();
+            } else {
+                AnnualReport annualReport = annualReportRepository.findByYear(year);
+                if (annualReport == null) {
+                    throw new ResourceNotFoundException("Not found any term have year = " + year);
+                }
+                return annualReport;
             }
-            return annualReport;
         } else {
             throw new UnauthorizedException("Unauthorized to view annual report");
         }

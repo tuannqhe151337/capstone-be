@@ -27,7 +27,7 @@ public class GlobalCorsConfiguration {
             @Override
             public void addCorsMappings(final @NonNull CorsRegistry registry) {
                 registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .allowedOrigins(FRONTEND_HOST)
+                        .allowedOrigins(FRONTEND_HOST, "http://localhost:5174")
                         .allowedHeaders("*");
             }
         };

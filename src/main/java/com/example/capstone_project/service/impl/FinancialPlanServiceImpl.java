@@ -16,6 +16,7 @@ import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
+import com.example.capstone_project.utils.exception.department.InvalidDepartmentIdException;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
 import com.example.capstone_project.utils.helper.HandleFileHelper;
 import com.example.capstone_project.utils.helper.PaginationHelper;
@@ -23,6 +24,8 @@ import com.example.capstone_project.utils.helper.UserHelper;
 import com.example.capstone_project.utils.mapper.plan.reupload.ReUploadExpensesMapperImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -31,8 +34,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.util.ResourceUtils;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -254,7 +258,13 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
     @Override
     @Transactional
-    public FinancialPlan deletePlan(long planId) throws InvalidDateException {
+    public FinancialPlan deletePlan(long planId) throws Exception {
+        // Get userId from token
+        long userId = UserHelper.getUserId();
+
+        // Get user detail
+        UserDetail userDetail = userDetailRepository.get(userId);
+
         // Check authorization
         if (userAuthorityRepository.get(UserHelper.getUserId()).contains(AuthorityCode.DELETE_PLAN.getValue())) {
 
@@ -266,6 +276,10 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
 
             FinancialPlan financialPlan = planRepository.findById(planId).orElseThrow(() ->
                     new ResourceNotFoundException("Not found any plan have id = " + planId));
+
+            if (financialPlan.getDepartment().getId() != userDetail.getDepartmentId()) {
+                throw new InvalidDepartmentIdException("User can't delete plan of other department");
+            }
 
             financialPlan.setDelete(true);
 
@@ -519,9 +533,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -542,9 +558,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -758,9 +776,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
-            FileInputStream file = new FileInputStream(fileLocation);
-            HSSFWorkbook wb = new HSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xls";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xls");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            HSSFWorkbook wb = new HSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -821,9 +841,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             List<Supplier> suppliers = supplierRepository.findAll();
             List<Currency> currencies = currencyRepository.findAll();
 
-            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-            FileInputStream file = new FileInputStream(fileLocation);
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+//            String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//            FileInputStream file = new FileInputStream(fileLocation);
+            File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+            FileInputStream fileInputStream = new FileInputStream(file);
+            XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
             return handleFileHelper.fillDataToExcel(wb, expenses, departments, costTypes, expenseStatuses, projects, suppliers, currencies);
         } else {
@@ -922,7 +944,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
     }
 
     @Override
-    public byte[] getTemplateData() throws IOException {
+    public byte[] getTemplateData() throws IOException, InvalidFormatException {
         List<Department> departments = departmentRepository.findAll();
         List<CostType> costTypes = costTypeRepository.findAll();
         List<ExpenseStatus> expenseStatuses = expenseStatusRepository.findAll();
@@ -930,9 +952,11 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
         List<Supplier> suppliers = supplierRepository.findAll();
         List<Currency> currencies = currencyRepository.findAll();
 
-        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
-        FileInputStream file = new FileInputStream(fileLocation);
-        XSSFWorkbook wb = new XSSFWorkbook(file);
+//        String fileLocation = "src/main/resources/fileTemplate/Financial Planning_v1.0.xlsx";
+//        FileInputStream file = new FileInputStream(fileLocation);
+        File file = ResourceUtils.getFile("classpath:fileTemplate/Financial Planning_v1.0.xlsx");
+        FileInputStream fileInputStream = new FileInputStream(file);
+        XSSFWorkbook wb = new XSSFWorkbook(fileInputStream);
 
 
         Sheet sheet = wb.getSheet("List");
@@ -1160,7 +1184,7 @@ public class FinancialPlanServiceImpl implements FinancialPlanService {
             for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
                 BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
                 BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
-                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(toAmount).divide(formAmount, 2, RoundingMode.CEILING));
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
                 System.out.println(actualCost);
             }
         }

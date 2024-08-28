@@ -14,14 +14,17 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class FinancialPlanExpense extends BaseEntity {
+    // https://vladmihalcea.com/postgresql-serial-column-hibernate-identity/
+    // https://stackoverflow.com/questions/17780394/hibernate-identity-vs-sequence-entity-identifier-generators
+    // GenerationType.IDENTITY will disable batch insert!!!
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(name = "financial_plan_expense_key")
+    @Column(name = "financial_plan_expense_key", columnDefinition = "NVARCHAR(255)")
     private String planExpenseKey;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Column(name = "unit_price")
@@ -59,6 +62,10 @@ public class FinancialPlanExpense extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_id")
     private Currency currency;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
 
     @Column(name = "is_delete", columnDefinition = "bit default 0")
     private boolean isDelete;

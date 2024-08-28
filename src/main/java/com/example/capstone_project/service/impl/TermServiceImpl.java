@@ -1,5 +1,6 @@
 package com.example.capstone_project.service.impl;
 
+import com.example.capstone_project.controller.responses.CustomSort;
 import com.example.capstone_project.entity.*;
 
 import com.example.capstone_project.repository.*;
@@ -7,16 +8,21 @@ import com.example.capstone_project.repository.redis.UserAuthorityRepository;
 import com.example.capstone_project.repository.redis.UserDetailRepository;
 import com.example.capstone_project.service.TermService;
 import com.example.capstone_project.utils.enums.AuthorityCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
+import com.example.capstone_project.utils.enums.RoleCode;
 import com.example.capstone_project.utils.enums.TermStatusCode;
 import com.example.capstone_project.utils.exception.UnauthorizedException;
 import com.example.capstone_project.utils.exception.term.*;
 import com.example.capstone_project.utils.exception.ResourceNotFoundException;
+import com.example.capstone_project.utils.helper.PaginationHelper;
 import com.example.capstone_project.utils.helper.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,6 +34,8 @@ public class TermServiceImpl implements TermService {
     private final UserRepository userRepository;
     private final TermStatusRepository termStatusRepository;
     private final TermIntervalRepository termIntervalRepository;
+    private final ReportStatusRepository reportStatusRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     @Override
     public long countDistinct(String query) throws Exception {
@@ -101,7 +109,7 @@ public class TermServiceImpl implements TermService {
         Term currentTerm = termRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Term not exist with id: " + id));
 
-        if(!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
+        if (!currentTerm.getStatus().getCode().equals(TermStatusCode.NEW)) {
             throw new InvalidDateException("Only can delete term when status is new");
         }
         currentTerm.setDelete(true);
@@ -135,10 +143,26 @@ public class TermServiceImpl implements TermService {
         if (term == null) {
             throw new ResourceNotFoundException("Term not found");
         }
-        TermStatus termStatus = termStatusRepository.getReferenceById(2L);
+
+        TermStatus termStatus = termStatusRepository.findByCode(TermStatusCode.IN_PROGRESS);
+
         term.setStatus(termStatus);
         term.setStartDate(LocalDateTime.now());
         termRepository.save(term);
+
+        ReportStatus newStatus = reportStatusRepository.findByCode(ReportStatusCode.NEW);
+
+        // Create new report
+        FinancialReport report = FinancialReport.builder()
+                .name(term.getName() + "_" + "Report")
+                .month(term.getFinalEndTermDate().toLocalDate())
+                .term(term)
+                .status(newStatus)
+                .build();
+
+        // Generate report
+        financialReportRepository.save(report);
+
     }
 
 
@@ -171,11 +195,33 @@ public class TermServiceImpl implements TermService {
     }
 
     @Override
-    public List<Term> getListTermPaging(Long statusId, String query, Pageable pageable) {
+    public List<Term> getListTermPaging(Long statusId, String query, Integer pageInt, Integer sizeInt, String sortBy, String sortType) {
         long userId = UserHelper.getUserId();
 
         if (userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_PLAN.getValue())
                 || userAuthorityRepository.get(userId).contains(AuthorityCode.VIEW_TERM.getValue())) {
+            Pageable pageable = null;
+            if (sortBy == null || sortBy.isEmpty()) {
+                pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                        CustomSort.builder().sortBy(Term_.STATUS).sortType("asc").build(),
+                        CustomSort.builder().sortBy(Term_.START_DATE).sortType("desc").build(),
+                        CustomSort.builder().sortBy(Term_.ID).sortType("desc").build()
+                ));
+            } else {
+                // Sort by request
+                if (sortBy.equals("id") || sortBy.equals("ID")) {
+                    // Sort by id
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build()
+                    ));
+
+                } else {
+                    pageable = PaginationHelper.handlingPaginationWithMultiSort(pageInt, sizeInt, List.of(
+                            CustomSort.builder().sortBy(sortBy).sortType(sortType).build(),
+                            CustomSort.builder().sortBy(Term_.ID).sortType("desc").build()
+                    ));
+                }
+            }
             return termRepository.getListTermPaging(statusId, query, pageable);
 
         }
@@ -214,7 +260,10 @@ public class TermServiceImpl implements TermService {
         //throw exception if start reup date is before end date
         //before 20 days - false
         if (term.isAllowReupload()) {
-            LocalDateTime boundaryStartReuploadDate = term.getStartDate().plusDays(termInterval.getStartReuploadInterval());
+            LocalDate date = LocalDate.of(term.getStartDate().getYear(), term.getStartDate().getMonth(), termInterval.getStartTermDate());
+            LocalTime time = LocalTime.of(term.getStartDate().getHour(), term.getStartDate().getMinute());
+            LocalDateTime startdate = LocalDateTime.of(date, time);
+            LocalDateTime boundaryStartReuploadDate = startdate.plusDays(termInterval.getStartReuploadInterval());
             if (!term.getReuploadStartDate().isAfter(term.getEndDate()) || term.getReuploadStartDate().isAfter(finalEndTermDate)
                     || term.getReuploadStartDate().isBefore(boundaryStartReuploadDate)) {
                 throw new InvalidStartReupDateException("Re-upload start date must be within "

@@ -8,6 +8,7 @@ import com.example.capstone_project.repository.result.FileNameResult;
 import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.ExpenseStatusCode;
+import com.example.capstone_project.utils.enums.ReportStatusCode;
 import com.example.capstone_project.utils.enums.TermStatusCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -134,6 +135,13 @@ public interface FinancialReportRepository extends JpaRepository<FinancialReport
             " (financialReport.isDelete = false OR financialReport.isDelete IS NULL)"
     )
     Optional<FinancialReport> getFinancialReportWithTerm(@NonNull Long reportId, TermStatusCode inProgress, LocalDateTime now);
+
+    @Query(value = " SELECT report FROM FinancialReport report " +
+            " JOIN report.term term " +
+            " WHERE report.status.code = :reportStatusCode AND " +
+            " cast(term.endDate as localdate) = cast(:now as localdate) AND " +
+            " term.isDelete = false and report.isDelete = false ")
+    List<FinancialReport> autoUpdateReportStatus(ReportStatusCode reportStatusCode, LocalDateTime now);
 
 //    @Query(value = " SELECT expenses FROM FinancialReportExpense expenses " +
 //            " JOIN expenses.financialReport report " +

@@ -1,10 +1,14 @@
 package com.example.capstone_project.config;
 
 import com.example.capstone_project.entity.*;
+import com.example.capstone_project.entity.Currency;
 import com.example.capstone_project.repository.*;
 import com.example.capstone_project.repository.result.AnnualReportResult;
+import com.example.capstone_project.repository.result.CostStatisticalByCurrencyResult;
+import com.example.capstone_project.repository.result.PaginateExchange;
 import com.example.capstone_project.repository.result.ReportResult;
-import com.example.capstone_project.service.scheduler.TermSchedulerService;
+import com.example.capstone_project.service.result.CostResult;
+import com.example.capstone_project.service.result.TotalCostByCurrencyResult;
 import com.example.capstone_project.utils.enums.*;
 import com.example.capstone_project.utils.mapper.annual.AnnualReportMapperImpl;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +18,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Configuration
 @RequiredArgsConstructor
 public class SeedConfiguration {
     private final PasswordEncoder passwordEncoder;
+    private final CurrencyExchangeRateRepository currencyExchangeRateRepository;
+    private final FinancialPlanRepository planRepository;
+    private final ReportStatisticRepository reportStatisticRepository;
+    private final DepartmentRepository departmentRepository;
+    private final CostTypeRepository costTypeRepository;
+    private final FinancialReportRepository financialReportRepository;
 
     @Bean
     public CommandLineRunner commandLineRunner(
@@ -50,9 +60,7 @@ public class SeedConfiguration {
             ProjectRepository projectRepository,
             TermIntervalRepository termIntervalRepository,
             CurrencyRepository currencyRepository,
-            CurrencyExchangeRateRepository currencyExchangeRateRepository,
-            ReportStatisticRepository reportStatisticRepository,
-            TermSchedulerService termSchedulerService
+            CurrencyExchangeRateRepository currencyExchangeRateRepository
 
     ) {
         return args -> {
@@ -440,7 +448,7 @@ public class SeedConfiguration {
                     .phoneNumber("0999988877")
                     .position(techlead)
                     .dob(LocalDateTime.of(2000, 4, 5, 0, 0))
-                    .email("username2@email.com")
+                    .email("admin@email.com")
                     .address("Da Nang")
                     .build();
 
@@ -469,7 +477,7 @@ public class SeedConfiguration {
                     .position(staff)
                     .dob(LocalDateTime.of(1986, 12, 20, 0, 0))
                     .isDelete(false)
-                    .email("username4@email.com")
+                    .email("accountant@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .build();
@@ -480,10 +488,10 @@ public class SeedConfiguration {
                     .fullName("Nguyen The Ngoc")
                     .password(this.passwordEncoder.encode("password"))
                     .role(financialStaff)
-                    .department(communicationDepartment)
+                    .department(hrDepartment)
                     .position(staff)
                     .dob(LocalDateTime.of(2000, 4, 2, 2, 3))
-                    .email("username5@email.com")
+                    .email("staff@email.com")
                     .phoneNumber("0999988877")
                     .address("Ha Noi ")
                     .dob(LocalDateTime.of(2002, 11, 11, 0, 0, 0))
@@ -773,20 +781,12 @@ public class SeedConfiguration {
 
                 String randomTheme = switch (randomThemeIndex) {
                     case 1 -> themes[0];
-                    case 2 -> themes[1];
-                    case 3 -> themes[2];
-                    case 4 -> themes[3];
-                    case 5 -> themes[4];
-                    case 6 -> themes[5];
-                    case 7 -> themes[6];
                     default -> themes[0]; // Default case, should never be reached
                 };
 
                 String randomLanguage = switch (randomLanguageIndex) {
-                    case 1 -> themes[0];
-                    case 2 -> themes[1];
-                    case 3 -> themes[2];
-                    default -> themes[0]; // Default case, should never be reached
+                    case 1 -> languages[0];
+                    default -> languages[0]; // Default case, should never be reached
                 };
 
                 UserSetting userSetting = UserSetting.builder()
@@ -1530,43 +1530,7 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
-            Term term24_8 = Term.builder()
-                    .name("September 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 8, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus2)
-                    .build();
-
-            Term term24_9 = Term.builder()
-                    .name("October 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 9, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus)
-                    .build();
-
-            Term term24_10 = Term.builder()
-                    .name("November 2024")
-                    .duration(TermDuration.MONTHLY)
-                    .startDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0))
-                    .endDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(5))
-                    .reuploadStartDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(20))
-                    .reuploadEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0).plusDays(21))
-                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 10, 25, 0, 0, 0)))
-                    .user(user4)
-                    .status(termStatus)
-                    .build();
-
-            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7, term24_8, term24_9, term24_10));
+            List<Term> term2024List = new ArrayList<>(List.of(term24_1, term24_2, term24_3, term24_4, term24_5, term24_6, term24_7));
 
 
             Term termTester1 = Term.builder()
@@ -1606,92 +1570,111 @@ public class SeedConfiguration {
                     .status(termStatus2)
                     .build();
 
+            Term termTester4 = Term.builder()
+                    .name("Available To Reviewing New")
+                    .duration(TermDuration.MONTHLY)
+                    .startDate(LocalDateTime.of(2023, 12, 25, 0, 0, 0))
+                    .endDate(LocalDateTime.now().minusDays(1))
+                    .reuploadStartDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(20))
+                    .reuploadEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0).plusDays(21))
+                    .finalEndTermDate(TermDuration.MONTHLY.calculateEndDate(LocalDateTime.of(2024, 12, 25, 0, 0, 0)))
+                    .user(user4)
+                    .status(termStatus2)
+                    .build();
+
             termRepository.saveAll(term2022List);
             termRepository.saveAll(term2023List);
             termRepository.saveAll(term2024List);
-            termRepository.saveAll(List.of(termTester1, termTester2, termTester3));
+            termRepository.saveAll(List.of(termTester1, termTester2, termTester3, termTester4));
 
             List<FinancialPlan> plans2022 = new ArrayList<>();
 
             for (Term term : term2022List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
-                        .build();
+                for (int i = 0; i < randomNumberDepartment; i++) {
+                    int randomIndexDepartment = random.nextInt(6) + 1;
+                    if (randomIndexDepartment >= departments.size()) {
+                        randomIndexDepartment = departments.size() - 1;
+                    }
 
-                plans2022.add(financialPlan);
+                    Department randomDepartment = departments.get(randomIndexDepartment);
+
+                    FinancialPlan financialPlan = FinancialPlan.builder()
+                            .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                            .term(term)
+                            .department(randomDepartment)
+                            .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                            .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                            .build();
+
+                    departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                    plans2022.add(financialPlan);
+                }
             }
 
             List<FinancialPlan> plans2023 = new ArrayList<>();
 
             for (Term term : term2023List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2100000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1300000000))
-                        .build();
+                for (int i = 0; i < randomNumberDepartment; i++) {
+                    int randomIndexDepartment = random.nextInt(6) + 1;
+                    if (randomIndexDepartment >= departments.size()) {
+                        randomIndexDepartment = departments.size() - 1;
+                    }
 
-                plans2023.add(financialPlan);
+                    Department randomDepartment = departments.get(randomIndexDepartment);
+
+                    FinancialPlan financialPlan = FinancialPlan.builder()
+                            .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                            .term(term)
+                            .department(randomDepartment)
+                            .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                            .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                            .build();
+
+                    departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                    plans2023.add(financialPlan);
+                }
             }
 
             List<FinancialPlan> plans2024 = new ArrayList<>();
 
             for (Term term : term2024List) {
-                int randomIndexDepartment = random.nextInt(6) + 1;
+                if (term.getStatus().getCode().equals(TermStatusCode.NEW)) {
+                } else {
+                    List<Department> departments = new ArrayList<>(List.of(itDepartment, hrDepartment, financeDepartment, accountingDepartment, marketingDepartment, communicationDepartment));
 
-                Department randomDepartment = switch (randomIndexDepartment) {
-                    case 1 -> itDepartment;
-                    case 2 -> accountingDepartment;
-                    case 3 -> financeDepartment;
-                    case 4 -> hrDepartment;
-                    case 5 -> communicationDepartment;
-                    case 6 -> marketingDepartment;
-                    default -> itDepartment; // Default case, should never be reached
-                };
+                    int randomNumberDepartment = random.nextInt(6) + 1;
 
-                FinancialPlan financialPlan = FinancialPlan.builder()
-                        .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
-                        .term(term)
-                        .department(randomDepartment)
-                        .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 1800000000))
-                        .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1300000000))
-                        .build();
+                    for (int i = 0; i < randomNumberDepartment; i++) {
+                        int randomIndexDepartment = random.nextInt(6) + 1;
+                        if (randomIndexDepartment >= departments.size()) {
+                            randomIndexDepartment = departments.size() - 1;
+                        }
 
-                if (term.getFinalEndTermDate().getMonthValue() < LocalDateTime.now().getMonthValue()) {
-                    financialPlan.setActualCost(BigDecimal.valueOf(0));
-                    financialPlan.setExpectedCost(BigDecimal.valueOf(0));
+                        Department randomDepartment = departments.get(randomIndexDepartment);
+
+                        FinancialPlan financialPlan = FinancialPlan.builder()
+                                .name(term.getName() + "_" + randomDepartment.getName() + "_Plan")
+                                .term(term)
+                                .department(randomDepartment)
+                                .expectedCost(BigDecimal.valueOf(random.nextInt(500000000) + 2000000000))
+                                .actualCost(BigDecimal.valueOf(random.nextInt(500000000) + 1500000000))
+                                .build();
+
+                        departments.removeIf(department -> department.getName().equals(randomDepartment.getName()));
+
+                        plans2024.add(financialPlan);
+                    }
                 }
-
-                plans2024.add(financialPlan);
             }
 
 
@@ -1704,17 +1687,89 @@ public class SeedConfiguration {
                     .build();
 
             FinancialPlan planTester2 = FinancialPlan.builder()
-                    .name(termTester3.getName() + "_" + accountant.getName() + "_Plan")
+                    .name(termTester3.getName() + "_" + accountingDepartment.getName() + "_Plan")
                     .term(termTester3)
                     .actualCost(BigDecimal.valueOf(0))
                     .expectedCost(BigDecimal.valueOf(0))
                     .department(accountingDepartment)
                     .build();
 
+            FinancialPlan planTester3 = FinancialPlan.builder()
+                    .name(termTester2.getName() + "_" + accountingDepartment.getName() + "_Plan")
+                    .term(termTester2)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(accountingDepartment)
+                    .build();
+
+            FinancialPlan planTester4 = FinancialPlan.builder()
+                    .name(termTester2.getName() + "_" + itDepartment.getName() + "_Plan")
+                    .term(termTester2)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(itDepartment)
+                    .build();
+
+            FinancialPlan planTester5 = FinancialPlan.builder()
+                    .name(termTester2.getName() + "_" + financeDepartment.getName() + "_Plan")
+                    .term(termTester2)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(financeDepartment)
+                    .build();
+
+            FinancialPlan planTester6 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + financeDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(financeDepartment)
+                    .build();
+
+            FinancialPlan planTester7 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + itDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(itDepartment)
+                    .build();
+
+            FinancialPlan planTester8 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + accountingDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(accountingDepartment)
+                    .build();
+
+            FinancialPlan planTester9 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + hrDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(hrDepartment)
+                    .build();
+
+            FinancialPlan planTester10 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + communicationDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(communicationDepartment)
+                    .build();
+
+            FinancialPlan planTester11 = FinancialPlan.builder()
+                    .name(termTester4.getName() + "_" + marketingDepartment.getName() + "_Plan")
+                    .term(termTester4)
+                    .actualCost(BigDecimal.valueOf(0))
+                    .expectedCost(BigDecimal.valueOf(0))
+                    .department(marketingDepartment)
+                    .build();
+
             planRepository.saveAll(plans2022);
             planRepository.saveAll(plans2023);
             planRepository.saveAll(plans2024);
-            planRepository.saveAll(List.of(planTester1, planTester2));
+            planRepository.saveAll(List.of(planTester1, planTester2, planTester3, planTester4, planTester5, planTester6, planTester7, planTester8, planTester9, planTester10, planTester11));
 
             CostType costType1 = CostType.builder()
                     .id(1L)
@@ -1953,59 +2008,63 @@ public class SeedConfiguration {
             List<FinancialPlanFile> planFiles2024 = new ArrayList<>();
 
             for (FinancialPlan plan : plans2024) {
-                int randomIndexUser = random.nextInt(6) + 1;
-                User randomUser = null;
-                if (plan.getDepartment().getName().equals(itDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user7;
-                        case 2 -> user8;
-                        case 3 -> user9;
-                        case 4 -> user14;
-                        case 5 -> user15;
-                        case 6 -> user20;
-                        default -> user7; // Default case, should never be reached
-                    };
-                } else if (plan.getDepartment().getName().equals(hrDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user10;
-                        case 2 -> user11;
-                        case 3 -> user16;
-                        case 4 -> user21;
-                        default -> user10; // Default case, should never be reached
-                    };
-                } else if (plan.getDepartment().getName().equals(accountingDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user4;
-                        case 2 -> user17;
-                        case 3 -> user18;
-                        default -> user17; // Default case, should never be reached
-                    };
-                } else if (plan.getDepartment().getName().equals(marketingDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user22;
-                        default -> user22; // Default case, should never be reached
-                    };
-                } else if (plan.getDepartment().getName().equals(communicationDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user5;
-                        case 2 -> user12;
-                        case 3 -> user13;
-                        default -> user5; // Default case, should never be reached
-                    };
-                } else if (plan.getDepartment().getName().equals(financeDepartment.getName())) {
-                    randomUser = switch (randomIndexUser) {
-                        case 1 -> user3;
-                        default -> user3; // Default case, should never be reached
-                    };
+                if (plan.getTerm().getStatus().getCode().equals(TermStatusCode.NEW)) {
+                } else {
+                    int randomIndexUser = random.nextInt(6) + 1;
+                    User randomUser = null;
+                    if (plan.getDepartment().getName().equals(itDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user7;
+                            case 2 -> user8;
+                            case 3 -> user9;
+                            case 4 -> user14;
+                            case 5 -> user15;
+                            case 6 -> user20;
+                            default -> user7; // Default case, should never be reached
+                        };
+                    } else if (plan.getDepartment().getName().equals(hrDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user10;
+                            case 2 -> user11;
+                            case 3 -> user16;
+                            case 4 -> user21;
+                            default -> user10; // Default case, should never be reached
+                        };
+                    } else if (plan.getDepartment().getName().equals(accountingDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user4;
+                            case 2 -> user17;
+                            case 3 -> user18;
+                            default -> user17; // Default case, should never be reached
+                        };
+                    } else if (plan.getDepartment().getName().equals(marketingDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user22;
+                            default -> user22; // Default case, should never be reached
+                        };
+                    } else if (plan.getDepartment().getName().equals(communicationDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user5;
+                            case 2 -> user12;
+                            case 3 -> user13;
+                            default -> user5; // Default case, should never be reached
+                        };
+
+                    } else if (plan.getDepartment().getName().equals(financeDepartment.getName())) {
+                        randomUser = switch (randomIndexUser) {
+                            case 1 -> user3;
+                            default -> user3; // Default case, should never be reached
+                        };
+                    }
+
+                    FinancialPlanFile financialPlanFile = FinancialPlanFile.builder()
+                            .name(plan.getName())
+                            .plan(plan)
+                            .user(randomUser)
+                            .build();
+
+                    planFiles2024.add(financialPlanFile);
                 }
-
-                FinancialPlanFile financialPlanFile = FinancialPlanFile.builder()
-                        .name(plan.getName())
-                        .plan(plan)
-                        .user(randomUser)
-                        .build();
-
-                planFiles2024.add(financialPlanFile);
             }
 
             FinancialPlanFile planTester1_1 = FinancialPlanFile.builder()
@@ -2038,15 +2097,69 @@ public class SeedConfiguration {
                     .user(user6)
                     .build();
 
+            FinancialPlanFile planTester3_1 = FinancialPlanFile.builder()
+                    .name(planTester3.getName())
+                    .plan(planTester3)
+                    .user(user10)
+                    .build();
+
+            FinancialPlanFile planTester4_1 = FinancialPlanFile.builder()
+                    .name(planTester4.getName())
+                    .plan(planTester4)
+                    .user(user8)
+                    .build();
+
+            FinancialPlanFile planTester5_1 = FinancialPlanFile.builder()
+                    .name(planTester5.getName())
+                    .plan(planTester5)
+                    .user(user7)
+                    .build();
+
+            FinancialPlanFile planTester6_1 = FinancialPlanFile.builder()
+                    .name(planTester6.getName())
+                    .plan(planTester6)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester7_1 = FinancialPlanFile.builder()
+                    .name(planTester7.getName())
+                    .plan(planTester7)
+                    .user(user12)
+                    .build();
+
+            FinancialPlanFile planTester8_1 = FinancialPlanFile.builder()
+                    .name(planTester8.getName())
+                    .plan(planTester8)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester9_1 = FinancialPlanFile.builder()
+                    .name(planTester9.getName())
+                    .plan(planTester9)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester10_1 = FinancialPlanFile.builder()
+                    .name(planTester10.getName())
+                    .plan(planTester10)
+                    .user(user11)
+                    .build();
+
+            FinancialPlanFile planTester11_1 = FinancialPlanFile.builder()
+                    .name(planTester11.getName())
+                    .plan(planTester11)
+                    .user(user11)
+                    .build();
+
             financialPlanFileRepository.saveAll(planFiles2022);
             financialPlanFileRepository.saveAll(planFiles2023);
             financialPlanFileRepository.saveAll(planFiles2024);
-            financialPlanFileRepository.saveAll(List.of(planTester1_1, planTester1_2, planTester1_3, planTester2_1, planTester2_2));
+            financialPlanFileRepository.saveAll(List.of(planTester1_1, planTester1_2, planTester1_3, planTester2_1, planTester2_2, planTester3_1, planTester4_1, planTester5_1, planTester6_1, planTester7_1, planTester8_1, planTester9_1, planTester10_1, planTester11_1));
 
             // Create currency data
             Currency vndCurrency = Currency.builder()
                     .id(1L)
-                    .name("VNĐ")
+                    .name("VND")
                     .symbol("₫")
                     .affix(Affix.SUFFIX)
                     .isDefault(true)
@@ -2082,7 +2195,7 @@ public class SeedConfiguration {
 
             currencyRepository.saveAll(List.of(vndCurrency, usdCurrency, jpyCurrency, krwCurrency, eurCurrency));
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2022
+            // Get 512 random expenses vnd, krw, jpy for plan 2022
             List<FinancialPlanExpense> expenseList = new ArrayList<>();
             String[] listExpenseName = {
                     "Travel Expenses",
@@ -2115,6 +2228,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2168,6 +2282,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2178,6 +2299,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2206,10 +2328,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2022
+            // Get 512 random expense usd and euro for plan 2022
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2217,6 +2339,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2269,6 +2392,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2279,6 +2409,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
                 expenseList.add(expense);
             }
@@ -2304,9 +2435,9 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2023
+            // Get 512 random expenses vnd, krw, jpy for plan 2023
             expenseList = new ArrayList<>();
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2314,6 +2445,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2367,6 +2499,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2377,6 +2516,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2405,10 +2545,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2023
+            // Get 512 random expense usd and euro for plan 2023
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2416,6 +2556,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2468,6 +2609,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2478,7 +2626,9 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
+
                 expenseList.add(expense);
             }
 
@@ -2504,9 +2654,9 @@ public class SeedConfiguration {
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
 
-            // Get 128 random expenses vnd, krw, jpy for plan 2024
+            // Get 512 random expenses vnd, krw, jpy for plan 2024
             expenseList = new ArrayList<>();
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2514,6 +2664,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2567,6 +2718,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2577,6 +2735,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2605,10 +2764,10 @@ public class SeedConfiguration {
             financialPlanExpenseRepository.saveAll(expenseList);
             financialPlanFileExpenseRepository.saveAll(fileExpenses);
 
-            // Get 128 random expense usd and euro for plan 2024
+            // Get 512 random expense usd and euro for plan 2024
             expenseList = new ArrayList<>();
 
-            for (int i = 1; i <= 128; i++) {
+            for (int i = 1; i <= 512; i++) {
                 int randomStatusIndex = random.nextInt(4) + 1;
                 int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
                 int randomCostTypeIndex = random.nextInt(6) + 1;
@@ -2616,6 +2775,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
@@ -2668,6 +2828,13 @@ public class SeedConfiguration {
                     default -> usdCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
@@ -2678,6 +2845,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
                 expenseList.add(expense);
             }
@@ -2713,6 +2881,7 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(3) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 1 -> expenseStatus1;
@@ -2767,6 +2936,13 @@ public class SeedConfiguration {
                     default -> vndCurrency; // Default case, should never be reached
                 };
 
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
                 FinancialPlanExpense expense = FinancialPlanExpense.builder()
                         .name(listExpenseName[randomExpenseNameIndex])
                         .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
@@ -2777,6 +2953,7 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(approvedBy)
                         .build();
 
                 expenseList.add(expense);
@@ -2787,13 +2964,16 @@ public class SeedConfiguration {
             index = 0;
             fileExpenses = new ArrayList<>();
             for (FinancialPlanExpense expense : expenseList) {
-                int randomFilePlanIndex = random.nextInt(5) + 1;
+                int randomFilePlanIndex = random.nextInt(8) + 1;
                 FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
                     case 1 -> planTester1_1;
                     case 2 -> planTester1_2;
                     case 3 -> planTester1_3;
                     case 4 -> planTester2_1;
                     case 5 -> planTester2_2;
+                    case 6 -> planTester3_1;
+                    case 7 -> planTester4_1;
+                    case 8 -> planTester5_1;
                     default -> planTester1_1; // Default case, should never be reached
                 };
 
@@ -2823,11 +3003,235 @@ public class SeedConfiguration {
                 int randomSupplierIndex = random.nextInt(6) + 1;
                 int randomPicIndex = random.nextInt(5) + 1;
                 int randomCurrencyIndex = random.nextInt(2) + 1;
+                int randomApprovedIndex = random.nextInt(3) + 1;
 
                 ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
                     case 2 -> expenseStatus2;
                     case 3 -> expenseStatus3;
                     default -> expenseStatus2; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Project randomProject = switch (randomProjectIndex) {
+                    case 1 -> project1;
+                    case 2 -> project2;
+                    case 3 -> project3;
+                    case 4 -> project4;
+                    case 5 -> project5;
+                    case 6 -> project6;
+                    default -> project1; // Default case, should never be reached
+                };
+
+                Supplier randomSupplier = switch (randomSupplierIndex) {
+                    case 1 -> supplier1;
+                    case 2 -> supplier2;
+                    case 3 -> supplier3;
+                    case 4 -> supplier4;
+                    case 5 -> supplier5;
+                    case 6 -> supplier6;
+                    default -> supplier1; // Default case, should never be reached
+                };
+
+                User randomPic = switch (randomPicIndex) {
+                    case 1 -> user6;
+                    case 2 -> user7;
+                    case 3 -> user8;
+                    case 4 -> user9;
+                    case 5 -> user10;
+                    default -> user6; // Default case, should never be reached
+                };
+
+                Currency randomCurrency = switch (randomCurrencyIndex) {
+                    case 1 -> usdCurrency;
+                    case 2 -> eurCurrency;
+                    default -> usdCurrency; // Default case, should never be reached
+                };
+
+                User approvedBy = switch (randomApprovedIndex) {
+                    case 1 -> user3;
+                    case 2 -> user4;
+                    case 3 -> user7;
+                    default -> user3;
+                };
+
+                FinancialPlanExpense expense = FinancialPlanExpense.builder()
+                        .name(listExpenseName[randomExpenseNameIndex])
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(1000) + 900))
+                        .amount(random.nextInt(10) + 1)
+                        .project(randomProject)
+                        .supplier(randomSupplier)
+                        .pic(randomPic)
+                        .status(randomExpenseStatus)
+                        .costType(randomCostType)
+                        .currency(randomCurrency)
+                        .approvedBy(approvedBy)
+                        .build();
+
+                expenseList.add(expense);
+            }
+
+            // Mapping expense to plan
+            fileExpenses = new ArrayList<>();
+            for (FinancialPlanExpense expense : expenseList) {
+
+                int randomFilePlanIndex = random.nextInt(5) + 1;
+
+                FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
+                    case 1 -> planTester1_1;
+                    case 2 -> planTester1_2;
+                    case 3 -> planTester1_3;
+                    case 4 -> planTester2_1;
+                    case 5 -> planTester2_2;
+                    default -> planTester1_1; // Default case, should never be reached
+                };
+                if (expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                    String prefixCode = randomFile.getPlan().getTerm().getName().replace(" ", "_");
+                    expense.setPlanExpenseKey(prefixCode + "_Report_" + ++index);
+                }
+
+                fileExpenses.add(FinancialPlanFileExpense.builder()
+                        .file(randomFile)
+                        .planExpense(expense)
+                        .build());
+
+            }
+
+            financialPlanExpenseRepository.saveAll(expenseList);
+            financialPlanFileExpenseRepository.saveAll(fileExpenses);
+
+            // Get 32 random expenses vnd, krw, jpy for test plan
+            expenseList = new ArrayList<>();
+            for (int i = 1; i <= 128; i++) {
+                int randomStatusIndex = random.nextInt(4) + 1;
+                int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomProjectIndex = random.nextInt(6) + 1;
+                int randomSupplierIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(5) + 1;
+                int randomCurrencyIndex = random.nextInt(3) + 1;
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 1 -> expenseStatus1;
+                    default -> expenseStatus1; // Default case, should never be reached
+                };
+
+                CostType randomCostType = switch (randomCostTypeIndex) {
+                    case 1 -> costType1;
+                    case 2 -> costType2;
+                    case 3 -> costType3;
+                    case 4 -> costType4;
+                    case 5 -> costType5;
+                    case 6 -> costType6;
+                    default -> costType1; // Default case, should never be reached
+                };
+
+                Project randomProject = switch (randomProjectIndex) {
+                    case 1 -> project1;
+                    case 2 -> project2;
+                    case 3 -> project3;
+                    case 4 -> project4;
+                    case 5 -> project5;
+                    case 6 -> project6;
+                    default -> project1; // Default case, should never be reached
+                };
+
+                Supplier randomSupplier = switch (randomSupplierIndex) {
+                    case 1 -> supplier1;
+                    case 2 -> supplier2;
+                    case 3 -> supplier3;
+                    case 4 -> supplier4;
+                    case 5 -> supplier5;
+                    case 6 -> supplier6;
+                    default -> supplier1; // Default case, should never be reached
+                };
+
+                User randomPic = switch (randomPicIndex) {
+                    case 1 -> user6;
+                    case 2 -> user7;
+                    case 3 -> user8;
+                    case 4 -> user9;
+                    case 5 -> user10;
+                    default -> user6; // Default case, should never be reached
+                };
+
+                Currency randomCurrency = switch (randomCurrencyIndex) {
+                    case 1 -> vndCurrency;
+                    case 2 -> krwCurrency;
+                    case 3 -> jpyCurrency;
+                    default -> vndCurrency; // Default case, should never be reached
+                };
+
+                FinancialPlanExpense expense = FinancialPlanExpense.builder()
+                        .name(listExpenseName[randomExpenseNameIndex])
+                        .unitPrice(BigDecimal.valueOf(random.nextInt(500000) + 10000L))
+                        .amount(random.nextInt(10) + 1)
+                        .project(randomProject)
+                        .supplier(randomSupplier)
+                        .pic(randomPic)
+                        .status(randomExpenseStatus)
+                        .costType(randomCostType)
+                        .currency(randomCurrency)
+                        .approvedBy(null)
+                        .build();
+
+                expenseList.add(expense);
+            }
+
+
+            // Mapping expense to plan
+            index = 0;
+            fileExpenses = new ArrayList<>();
+            for (FinancialPlanExpense expense : expenseList) {
+                int randomFilePlanIndex = random.nextInt(6) + 1;
+                FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
+                    case 1 -> planTester6_1;
+                    case 2 -> planTester7_1;
+                    case 3 -> planTester8_1;
+                    case 4 -> planTester9_1;
+                    case 5 -> planTester10_1;
+                    case 6 -> planTester11_1;
+                    default -> planTester6_1; // Default case, should never be reached
+                };
+
+                if (expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
+                    String prefixCode = randomFile.getPlan().getTerm().getName().replace(" ", "_");
+                    expense.setPlanExpenseKey(prefixCode + "_Report_" + ++index);
+                }
+
+                fileExpenses.add(FinancialPlanFileExpense.builder()
+                        .file(randomFile)
+                        .planExpense(expense)
+                        .build());
+
+            }
+
+            financialPlanExpenseRepository.saveAll(expenseList);
+            financialPlanFileExpenseRepository.saveAll(fileExpenses);
+
+            // Get 32 random expense usd and euro for test plan
+            expenseList = new ArrayList<>();
+
+            for (int i = 1; i < 128; i++) {
+                int randomStatusIndex = random.nextInt(2) + 1;
+                int randomExpenseNameIndex = random.nextInt(listExpenseName.length);
+                int randomCostTypeIndex = random.nextInt(6) + 1;
+                int randomProjectIndex = random.nextInt(6) + 1;
+                int randomSupplierIndex = random.nextInt(6) + 1;
+                int randomPicIndex = random.nextInt(5) + 1;
+                int randomCurrencyIndex = random.nextInt(2) + 1;
+
+                ExpenseStatus randomExpenseStatus = switch (randomStatusIndex) {
+                    case 2 -> expenseStatus1;
+                    default -> expenseStatus1; // Default case, should never be reached
                 };
 
                 CostType randomCostType = switch (randomCostTypeIndex) {
@@ -2885,7 +3289,9 @@ public class SeedConfiguration {
                         .status(randomExpenseStatus)
                         .costType(randomCostType)
                         .currency(randomCurrency)
+                        .approvedBy(null)
                         .build();
+
                 expenseList.add(expense);
             }
 
@@ -2893,15 +3299,16 @@ public class SeedConfiguration {
             fileExpenses = new ArrayList<>();
             for (FinancialPlanExpense expense : expenseList) {
 
-                int randomFilePlanIndex = random.nextInt(5) + 1;
+                int randomFilePlanIndex = random.nextInt(6) + 1;
 
                 FinancialPlanFile randomFile = switch (randomFilePlanIndex) {
-                    case 1 -> planTester1_1;
-                    case 2 -> planTester1_2;
-                    case 3 -> planTester1_3;
-                    case 4 -> planTester2_1;
-                    case 5 -> planTester2_2;
-                    default -> planTester1_1; // Default case, should never be reached
+                    case 1 -> planTester6_1;
+                    case 2 -> planTester7_1;
+                    case 3 -> planTester8_1;
+                    case 4 -> planTester9_1;
+                    case 5 -> planTester10_1;
+                    case 6 -> planTester11_1;
+                    default -> planTester6_1; // Default case, should never be reached
                 };
                 if (expense.getStatus().getCode().equals(ExpenseStatusCode.APPROVED)) {
                     String prefixCode = randomFile.getPlan().getTerm().getName().replace(" ", "_");
@@ -2922,7 +3329,7 @@ public class SeedConfiguration {
 
             for (Term term : term2022List) {
                 FinancialReport report = FinancialReport.builder()
-                        .name(term.getName() + "_Report")
+                        .name(term.getName() + " Report")
                         .month(term.getFinalEndTermDate().toLocalDate())
                         .expectedCost(BigDecimal.valueOf(random.nextLong(500000000) + 3000000000L))
                         .actualCost(BigDecimal.valueOf(random.nextLong(500000000) + 2000000000L))
@@ -2937,7 +3344,7 @@ public class SeedConfiguration {
 
             for (Term term : term2023List) {
                 FinancialReport report = FinancialReport.builder()
-                        .name(term.getName() + "_Report")
+                        .name(term.getName() + " Report")
                         .month(term.getFinalEndTermDate().toLocalDate())
                         .expectedCost(BigDecimal.valueOf(random.nextLong(500000000) + 2500000000L))
                         .actualCost(BigDecimal.valueOf(random.nextLong(500000000) + 2000000000L))
@@ -2951,30 +3358,26 @@ public class SeedConfiguration {
             List<FinancialReport> reports2024 = new ArrayList<>();
 
             for (Term term : term2024List) {
-                FinancialReport report = FinancialReport.builder()
-                        .name(term.getName() + "_Report")
-                        .month(term.getFinalEndTermDate().toLocalDate())
-                        .expectedCost(BigDecimal.valueOf(random.nextLong(500000000) + 2500000000L))
-                        .actualCost(BigDecimal.valueOf(random.nextLong(500000000) + 2000000000L))
-                        .status(closedReportStatus)
-                        .term(term)
-                        .build();
 
-                if (term.getFinalEndTermDate().getMonthValue() > 8) {
-                    report.setStatus(newReportStatus);
-                    report.setExpectedCost(BigDecimal.ZERO);
-                    report.setActualCost(BigDecimal.ZERO);
-                } else if (term.getFinalEndTermDate().getMonthValue() == 8) {
-                    report.setStatus(reviewedReportStatus);
-                    report.setExpectedCost(BigDecimal.ZERO);
-                    report.setActualCost(BigDecimal.ZERO);
+                if (term.getStatus().getCode().equals(TermStatusCode.NEW)) {
+
+                } else {
+                    FinancialReport report = FinancialReport.builder()
+                            .name(term.getName() + " Report")
+                            .month(term.getFinalEndTermDate().toLocalDate())
+                            .expectedCost(BigDecimal.valueOf(random.nextLong(500000000) + 2500000000L))
+                            .actualCost(BigDecimal.valueOf(random.nextLong(500000000) + 2000000000L))
+                            .status(closedReportStatus)
+                            .term(term)
+                            .build();
+
+                    reports2024.add(report);
                 }
 
-                reports2024.add(report);
             }
 
             FinancialReport reportTester1 = FinancialReport.builder()
-                    .name(termTester1.getName() + "_Report")
+                    .name(termTester1.getName() + " Report")
                     .expectedCost(BigDecimal.valueOf(901660487L))
                     .actualCost(BigDecimal.valueOf(616579382))
                     .month(termTester1.getFinalEndTermDate().toLocalDate())
@@ -2983,7 +3386,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport reportTester2 = FinancialReport.builder()
-                    .name(termTester2.getName() + "_Report")
+                    .name(termTester2.getName() + " Report")
                     .expectedCost(BigDecimal.valueOf(131660487L))
                     .actualCost(BigDecimal.valueOf(1216579382))
                     .month(termTester2.getFinalEndTermDate().toLocalDate())
@@ -2992,7 +3395,7 @@ public class SeedConfiguration {
                     .build();
 
             FinancialReport reportTester3 = FinancialReport.builder()
-                    .name(termTester3.getName() + "_Report")
+                    .name(termTester3.getName() + " Report")
                     .expectedCost(BigDecimal.valueOf(151660487L))
                     .actualCost(BigDecimal.valueOf(1006579382))
                     .month(termTester3.getFinalEndTermDate().toLocalDate())
@@ -3000,11 +3403,20 @@ public class SeedConfiguration {
                     .term(termTester3)
                     .build();
 
+            FinancialReport reportTester4 = FinancialReport.builder()
+                    .name(termTester4.getName() + " Report")
+                    .expectedCost(BigDecimal.valueOf(151660487L))
+                    .actualCost(BigDecimal.valueOf(1006579382))
+                    .month(termTester4.getFinalEndTermDate().toLocalDate())
+                    .status(waitingForApprovalReportStatus)
+                    .term(termTester4)
+                    .build();
+
 
             financialReportRepository.saveAll(reports2022);
             financialReportRepository.saveAll(reports2023);
             financialReportRepository.saveAll(reports2024);
-            financialReportRepository.saveAll(List.of(reportTester1, reportTester2, reportTester3));
+            financialReportRepository.saveAll(List.of(reportTester1, reportTester2, reportTester3, reportTester4));
 
             List<CurrencyExchangeRate> exchangeRates2022 = new ArrayList<>();
 
@@ -3145,12 +3557,27 @@ public class SeedConfiguration {
 //                }
 //            }
 
+            //AUTO UPDATE REPORT STATUS (TERM END_DATE)
+            List<FinancialReport> reports = financialReportRepository.autoUpdateReportStatus(ReportStatusCode.NEW, LocalDateTime.now());
+            //change status to 2 (IN_PROGRESS)
+            if (reports != null) {
+                for (FinancialReport report : reports) {
+                    ReportStatus inProgressStatus = reportStatusRepository.findByCode(ReportStatusCode.WAITING_FOR_APPROVAL);
+                    report.setStatus(inProgressStatus);
+                    financialReportRepository.save(report);
+
+                    ReportStatus newStatus = reportStatusRepository.findByCode(ReportStatusCode.NEW);
+                }
+            }
 
             //END TERM
             List<Term> terms = termRepository.getListTermNeedToCloseForSeed(LocalDateTime.now());
+
             terms.removeIf(term -> term.getName().equals(termTester1.getName()));
             terms.removeIf(term -> term.getName().equals(termTester2.getName()));
             terms.removeIf(term -> term.getName().equals(termTester3.getName()));
+            terms.removeIf(term -> term.getName().equals(termTester4.getName()));
+
             //change status to CLOSED
             if (terms != null) {
                 for (Term term : terms) {
@@ -3179,9 +3606,9 @@ public class SeedConfiguration {
                     });
 
                     Currency defaultCurrency = currencyRepository.getDefaultCurrency();
-                    termSchedulerService.generateActualCostAndExpectedCostForPlan(term.getId(), defaultCurrency);
-                    termSchedulerService.generateActualCostAndExpectedCostForReport(term.getId(), defaultCurrency);
-                    termSchedulerService.generateReportStatistical(term.getId(), defaultCurrency);
+                    generateActualCostAndExpectedCostForPlan(term.getId(), defaultCurrency);
+                    generateActualCostAndExpectedCostForReport(term.getId(), defaultCurrency);
+                    generateReportStatistical(term.getId(), defaultCurrency);
                 }
             }
 
@@ -3240,8 +3667,208 @@ public class SeedConfiguration {
                 annualReportRepository.save(annualReport);
                 monthlyReportSummaryRepository.saveAll(monthlyReportSummaries);
             }
-
         };
     }
 
+    private void generateActualCostAndExpectedCostForPlan(Long termId, Currency defaultCurrency) {
+        List<FinancialPlan> plans = planRepository.getReferenceByTermId(termId);
+        List<FinancialPlan> savePlan = new ArrayList<>();
+        if (plans != null) {
+            plans.forEach(plan -> {
+                plan.setExpectedCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), null), defaultCurrency).getCost());
+
+                plan.setActualCost(calculateCost(planRepository.calculateCostByPlanId(plan.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
+                savePlan.add(plan);
+            });
+
+            planRepository.saveAll(plans);
+        }
+    }
+
+
+    private void generateActualCostAndExpectedCostForReport(Long termId, Currency defaultCurrency) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        if (report != null) {
+            financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null);
+            ;
+
+            report.setExpectedCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), null), defaultCurrency).getCost());
+
+            report.setActualCost(calculateCost(financialReportRepository.calculateCostByReportIdAndStatus(report.getId(), ExpenseStatusCode.APPROVED), defaultCurrency).getCost());
+            financialReportRepository.save(report);
+        }
+    }
+
+    private void generateReportStatistical(Long termId, Currency defaultCurrency) {
+        FinancialReport report = financialReportRepository.getReferenceByTermId(termId);
+        if (report != null) {
+
+            List<CostStatisticalByCurrencyResult> costStaticalByCurrencies = reportStatisticRepository.getListCostStatistical(report.getId(), ExpenseStatusCode.APPROVED);
+
+            if (costStaticalByCurrencies != null) {
+                List<ReportStatistical> reportStatistics = new ArrayList<>();
+
+                // Inner hashmap: map by currency id
+                HashMap<String, HashMap<Long, List<CostStatisticalByCurrencyResult>>> fromCurrencyIdHashMap = new HashMap<>();
+
+                Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.putIfAbsent(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId(), new HashMap<>());
+                    monthYearSet.add(PaginateExchange.builder()
+                            .month(costStatisticalByCurrency.getMonth())
+                            .year(costStatisticalByCurrency.getYear())
+                            .build());
+                });
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                            .putIfAbsent(costStatisticalByCurrency.getCurrencyId(), new ArrayList<>());
+                });
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrency -> {
+                    fromCurrencyIdHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                            .get(costStatisticalByCurrency.getCurrencyId()).add(costStatisticalByCurrency);
+                });
+
+                // Get list exchange rates
+                Set<Long> currencyIds = new HashSet<>();
+                for (String depIdCostId : fromCurrencyIdHashMap.keySet()) {
+                    currencyIds.addAll(fromCurrencyIdHashMap.get(depIdCostId).keySet());
+                }
+
+                currencyIds.add(defaultCurrency.getId());
+
+                // Get list exchange rates
+                List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds.stream().toList());
+
+                // Outer hashmap: map by string (department id + cost type id), date, currency id
+                HashMap<String, HashMap<String, HashMap<Long, BigDecimal>>> exchangeRateHashMap = new HashMap<>();
+
+                costStaticalByCurrencies.forEach(costStatisticalByCurrencyResult -> {
+                    exchangeRateHashMap.putIfAbsent(costStatisticalByCurrencyResult.getDepartmentId() + "_" + costStatisticalByCurrencyResult.getCostTypeId(), new HashMap<>());
+                });
+
+                exchangeRateHashMap.keySet().forEach(depIdCostId -> {
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(depIdCostId).putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+                    });
+                });
+
+                exchangeRateHashMap.keySet().forEach(depIdCostId -> {
+                    exchangeRates.forEach(exchangeRate -> {
+                        exchangeRateHashMap.get(depIdCostId).get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+                    });
+                });
+
+                for (String depIdCostId : fromCurrencyIdHashMap.keySet()) {
+                    BigDecimal totalCost = BigDecimal.valueOf(0);
+                    BigDecimal formAmount = null;
+                    BigDecimal toAmount = null;
+                    BigDecimal biggestCost = null;
+                    BigDecimal maxBiggestCost = BigDecimal.valueOf(0);
+                    HashMap<Long, List<CostStatisticalByCurrencyResult>> depIdCostIdHashMap = fromCurrencyIdHashMap.get(depIdCostId);
+
+                    for (Long fromCurrencyId : depIdCostIdHashMap.keySet()) {
+
+                        for (CostStatisticalByCurrencyResult costStatisticalByCurrency : depIdCostIdHashMap.get(fromCurrencyId)) {
+
+                            formAmount = exchangeRateHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                                    .get(costStatisticalByCurrency.getMonth() + "/" + costStatisticalByCurrency.getYear())
+                                    .get(fromCurrencyId);
+
+                            toAmount = exchangeRateHashMap.get(costStatisticalByCurrency.getDepartmentId() + "_" + costStatisticalByCurrency.getCostTypeId())
+                                    .get(costStatisticalByCurrency.getMonth() + "/" + costStatisticalByCurrency.getYear())
+                                    .get(defaultCurrency.getId());
+
+                            if (costStatisticalByCurrency.getCost() != null && toAmount != null && formAmount != null) {
+                                totalCost = totalCost.add(costStatisticalByCurrency.getCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+                            }
+
+                            if (costStatisticalByCurrency.getBiggestCost() != null && toAmount != null && formAmount != null) {
+                                biggestCost = costStatisticalByCurrency.getBiggestCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING);
+                            }
+
+                            if (biggestCost != null) {
+                                if (maxBiggestCost.longValue() < biggestCost.longValue()) {
+                                    maxBiggestCost = biggestCost;
+                                }
+                            }
+                        }
+                    }
+                    // Split the string using the "_" delimiter
+                    String[] parts = depIdCostId.split("_");
+
+                    // Parse the parts to Long
+                    Long departmentId = Long.parseLong(parts[0]);
+                    Long costTypeId = Long.parseLong(parts[1]);
+
+
+                    reportStatistics.add(
+                            ReportStatistical.builder()
+                                    .report(report)
+                                    .totalExpense(totalCost)
+                                    .biggestExpenditure(maxBiggestCost)
+                                    .department(departmentRepository.getReferenceById(departmentId))
+                                    .costType(costTypeRepository.getReferenceById(costTypeId))
+                                    .build());
+                }
+                reportStatisticRepository.saveAll(reportStatistics);
+            }
+        }
+    }
+
+    private CostResult calculateCost(List<TotalCostByCurrencyResult> costByCurrencyResults, Currency defaultCurrency) {
+        if (costByCurrencyResults == null) {
+            return CostResult.builder().cost(BigDecimal.valueOf(0))
+                    .currency(defaultCurrency)
+                    .build();
+        }
+
+        // Inner hashmap: map by currency id
+        HashMap<Long, List<TotalCostByCurrencyResult>> fromCurrencyIdHashMap = new HashMap<>();
+
+        Set<PaginateExchange> monthYearSet = new HashSet<>();
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.putIfAbsent(costByCurrency.getCurrencyId(), new ArrayList<>());
+        });
+
+        costByCurrencyResults.forEach(costByCurrency -> {
+            fromCurrencyIdHashMap.get(costByCurrency.getCurrencyId()).add(costByCurrency);
+            monthYearSet.add(PaginateExchange.builder()
+                    .month(costByCurrency.getMonth())
+                    .year(costByCurrency.getYear())
+                    .build());
+        });
+
+        // Get list exchange rates
+        List<Long> currencyIds = new ArrayList<>(fromCurrencyIdHashMap.keySet().stream().toList());
+        currencyIds.add(defaultCurrency.getId());
+
+        // Get list exchange rates
+        List<CurrencyExchangeRate> exchangeRates = currencyExchangeRateRepository.getListCurrencyExchangeRateByMonthYear(monthYearSet.stream().toList(), currencyIds);
+
+        // Outer hashmap: map by date
+        HashMap<String, HashMap<Long, BigDecimal>> exchangeRateHashMap = new HashMap<>();
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.putIfAbsent(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy")), new HashMap<>());
+        });
+
+        exchangeRates.forEach(exchangeRate -> {
+            exchangeRateHashMap.get(exchangeRate.getMonth().format(DateTimeFormatter.ofPattern("M/yyyy"))).put(exchangeRate.getCurrency().getId(), exchangeRate.getAmount());
+        });
+
+        BigDecimal actualCost = BigDecimal.valueOf(0);
+
+        for (Long fromCurrencyId : fromCurrencyIdHashMap.keySet()) {
+            for (TotalCostByCurrencyResult costByCurrency : fromCurrencyIdHashMap.get(fromCurrencyId)) {
+                BigDecimal formAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(fromCurrencyId).longValue());
+                BigDecimal toAmount = BigDecimal.valueOf(exchangeRateHashMap.get(costByCurrency.getMonth() + "/" + costByCurrency.getYear()).get(defaultCurrency.getId()).longValue());
+                actualCost = actualCost.add(costByCurrency.getTotalCost().multiply(formAmount).divide(toAmount, 2, RoundingMode.CEILING));
+            }
+        }
+        return CostResult.builder().cost(actualCost).currency(defaultCurrency).build();
+    }
 }

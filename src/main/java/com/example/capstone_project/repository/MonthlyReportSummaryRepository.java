@@ -18,6 +18,16 @@ public interface MonthlyReportSummaryRepository extends JpaRepository<MonthlyRep
             " ORDER BY totalCost desc")
     List<CostTypeDiagramResult> getCostTypeYearDiagram(Integer year, Long departmentId);
 
+    @Query(value = " SELECT reportStatistic.costType.id AS costTypeId, reportStatistic.costType.name AS costTypeName, sum(reportStatistic.totalExpense) AS totalCost FROM ReportStatistical reportStatistic " +
+            " JOIN reportStatistic.report report " +
+            " JOIN report.term term " +
+            " WHERE year(term.finalEndTermDate) = :year AND " +
+            " (reportStatistic.department.id = :departmentId OR :departmentId is null) AND " +
+            " report.isDelete = false AND term.isDelete = false " +
+            " GROUP BY costTypeId, costTypeName " +
+            " ORDER BY totalCost desc")
+    List<CostTypeDiagramResult> getCostTypeYearDiagramForCurrentYear(Integer year, Long departmentId);
+
     @Query(value = " SELECT report.department.id AS departmentId, report.department.name AS departmentName, sum(report.totalExpense) AS totalCost FROM AnnualReport annualReport " +
             " JOIN annualReport.monthlyReportSummaries report " +
             " WHERE annualReport.year = :year AND " +

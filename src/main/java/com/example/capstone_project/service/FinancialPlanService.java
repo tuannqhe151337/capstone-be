@@ -7,6 +7,7 @@ import com.example.capstone_project.repository.result.UserDownloadResult;
 import com.example.capstone_project.repository.result.YearDiagramResult;
 import com.example.capstone_project.service.result.CostResult;
 import com.example.capstone_project.utils.exception.term.InvalidDateException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.data.domain.Pageable;
 import com.example.capstone_project.repository.result.VersionResult;
 
@@ -26,7 +27,7 @@ public interface FinancialPlanService {
 
     List<ReportStatus> getListPlanStatus();
 
-    FinancialPlan deletePlan(long planId) throws InvalidDateException;
+    FinancialPlan deletePlan(long planId) throws Exception;
 
     PlanDetailResult getPlanDetailByPlanId(Long planId) throws Exception;
 
@@ -70,7 +71,7 @@ public interface FinancialPlanService {
 
     void submitPlanForReview(Long planId) throws Exception;
 
-    byte[] getTemplateData() throws IOException;
+    byte[] getTemplateData() throws IOException, InvalidFormatException;
 
     List<UserDownloadResult> checkUsernameExist(List<String> listUsername) throws Exception;
     CostResult calculateActualCostByPlanId(Long planId) throws Exception;

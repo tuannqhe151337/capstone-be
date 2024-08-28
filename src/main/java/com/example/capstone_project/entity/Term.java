@@ -19,12 +19,15 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class Term extends BaseEntity{
+    // https://vladmihalcea.com/postgresql-serial-column-hibernate-identity/
+    // https://stackoverflow.com/questions/17780394/hibernate-identity-vs-sequence-entity-identifier-generators
+    // GenerationType.IDENTITY will disable batch insert!!!
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @NotEmpty(message = "Name cannot be empty")
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @NotNull(message = "Duration cannot be empty")

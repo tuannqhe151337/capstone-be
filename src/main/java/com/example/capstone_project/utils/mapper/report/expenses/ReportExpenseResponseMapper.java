@@ -6,8 +6,6 @@ import com.example.capstone_project.controller.responses.report.expenses.Expense
 import com.example.capstone_project.repository.result.ReportExpenseResult;
 import org.mapstruct.Mapper;
 
-import java.math.BigDecimal;
-
 @Mapper(componentModel = "spring")
 public interface ReportExpenseResponseMapper {
     default ExpenseResponse mapToReportExpenseResponseMapping(ReportExpenseResult reportExpenseResult) {
@@ -45,6 +43,10 @@ public interface ReportExpenseResponseMapper {
                         .name(reportExpenseResult.getCurrency().getName())
                         .symbol(reportExpenseResult.getCurrency().getSymbol())
                         .affix(reportExpenseResult.getCurrency().getAffix())
+                        .build())
+                .approvedBy(ApprovedByResponse.builder()
+                        .approvedById(reportExpenseResult.getApprovedById())
+                        .name(reportExpenseResult.getApprovedByName())
                         .build())
                 .createdAt(reportExpenseResult.getCreatedAt())
                 .updatedAt(reportExpenseResult.getUpdatedAt())
